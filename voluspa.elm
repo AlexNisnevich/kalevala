@@ -1,4 +1,7 @@
-type Board = [(Pos, Piece)]
+import Dict
+import Dict (Dict)
+
+type Board = Dict Location Piece
 
 data Piece = Odin
            | Thor
@@ -12,15 +15,15 @@ data Piece = Odin
 type Score = { red : Int, blue : Int }
 type State = { board : Board, score : Score }
 
-type Move = { piece : Piece, pos : Pos }
-type Pos = { x : Int, y : Int }
+type Move = { piece : Piece, location : Location }
+type Location = (Int, Int)
 
 makeMove : State -> Move -> State
 makeMove state move 
   = state -- TODO
 
 startState : State
-startState = { board = [], score = { red = 0, blue = 0 }}
+startState = { board = Dict.empty, score = { red = 0, blue = 0 }}
 
 main : Element
 main = asText startState
