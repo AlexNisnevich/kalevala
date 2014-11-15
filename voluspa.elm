@@ -1,3 +1,4 @@
+
 import Dict
 import Dict (Dict)
 
@@ -19,11 +20,17 @@ type Move = { piece : Piece, location : Location }
 type Location = (Int, Int)
 
 makeMove : State -> Move -> State
-makeMove state move 
-  = state -- TODO
+makeMove state move =
+  let board = Dict.insert move.location move.piece state.board
+      score = state.score    -- TODO: update score
+  in
+    { board = board, score = score }
 
 startState : State
 startState = { board = Dict.empty, score = { red = 0, blue = 0 }}
 
 main : Element
-main = asText startState
+main = 
+  let state = makeMove startState { piece = Odin, location = (0, 0) }
+  in 
+    asText state
