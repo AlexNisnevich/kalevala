@@ -26,23 +26,23 @@ data Piece = Odin
            | Skadi
            | Valkyrie
            | Loki
-           
+
 
 data Player = Red
             | Blue
 
-data Action = PlacePiece Move 
+data Action = PlacePiece Move
             | StartGame Deck
-            | MakeRandomMove
+            | MakeRandomMove Float
 
 -- MAGIC STRINGS
 
 playerName : Player -> String
-playerName player = 
+playerName player =
   case player of
     Red -> "red"
     Blue -> "blue"
-    
+
 pieceFromString : String -> Piece
 pieceFromString str =
   case str of
@@ -58,21 +58,21 @@ pieceFromString str =
 -- HELPERS
 
 without : Int -> [a] -> [a]
-without i arr = 
+without i arr =
   let before = take i arr
       after = drop (i+1) arr
   in
     before ++ after
 
 shuffle : [a] -> Signal b -> Signal [a]
-shuffle list signal = 
+shuffle list signal =
   let randomsFromSignal signal = Random.floatList (lift (\x -> List.length list) signal)
       shuffleWithRandoms list randoms =
         if (List.isEmpty list)
         then []
         else
           let i = floor (head randoms * toFloat (List.length list))
-              ith = head (drop i list) 
+              ith = head (drop i list)
           in
             [ith] ++ (shuffleWithRandoms (without i list) (tail randoms))
   in
@@ -84,10 +84,17 @@ tryMove : Move -> State -> State
 tryMove move state =
   if (isValidMove move state) then (makeMove move state) else state
 
+isAdjacent : Location -> Location -> Bool
+isAdjacent (x1, y1) (x2, y2) =
+  (y1 == y2 && abs (x1 - x2) == 1) || (x1 == x2 && abs (y1 - y2) == 1)
+
 isValidMove : Move -> State -> Bool
 isValidMove move state =
-  not (Dict.member move.location state.board)
-  -- TODO: there are more conditions for a move to not be valid 
+  let isOccupied = Dict.member move.location state.board
+      hasAdjacentTile = any (\loc -> isAdjacent loc move.location) (Dict.keys state.board)
+  in
+    not isOccupied && (hasAdjacentTile || ((List.isEmpty <| Dict.toList state.board) && (move.location == (0, 0))))
+  -- TODO: there are more conditions for a move to not be valid
   --       (e.g. not touching an existing tile)
 
 makeMove : Move -> State -> State
@@ -105,19 +112,21 @@ makeMove move state =
     , hands = Dict.insert p newHand state.hands
     , started = True
     }
-  
+
 scoreMove : Move -> State -> Int
 scoreMove move state = 1      -- TODO: actually score moves
 
-makeRandomMove : State -> State
-makeRandomMove state =
+makeRandomMove : State -> Float -> State
+makeRandomMove state seed =
   let p = playerName state.turn
       piece = pieceFromString <| head <| Dict.getOrFail p state.hands
       xs = ([0..7] ++ [-1,-2,-3,-4,-5,-6,-7])
       locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
       validLocations = List.filter (\loc -> isValidMove { piece = piece, location = loc } state) locations
+      idx = floor (seed * toFloat (List.length validLocations))
+      location = head (drop idx validLocations)
   in
-    tryMove { piece = piece, location = (head validLocations) } state
+    tryMove { piece = piece, location = location } state
 
 nextPlayer : Player -> Player
 nextPlayer player =
@@ -137,13 +146,13 @@ startGame state deck =
       blueHand = take 5 (drop 5 deck)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
       remainder = drop 10 deck
-  in 
+  in
     { state | hands <- hands, deck <- remainder, started <- True }
-    
+
 -- DISPLAY
 
 pieceToImage: Piece -> Float -> Element
-pieceToImage piece tileSize = 
+pieceToImage piece tileSize =
   let pos =
         case piece of
           Odin -> (3 * tileSize, 1 * tileSize)
@@ -156,7 +165,7 @@ pieceToImage piece tileSize =
           Loki -> (0, 0)
   in
     croppedImage pos tileSize tileSize "http://i.imgur.com/5yLICgb.png?1"
-    
+
 drawGrid : Float -> Float -> [Form]
 drawGrid num tileSize =
   let size = num * tileSize
@@ -167,7 +176,7 @@ drawGrid num tileSize =
     (concatMap (\x -> (map (\y -> shape x y) [0..(num - 1)])) [0..(num - 1)])
 
 drawPiece : (Location, Piece) -> Float -> Form
-drawPiece (location, piece) tileSize = 
+drawPiece (location, piece) tileSize =
   let x = (fst location) * tileSize
       y = (snd location) * tileSize
   in
@@ -186,15 +195,15 @@ renderBoard board =
 renderHand : Player -> State -> Element
 renderHand player state =
   let hand = Dict.getOrFail (playerName player) state.hands
-  in 
+  in
     flow right
      ([plainText (playerName player)
       ] ++ map (\p -> pieceToImage (pieceFromString p) 50) hand)
 
 display : State -> Element
 display state =
-  flow down 
-    [ renderBoard state.board 
+  flow down
+    [ renderBoard state.board
     , renderHand Red state
     , renderHand Blue state
     , asText state
@@ -210,20 +219,20 @@ performAction action state =
   case action of
     PlacePiece move -> tryMove move state
     StartGame deck -> tryStartGame state deck
-    MakeRandomMove -> makeRandomMove state
+    MakeRandomMove seed -> makeRandomMove state seed
 
 deckContents : [String]
 deckContents = (Array.toList (Array.repeat 6 "odin") ++
                 Array.toList (Array.repeat 8 "thor") ++
-                Array.toList (Array.repeat 6 "troll") ++ 
+                Array.toList (Array.repeat 6 "troll") ++
                 Array.toList (Array.repeat 8 "dragon") ++
                 Array.toList (Array.repeat 8 "fenrir") ++
                 Array.toList (Array.repeat 9 "skadi") ++
-                Array.toList (Array.repeat 9 "valkyrie") ++ 
+                Array.toList (Array.repeat 9 "valkyrie") ++
                 Array.toList (Array.repeat 6 "loki"))
 
 startState : State
-startState = 
+startState =
   { turn = Red
   , board = Dict.empty
   , score = Dict.fromList [("red", 0), ("blue", 0)]
@@ -235,14 +244,13 @@ startState =
 processStartGameSignal : Signal a -> Signal Action
 processStartGameSignal signal =
   (\s -> StartGame s) <~ (shuffle deckContents signal)
-  
+
 processMouseSignal : Signal a -> Signal Action
 processMouseSignal signal =
-  (\s -> MakeRandomMove) <~ signal
+  (\s -> MakeRandomMove s) <~ (Random.float signal)
 
 main : Signal Element
-main = 
+main =
   let actionSignal = (merge (processMouseSignal Mouse.clicks) (processStartGameSignal once))
   in
     display <~ (foldp performAction startState actionSignal)
-
