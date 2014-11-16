@@ -222,9 +222,6 @@ display state =
 
 -- MAIN
 
-once : Signal Time
-once = fps 1 -- TODO: find how to actually make this trigger only once?
-
 performAction : Action -> State -> State
 performAction action state =
   case action of
