@@ -6,6 +6,9 @@ import Dict
 import Dict (Dict)
 import Mouse
 import Graphics.Collage (Form)
+import Graphics.Input (..)
+
+import Debug
 
 -- TYPES
 
@@ -34,6 +37,7 @@ data Player = Red
 data Action = PlacePiece Move
             | StartGame Deck
             | MakeRandomMove Float
+            | NoAction
 
 -- MAGIC STRINGS
 
@@ -118,15 +122,18 @@ scoreMove move state = 1      -- TODO: actually score moves
 
 makeRandomMove : State -> Float -> State
 makeRandomMove state seed =
-  let p = playerName state.turn
-      piece = pieceFromString <| head <| Dict.getOrFail p state.hands
-      xs = ([0..7] ++ [-1,-2,-3,-4,-5,-6,-7])
-      locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
-      validLocations = List.filter (\loc -> isValidMove { piece = piece, location = loc } state) locations
-      idx = floor (seed * toFloat (List.length validLocations))
-      location = head (drop idx validLocations)
-  in
-    tryMove { piece = piece, location = location } state
+  if state.started
+  then
+    let p = playerName state.turn
+        piece = pieceFromString <| head <| Dict.getOrFail p state.hands
+        xs = ([0..7] ++ [-1,-2,-3,-4,-5,-6,-7])
+        locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
+        validLocations = List.filter (\loc -> isValidMove { piece = piece, location = loc } state) locations
+        idx = floor (seed * toFloat (List.length validLocations))
+        location = head (drop idx validLocations)
+    in
+      tryMove { piece = piece, location = location } state
+  else state
 
 nextPlayer : Player -> Player
 nextPlayer player =
@@ -200,19 +207,23 @@ renderHand player state =
      ([plainText (playerName player)
       ] ++ map (\p -> pieceToImage (pieceFromString p) 50) hand)
 
+click : Input String
+click = input ""
+
 display : State -> Element
 display state =
   flow down
-    [ renderBoard state.board
+    [ renderBoard state.board |> clickable click.handle "board"
     , renderHand Red state
     , renderHand Blue state
+    , button click.handle "start" "START"
     , asText state
     ]
 
 -- MAIN
 
 once : Signal Time
-once = fps 10 -- TODO: find how to actually make this trigger only once?
+once = fps 1 -- TODO: find how to actually make this trigger only once?
 
 performAction : Action -> State -> State
 performAction action state =
@@ -220,6 +231,7 @@ performAction action state =
     PlacePiece move -> tryMove move state
     StartGame deck -> tryStartGame state deck
     MakeRandomMove seed -> makeRandomMove state seed
+    NoAction -> state
 
 deckContents : [String]
 deckContents = (Array.toList (Array.repeat 6 "odin") ++
@@ -241,16 +253,17 @@ startState =
   , started = False
   }
 
-processStartGameSignal : Signal a -> Signal Action
-processStartGameSignal signal =
-  (\s -> StartGame s) <~ (shuffle deckContents signal)
-
-processMouseSignal : Signal a -> Signal Action
-processMouseSignal signal =
-  (\s -> MakeRandomMove s) <~ (Random.float signal)
+processClick : Signal String -> Signal Action
+processClick signal =
+  let random = Random.float signal
+      shuffled = shuffle deckContents signal
+  in
+    lift3 (\clickType -> \randomFloat -> \shuffledDeck ->
+            if | (Debug.watch "click.signal" clickType) == "start" -> (StartGame shuffledDeck)
+               | clickType == "board" -> (MakeRandomMove randomFloat)
+               | otherwise -> NoAction)
+      signal random shuffled
 
 main : Signal Element
 main =
-  let actionSignal = (merge (processMouseSignal Mouse.clicks) (processStartGameSignal once))
-  in
-    display <~ (foldp performAction startState actionSignal)
+  display <~ (foldp performAction startState (processClick click.signal))
