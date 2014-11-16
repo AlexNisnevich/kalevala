@@ -1,6 +1,7 @@
 
 import Dict
 import Dict (Dict)
+import Mouse
 
 type Board = Dict Location Piece
 
@@ -22,11 +23,21 @@ type State = { turn: Player, board : Board, score : Score }
 type Move = { piece : Piece, location : Location }
 type Location = (Int, Int)
 
-makeMove : State -> Move -> State
-makeMove state move =
+tryMove : Move -> State -> State
+tryMove move state =
+  if (isValidMove move state) then (makeMove move state) else state
+
+isValidMove : Move -> State -> Bool
+isValidMove move state =
+  not (Dict.member move.location state.board)
+  -- TODO: there are more conditions for a move to not be valid 
+  --       (e.g. not touching an existing tile)
+
+makeMove : Move -> State -> State
+makeMove move state =
   let p = playerName state.turn
       newBoard = Dict.insert move.location move.piece state.board
-      newScore = (Dict.getOrFail p state.score) + (scoreMove state move)
+      newScore = (Dict.getOrFail p state.score) + (scoreMove move state)
   in
     {
       turn = nextPlayer state.turn,
@@ -34,8 +45,8 @@ makeMove state move =
       score = Dict.insert p newScore state.score 
     }
     
-scoreMove : State -> Move -> Int
-scoreMove state move = 1      -- TODO: actually score moves
+scoreMove : Move -> State -> Int
+scoreMove move state = 1      -- TODO: actually score moves
 
 playerName : Player -> String
 playerName player = 
@@ -56,9 +67,10 @@ startState =
     board = Dict.empty, 
     score = Dict.fromList [("red", 0), ("blue", 0)]
   }
-
-main : Element
+  
+main : Signal Element
 main = 
-  let state = makeMove startState { piece = Odin, location = (0, 0) }
-  in 
-    asText state
+  -- Move made on every click
+  let move = { piece = Odin, location = (0, 0) }
+  in
+    asText <~ (foldp tryMove startState ((\() -> move) <~ Mouse.clicks))
