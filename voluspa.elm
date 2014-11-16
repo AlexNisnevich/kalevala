@@ -9,13 +9,13 @@ import Graphics.Collage (Form)
 
 -- TYPES
 
+type State = { turn: Player, board : Board, score : Score, deck: Deck, hands: Hands, started: Bool}
 type Board = Dict Location Piece
-
-type Hands = Dict String [String]
 type Score = Dict String Int
-type State = { turn: Player, board : Board, score : Score, deck: Deck, hands: Hands}
+type Deck = [String]
+type Hands = Dict String [String]
 
-type Move = { piece : Piece, location : Location, shuffle : Deck }
+type Move = { piece : Piece, location : Location }
 type Location = (Float, Float)
 
 data Piece = Odin
@@ -27,14 +27,13 @@ data Piece = Odin
            | Valkyrie
            | Loki
            
-data Deck = Unshuffled
-          | Shuffled [String]
 
 data Player = Red
             | Blue
 
 data Action = PlacePiece Move 
-            | StartGame [String]
+            | StartGame Deck
+            | MakeRandomMove
 
 -- MAGIC STRINGS
 
@@ -96,39 +95,50 @@ makeMove move state =
   let p = playerName state.turn
       newBoard = Dict.insert move.location move.piece state.board
       newScore = (Dict.getOrFail p state.score) + (scoreMove move state)
+      newHand = (drop 1 (Dict.getOrFail p state.hands)) ++ (take 1 state.deck)
+                 -- TODO correctly remove placed piece from hand
   in
     { turn = nextPlayer state.turn
     , board = newBoard
     , score = Dict.insert p newScore state.score
-    , deck = state.deck
-    , hands = state.hands
+    , deck = drop 1 state.deck
+    , hands = Dict.insert p newHand state.hands
+    , started = True
     }
-    
+  
 scoreMove : Move -> State -> Int
 scoreMove move state = 1      -- TODO: actually score moves
+
+makeRandomMove : State -> State
+makeRandomMove state =
+  let p = playerName state.turn
+      piece = pieceFromString <| head <| Dict.getOrFail p state.hands
+      xs = ([0..7] ++ [-1,-2,-3,-4,-5,-6,-7])
+      locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
+      validLocations = List.filter (\loc -> isValidMove { piece = piece, location = loc } state) locations
+  in
+    tryMove { piece = piece, location = (head validLocations) } state
 
 nextPlayer : Player -> Player
 nextPlayer player =
   case player of
     Red -> Blue
-    Blue -> Red 
+    Blue -> Red
 
 -- GAME
 
-tryStartGame : State -> [String] -> State
+tryStartGame : State -> Deck -> State
 tryStartGame state deck =
-  case state.deck of
-      Unshuffled -> startGame state deck
-      Shuffled d -> state
+  if (not state.started) then (startGame state deck) else state
 
-startGame : State -> [String] -> State
+startGame : State -> Deck -> State
 startGame state deck =
   let redHand = take 5 deck
       blueHand = take 5 (drop 5 deck)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
       remainder = drop 10 deck
   in 
-    { state | hands <- hands, deck <- Shuffled remainder }
+    { state | hands <- hands, deck <- remainder, started <- True }
     
 -- DISPLAY
 
@@ -184,10 +194,10 @@ renderHand player state =
 display : State -> Element
 display state =
   flow down 
-    [ asText state
-    , renderBoard state.board 
+    [ renderBoard state.board 
     , renderHand Red state
     , renderHand Blue state
+    , asText state
     ]
 
 -- MAIN
@@ -200,6 +210,7 @@ performAction action state =
   case action of
     PlacePiece move -> tryMove move state
     StartGame deck -> tryStartGame state deck
+    MakeRandomMove -> makeRandomMove state
 
 deckContents : [String]
 deckContents = (Array.toList (Array.repeat 6 "odin") ++
@@ -216,8 +227,9 @@ startState =
   { turn = Red
   , board = Dict.empty
   , score = Dict.fromList [("red", 0), ("blue", 0)]
-  , deck = Unshuffled
+  , deck = []
   , hands = Dict.fromList [("red", []), ("blue", [])]
+  , started = False
   }
 
 processStartGameSignal : Signal a -> Signal Action
@@ -226,7 +238,7 @@ processStartGameSignal signal =
   
 processMouseSignal : Signal a -> Signal Action
 processMouseSignal signal =
-  (\s -> PlacePiece { piece = Odin, location = (0, 0), shuffle = Unshuffled}) <~ signal
+  (\s -> MakeRandomMove) <~ signal
 
 main : Signal Element
 main = 
