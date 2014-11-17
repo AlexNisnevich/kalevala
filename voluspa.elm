@@ -86,8 +86,8 @@ pieceFromString str =
 
 get : [a] -> Int -> a
 get list idx = head (drop idx list)
-($) = get
-infixl 4 $
+(!!) = get
+infixl 4 !!
 
 without : Int -> [a] -> [a]
 without i arr =
@@ -105,7 +105,7 @@ shuffle list signal =
         else
           let i = floor (head randoms * toFloat (List.length list))
           in
-            [list $ i] ++ (shuffleWithRandoms (without i list) (tail randoms))
+            [list !! i] ++ (shuffleWithRandoms (without i list) (tail randoms))
   in
     lift2 shuffleWithRandoms (constant list) (randomsFromSignal signal)
 
@@ -176,7 +176,7 @@ makeRandomMove state seed =
         locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
         validLocations = List.filter (\loc -> isValidMove { piece = piece, location = loc } state) locations
         idx = floor (seed * toFloat (List.length validLocations))
-        location = validLocations $ idx
+        location = validLocations !! idx
     in
       tryMove location state
   else state
@@ -195,12 +195,19 @@ tryStartGame state deck =
 
 startGame : State -> Deck -> State
 startGame state deck =
-  let redHand = take 5 deck
-      blueHand = take 5 (drop 5 deck)
+  let deckWithIndices = zip [0..(List.length deck - 1)] deck
+      idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "troll")) deckWithIndices
+      firstTile = pieceFromString <| deck !! idxFirstNonTroll
+      deckMinusFirstTile = without idxFirstNonTroll deck
+      redHand = take 5 deckMinusFirstTile
+      blueHand = take 5 (drop 5 deckMinusFirstTile)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
-      remainder = drop 10 deck
+      remainder = drop 10 deckMinusFirstTile
   in
-    { state | hands <- hands, deck <- remainder, started <- True }
+    { state | hands <- hands,
+              deck <- remainder,
+              started <- True,
+              board <- Dict.singleton (0, 0) firstTile }
 
 -- DISPLAY
 
@@ -245,10 +252,8 @@ renderBoard : Board -> Element
 renderBoard board =
   let size = gameBoardSize * (round gameTileSize) + 1
       pieces = map (\p -> drawPiece p gameTileSize) (Dict.toList board)
-      center = toText "*" |> Text.height gameTileSize |> centered |> toForm |> move (0, 0 - (gameTileSize / 4))
-      centerIfUnoccupied = if not (Dict.member (0, 0) board) then [center] else []
   in
-    collage size size (drawGrid ++ pieces ++ centerIfUnoccupied)
+    collage size size (drawGrid ++ pieces)
 
 renderHand : Player -> State -> Element
 renderHand player state =
@@ -275,7 +280,7 @@ display state =
     [ size 750 gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
     , flow right [ renderBoard state.board |> clickable clickInput.handle Board
                  , flow down [ renderHand Red state
-                             , spacer 50 ((round gameTileSize) * (gameBoardSize - 2) - handPadding * 2)
+                             , spacer 1 ((round gameTileSize) * (gameBoardSize - 2) - handPadding * 2)
                              , renderHand Blue state]]
     , if not state.started then (button clickInput.handle Start "Begin game!") else empty
     , asText state
