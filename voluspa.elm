@@ -271,8 +271,10 @@ renderHand player state =
                                   |> (if state.turn == player then bold else identity)
                                   |> leftAligned
                                   |> container 70 pieceSize middle
+      score = Dict.getOrFail p state.score |> asText
+                                           |> container 40 pieceSize middle
   in
-    flow right ([handText] ++ handContents)
+    flow right ([handText] ++ handContents ++ [score])
 
 display : State -> Element
 display state =
