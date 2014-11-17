@@ -268,7 +268,23 @@ startState =
   }
 
 mouseToBoardPosition: (Int, Int) -> (Int, Int)
-mouseToBoardPosition x = x
+mouseToBoardPosition (x', y') =
+  let x = x'
+      y = (y' - gameHeaderSize)
+      tileSize = (round gameTileSize)
+      offset = gameBoardSize // 2
+      boardX = (x // tileSize) - offset
+      boardY = (y // tileSize) - offset
+  in (boardX, boardY)
+
+
+  {-
+  let tileSize = (round gameTileSize)
+      totalBoardSize = gameBoardSize * tileSize
+      boardX = (x - (totalBoardSize // 2) + (tileSize // 2)) // tileSize
+      boardY = (y - (totalBoardSize // 2) + (tileSize // 2) - gameHeaderSize) // tileSize
+  in (boardX, boardY)
+  -}
 
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
@@ -279,6 +295,7 @@ processClick signal =
     lift4 (\clickType randomFloat shuffledDeck mousePos ->
             let
               pos = (Debug.watch "Mouse.position" mousePos)
+              boardPos = (Debug.watch "Board position" (mouseToBoardPosition mousePos))
               click = (Debug.watch "clickInput.signal" clickType)
             in
               case clickType of
