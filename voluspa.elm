@@ -41,6 +41,8 @@ data Action = PlacePiece Move
             | MakeRandomMove Float
             | NoAction
 
+data ClickEvent = Start | Board | None
+
 -- GLOBAL CONSTANTS
 
 gameHeaderSize : Int
@@ -173,8 +175,8 @@ startGame state deck =
 
 -- DISPLAY
 
-click : Input String
-click = input ""
+clickInput : Input ClickEvent
+clickInput = input None
 
 pieceToImage: Piece -> Float -> Element
 pieceToImage piece tileSize =
@@ -227,11 +229,11 @@ display : State -> Element
 display state =
   flow down
     [ size 750 gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
-    , flow right [ renderBoard state.board |> clickable click.handle "board"
+    , flow right [ renderBoard state.board |> clickable clickInput.handle Board
                  , flow down [ renderHand Red state
                              , spacer 50 ((round gameTileSize) * (gameBoardSize - 2))
                              , renderHand Blue state]]
-    , button click.handle "start" "START"
+    , button clickInput.handle Start "Begin game!"
     , asText state
     ]
 
@@ -268,7 +270,7 @@ startState =
 mouseToBoardPosition: (Int, Int) -> (Int, Int)
 mouseToBoardPosition x = x
 
-processClick : Signal String -> Signal Action
+processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let random = Random.float signal
       shuffled = shuffle deckContents signal
@@ -277,12 +279,14 @@ processClick signal =
     lift4 (\clickType randomFloat shuffledDeck mousePos ->
             let
               pos = (Debug.watch "Mouse.position" mousePos)
+              click = (Debug.watch "clickInput.signal" clickType)
             in
-              if | (Debug.watch "click.signal" clickType) == "start" -> (StartGame shuffledDeck)
-                 | clickType == "board" -> (MakeRandomMove randomFloat)
-                 | otherwise -> NoAction)
+              case clickType of
+                Start -> StartGame shuffledDeck
+                Board -> MakeRandomMove randomFloat
+                None -> NoAction)
       signal random shuffled sampledMouse
 
 main : Signal Element
 main =
-  display <~ (foldp performAction startState (processClick click.signal))
+  display <~ (foldp performAction startState (processClick clickInput.signal))
