@@ -41,6 +41,18 @@ data Action = PlacePiece Move
             | MakeRandomMove Float
             | NoAction
 
+-- GLOBAL CONSTANTS
+
+gameHeaderSize : Int
+gameHeaderSize = 100
+
+gameTileSize : Float
+gameTileSize = 50
+
+gameBoardSize : Int
+gameBoardSize = 15
+
+
 -- MAGIC STRINGS
 
 playerName : Player -> String
@@ -128,7 +140,8 @@ makeRandomMove state seed =
   then
     let p = playerName state.turn
         piece = pieceFromString <| head <| Dict.getOrFail p state.hands
-        xs = ([0..7] ++ [-1,-2,-3,-4,-5,-6,-7])
+        halfGameBoardSize = gameBoardSize // 2
+        xs = map (\x -> toFloat (x - halfGameBoardSize)) [0..(gameBoardSize - 1)]
         locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
         validLocations = List.filter (\loc -> isValidMove { piece = piece, location = loc } state) locations
         idx = floor (seed * toFloat (List.length validLocations))
@@ -159,6 +172,9 @@ startGame state deck =
     { state | hands <- hands, deck <- remainder, started <- True }
 
 -- DISPLAY
+
+click : Input String
+click = input ""
 
 pieceToImage: Piece -> Float -> Element
 pieceToImage piece tileSize =
@@ -193,11 +209,9 @@ drawPiece (location, piece) tileSize =
 
 renderBoard : Board -> Element
 renderBoard board =
-  let num = 15
-      tileSize = 50
-      size = (round num * tileSize) + 1
-      grid = drawGrid num tileSize
-      pieces = map (\p -> drawPiece p tileSize) (Dict.toList board)
+  let size = gameBoardSize * (round gameTileSize) + 1
+      grid = drawGrid (toFloat gameBoardSize) gameTileSize
+      pieces = map (\p -> drawPiece p gameTileSize) (Dict.toList board)
   in
     collage size size (grid ++ pieces)
 
@@ -207,18 +221,15 @@ renderHand player state =
   in
     flow right
      ([plainText (playerName player)
-      ] ++ map (\p -> pieceToImage (pieceFromString p) 50) hand)
-
-click : Input String
-click = input ""
+      ] ++ map (\p -> pieceToImage (pieceFromString p) gameTileSize) hand)
 
 display : State -> Element
 display state =
   flow down
-    [ size 750 100 (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
+    [ size 750 gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
     , flow right [ renderBoard state.board |> clickable click.handle "board"
                  , flow down [ renderHand Red state
-                             , spacer 50 650
+                             , spacer 50 ((round gameTileSize) * (gameBoardSize - 2))
                              , renderHand Blue state]]
     , button click.handle "start" "START"
     , asText state
@@ -254,16 +265,23 @@ startState =
   , started = False
   }
 
+mouseToBoardPosition: (Int, Int) -> (Int, Int)
+mouseToBoardPosition x = x
+
 processClick : Signal String -> Signal Action
 processClick signal =
   let random = Random.float signal
       shuffled = shuffle deckContents signal
+      sampledMouse = sampleOn signal Mouse.position
   in
-    lift3 (\clickType randomFloat shuffledDeck ->
-            if | (Debug.watch "click.signal" clickType) == "start" -> (StartGame shuffledDeck)
-               | clickType == "board" -> (MakeRandomMove randomFloat)
-               | otherwise -> NoAction)
-      signal random shuffled
+    lift4 (\clickType randomFloat shuffledDeck mousePos ->
+            let
+              pos = (Debug.watch "Mouse.position" mousePos)
+            in
+              if | (Debug.watch "click.signal" clickType) == "start" -> (StartGame shuffledDeck)
+                 | clickType == "board" -> (MakeRandomMove randomFloat)
+                 | otherwise -> NoAction)
+      signal random shuffled sampledMouse
 
 main : Signal Element
 main =
