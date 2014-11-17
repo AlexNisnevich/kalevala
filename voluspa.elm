@@ -277,15 +277,6 @@ mouseToBoardPosition (x', y') =
       boardY = (y // tileSize) - offset
   in (boardX, boardY)
 
-
-  {-
-  let tileSize = (round gameTileSize)
-      totalBoardSize = gameBoardSize * tileSize
-      boardX = (x - (totalBoardSize // 2) + (tileSize // 2)) // tileSize
-      boardY = (y - (totalBoardSize // 2) + (tileSize // 2) - gameHeaderSize) // tileSize
-  in (boardX, boardY)
-  -}
-
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let random = Random.float signal
