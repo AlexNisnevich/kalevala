@@ -14,7 +14,7 @@ import Debug
 
 -- TYPES
 
-type State = { turn: Player, board : Board, score : Score, deck: Deck, hands: Hands, started: Bool}
+type State = { turn: Player, board : Board, score : Score, deck: Deck, hands: Hands, started: Bool, heldPiece: Maybe Int}
 type Board = Dict Location Piece
 type Score = Dict String Int
 type Deck = [String]
@@ -36,12 +36,16 @@ data Piece = Odin
 data Player = Red
             | Blue
 
-data Action = PlacePiece Move
+data Action = PickUpPiece Player Int
+            | PlacePiece Location
             | StartGame Deck
             | MakeRandomMove Float
             | NoAction
 
-data ClickEvent = Start | Board | None
+data ClickEvent = Start
+                | Board
+                | PieceInHand Player Int
+                | None
 
 -- GLOBAL CONSTANTS
 
@@ -100,9 +104,26 @@ shuffle list signal =
 
 -- MOVES
 
-tryMove : Move -> State -> State
-tryMove move state =
-  if (isValidMove move state) then (makeMove move state) else state
+tryToPickUpPiece : Player -> Int -> State -> State
+tryToPickUpPiece player idx state =
+  if (state.turn == player) then (pickUpPiece idx state) else state
+
+pickUpPiece : Int -> State -> State
+pickUpPiece idx state =
+  { state | heldPiece <- Just idx }
+
+tryMove : Location -> State -> State
+tryMove location state =
+  case state.heldPiece of
+    Just idx ->
+      let p = playerName state.turn
+          hand = Dict.getOrFail p state.hands
+          pieceStr = head <| drop idx hand
+          piece = pieceFromString pieceStr
+          move = { piece = piece, location = location }
+      in
+        if (isValidMove move state) then (makeMove move state) else state
+    Nothing -> state
 
 isAdjacent : Location -> Location -> Bool
 isAdjacent (x1, y1) (x2, y2) =
@@ -131,6 +152,7 @@ makeMove move state =
     , deck = drop 1 state.deck
     , hands = Dict.insert p newHand state.hands
     , started = True
+    , heldPiece = Nothing
     }
 
 scoreMove : Move -> State -> Int
@@ -149,7 +171,7 @@ makeRandomMove state seed =
         idx = floor (seed * toFloat (List.length validLocations))
         location = head (drop idx validLocations)
     in
-      tryMove { piece = piece, location = location } state
+      tryMove location state
   else state
 
 nextPlayer : Player -> Player
@@ -223,7 +245,7 @@ renderHand player state =
   in
     flow right
      ([plainText (playerName player)
-      ] ++ map (\p -> pieceToImage (pieceFromString p) gameTileSize) hand)
+      ] ++ indexedMap (\idx p -> pieceToImage (pieceFromString p) gameTileSize |> clickable clickInput.handle (PieceInHand player idx)) hand)
 
 display : State -> Element
 display state =
@@ -242,7 +264,8 @@ display state =
 performAction : Action -> State -> State
 performAction action state =
   case action of
-    PlacePiece move -> tryMove move state
+    PickUpPiece player idx -> tryToPickUpPiece player idx state
+    PlacePiece location -> tryMove location state
     StartGame deck -> tryStartGame state deck
     MakeRandomMove seed -> makeRandomMove state seed
     NoAction -> state
@@ -265,16 +288,17 @@ startState =
   , deck = []
   , hands = Dict.fromList [("red", []), ("blue", [])]
   , started = False
+  , heldPiece = Nothing
   }
 
-mouseToBoardPosition: (Int, Int) -> (Int, Int)
+mouseToBoardPosition: (Int, Int) -> (Float, Float)
 mouseToBoardPosition (x', y') =
   let x = x'
       y = (y' - gameHeaderSize)
       tileSize = (round gameTileSize)
       offset = gameBoardSize // 2
-      boardX = (x // tileSize) - offset
-      boardY = (y // tileSize) - offset
+      boardX = (x // tileSize) - offset |> toFloat
+      boardY = 0 - ((y // tileSize) - offset) |> toFloat
   in (boardX, boardY)
 
 processClick : Signal ClickEvent -> Signal Action
@@ -291,7 +315,8 @@ processClick signal =
             in
               case clickType of
                 Start -> StartGame shuffledDeck
-                Board -> MakeRandomMove randomFloat
+                Board -> PlacePiece boardPos
+                PieceInHand player idx -> PickUpPiece player idx
                 None -> NoAction)
       signal random shuffled sampledMouse
 
