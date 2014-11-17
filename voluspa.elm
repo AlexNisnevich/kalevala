@@ -216,9 +216,10 @@ display : State -> Element
 display state =
   flow down
     [ size 750 100 (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
-    , renderBoard state.board |> clickable click.handle "board"
-    , renderHand Red state
-    , renderHand Blue state
+    , flow right [ renderBoard state.board |> clickable click.handle "board"
+                 , flow down [ renderHand Red state
+                             , spacer 50 650
+                             , renderHand Blue state]]
     , button click.handle "start" "START"
     , asText state
     ]
