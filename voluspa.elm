@@ -59,6 +59,8 @@ gameTileSize = 50
 gameBoardSize : Int
 gameBoardSize = 15
 
+handPadding : Int
+handPadding = 5
 
 -- MAGIC STRINGS
 
@@ -207,56 +209,63 @@ clickInput = input None
 
 pieceToImage: Piece -> Float -> Element
 pieceToImage piece tileSize =
-  let pos =
+  let tileSize = round gameTileSize
+      pos =
         case piece of
-          Odin -> (3 * tileSize, 1 * tileSize)
-          Thor -> (2 * tileSize, 1 * tileSize)
-          Troll -> (1 * tileSize, 1 * tileSize)
-          Dragon -> (0, 1 * tileSize)
-          Fenrir -> (3 * tileSize, 0)
-          Skadi -> (2 * tileSize, 0)
-          Valkyrie -> (1 * tileSize, 0)
+          Odin -> (3, 1)
+          Thor -> (2, 1)
+          Troll -> (1, 1)
+          Dragon -> (0, 1)
+          Fenrir -> (3, 0)
+          Skadi -> (2, 0)
+          Valkyrie -> (1, 0)
           Loki -> (0, 0)
   in
-    croppedImage pos tileSize tileSize "http://i.imgur.com/5yLICgb.png?1"
+    case pos of
+      (x, y) -> croppedImage (x * tileSize, y * tileSize) tileSize tileSize "http://i.imgur.com/5yLICgb.png?1"
 
-drawGrid : Float -> Float -> [Form]
-drawGrid num tileSize =
-  let size = num * tileSize
-      xShift = tileSize / 2 - size / 2
-      yShift = tileSize / 2 - size / 2
-      shape x y = move (tileSize * x + xShift, tileSize * y + yShift) (outlined (solid black) (square tileSize))
+drawGrid : [Form]
+drawGrid =
+  let num = (toFloat gameBoardSize)
+      size = num * gameTileSize
+      xShift = gameTileSize / 2 - size / 2
+      yShift = gameTileSize / 2 - size / 2
+      shape x y = move (gameTileSize * x + xShift, gameTileSize * y + yShift) (outlined (solid black) (square gameTileSize))
   in
     (concatMap (\x -> (map (\y -> shape x y) [0..(num - 1)])) [0..(num - 1)])
 
 drawPiece : (Location, Piece) -> Float -> Form
-drawPiece (location, piece) tileSize =
-  let x = (fst location) * tileSize
-      y = (snd location) * tileSize
+drawPiece ((x', y'), piece) tileSize =
+  let x = x' * tileSize
+      y = y' * tileSize
   in
     move (x, y) (toForm (pieceToImage piece tileSize))
 
 renderBoard : Board -> Element
 renderBoard board =
   let size = gameBoardSize * (round gameTileSize) + 1
-      grid = drawGrid (toFloat gameBoardSize) gameTileSize
       pieces = map (\p -> drawPiece p gameTileSize) (Dict.toList board)
       center = toText "*" |> Text.height gameTileSize |> centered |> toForm |> move (0, 0 - (gameTileSize / 4))
       centerIfUnoccupied = if not (Dict.member (0, 0) board) then [center] else []
   in
-    collage size size (grid ++ pieces ++ centerIfUnoccupied)
+    collage size size (drawGrid ++ pieces ++ centerIfUnoccupied)
 
 renderHand : Player -> State -> Element
 renderHand player state =
   let p = playerName player
+      tileSize = round gameTileSize
       hand = Dict.getOrFail p state.hands
-      makePiece pieceStr = pieceToImage (pieceFromString pieceStr) gameTileSize
-      makeClickablePiece idx pieceStr = makePiece pieceStr |> clickable clickInput.handle (PieceInHand player idx)
-      handContents = indexedMap makeClickablePiece hand
+      isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
+      pieceImage pieceStr = pieceToImage (pieceFromString pieceStr) gameTileSize
+      pieceSize = tileSize + handPadding
+      makePiece idx pieceStr = pieceImage pieceStr |> container pieceSize pieceSize middle
+                                                   |> color (if isPieceHeld idx then blue else white)
+                                                   |> clickable clickInput.handle (PieceInHand player idx)
+      handContents = indexedMap makePiece hand
       handText = String.toUpper p |> toText
                                   |> (if state.turn == player then bold else identity)
                                   |> leftAligned
-                                  |> container 70 50 middle
+                                  |> container 70 pieceSize middle
   in
     flow right ([handText] ++ handContents)
 
@@ -266,7 +275,7 @@ display state =
     [ size 750 gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
     , flow right [ renderBoard state.board |> clickable clickInput.handle Board
                  , flow down [ renderHand Red state
-                             , spacer 50 ((round gameTileSize) * (gameBoardSize - 2))
+                             , spacer 50 ((round gameTileSize) * (gameBoardSize - 2) - handPadding * 2)
                              , renderHand Blue state]]
     , if not state.started then (button clickInput.handle Start "Begin game!") else empty
     , asText state
@@ -323,8 +332,8 @@ processClick signal =
     lift4 (\clickType randomFloat shuffledDeck mousePos ->
             let
               pos = (Debug.watch "Mouse.position" mousePos)
-              boardPos = (Debug.watch "Board position" (mouseToBoardPosition mousePos))
               click = (Debug.watch "clickInput.signal" clickType)
+              boardPos = (Debug.watch "Board position" (mouseToBoardPosition mousePos))
             in
               case clickType of
                 Start -> StartGame shuffledDeck
