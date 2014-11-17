@@ -1,3 +1,4 @@
+module Voluspa where
 
 import Array
 import List
@@ -7,6 +8,7 @@ import Dict (Dict)
 import Mouse
 import Graphics.Collage (Form)
 import Graphics.Input (..)
+import Text
 
 import Debug
 
@@ -213,7 +215,8 @@ click = input ""
 display : State -> Element
 display state =
   flow down
-    [ renderBoard state.board |> clickable click.handle "board"
+    [ size 750 100 (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
+    , renderBoard state.board |> clickable click.handle "board"
     , renderHand Red state
     , renderHand Blue state
     , button click.handle "start" "START"
@@ -255,7 +258,7 @@ processClick signal =
   let random = Random.float signal
       shuffled = shuffle deckContents signal
   in
-    lift3 (\clickType -> \randomFloat -> \shuffledDeck ->
+    lift3 (\clickType randomFloat shuffledDeck ->
             if | (Debug.watch "click.signal" clickType) == "start" -> (StartGame shuffledDeck)
                | clickType == "board" -> (MakeRandomMove randomFloat)
                | otherwise -> NoAction)
