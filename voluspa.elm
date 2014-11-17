@@ -8,6 +8,7 @@ import Dict (Dict)
 import Mouse
 import Graphics.Collage (Form)
 import Graphics.Input (..)
+import String
 import Text
 
 import Debug
@@ -81,6 +82,11 @@ pieceFromString str =
 
 -- HELPERS
 
+get : [a] -> Int -> a
+get list idx = head (drop idx list)
+($) = get
+infixl 4 $
+
 without : Int -> [a] -> [a]
 without i arr =
   let before = take i arr
@@ -96,9 +102,8 @@ shuffle list signal =
         then []
         else
           let i = floor (head randoms * toFloat (List.length list))
-              ith = head (drop i list)
           in
-            [ith] ++ (shuffleWithRandoms (without i list) (tail randoms))
+            [list $ i] ++ (shuffleWithRandoms (without i list) (tail randoms))
   in
     lift2 shuffleWithRandoms (constant list) (randomsFromSignal signal)
 
@@ -106,7 +111,7 @@ shuffle list signal =
 
 tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
-  if (state.turn == player) then (pickUpPiece idx state) else state
+  if (state.turn == player) then (pickUpPiece idx state) else { state | heldPiece <- Nothing }
 
 pickUpPiece : Int -> State -> State
 pickUpPiece idx state =
@@ -122,7 +127,7 @@ tryMove location state =
           piece = pieceFromString pieceStr
           move = { piece = piece, location = location }
       in
-        if (isValidMove move state) then (makeMove move state) else state
+        if (isValidMove move state) then (makeMove move state) else { state | heldPiece <- Nothing }
     Nothing -> state
 
 isAdjacent : Location -> Location -> Bool
@@ -169,7 +174,7 @@ makeRandomMove state seed =
         locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
         validLocations = List.filter (\loc -> isValidMove { piece = piece, location = loc } state) locations
         idx = floor (seed * toFloat (List.length validLocations))
-        location = head (drop idx validLocations)
+        location = validLocations $ idx
     in
       tryMove location state
   else state
@@ -236,16 +241,24 @@ renderBoard board =
   let size = gameBoardSize * (round gameTileSize) + 1
       grid = drawGrid (toFloat gameBoardSize) gameTileSize
       pieces = map (\p -> drawPiece p gameTileSize) (Dict.toList board)
+      center = toText "*" |> Text.height gameTileSize |> centered |> toForm |> move (0, 0 - (gameTileSize / 4))
+      centerIfUnoccupied = if not (Dict.member (0, 0) board) then [center] else []
   in
-    collage size size (grid ++ pieces)
+    collage size size (grid ++ pieces ++ centerIfUnoccupied)
 
 renderHand : Player -> State -> Element
 renderHand player state =
-  let hand = Dict.getOrFail (playerName player) state.hands
+  let p = playerName player
+      hand = Dict.getOrFail p state.hands
+      makePiece pieceStr = pieceToImage (pieceFromString pieceStr) gameTileSize
+      makeClickablePiece idx pieceStr = makePiece pieceStr |> clickable clickInput.handle (PieceInHand player idx)
+      handContents = indexedMap makeClickablePiece hand
+      handText = String.toUpper p |> toText
+                                  |> (if state.turn == player then bold else identity)
+                                  |> leftAligned
+                                  |> container 70 50 middle
   in
-    flow right
-     ([plainText (playerName player)
-      ] ++ indexedMap (\idx p -> pieceToImage (pieceFromString p) gameTileSize |> clickable clickInput.handle (PieceInHand player idx)) hand)
+    flow right ([handText] ++ handContents)
 
 display : State -> Element
 display state =
@@ -255,7 +268,7 @@ display state =
                  , flow down [ renderHand Red state
                              , spacer 50 ((round gameTileSize) * (gameBoardSize - 2))
                              , renderHand Blue state]]
-    , button clickInput.handle Start "Begin game!"
+    , if not state.started then (button clickInput.handle Start "Begin game!") else empty
     , asText state
     ]
 
