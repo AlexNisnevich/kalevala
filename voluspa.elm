@@ -275,22 +275,21 @@ startGame state deck =
 clickInput : Input ClickEvent
 clickInput = input None
 
-pieceToImage: Piece -> Float -> Element
-pieceToImage piece tileSize =
+pieceToImage: Piece -> Element
+pieceToImage piece =
   let tileSize = round gameTileSize
-      pos =
+      imgPath =
         case piece of
-          Odin -> (3, 1)
-          Thor -> (2, 1)
-          Troll -> (1, 1)
-          Dragon -> (0, 1)
-          Fenrir -> (3, 0)
-          Skadi -> (2, 0)
-          Valkyrie -> (1, 0)
-          Loki -> (0, 0)
+          Odin -> "images/tile_7.jpg"
+          Thor -> "images/tile_6.jpg"
+          Troll -> "images/tile_5.jpg"
+          Dragon -> "images/tile_4.jpg"
+          Fenrir -> "images/tile_3.jpg"
+          Skadi -> "images/tile_2.jpg"
+          Valkyrie -> "images/tile_1.jpg"
+          Loki -> "images/tile_0.jpg"
   in
-    case pos of
-      (x, y) -> croppedImage (x * tileSize, y * tileSize) tileSize tileSize "http://i.imgur.com/5yLICgb.png?1"
+    image tileSize tileSize imgPath
 
 drawGrid : [Form]
 drawGrid =
@@ -307,7 +306,7 @@ drawPiece ((x', y'), piece) tileSize =
   let x = x' * tileSize
       y = y' * tileSize
   in
-    move (x, y) (toForm (pieceToImage piece tileSize))
+    move (x, y) (toForm (pieceToImage piece))
 
 renderBoard : Board -> Element
 renderBoard board =
@@ -322,7 +321,7 @@ renderHand player state =
       tileSize = round gameTileSize
       hand = Dict.getOrFail p state.hands
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
-      pieceImage pieceStr = pieceToImage (pieceFromString pieceStr) gameTileSize
+      pieceImage pieceStr = pieceToImage (pieceFromString pieceStr)
       pieceSize = tileSize + handPadding
       makePiece idx pieceStr = pieceImage pieceStr |> container pieceSize pieceSize middle
                                                    |> color (if isPieceHeld idx then blue else white)
