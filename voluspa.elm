@@ -23,6 +23,7 @@ type Hands = Dict String [String]
 
 type Move = { piece : Piece, location : Location }
 type Location = (Float, Float)
+type MousePos = (Int, Int)
 
 data Piece = Odin
            | Thor
@@ -38,7 +39,7 @@ data Player = Red
             | Blue
 
 data Action = PickUpPiece Player Int
-            | PlacePiece Location
+            | PlacePiece MousePos
             | StartGame Deck
             | MakeRandomMove Float
             | NoAction
@@ -53,14 +54,14 @@ data ClickEvent = Start
 gameHeaderSize : Int
 gameHeaderSize = 100
 
-gameTileSize : Float
-gameTileSize = 50
-
-gameBoardSize : Int
-gameBoardSize = 15
-
 handPadding : Int
-handPadding = 5
+handPadding = 10
+
+handTileSize : Float
+handTileSize = 100
+
+totalBoardSize : Int
+totalBoardSize = 750
 
 -- MAGIC STRINGS
 
@@ -110,6 +111,22 @@ shuffle list signal =
     lift2 shuffleWithRandoms (constant list) (randomsFromSignal signal)
 
 -- BOARD
+
+getBoardSize : State -> Int
+getBoardSize state =
+  if List.isEmpty <| Dict.toList state.board
+  then 5
+  else
+    let locations = Dict.keys state.board
+        xs = map fst locations
+        ys = map snd locations
+        maxX = max (maximum xs) (abs <| minimum xs)
+        maxY = max (maximum ys) (abs <| minimum ys)
+    in
+      (((max maxX maxY) + 2) * 2) + 1
+
+getTileSizeFromBoardSize : Int -> Float
+getTileSizeFromBoardSize boardSize = toFloat (totalBoardSize // boardSize)
 
 getTileScore : Location -> Board -> Int
 getTileScore (x,y) board =
@@ -232,8 +249,8 @@ makeRandomMove state seed =
   then
     let p = playerName state.turn
         piece = pieceFromString <| head <| Dict.getOrFail p state.hands
-        halfGameBoardSize = gameBoardSize // 2
-        xs = map (\x -> toFloat (x - halfGameBoardSize)) [0..(gameBoardSize - 1)]
+        boardSize = getBoardSize state
+        xs = map (\x -> toFloat (x - (boardSize // 2))) [0..(boardSize - 1)]
         locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
         validLocations = List.filter (\loc -> isValidMove { piece = piece, location = loc } state) locations
         idx = floor (seed * toFloat (List.length validLocations))
@@ -275,10 +292,9 @@ startGame state deck =
 clickInput : Input ClickEvent
 clickInput = input None
 
-pieceToImage: Piece -> Element
-pieceToImage piece =
-  let tileSize = round gameTileSize
-      imgPath =
+pieceToImage: Piece -> Float -> Element
+pieceToImage piece tileSize =
+  let imgPath =
         case piece of
           Odin -> "images/tile_7.jpg"
           Thor -> "images/tile_6.jpg"
@@ -289,15 +305,16 @@ pieceToImage piece =
           Valkyrie -> "images/tile_1.jpg"
           Loki -> "images/tile_0.jpg"
   in
-    image tileSize tileSize imgPath
+    image (round tileSize) (round tileSize) imgPath
 
-drawGrid : [Form]
-drawGrid =
-  let num = (toFloat gameBoardSize)
-      size = num * gameTileSize
-      xShift = gameTileSize / 2 - size / 2
-      yShift = gameTileSize / 2 - size / 2
-      shape x y = move (gameTileSize * x + xShift, gameTileSize * y + yShift) (outlined (solid black) (square gameTileSize))
+drawGrid : Int -> [Form]
+drawGrid boardSize =
+  let num = toFloat boardSize
+      tileSize = getTileSizeFromBoardSize boardSize
+      size = num * tileSize
+      xShift = tileSize / 2 - size / 2
+      yShift = tileSize / 2 - size / 2
+      shape x y = move (tileSize * x + xShift, tileSize * y + yShift) (outlined (solid black) (square tileSize))
   in
     (concatMap (\x -> (map (\y -> shape x y) [0..(num - 1)])) [0..(num - 1)])
 
@@ -306,26 +323,26 @@ drawPiece ((x', y'), piece) tileSize =
   let x = x' * tileSize
       y = y' * tileSize
   in
-    move (x, y) (toForm (pieceToImage piece))
+    move (x, y) (toForm (pieceToImage piece tileSize))
 
-renderBoard : Board -> Element
-renderBoard board =
-  let size = gameBoardSize * (round gameTileSize) + 1
-      pieces = map (\p -> drawPiece p gameTileSize) (Dict.toList board)
+renderBoard : Board -> Int -> Element
+renderBoard board boardSize =
+  let tileSize = getTileSizeFromBoardSize boardSize
+      size = boardSize * (round tileSize) + 1
+      pieces = map (\p -> drawPiece p tileSize) (Dict.toList board)
   in
-    collage size size (drawGrid ++ pieces)
+    collage size size ((drawGrid boardSize) ++ pieces)
 
 renderHand : Player -> State -> Element
 renderHand player state =
   let p = playerName player
-      tileSize = round gameTileSize
       hand = Dict.getOrFail p state.hands
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
       pieceImage pieceStr = pieceToImage (pieceFromString pieceStr)
-      pieceSize = tileSize + handPadding
-      makePiece idx pieceStr = pieceImage pieceStr |> container pieceSize pieceSize middle
-                                                   |> color (if isPieceHeld idx then blue else white)
-                                                   |> clickable clickInput.handle (PieceInHand player idx)
+      pieceSize = (round handTileSize) + handPadding
+      makePiece idx pieceStr = pieceImage pieceStr handTileSize |> container pieceSize pieceSize middle
+                                                                |> color (if isPieceHeld idx then blue else white)
+                                                                |> clickable clickInput.handle (PieceInHand player idx)
       handContents = indexedMap makePiece hand
       handText = String.toUpper p |> toText
                                   |> (if state.turn == player then bold else identity)
@@ -338,15 +355,19 @@ renderHand player state =
 
 display : State -> Element
 display state =
-  flow down
-    [ size 750 gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
-    , flow right [ renderBoard state.board |> clickable clickInput.handle Board
-                 , flow down [ renderHand Red state
-                             , spacer 1 ((round gameTileSize) * (gameBoardSize - 2) - handPadding * 2)
-                             , renderHand Blue state]]
-    , if not state.started then (button clickInput.handle Start "Begin game!") else empty
-    , asText state
-    ]
+  let boardSize = getBoardSize state
+      tileSize = getTileSizeFromBoardSize boardSize
+      handGap = totalBoardSize - 2 * (round handTileSize) - (handPadding * 2)
+  in
+    flow down
+      [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
+      , flow right [ renderBoard state.board boardSize |> clickable clickInput.handle Board
+                   , flow down [ renderHand Red state
+                               , spacer 1 handGap
+                               , renderHand Blue state]]
+      , if not state.started then (button clickInput.handle Start "Begin game!") else empty
+      , asText state
+      ]
 
 -- MAIN
 
@@ -354,7 +375,7 @@ performAction : Action -> State -> State
 performAction action state =
   case action of
     PickUpPiece player idx -> tryToPickUpPiece player idx state
-    PlacePiece location -> tryMove location state
+    PlacePiece mousePos -> tryMove (mouseToBoardPosition mousePos state) state
     StartGame deck -> tryStartGame state deck
     MakeRandomMove seed -> makeRandomMove state seed
     NoAction -> state
@@ -380,12 +401,13 @@ startState =
   , heldPiece = Nothing
   }
 
-mouseToBoardPosition: (Int, Int) -> (Float, Float)
-mouseToBoardPosition (x', y') =
+mouseToBoardPosition: MousePos -> State -> Location
+mouseToBoardPosition (x', y') state =
   let x = x'
       y = (y' - gameHeaderSize)
-      tileSize = (round gameTileSize)
-      offset = gameBoardSize // 2
+      boardSize = getBoardSize state
+      tileSize = round (getTileSizeFromBoardSize boardSize)
+      offset = boardSize // 2
       boardX = (x // tileSize) - offset |> toFloat
       boardY = 0 - ((y // tileSize) - offset) |> toFloat
   in (boardX, boardY)
@@ -400,11 +422,10 @@ processClick signal =
             let
               pos = (Debug.watch "Mouse.position" mousePos)
               click = (Debug.watch "clickInput.signal" clickType)
-              boardPos = (Debug.watch "Board position" (mouseToBoardPosition mousePos))
             in
               case clickType of
                 Start -> StartGame shuffledDeck
-                Board -> PlacePiece boardPos
+                Board -> PlacePiece mousePos
                 PieceInHand player idx -> PickUpPiece player idx
                 None -> NoAction)
       signal random shuffled sampledMouse
