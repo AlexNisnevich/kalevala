@@ -21,7 +21,7 @@ type Score = Dict String Int
 type Deck = [String]
 type Hands = Dict String [String]
 
-type Move = { piece : Piece, location : Location }
+type Move = { piece : Piece, idx : Int, location : Location }
 type Location = (Float, Float)
 type MousePos = (Int, Int)
 
@@ -190,7 +190,7 @@ tryMove location state =
           hand = Dict.getOrFail p state.hands
           pieceStr = head <| drop idx hand
           piece = pieceFromString pieceStr
-          move = { piece = piece, location = location }
+          move = { piece = piece, idx = idx, location = location }
       in
         if (isValidMove move state) then (makeMove move state) else { state | heldPiece <- Nothing }
     Nothing -> state
@@ -205,16 +205,14 @@ isValidMove move state =
       hasAdjacentTile = any (\loc -> isAdjacent loc move.location) (Dict.keys state.board)
   in
     not isOccupied && (hasAdjacentTile || ((List.isEmpty <| Dict.toList state.board) && (move.location == (0, 0))))
-  -- TODO: there are more conditions for a move to not be valid
-  --       (e.g. not touching an existing tile)
 
 makeMove : Move -> State -> State
 makeMove move state =
   let p = playerName state.turn
       newBoard = Dict.insert move.location move.piece state.board
       newScore = (Dict.getOrFail p state.score) + (scoreMove move { state | board <- newBoard })
-      newHand = (drop 1 (Dict.getOrFail p state.hands)) ++ (take 1 state.deck)
-                 -- TODO correctly remove placed piece from hand
+      hand = Dict.getOrFail p state.hands
+      newHand = without move.idx hand ++ (take 1 state.deck)
   in
     { turn = nextPlayer state.turn
     , board = newBoard
@@ -252,7 +250,7 @@ makeRandomMove state seed =
         boardSize = getBoardSize state
         xs = map (\x -> toFloat (x - (boardSize // 2))) [0..(boardSize - 1)]
         locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
-        validLocations = List.filter (\loc -> isValidMove { piece = piece, location = loc } state) locations
+        validLocations = List.filter (\loc -> isValidMove { piece = piece, idx = 0, location = loc } state) locations
         idx = floor (seed * toFloat (List.length validLocations))
         location = validLocations !! idx
     in
