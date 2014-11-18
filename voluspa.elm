@@ -109,6 +109,52 @@ shuffle list signal =
   in
     lift2 shuffleWithRandoms (constant list) (randomsFromSignal signal)
 
+-- BOARD
+
+getTileScore : Location -> Board -> Int
+getTileScore (x,y) board =
+  let piece = Dict.getOrFail (x,y) board
+  in
+    case piece of
+      Odin -> 8
+      Thor -> 7
+      Troll -> 6
+      Dragon -> 5
+      Fenrir -> 4
+      Skadi -> 3
+      Valkyrie -> 2
+      Loki -> 1
+
+findColumn : Location -> Board -> [Location]
+findColumn (x,y) board = (findAbove (x,y-1) board) ++ (findBelow (x,y+1) board)
+
+findRow : Location -> Board -> [Location]
+findRow (x,y) board = (findLeftward (x-1,y) board) ++ (findRightward (x+1,y) board)
+
+findAbove : Location -> Board -> [Location]
+findAbove (x,y) board =
+  if Dict.member (x,y) board
+  then [(x,y)] ++ findAbove (x,y-1) board
+  else []
+
+findBelow : Location -> Board -> [Location]
+findBelow (x,y) board =
+  if Dict.member (x,y) board
+  then [(x,y)] ++ findBelow (x,y+1) board
+  else []
+
+findLeftward : Location -> Board -> [Location]
+findLeftward (x,y) board =
+  if Dict.member (x,y) board
+  then [(x,y)] ++ findLeftward (x-1,y) board
+  else []
+
+findRightward : Location -> Board -> [Location]
+findRightward (x,y) board =
+  if Dict.member (x,y) board
+  then [(x,y)] ++ findRightward (x+1,y) board
+  else []
+
 -- MOVES
 
 tryToPickUpPiece : Player -> Int -> State -> State
@@ -149,7 +195,7 @@ makeMove : Move -> State -> State
 makeMove move state =
   let p = playerName state.turn
       newBoard = Dict.insert move.location move.piece state.board
-      newScore = (Dict.getOrFail p state.score) + (scoreMove move state)
+      newScore = (Dict.getOrFail p state.score) + (scoreMove move { state | board <- newBoard })
       newHand = (drop 1 (Dict.getOrFail p state.hands)) ++ (take 1 state.deck)
                  -- TODO correctly remove placed piece from hand
   in
@@ -163,7 +209,22 @@ makeMove move state =
     }
 
 scoreMove : Move -> State -> Int
-scoreMove move state = 1      -- TODO: actually score moves
+scoreMove move state =
+  let tileScore = getTileScore move.location state.board
+
+      column = findColumn move.location state.board
+      columnSize = List.length column + 1
+      columnScores = map (\c -> getTileScore c state.board) column
+      columnHighScore = if isEmpty column then 0 else maximum columnScores
+      columnPoints = if tileScore > columnHighScore && columnSize >= 2 then columnSize else 0
+
+      row = findRow move.location state.board
+      rowSize = List.length row + 1
+      rowScores = map (\r -> getTileScore r state.board) row
+      rowHighScore = if isEmpty row then 0 else maximum rowScores
+      rowPoints = if tileScore > rowHighScore && rowSize >= 2 then rowSize else 0
+  in
+    columnPoints + rowPoints
 
 makeRandomMove : State -> Float -> State
 makeRandomMove state seed =
