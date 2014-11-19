@@ -205,10 +205,11 @@ isAdjacent (x1, y1) (x2, y2) =
 
 isValidMove : Move -> State -> Bool
 isValidMove move state =
-  let isOccupied = Dict.member move.location state.board
+  let isUnoccupied = not <| Dict.member move.location state.board
+      canOverlapExistingTile = move.piece == Dragon || move.piece == Skadi
       hasAdjacentTile = any (\loc -> isAdjacent loc move.location) (Dict.keys state.board)
   in
-    not isOccupied && (hasAdjacentTile || ((List.isEmpty <| Dict.toList state.board) && (move.location == (0, 0))))
+    (isUnoccupied || canOverlapExistingTile) && hasAdjacentTile
 
 makeMove : Move -> State -> State
 makeMove move state =
