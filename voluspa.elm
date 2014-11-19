@@ -226,9 +226,11 @@ isValidMove : Move -> State -> Bool
 isValidMove move state =
   let isUnoccupied = not <| Dict.member move.location state.board
       canOverlapExistingTile = move.piece == Dragon || move.piece == Skadi
-      hasAdjacentTile = any (\loc -> isAdjacent loc move.location) (Dict.keys state.board)
+      occupiedAdjacentTiles = filter (\loc -> isAdjacent loc move.location) (Dict.keys state.board)
+      hasAdjacentTile = not <| List.isEmpty occupiedAdjacentTiles 
+      adjacentToTroll = any (\loc -> Dict.getOrFail loc state.board == Troll) occupiedAdjacentTiles
   in
-    (isUnoccupied || canOverlapExistingTile) && hasAdjacentTile
+    (isUnoccupied || canOverlapExistingTile) && hasAdjacentTile && not adjacentToTroll
 
 makeMove : Move -> State -> State
 makeMove move state =
