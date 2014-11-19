@@ -10,6 +10,7 @@ import Graphics.Collage (Form)
 import Graphics.Input (..)
 import String
 import Text
+import Window
 
 import Debug
 
@@ -24,6 +25,7 @@ type Hands = Dict String [String]
 type Move = { piece : Piece, idx : Int, location : Location }
 type Location = (Float, Float)
 type MousePos = (Int, Int)
+type WindowDims = (Int, Int)
 
 data Piece = Odin
            | Thor
@@ -39,7 +41,7 @@ data Player = Red
             | Blue
 
 data Action = PickUpPiece Player Int
-            | PlacePiece MousePos
+            | PlacePiece MousePos WindowDims
             | StartGame Deck
             | MakeRandomMove Float
             | NoAction
@@ -59,9 +61,6 @@ handPadding = 10
 
 handTileSize : Float
 handTileSize = 100
-
-totalBoardSize : Int
-totalBoardSize = 750
 
 -- MAGIC STRINGS
 
@@ -125,8 +124,11 @@ getBoardSize state =
     in
       (distFromCenter * 2) + 1
 
-getTileSizeFromBoardSize : Int -> Float
-getTileSizeFromBoardSize boardSize = toFloat (totalBoardSize // boardSize)
+getTotalBoardSize : WindowDims -> Int
+getTotalBoardSize (width, height) = height - gameHeaderSize
+
+getTileSizeFromBoardSize : Int -> WindowDims -> Float
+getTileSizeFromBoardSize boardSize dims = toFloat (getTotalBoardSize dims // boardSize)
 
 getTileScore : Location -> Board -> Int
 getTileScore (x,y) board =
@@ -233,7 +235,7 @@ scoreMove move state =
       columnSize = List.length column + 1
       columnScores = map (\c -> getTileScore c state.board) column
       columnHighScore = if isEmpty column then 0 else maximum columnScores
-      columnPoints = if (tileScore > columnHighScore && columnSize) >= 2 then columnSize else 0
+      columnPoints = if (tileScore > columnHighScore && columnSize >= 2) then columnSize else 0
 
       row = findRow move.location state.board
       rowSize = List.length row + 1
@@ -309,10 +311,10 @@ pieceToImage piece tileSize =
   in
     image (round tileSize) (round tileSize) imgPath
 
-drawGrid : Int -> [Form]
-drawGrid boardSize =
+drawGrid : Int -> WindowDims -> [Form]
+drawGrid boardSize dims =
   let num = toFloat boardSize
-      tileSize = getTileSizeFromBoardSize boardSize
+      tileSize = getTileSizeFromBoardSize boardSize dims
       size = num * tileSize
       xShift = tileSize / 2 - size / 2
       yShift = tileSize / 2 - size / 2
@@ -327,13 +329,13 @@ drawPiece ((x', y'), piece) tileSize =
   in
     move (x, y) (toForm (pieceToImage piece tileSize))
 
-renderBoard : Board -> Int -> Element
-renderBoard board boardSize =
-  let tileSize = getTileSizeFromBoardSize boardSize
+renderBoard : Board -> Int -> WindowDims -> Element
+renderBoard board boardSize dims =
+  let tileSize = getTileSizeFromBoardSize boardSize dims
       size = boardSize * (round tileSize) + 1
       pieces = map (\p -> drawPiece p tileSize) (Dict.toList board)
   in
-    collage size size ((drawGrid boardSize) ++ pieces)
+    collage size size ((drawGrid boardSize dims) ++ pieces)
 
 renderHand : Player -> State -> Element
 renderHand player state =
@@ -355,15 +357,16 @@ renderHand player state =
   in
     flow right ([handText] ++ handContents ++ [score])
 
-display : State -> Element
-display state =
+display : State -> WindowDims -> Element
+display state dims =
   let boardSize = getBoardSize state
-      tileSize = getTileSizeFromBoardSize boardSize
+      totalBoardSize = getTotalBoardSize dims
+      tileSize = getTileSizeFromBoardSize boardSize dims
       handGap = totalBoardSize - 2 * (round handTileSize) - (handPadding * 2)
   in
     flow down
       [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
-      , flow right [ renderBoard state.board boardSize |> clickable clickInput.handle Board
+      , flow right [ renderBoard state.board boardSize dims |> clickable clickInput.handle Board
                    , flow down [ renderHand Red state
                                , spacer 1 handGap
                                , renderHand Blue state]]
@@ -377,7 +380,7 @@ performAction : Action -> State -> State
 performAction action state =
   case action of
     PickUpPiece player idx -> tryToPickUpPiece player idx state
-    PlacePiece mousePos -> tryMove (mouseToBoardPosition mousePos state) state
+    PlacePiece mousePos dims -> tryMove (mouseToBoardPosition mousePos state dims) state
     StartGame deck -> tryStartGame state deck
     MakeRandomMove seed -> makeRandomMove state seed
     NoAction -> state
@@ -403,12 +406,12 @@ startState =
   , heldPiece = Nothing
   }
 
-mouseToBoardPosition: MousePos -> State -> Location
-mouseToBoardPosition (x', y') state =
+mouseToBoardPosition: MousePos -> State -> WindowDims -> Location
+mouseToBoardPosition (x', y') state dims =
   let x = x'
       y = (y' - gameHeaderSize)
       boardSize = getBoardSize state
-      tileSize = round <| getTileSizeFromBoardSize boardSize
+      tileSize = round <| getTileSizeFromBoardSize boardSize dims
       offset = boardSize // 2
       boardX = (x // tileSize) - offset |> toFloat
       boardY = 0 - ((y // tileSize) - offset) |> toFloat
@@ -420,18 +423,21 @@ processClick signal =
       shuffled = shuffle deckContents signal
       sampledMouse = sampleOn signal Mouse.position
   in
-    lift4 (\clickType randomFloat shuffledDeck mousePos ->
+    lift5 (\clickType randomFloat shuffledDeck mousePos dims ->
             let
               pos = (Debug.watch "Mouse.position" mousePos)
               click = (Debug.watch "clickInput.signal" clickType)
             in
               case clickType of
                 Start -> StartGame shuffledDeck
-                Board -> PlacePiece mousePos
+                Board -> PlacePiece mousePos dims
                 PieceInHand player idx -> PickUpPiece player idx
                 None -> NoAction)
-      signal random shuffled sampledMouse
+      signal random shuffled sampledMouse Window.dimensions
 
 main : Signal Element
 main =
-  display <~ (foldp performAction startState (processClick clickInput.signal))
+  let
+    state = (foldp performAction startState (processClick clickInput.signal))
+  in
+    display <~ state ~ Window.dimensions
