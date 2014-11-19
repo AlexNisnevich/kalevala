@@ -149,19 +149,32 @@ getTotalBoardSize (width, height) = height - gameHeaderSize
 getTileSizeFromBoardSize : Int -> WindowDims -> Float
 getTileSizeFromBoardSize boardSize dims = toFloat (getTotalBoardSize dims // boardSize)
 
+isAdjacent : Location -> Location -> Bool
+isAdjacent (x1, y1) (x2, y2) =
+  (y1 == y2 && abs (x1 - x2) == 1) || (x1 == x2 && abs (y1 - y2) == 1)
+
+adjacentTiles : Location -> Board -> [Location]
+adjacentTiles (x, y) board =
+  filter (\loc -> isAdjacent loc (x, y)) (Dict.keys board)
+
 getTileScore : Location -> Board -> Int
 getTileScore (x,y) board =
   let piece = Dict.getOrFail (x,y) board
+      adjacents = adjacentTiles (x,y) board
+      adjacentToLoki = any (\loc -> Dict.getOrFail loc board == Loki) adjacents
   in
-    case piece of
-      Odin -> 8
-      Thor -> 7
-      Troll -> 6
-      Dragon -> 5
-      Fenrir -> 4
-      Skadi -> 3
-      Valkyrie -> 2
-      Loki -> 1
+    if adjacentToLoki && not (piece == Loki)
+    then 0 -- Loki makes all tiles around him 0 (except other Lokis)
+    else
+      case piece of
+        Odin -> 8
+        Thor -> 7
+        Troll -> 6
+        Dragon -> 5
+        Fenrir -> 4
+        Skadi -> 3
+        Valkyrie -> 2
+        Loki -> 1
 
 findColumn : Location -> Board -> [Location]
 findColumn (x,y) board = (findAbove (x,y-1) board) ++ (findBelow (x,y+1) board)
@@ -198,7 +211,7 @@ findRightward (x,y) board =
 tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
   if state.turn == player
-  then pickUpPiece idx state 
+  then pickUpPiece idx state
   else { state | heldPiece <- Nothing }
 
 pickUpPiece : Int -> State -> State
@@ -218,17 +231,16 @@ tryMove location state =
         if (isValidMove move state) then (makeMove move state) else { state | heldPiece <- Nothing }
     Nothing -> state
 
-isAdjacent : Location -> Location -> Bool
-isAdjacent (x1, y1) (x2, y2) =
-  (y1 == y2 && abs (x1 - x2) == 1) || (x1 == x2 && abs (y1 - y2) == 1)
-
 isValidMove : Move -> State -> Bool
 isValidMove move state =
   let isUnoccupied = not <| Dict.member move.location state.board
-      canOverlapExistingTile = move.piece == Dragon || move.piece == Skadi
-      occupiedAdjacentTiles = filter (\loc -> isAdjacent loc move.location) (Dict.keys state.board)
-      hasAdjacentTile = not <| List.isEmpty occupiedAdjacentTiles 
-      adjacentToTroll = any (\loc -> Dict.getOrFail loc state.board == Troll) occupiedAdjacentTiles
+      existingTile = Dict.get move.location state.board
+      canOverlapExistingTile = (move.piece == Dragon || move.piece == Skadi)
+                               && not (existingTile == Just move.piece)
+                               -- can't Skadi a Skadi, can't Dragon a Dragon
+      adjacents = adjacentTiles move.location state.board
+      hasAdjacentTile = not <| List.isEmpty adjacents
+      adjacentToTroll = any (\loc -> Dict.getOrFail loc state.board == Troll) adjacents
   in
     (isUnoccupied || canOverlapExistingTile) && hasAdjacentTile && not adjacentToTroll
 
@@ -238,9 +250,9 @@ makeMove move state =
       newBoard = Dict.insert move.location move.piece state.board
       newScore = (Dict.getOrFail p state.score) + (scoreMove move { state | board <- newBoard })
       hand = Dict.getOrFail p state.hands
-      existingPieceOnTile = Dict.get move.location state.board
+      existingTile = Dict.get move.location state.board
       handWithDrawnTile = without move.idx hand ++ (take 1 state.deck)
-      newHand = case existingPieceOnTile of
+      newHand = case existingTile of
         Just piece -> if move.piece == Skadi then (replaceAtIndex move.idx (pieceToString piece) hand) else handWithDrawnTile
         Nothing -> handWithDrawnTile
   in
@@ -297,7 +309,7 @@ nextPlayer player =
 
 tryStartGame : State -> Deck -> State
 tryStartGame state deck =
-  if not state.started 
+  if not state.started
   then startGame state deck
   else state
 
