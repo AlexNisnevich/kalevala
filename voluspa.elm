@@ -82,6 +82,18 @@ pieceFromString str =
     "valkyrie" -> Valkyrie
     "loki" -> Loki
 
+pieceToString : Piece -> String
+pieceToString piece =
+  case piece of
+    Odin -> "odin"
+    Thor -> "thor"
+    Troll -> "troll"
+    Dragon -> "dragon"
+    Fenrir -> "fenrir"
+    Skadi -> "skadi"
+    Valkyrie -> "valkyrie"
+    Loki -> "loki"
+
 -- HELPERS
 
 (!!) : [a] -> Int -> a
@@ -94,6 +106,13 @@ without i arr =
       after = drop (i+1) arr
   in
     before ++ after
+
+replaceAtIndex : Int -> a -> [a] -> [a]
+replaceAtIndex i elt arr =
+  let before = take i arr
+      after = drop (i+1) arr
+  in
+    before ++ [elt] ++ after
 
 shuffle : [a] -> Signal b -> Signal [a]
 shuffle list signal =
@@ -217,7 +236,11 @@ makeMove move state =
       newBoard = Dict.insert move.location move.piece state.board
       newScore = (Dict.getOrFail p state.score) + (scoreMove move { state | board <- newBoard })
       hand = Dict.getOrFail p state.hands
-      newHand = without move.idx hand ++ (take 1 state.deck)
+      existingPieceOnTile = Dict.get move.location state.board
+      handWithDrawnTile = without move.idx hand ++ (take 1 state.deck)
+      newHand = case existingPieceOnTile of
+        Just piece -> if move.piece == Skadi then (replaceAtIndex move.idx (pieceToString piece) hand) else handWithDrawnTile
+        Nothing -> handWithDrawnTile
   in
     { turn = nextPlayer state.turn
     , board = newBoard
