@@ -85,9 +85,8 @@ pieceFromString str =
 
 -- HELPERS
 
-get : [a] -> Int -> a
-get list idx = head (drop idx list)
-(!!) = get
+(!!) : [a] -> Int -> a
+(!!) list idx = head (drop idx list)
 infixl 4 !!
 
 without : Int -> [a] -> [a]
@@ -122,8 +121,9 @@ getBoardSize state =
         ys = map snd locations
         maxX = max (maximum xs) (abs <| minimum xs)
         maxY = max (maximum ys) (abs <| minimum ys)
+        distFromCenter = (max maxX maxY) + 2
     in
-      (((max maxX maxY) + 2) * 2) + 1
+      (distFromCenter * 2) + 1
 
 getTileSizeFromBoardSize : Int -> Float
 getTileSizeFromBoardSize boardSize = toFloat (totalBoardSize // boardSize)
@@ -176,7 +176,9 @@ findRightward (x,y) board =
 
 tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
-  if (state.turn == player) then (pickUpPiece idx state) else { state | heldPiece <- Nothing }
+  if state.turn == player
+  then pickUpPiece idx state 
+  else { state | heldPiece <- Nothing }
 
 pickUpPiece : Int -> State -> State
 pickUpPiece idx state =
@@ -231,13 +233,13 @@ scoreMove move state =
       columnSize = List.length column + 1
       columnScores = map (\c -> getTileScore c state.board) column
       columnHighScore = if isEmpty column then 0 else maximum columnScores
-      columnPoints = if tileScore > columnHighScore && columnSize >= 2 then columnSize else 0
+      columnPoints = if (tileScore > columnHighScore && columnSize) >= 2 then columnSize else 0
 
       row = findRow move.location state.board
       rowSize = List.length row + 1
       rowScores = map (\r -> getTileScore r state.board) row
       rowHighScore = if isEmpty row then 0 else maximum rowScores
-      rowPoints = if tileScore > rowHighScore && rowSize >= 2 then rowSize else 0
+      rowPoints = if (tileScore > rowHighScore && rowSize >= 2) then rowSize else 0
   in
     columnPoints + rowPoints
 
@@ -267,13 +269,15 @@ nextPlayer player =
 
 tryStartGame : State -> Deck -> State
 tryStartGame state deck =
-  if (not state.started) then (startGame state deck) else state
+  if not state.started 
+  then startGame state deck
+  else state
 
 startGame : State -> Deck -> State
 startGame state deck =
   let deckWithIndices = zip [0..(List.length deck - 1)] deck
       idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "troll")) deckWithIndices
-      firstTile = pieceFromString <| deck !! idxFirstNonTroll
+      firstTile = pieceFromString (deck !! idxFirstNonTroll)
       deckMinusFirstTile = without idxFirstNonTroll deck
       redHand = take 5 deckMinusFirstTile
       blueHand = take 5 (drop 5 deckMinusFirstTile)
@@ -404,7 +408,7 @@ mouseToBoardPosition (x', y') state =
   let x = x'
       y = (y' - gameHeaderSize)
       boardSize = getBoardSize state
-      tileSize = round (getTileSizeFromBoardSize boardSize)
+      tileSize = round <| getTileSizeFromBoardSize boardSize
       offset = boardSize // 2
       boardX = (x // tileSize) - offset |> toFloat
       boardY = 0 - ((y // tileSize) - offset) |> toFloat
