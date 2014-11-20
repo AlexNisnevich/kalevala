@@ -216,6 +216,8 @@ getTileScore (x,y) dir move board =
                       -- (this is so that Fenrirs can beat other Fenrirs)
                   in
                     4 * numFenrirsToCount
+                  -- TODO: Fenrir-Loki interaction is actually quite tricky.
+                  -- "Fenrir tiles next to Loki tiles are worth zero and do not contribute to the value of other Fenrir tiles."
         Skadi -> 3
         Valkyrie -> if isCurrentTile && hasSamePieceAtOtherEnd (x,y) board dir
                     then 100 -- i.e. instantly score row
