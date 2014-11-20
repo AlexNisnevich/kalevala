@@ -140,9 +140,9 @@ replaceAtIndex i elt arr =
 
 shuffle : [a] -> Signal b -> Signal [a]
 shuffle list signal =
-  let randomsFromSignal signal = Random.floatList (lift (\x -> List.length list) signal)
+  let randomsFromSignal signal = Random.floatList <| lift (\x -> List.length list) signal
       shuffleWithRandoms list randoms =
-        if (List.isEmpty list)
+        if List.isEmpty list
         then []
         else
           let i = floor (head randoms * toFloat (List.length list))
@@ -197,7 +197,7 @@ getTileScore (x,y) dir move board =
   let piece = Dict.getOrFail (x,y) board
       adjacents = adjacentTiles (x,y) board
       adjacentToLoki = any (\loc -> Dict.getOrFail loc board == Loki) adjacents
-      isMovedTile = (move.location == (x,y)) -- is this the tile that was moved to this turn?
+      isCurrentTile = (move.location == (x,y)) -- is this the tile that was placed this turn?
   in
     if adjacentToLoki && not (piece == Loki)
     then 0 -- Loki makes all tiles around him 0 (except other Lokis)
@@ -211,13 +211,15 @@ getTileScore (x,y) dir move board =
                                           Vertical -> findColumn) (x,y) board
                       piecesInLine = map (\loc -> Dict.getOrFail loc board) line
                       numOtherFenrirs = length <| filter (\p -> p == Fenrir) piecesInLine
-                      numFenrirsToCount = numOtherFenrirs + if (isMovedTile || not (move.piece == Fenrir)) then 1 else 0
+                      numFenrirsToCount = numOtherFenrirs + if (isCurrentTile || not (move.piece == Fenrir)) then 1 else 0
                       -- count the tile itself, but don't count Fenrir placed this turn for other Fenrirs
                       -- (this is so that Fenrirs can beat other Fenrirs)
                   in
                     4 * numFenrirsToCount
         Skadi -> 3
-        Valkyrie -> 2
+        Valkyrie -> if isCurrentTile && hasSamePieceAtOtherEnd (x,y) board dir
+                    then 100 -- i.e. instantly score row
+                    else 2
         Loki -> 1
 
 findColumn : Location -> Board -> [Location]
@@ -249,6 +251,25 @@ findRightward (x,y) board =
   if Dict.member (x,y) board
   then [(x,y)] ++ findRightward (x+1,y) board
   else []
+
+-- is this piece at one end of a line with the same kind of piece
+-- at the other end? (used by Valkyrie)
+hasSamePieceAtOtherEnd : Location -> Board -> Direction -> Bool
+hasSamePieceAtOtherEnd (x,y) board dir =
+  let pieceAt pos = Dict.getOrFail pos board
+      samePieces pos1 pos2 = pieceAt pos1 == pieceAt pos2
+      above = findAbove (x,y-1) board
+      below = findBelow (x,y+1) board
+      left = findLeftward (x-1,y) board
+      right = findRightward (x+1,y) board
+      samePieceBelow = isEmpty above && not (isEmpty below) && samePieces (last below) (x,y)
+      samePieceAbove = isEmpty below && not (isEmpty above) && samePieces (last above) (x,y)
+      samePieceLeft = isEmpty right && not (isEmpty left) && samePieces (last left) (x,y)
+      samePieceRight = isEmpty left && not (isEmpty right) && samePieces (last right) (x,y)
+  in
+    case dir of
+      Horizontal -> samePieceLeft || samePieceRight
+      Vertical -> samePieceBelow || samePieceAbove
 
 -- MOVES
 
