@@ -17,14 +17,15 @@ import Debug
 -- TYPES
 
 type State = {
-  turn: Player,
+  players : Dict String PlayerType,
+  turn : Player,
   board : Board,
   score : Score,
-  deck: Deck,
-  hands: Hands,
-  started: Bool,
-  heldPiece: Maybe Int,
-  lastPlaced: Maybe Location
+  deck : Deck,
+  hands : Hands,
+  started : Bool,
+  heldPiece : Maybe Int,
+  lastPlaced : Maybe Location
 }
 
 type Board = Dict Location Piece
@@ -48,6 +49,9 @@ data Piece = Odin
 
 data Player = Red
             | Blue
+
+data PlayerType = Human
+                | Cpu
 
 data Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
@@ -169,6 +173,17 @@ getTotalBoardSize (width, height) = height - gameHeaderSize
 getTileSizeFromBoardSize : Int -> WindowDims -> Float
 getTileSizeFromBoardSize boardSize dims = toFloat (getTotalBoardSize dims // boardSize)
 
+mouseToBoardPosition: MousePos -> State -> WindowDims -> Location
+mouseToBoardPosition (x', y') state dims =
+  let x = x'
+      y = (y' - gameHeaderSize)
+      boardSize = getBoardSize state
+      tileSize = round <| getTileSizeFromBoardSize boardSize dims
+      offset = boardSize // 2
+      boardX = (x // tileSize) - offset |> toFloat
+      boardY = 0 - ((y // tileSize) - offset) |> toFloat
+  in (boardX, boardY)
+
 isAdjacent : Location -> Location -> Bool
 isAdjacent (x1, y1) (x2, y2) =
   (y1 == y2 && abs (x1 - x2) == 1) || (x1 == x2 && abs (y1 - y2) == 1)
@@ -247,8 +262,8 @@ pickUpPiece : Int -> State -> State
 pickUpPiece idx state =
   { state | heldPiece <- Just idx }
 
-tryMove : Location -> (State, State) -> State -> State
-tryMove location nextAction state =
+tryMove : Location -> State -> State
+tryMove location state =
   case state.heldPiece of
     Just idx ->
       let p = playerName state.turn
@@ -256,6 +271,10 @@ tryMove location nextAction state =
           pieceStr = head <| drop idx hand
           piece = pieceFromString pieceStr
           move = { piece = piece, idx = idx, location = location }
+          nextPlayerType = Dict.getOrFail (playerName <| nextPlayer state.turn) state.players
+          nextAction = case nextPlayerType of
+                         Human -> identity
+                         Cpu -> makeCpuMove
       in
         if (isValidMove move state) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
     Nothing -> state
@@ -280,20 +299,19 @@ makeMove move state =
       newScore = (Dict.getOrFail p state.score) + (scoreMove move { state | board <- newBoard })
       hand = Dict.getOrFail p state.hands
       existingTile = Dict.get move.location state.board
-      handWithDrawnTile = without move.idx hand ++ (take 1 state.deck)
+      handWithDrawnTile = without move.idx hand ++ (if (not <| List.isEmpty state.deck) then (take 1 state.deck) else [])
       newHand = case existingTile of
         Just piece -> if move.piece == Skadi then (replaceAtIndex move.idx (pieceToString piece) hand) else handWithDrawnTile
         Nothing -> handWithDrawnTile
   in
-    { turn = nextPlayer state.turn
-    , board = newBoard
-    , score = Dict.insert p newScore state.score
-    , deck = drop 1 state.deck
-    , hands = Dict.insert p newHand state.hands
-    , started = True
-    , heldPiece = Nothing
-    , lastPlaced = Just move.location
-    }
+    { state | turn <- nextPlayer state.turn
+            , board <- newBoard
+            , score <- Dict.insert p newScore state.score
+            , deck <- drop 1 state.deck
+            , hands <- Dict.insert p newHand state.hands
+            , started <- True
+            , heldPiece <- Nothing
+            , lastPlaced <- Just move.location }
 
 scoreMove : Move -> State -> Int
 scoreMove move state =
@@ -316,25 +334,28 @@ scoreMove move state =
 -- 1-ply AI
 makeCpuMove : State -> State
 makeCpuMove state =
-  let p = playerName state.turn
-      hand = Dict.getOrFail p state.hands
-      idxs = [0..(List.length hand)-1]
+  if Dict.getOrFail (playerName state.turn) state.hands |> List.isEmpty
+  then state -- TODO: handle turn skipping (in case one player runs out of tiles before the other)
+  else
+    let p = playerName state.turn
+        hand = Dict.getOrFail p state.hands
+        idxs = [0..(List.length hand)-1]
 
-      boardSize = getBoardSize state
-      xs = map (\x -> toFloat (x - (boardSize // 2))) [0..(boardSize - 1)]
-      locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
+        boardSize = getBoardSize state
+        xs = map (\x -> toFloat (x - (boardSize // 2))) [0..(boardSize - 1)]
+        locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
 
-      pieceAtIdx i = pieceFromString (hand !! i)
-      validLocationsByPiece piece = List.filter (\loc -> isValidMove { piece = piece, idx = 0, location = loc } state) locations
-      validMoves = concatMap (\i -> let piece = pieceAtIdx i
-                                        move loc = { piece = piece, idx = i, location = loc}
-                                        stateAfterMoveTo loc = { state | board <- Dict.insert loc piece state.board }
-                                        moveWithScore loc = (move loc, scoreMove (move loc) (stateAfterMoveTo loc))
-                                    in
-                                      map moveWithScore (validLocationsByPiece piece)) idxs
-      (bestMove, bestScore) = sortBy snd validMoves |> reverse |> Debug.watch "best moves" |> head
-  in
-    makeMove bestMove state
+        pieceAtIdx i = pieceFromString (hand !! i)
+        validLocationsByPiece piece = List.filter (\loc -> isValidMove { piece = piece, idx = 0, location = loc } state) locations
+        validMoves = concatMap (\i -> let piece = pieceAtIdx i
+                                          move loc = { piece = piece, idx = i, location = loc}
+                                          stateAfterMoveTo loc = { state | board <- Dict.insert loc piece state.board }
+                                          moveWithScore loc = (move loc, scoreMove (move loc) (stateAfterMoveTo loc))
+                                      in
+                                        map moveWithScore (validLocationsByPiece piece)) idxs
+        (bestMove, bestScore) = sortBy snd validMoves |> reverse |> Debug.watch "best moves" |> head
+    in
+      tryMove bestMove.location { state | heldPiece <- Just bestMove.idx }
 
 nextPlayer : Player -> Player
 nextPlayer player =
@@ -343,6 +364,14 @@ nextPlayer player =
     Blue -> Red
 
 -- GAME
+
+performAction : Action -> State -> State
+performAction action state =
+  case action of
+    PickUpPiece player idx -> tryToPickUpPiece player idx state
+    PlacePiece mousePos dims -> tryMove (mouseToBoardPosition mousePos state dims) state
+    StartGame deck -> tryStartGame state deck
+    NoAction -> state
 
 tryStartGame : State -> Deck -> State
 tryStartGame state deck =
@@ -360,11 +389,15 @@ startGame state deck =
       blueHand = take 5 (drop 5 deckMinusFirstTile)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
       remainder = drop 10 deckMinusFirstTile
+      newState = { state | hands <- hands,
+                           deck <- remainder,
+                           started <- True,
+                           board <- Dict.singleton (0, 0) firstTile }
   in
-    { state | hands <- hands,
-              deck <- remainder,
-              started <- True,
-              board <- Dict.singleton (0, 0) firstTile }
+    -- if first player is Cpu, make their move
+    if Dict.getOrFail (playerName newState.turn) newState.players == Cpu
+    then makeCpuMove newState
+    else newState
 
 -- DISPLAY
 
@@ -435,6 +468,9 @@ renderHand player state =
                                                                 |> color (if isPieceHeld idx then (playerColor state.turn) else white)
                                                                 |> clickable clickInput.handle (PieceInHand player idx)
       handContents = indexedMap makePiece hand
+      maybeHandContents = if Dict.getOrFail p state.players == Human
+                          then handContents
+                          else []
       handText = String.toUpper p |> toText
                                   |> (if state.turn == player then bold else identity)
                                   |> leftAligned
@@ -442,7 +478,7 @@ renderHand player state =
       score = Dict.getOrFail p state.score |> asText
                                            |> container 40 pieceSize middle
   in
-    flow right ([handText] ++ handContents ++ [score])
+    flow right ([handText] ++ maybeHandContents ++ [score])
 
 display : State -> WindowDims -> Element
 display state dims =
@@ -463,14 +499,6 @@ display state dims =
 
 -- MAIN
 
-performAction : Action -> State -> State
-performAction action state =
-  case action of
-    PickUpPiece player idx -> tryToPickUpPiece player idx state
-    PlacePiece mousePos dims -> tryMove (mouseToBoardPosition mousePos state dims) makeCpuMove state
-    StartGame deck -> tryStartGame state deck
-    NoAction -> state
-
 deckContents : [String]
 deckContents = repeat 6 "odin" ++
                repeat 8 "thor" ++
@@ -483,7 +511,8 @@ deckContents = repeat 6 "odin" ++
 
 startState : State
 startState =
-  { turn = Red
+  { players = Dict.fromList [("red", Human), ("blue", Cpu)]
+  , turn = Red
   , board = Dict.empty
   , score = Dict.fromList [("red", 0), ("blue", 0)]
   , deck = []
@@ -492,17 +521,6 @@ startState =
   , heldPiece = Nothing
   , lastPlaced = Nothing
   }
-
-mouseToBoardPosition: MousePos -> State -> WindowDims -> Location
-mouseToBoardPosition (x', y') state dims =
-  let x = x'
-      y = (y' - gameHeaderSize)
-      boardSize = getBoardSize state
-      tileSize = round <| getTileSizeFromBoardSize boardSize dims
-      offset = boardSize // 2
-      boardX = (x // tileSize) - offset |> toFloat
-      boardY = 0 - ((y // tileSize) - offset) |> toFloat
-  in (boardX, boardY)
 
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
