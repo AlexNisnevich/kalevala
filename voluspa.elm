@@ -52,7 +52,6 @@ data Player = Red
 data Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
             | StartGame Deck
-            | MakeRandomMove Float
             | NoAction
 
 data ClickEvent = Start
@@ -117,6 +116,9 @@ pieceToString piece =
 (!!) : [a] -> Int -> a
 (!!) list idx = head (drop idx list)
 infixl 4 !!
+
+repeat : Int -> a -> [a]
+repeat num elt = Array.toList <| Array.repeat num elt
 
 without : Int -> [a] -> [a]
 without i arr =
@@ -245,8 +247,8 @@ pickUpPiece : Int -> State -> State
 pickUpPiece idx state =
   { state | heldPiece <- Just idx }
 
-tryMove : Location -> State -> State
-tryMove location state =
+tryMove : Location -> (State, State) -> State -> State
+tryMove location nextAction state =
   case state.heldPiece of
     Just idx ->
       let p = playerName state.turn
@@ -255,7 +257,7 @@ tryMove location state =
           piece = pieceFromString pieceStr
           move = { piece = piece, idx = idx, location = location }
       in
-        if (isValidMove move state) then (makeMove move state) else { state | heldPiece <- Nothing }
+        if (isValidMove move state) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
     Nothing -> state
 
 isValidMove : Move -> State -> Bool
@@ -311,21 +313,28 @@ scoreMove move state =
   in
     columnPoints + rowPoints
 
-makeRandomMove : State -> Float -> State
-makeRandomMove state seed =
-  if state.started
-  then
-    let p = playerName state.turn
-        piece = pieceFromString <| head <| Dict.getOrFail p state.hands
-        boardSize = getBoardSize state
-        xs = map (\x -> toFloat (x - (boardSize // 2))) [0..(boardSize - 1)]
-        locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
-        validLocations = List.filter (\loc -> isValidMove { piece = piece, idx = 0, location = loc } state) locations
-        idx = floor (seed * toFloat (List.length validLocations))
-        location = validLocations !! idx
-    in
-      tryMove location state
-  else state
+-- 1-ply AI
+makeCpuMove : State -> State
+makeCpuMove state =
+  let p = playerName state.turn
+      hand = Dict.getOrFail p state.hands
+      idxs = [0..(List.length hand)-1]
+
+      boardSize = getBoardSize state
+      xs = map (\x -> toFloat (x - (boardSize // 2))) [0..(boardSize - 1)]
+      locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
+
+      pieceAtIdx i = pieceFromString (hand !! i)
+      validLocationsByPiece piece = List.filter (\loc -> isValidMove { piece = piece, idx = 0, location = loc } state) locations
+      validMoves = concatMap (\i -> let piece = pieceAtIdx i
+                                        move loc = { piece = piece, idx = i, location = loc}
+                                        stateAfterMoveTo loc = { state | board <- Dict.insert loc piece state.board }
+                                        moveWithScore loc = (move loc, scoreMove (move loc) (stateAfterMoveTo loc))
+                                    in
+                                      map moveWithScore (validLocationsByPiece piece)) idxs
+      (bestMove, bestScore) = sortBy snd validMoves |> reverse |> Debug.watch "best moves" |> head
+  in
+    makeMove bestMove state
 
 nextPlayer : Player -> Player
 nextPlayer player =
@@ -408,9 +417,12 @@ renderBoard : State -> Int -> WindowDims -> Element
 renderBoard state boardSize dims =
   let tileSize = getTileSizeFromBoardSize boardSize dims
       size = boardSize * (round tileSize) + 1
+
+      grid = drawGrid boardSize dims
       pieces = map (\p -> drawPiece p tileSize) (Dict.toList state.board)
+      outline = drawLastPlacedOutline state tileSize
   in
-    collage size size ((drawGrid boardSize dims) ++ pieces ++ (drawLastPlacedOutline state tileSize))
+    collage size size (grid ++ pieces ++ outline)
 
 renderHand : Player -> State -> Element
 renderHand player state =
@@ -455,20 +467,19 @@ performAction : Action -> State -> State
 performAction action state =
   case action of
     PickUpPiece player idx -> tryToPickUpPiece player idx state
-    PlacePiece mousePos dims -> tryMove (mouseToBoardPosition mousePos state dims) state
+    PlacePiece mousePos dims -> tryMove (mouseToBoardPosition mousePos state dims) makeCpuMove state
     StartGame deck -> tryStartGame state deck
-    MakeRandomMove seed -> makeRandomMove state seed
     NoAction -> state
 
 deckContents : [String]
-deckContents = (Array.toList (Array.repeat 6 "odin") ++
-                Array.toList (Array.repeat 8 "thor") ++
-                Array.toList (Array.repeat 6 "troll") ++
-                Array.toList (Array.repeat 8 "dragon") ++
-                Array.toList (Array.repeat 8 "fenrir") ++
-                Array.toList (Array.repeat 9 "skadi") ++
-                Array.toList (Array.repeat 9 "valkyrie") ++
-                Array.toList (Array.repeat 6 "loki"))
+deckContents = repeat 6 "odin" ++
+               repeat 8 "thor" ++
+               repeat 6 "troll" ++
+               repeat 8 "dragon" ++
+               repeat 8 "fenrir" ++
+               repeat 9 "skadi" ++
+               repeat 9 "valkyrie" ++
+               repeat 6 "loki"
 
 startState : State
 startState =
@@ -495,11 +506,10 @@ mouseToBoardPosition (x', y') state dims =
 
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
-  let random = Random.float signal
-      shuffled = shuffle deckContents signal
+  let shuffled = shuffle deckContents signal
       sampledMouse = sampleOn signal Mouse.position
   in
-    lift5 (\clickType randomFloat shuffledDeck mousePos dims ->
+    lift4 (\clickType shuffledDeck mousePos dims ->
             let
               pos = (Debug.watch "Mouse.position" mousePos)
               click = (Debug.watch "clickInput.signal" clickType)
@@ -509,7 +519,7 @@ processClick signal =
                 Board -> PlacePiece mousePos dims
                 PieceInHand player idx -> PickUpPiece player idx
                 None -> NoAction)
-      signal random shuffled sampledMouse Window.dimensions
+      signal shuffled sampledMouse Window.dimensions
 
 main : Signal Element
 main =
