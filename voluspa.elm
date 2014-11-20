@@ -36,7 +36,6 @@ data Piece = Odin
            | Valkyrie
            | Loki
 
-
 data Player = Red
             | Blue
 
@@ -50,6 +49,9 @@ data ClickEvent = Start
                 | Board
                 | PieceInHand Player Int
                 | None
+
+data Direction = Vertical
+               | Horizontal
 
 -- GLOBAL CONSTANTS
 
@@ -157,11 +159,12 @@ adjacentTiles : Location -> Board -> [Location]
 adjacentTiles (x, y) board =
   filter (\loc -> isAdjacent loc (x, y)) (Dict.keys board)
 
-getTileScore : Location -> Board -> Int
-getTileScore (x,y) board =
+getTileScore : Location -> Direction -> Move -> Board -> Int
+getTileScore (x,y) dir move board =
   let piece = Dict.getOrFail (x,y) board
       adjacents = adjacentTiles (x,y) board
       adjacentToLoki = any (\loc -> Dict.getOrFail loc board == Loki) adjacents
+      isMovedTile = (move.location == (x,y)) -- is this the tile that was moved to this turn?
   in
     if adjacentToLoki && not (piece == Loki)
     then 0 -- Loki makes all tiles around him 0 (except other Lokis)
@@ -171,7 +174,15 @@ getTileScore (x,y) board =
         Thor -> 7
         Troll -> 6
         Dragon -> 5
-        Fenrir -> 4
+        Fenrir -> let colOrRow = (case dir of Horizontal -> findRow
+                                              Vertical -> findColumn) (x,y) board
+                      pieces = map (\loc -> Dict.getOrFail loc board) colOrRow
+                      numOtherFenrirs = length <| filter (\p -> p == Fenrir) pieces
+                      numFenrirsToCount = numOtherFenrirs + if (isMovedTile || not (move.piece == Fenrir)) then 1 else 0
+                                          -- count the tile itself, but don't count Fenrir placed this turn for other Fenrirs
+                                          -- (this is so that Fenrirs can beat other Fenrirs)
+                  in
+                    4 * numFenrirsToCount
         Skadi -> 3
         Valkyrie -> 2
         Loki -> 1
@@ -267,19 +278,19 @@ makeMove move state =
 
 scoreMove : Move -> State -> Int
 scoreMove move state =
-  let tileScore = getTileScore move.location state.board
-
-      column = findColumn move.location state.board
+  let column = findColumn move.location state.board
       columnSize = List.length column + 1
-      columnScores = map (\c -> getTileScore c state.board) column
+      columnScores = map (\loc -> getTileScore loc Vertical move state.board) column
       columnHighScore = if isEmpty column then 0 else maximum columnScores
-      columnPoints = if (tileScore > columnHighScore && columnSize >= 2) then columnSize else 0
+      tileScoreInColumn = getTileScore move.location Vertical move state.board
+      columnPoints = if (tileScoreInColumn > columnHighScore && columnSize >= 2) then columnSize else 0
 
       row = findRow move.location state.board
       rowSize = List.length row + 1
-      rowScores = map (\r -> getTileScore r state.board) row
+      rowScores = map (\loc -> getTileScore loc Horizontal move state.board) row
       rowHighScore = if isEmpty row then 0 else maximum rowScores
-      rowPoints = if (tileScore > rowHighScore && rowSize >= 2) then rowSize else 0
+      tileScoreInRow = getTileScore move.location Horizontal move state.board
+      rowPoints = if (tileScoreInRow > rowHighScore && rowSize >= 2) then rowSize else 0
   in
     columnPoints + rowPoints
 
