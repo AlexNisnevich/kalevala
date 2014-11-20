@@ -286,11 +286,14 @@ isValidMove move state =
       canOverlapExistingTile = (move.piece == Dragon || move.piece == Skadi)
                                && not (existingTile == Just move.piece)
                                -- can't Skadi a Skadi, can't Dragon a Dragon
+      columnLength = length (findColumn move.location state.board) + 1
+      rowLength = length (findRow move.location state.board) + 1
+      longestLine = max columnLength rowLength
       adjacents = adjacentTiles move.location state.board
       hasAdjacentTile = not <| List.isEmpty adjacents
       adjacentToTroll = any (\loc -> Dict.getOrFail loc state.board == Troll) adjacents
   in
-    (isUnoccupied || canOverlapExistingTile) && hasAdjacentTile && not adjacentToTroll
+    (isUnoccupied || canOverlapExistingTile) && hasAdjacentTile && not adjacentToTroll && longestLine <= 7
 
 makeMove : Move -> State -> State
 makeMove move state =
