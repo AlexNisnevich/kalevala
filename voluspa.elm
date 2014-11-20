@@ -16,7 +16,17 @@ import Debug
 
 -- TYPES
 
-type State = { turn: Player, board : Board, score : Score, deck: Deck, hands: Hands, started: Bool, heldPiece: Maybe Int}
+type State = {
+  turn: Player,
+  board : Board,
+  score : Score,
+  deck: Deck,
+  hands: Hands,
+  started: Bool,
+  heldPiece: Maybe Int,
+  lastPlaced: Maybe Location
+}
+
 type Board = Dict Location Piece
 type Score = Dict String Int
 type Deck = [String]
@@ -71,6 +81,12 @@ playerName player =
   case player of
     Red -> "red"
     Blue -> "blue"
+
+playerColor : Player -> Color
+playerColor player =
+  case player of
+    Red -> red
+    Blue -> blue
 
 pieceFromString : String -> Piece
 pieceFromString str =
@@ -174,13 +190,13 @@ getTileScore (x,y) dir move board =
         Thor -> 7
         Troll -> 6
         Dragon -> 5
-        Fenrir -> let colOrRow = (case dir of Horizontal -> findRow
-                                              Vertical -> findColumn) (x,y) board
-                      pieces = map (\loc -> Dict.getOrFail loc board) colOrRow
-                      numOtherFenrirs = length <| filter (\p -> p == Fenrir) pieces
+        Fenrir -> let line = (case dir of Horizontal -> findRow
+                                          Vertical -> findColumn) (x,y) board
+                      piecesInLine = map (\loc -> Dict.getOrFail loc board) line
+                      numOtherFenrirs = length <| filter (\p -> p == Fenrir) piecesInLine
                       numFenrirsToCount = numOtherFenrirs + if (isMovedTile || not (move.piece == Fenrir)) then 1 else 0
-                                          -- count the tile itself, but don't count Fenrir placed this turn for other Fenrirs
-                                          -- (this is so that Fenrirs can beat other Fenrirs)
+                      -- count the tile itself, but don't count Fenrir placed this turn for other Fenrirs
+                      -- (this is so that Fenrirs can beat other Fenrirs)
                   in
                     4 * numFenrirsToCount
         Skadi -> 3
@@ -274,6 +290,7 @@ makeMove move state =
     , hands = Dict.insert p newHand state.hands
     , started = True
     , heldPiece = Nothing
+    , lastPlaced = Just move.location
     }
 
 scoreMove : Move -> State -> Int
@@ -365,9 +382,8 @@ drawGrid boardSize dims =
   let num = toFloat boardSize
       tileSize = getTileSizeFromBoardSize boardSize dims
       size = num * tileSize
-      xShift = tileSize / 2 - size / 2
-      yShift = tileSize / 2 - size / 2
-      shape x y = move (tileSize * x + xShift, tileSize * y + yShift) (outlined (solid black) (square tileSize))
+      offset = tileSize / 2 - size / 2
+      shape x y = move (tileSize * x + offset, tileSize * y + offset) (outlined (solid black) (square tileSize))
   in
     (concatMap (\x -> (map (\y -> shape x y) [0..(num - 1)])) [0..(num - 1)])
 
@@ -378,13 +394,23 @@ drawPiece ((x', y'), piece) tileSize =
   in
     move (x, y) (toForm (pieceToImage piece tileSize))
 
-renderBoard : Board -> Int -> WindowDims -> Element
-renderBoard board boardSize dims =
+drawLastPlacedOutline : State -> Float -> [Form]
+drawLastPlacedOutline state tileSize =
+  case state.lastPlaced of
+    Just (x,y) ->
+      let thick c = { defaultLine | color <- c, width <- 4}
+          lastPlacedColor = playerColor <| nextPlayer state.turn
+          lastPlacedOutline = move (tileSize * x, tileSize * y) (outlined (thick lastPlacedColor) (square (tileSize + 4)))
+      in [lastPlacedOutline]
+    Nothing -> []
+
+renderBoard : State -> Int -> WindowDims -> Element
+renderBoard state boardSize dims =
   let tileSize = getTileSizeFromBoardSize boardSize dims
       size = boardSize * (round tileSize) + 1
-      pieces = map (\p -> drawPiece p tileSize) (Dict.toList board)
+      pieces = map (\p -> drawPiece p tileSize) (Dict.toList state.board)
   in
-    collage size size ((drawGrid boardSize dims) ++ pieces)
+    collage size size ((drawGrid boardSize dims) ++ pieces ++ (drawLastPlacedOutline state tileSize))
 
 renderHand : Player -> State -> Element
 renderHand player state =
@@ -394,7 +420,7 @@ renderHand player state =
       pieceImage pieceStr = pieceToImage (pieceFromString pieceStr)
       pieceSize = (round handTileSize) + handPadding
       makePiece idx pieceStr = pieceImage pieceStr handTileSize |> container pieceSize pieceSize middle
-                                                                |> color (if isPieceHeld idx then blue else white)
+                                                                |> color (if isPieceHeld idx then (playerColor state.turn) else white)
                                                                 |> clickable clickInput.handle (PieceInHand player idx)
       handContents = indexedMap makePiece hand
       handText = String.toUpper p |> toText
@@ -415,7 +441,7 @@ display state dims =
   in
     flow down
       [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
-      , flow right [ renderBoard state.board boardSize dims |> clickable clickInput.handle Board
+      , flow right [ renderBoard state boardSize dims |> clickable clickInput.handle Board
                    , flow down [ renderHand Red state
                                , spacer 1 handGap
                                , renderHand Blue state]]
@@ -453,6 +479,7 @@ startState =
   , hands = Dict.fromList [("red", []), ("blue", [])]
   , started = False
   , heldPiece = Nothing
+  , lastPlaced = Nothing
   }
 
 mouseToBoardPosition: MousePos -> State -> WindowDims -> Location
