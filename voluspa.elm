@@ -533,7 +533,7 @@ display state dims =
                              , rulesRow Loki 1 "All tiles adjacent to Loki have value 1."
                              ]
       startButton = container rulesAreaWidth 50 middle <| button clickInput.handle Start (if not state.started then "Begin game!" else "Restart game")
-      rulesArea = flow down [ width rulesAreaWidth <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (toText "Rules")))
+      rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (toText "Rules")))
                             , spacer 5 5
                             , width rulesAreaWidth <| leftAligned <| toText "&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles."
                             , width rulesAreaWidth <| leftAligned <| toText "&bull; If the tile you placed has the highest value in a row and/or column (ties don't count), you score one point for each tile in that row and/or column."
