@@ -25,7 +25,8 @@ type State = {
   hands : Hands,
   started : Bool,
   heldPiece : Maybe Int,
-  lastPlaced : Maybe Location
+  lastPlaced : Maybe Location,
+  delta : Dict String String
 }
 
 type Board = Dict Location Piece
@@ -323,7 +324,8 @@ makeMove : Move -> State -> State
 makeMove move state =
   let p = playerName state.turn
       newBoard = Dict.insert move.location move.piece state.board
-      newScore = (Dict.getOrFail p state.score) + (scoreMove move { state | board <- newBoard })
+      delta = scoreMove move { state | board <- newBoard }
+      newScore = (Dict.getOrFail p state.score) + delta
       hand = Dict.getOrFail p state.hands
       existingTile = Dict.get move.location state.board
       handWithDrawnTile = without move.idx hand ++ (if (not <| List.isEmpty state.deck) then (take 1 state.deck) else [])
@@ -338,7 +340,8 @@ makeMove move state =
             , hands <- Dict.insert p newHand state.hands
             , started <- True
             , heldPiece <- Nothing
-            , lastPlaced <- Just move.location }
+            , lastPlaced <- Just move.location
+            , delta <- Dict.insert p (String.concat ["(+", show delta, ")"]) state.delta}
 
 scoreMove : Move -> State -> Int
 scoreMove move state =
@@ -501,9 +504,13 @@ renderHand player state =
                             |> leftAligned
                             |> container 80 pieceSize middle
       score = Dict.getOrFail p state.score |> asText
-                                           |> container 30 pieceSize midLeft
+                                           |> container 20 pieceSize midLeft
+      delta = Dict.getOrFail p state.delta |> toText
+                                           |> Text.height 9
+                                           |> leftAligned
+                                           |> container 20 pieceSize midLeft
   in
-    flow right ([handText] ++ [score] ++ maybeHandContents)
+    flow right ([handText] ++ [score] ++ [delta] ++ maybeHandContents)
 
 rulesRow : Piece -> Int -> String -> Element
 rulesRow piece value description =
@@ -581,6 +588,7 @@ startState =
   , started = False
   , heldPiece = Nothing
   , lastPlaced = Nothing
+  , delta = Dict.fromList [("red", ""), ("blue", "")]
   }
 
 processClick : Signal ClickEvent -> Signal Action
