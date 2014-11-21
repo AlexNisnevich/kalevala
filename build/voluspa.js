@@ -49,7 +49,7 @@ Elm.Voluspa.make = function (_elm) {
                case "Valkyrie":
                return "images/tile_1.jpg";}
             _E.Case($moduleName,
-            "between lines 434 and 443");
+            "between lines 431 and 440");
          }();
          return A3($Graphics$Element.image,
          $Basics.round(tileSize),
@@ -75,7 +75,7 @@ Elm.Voluspa.make = function (_elm) {
                    }();}
               break;}
          _E.Case($moduleName,
-         "between lines 458 and 461");
+         "between lines 455 and 458");
       }();
    });
    var pickUpPiece = F2(function (idx,
@@ -112,7 +112,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v7._1},
               board)) : _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 251 and 253");
+         "between lines 254 and 256");
       }();
    });
    var findLeftward = F2(function (_v11,
@@ -133,7 +133,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v11._1},
               board)) : _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 245 and 247");
+         "between lines 248 and 250");
       }();
    });
    var findBelow = F2(function (_v15,
@@ -154,7 +154,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v15._1 + 1},
               board)) : _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 239 and 241");
+         "between lines 242 and 244");
       }();
    });
    var findAbove = F2(function (_v19,
@@ -175,7 +175,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v19._1 - 1},
               board)) : _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 233 and 235");
+         "between lines 236 and 238");
       }();
    });
    var hasSamePieceAtOtherEnd = F3(function (_v23,
@@ -242,11 +242,11 @@ Elm.Voluspa.make = function (_elm) {
                        case "Vertical":
                        return samePieceBelow || samePieceAbove;}
                     _E.Case($moduleName,
-                    "between lines 270 and 272");
+                    "between lines 273 and 275");
                  }();
               }();}
          _E.Case($moduleName,
-         "between lines 259 and 272");
+         "between lines 262 and 275");
       }();
    });
    var findRow = F2(function (_v28,
@@ -265,7 +265,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v28._1},
               board));}
          _E.Case($moduleName,
-         "on line 229, column 24 to 83");
+         "on line 232, column 24 to 83");
       }();
    });
    var findColumn = F2(function (_v32,
@@ -284,7 +284,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v32._1 + 1},
               board));}
          _E.Case($moduleName,
-         "on line 226, column 27 to 79");
+         "on line 229, column 27 to 79");
       }();
    });
    var isAdjacent = F2(function (_v36,
@@ -381,16 +381,16 @@ Elm.Voluspa.make = function (_elm) {
    });
    var deckContents = _L.append(A2(repeat,
    6,
-   "odin"),
-   _L.append(A2(repeat,8,"thor"),
-   _L.append(A2(repeat,6,"troll"),
-   _L.append(A2(repeat,8,"dragon"),
-   _L.append(A2(repeat,8,"fenrir"),
-   _L.append(A2(repeat,9,"skadi"),
+   "Odin"),
+   _L.append(A2(repeat,8,"Thor"),
+   _L.append(A2(repeat,6,"Troll"),
+   _L.append(A2(repeat,8,"Dragon"),
+   _L.append(A2(repeat,8,"Fenrir"),
+   _L.append(A2(repeat,9,"Skadi"),
    _L.append(A2(repeat,
    9,
-   "valkyrie"),
-   A2(repeat,6,"loki"))))))));
+   "Valkyrie"),
+   A2(repeat,6,"Loki"))))))));
    _op["!!"] = F2(function (list,
    idx) {
       return $List.head(A2($List.drop,
@@ -428,19 +428,44 @@ Elm.Voluspa.make = function (_elm) {
    var pieceToString = function (piece) {
       return function () {
          switch (piece.ctor)
-         {case "Dragon": return "dragon";
-            case "Fenrir": return "fenrir";
-            case "Loki": return "loki";
-            case "Odin": return "odin";
-            case "Skadi": return "skadi";
-            case "Thor": return "thor";
-            case "Troll": return "troll";
+         {case "Dragon": return "Dragon";
+            case "Fenrir": return "Fenrir";
+            case "Loki": return "Loki";
+            case "Odin": return "Odin";
+            case "Skadi": return "Skadi";
+            case "Thor": return "Thor";
+            case "Troll": return "Troll";
             case "Valkyrie":
-            return "valkyrie";}
+            return "Valkyrie";}
          _E.Case($moduleName,
          "between lines 108 and 116");
       }();
    };
+   var rulesRow = F3(function (piece,
+   value,
+   description) {
+      return function () {
+         var text = A2($Graphics$Element.flow,
+         $Graphics$Element.right,
+         _L.fromArray([$Text.leftAligned($Text.bold($Text.toText($List.concat(_L.fromArray([pieceToString(piece)
+                                                                                           ," ("
+                                                                                           ,$String.show(value)
+                                                                                           ,"): "])))))
+                      ,$Text.plainText(description)]));
+         var image = A2($Graphics$Element.beside,
+         A2(pieceToImage,piece,50),
+         A2($Graphics$Element.spacer,
+         10,
+         10));
+         return A2($Graphics$Element.beside,
+         image,
+         A4($Graphics$Element.container,
+         600,
+         50,
+         $Graphics$Element.midLeft,
+         text));
+      }();
+   });
    var playerColor = function (player) {
       return function () {
          switch (player.ctor)
@@ -592,7 +617,7 @@ Elm.Voluspa.make = function (_elm) {
                      case "Start":
                      return StartGame(shuffledDeck);}
                   _E.Case($moduleName,
-                  "between lines 559 and 563");
+                  "between lines 596 and 600");
                }();
             }();
          }),
@@ -612,7 +637,7 @@ Elm.Voluspa.make = function (_elm) {
          {case "Blue": return Red;
             case "Red": return Blue;}
          _E.Case($moduleName,
-         "between lines 386 and 388");
+         "between lines 389 and 391");
       }();
    };
    var drawLastPlacedOutline = F2(function (state,
@@ -644,7 +669,7 @@ Elm.Voluspa.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 465 and 471");
+         "between lines 462 and 468");
       }();
    });
    var renderBoard = F3(function (state,
@@ -782,11 +807,11 @@ Elm.Voluspa.make = function (_elm) {
                          board,
                          dir) ? 100 : 2;}
                     _E.Case($moduleName,
-                    "between lines 205 and 223");
+                    "between lines 205 and 226");
                  }();
               }();}
          _E.Case($moduleName,
-         "between lines 197 and 223");
+         "between lines 197 and 226");
       }();
    });
    var scoreMove = F2(function (move,
@@ -876,7 +901,7 @@ Elm.Voluspa.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _E.Case($moduleName,
-            "between lines 327 and 330");
+            "between lines 330 and 333");
          }();
          return _U.replace([["turn"
                             ,nextPlayer(state.turn)]
@@ -945,14 +970,14 @@ Elm.Voluspa.make = function (_elm) {
    var pieceFromString = function (str) {
       return function () {
          switch (str)
-         {case "dragon": return Dragon;
-            case "fenrir": return Fenrir;
-            case "loki": return Loki;
-            case "odin": return Odin;
-            case "skadi": return Skadi;
-            case "thor": return Thor;
-            case "troll": return Troll;
-            case "valkyrie":
+         {case "Dragon": return Dragon;
+            case "Fenrir": return Fenrir;
+            case "Loki": return Loki;
+            case "Odin": return Odin;
+            case "Skadi": return Skadi;
+            case "Thor": return Thor;
+            case "Troll": return Troll;
+            case "Valkyrie":
             return Valkyrie;}
          _E.Case($moduleName,
          "between lines 96 and 104");
@@ -1061,7 +1086,7 @@ Elm.Voluspa.make = function (_elm) {
                        case "Human":
                        return $Basics.identity;}
                     _E.Case($moduleName,
-                    "between lines 296 and 299");
+                    "between lines 299 and 302");
                  }();
                  var p = playerName(state.turn);
                  var hand = A2($Dict.getOrFail,
@@ -1085,11 +1110,10 @@ Elm.Voluspa.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _E.Case($moduleName,
-         "between lines 288 and 301");
+         "between lines 291 and 304");
       }();
    });
-   var startGame = F2(function (state,
-   deck) {
+   var startGame = function (deck) {
       return function () {
          var deckWithIndices = A2($List.zip,
          _L.range(0,
@@ -1103,7 +1127,7 @@ Elm.Voluspa.make = function (_elm) {
                   return $Basics.not(_U.eq(_v79._1,
                     "troll"));}
                _E.Case($moduleName,
-               "on line 409, column 66 to 87");
+               "on line 406, column 66 to 87");
             }();
          },
          deckWithIndices)));
@@ -1138,19 +1162,13 @@ Elm.Voluspa.make = function (_elm) {
                                     ,A2($Dict.singleton,
                                     {ctor: "_Tuple2",_0: 0,_1: 0},
                                     firstTile)]],
-         state);
+         startState);
          return _U.eq(A2($Dict.getOrFail,
          playerName(newState.turn),
          newState.players),
          Cpu) ? makeCpuMove(newState) : newState;
       }();
-   });
-   var tryStartGame = F2(function (state,
-   deck) {
-      return $Basics.not(state.started) ? A2(startGame,
-      state,
-      deck) : state;
-   });
+   };
    var performAction = F2(function (action,
    state) {
       return function () {
@@ -1169,11 +1187,9 @@ Elm.Voluspa.make = function (_elm) {
               action._1),
               state);
             case "StartGame":
-            return A2(tryStartGame,
-              state,
-              action._0);}
+            return startGame(action._0);}
          _E.Case($moduleName,
-         "between lines 394 and 398");
+         "between lines 397 and 401");
       }();
    });
    var renderHand = F2(function (player,
@@ -1202,6 +1218,14 @@ Elm.Voluspa.make = function (_elm) {
             handTileSize))));
          });
          var p = playerName(player);
+         var playerType = A2($Dict.getOrFail,
+         p,
+         state.players);
+         var handText = A3($Graphics$Element.container,
+         80,
+         pieceSize,
+         $Graphics$Element.middle)($Text.leftAligned($Text.color(playerColor(player))((_U.eq(state.turn,
+         player) ? $Text.bold : $Basics.identity)($Text.toText($String.toUpper($String.show(playerType)))))));
          var hand = A2($Dict.getOrFail,
          p,
          state.hands);
@@ -1212,29 +1236,98 @@ Elm.Voluspa.make = function (_elm) {
          p,
          state.players),
          Human) ? handContents : _L.fromArray([]);
-         var handText = A3($Graphics$Element.container,
-         70,
-         pieceSize,
-         $Graphics$Element.middle)($Text.leftAligned((_U.eq(state.turn,
-         player) ? $Text.bold : $Basics.identity)($Text.toText($String.toUpper(p)))));
          var score = A3($Graphics$Element.container,
-         40,
+         30,
          pieceSize,
-         $Graphics$Element.middle)($Text.asText(A2($Dict.getOrFail,
+         $Graphics$Element.midLeft)($Text.asText(A2($Dict.getOrFail,
          p,
          state.score)));
          return A2($Graphics$Element.flow,
          $Graphics$Element.right,
          _L.append(_L.fromArray([handText]),
-         _L.append(maybeHandContents,
-         _L.fromArray([score]))));
+         _L.append(_L.fromArray([score]),
+         maybeHandContents)));
       }();
    });
    var display = F2(function (state,
    dims) {
       return function () {
+         var pieceRules = A2($Graphics$Element.flow,
+         $Graphics$Element.down,
+         _L.fromArray([A3(rulesRow,
+                      Odin,
+                      8,
+                      "No special power")
+                      ,A3(rulesRow,
+                      Thor,
+                      7,
+                      "No special power")
+                      ,A3(rulesRow,
+                      Troll,
+                      6,
+                      "No other tiles may be placed adjacent to a Troll.")
+                      ,A3(rulesRow,
+                      Dragon,
+                      5,
+                      "May be placed on top of other tiles (except other Dragons).")
+                      ,A3(rulesRow,
+                      Fenrir,
+                      4,
+                      "Value is the sum of all Fenrir tiles in the same row or column.")
+                      ,A3(rulesRow,
+                      Skadi,
+                      3,
+                      "You may exchange it with any tile on the table (except other Skadi).")
+                      ,A3(rulesRow,
+                      Valkyrie,
+                      2,
+                      "Automatically scores when there are Valkyries on both ends of a line.")
+                      ,A3(rulesRow,
+                      Loki,
+                      1,
+                      "All tiles adjacent to Loki have value 1.")]));
+         var minRulesHeight = 570;
+         var rulesAreaWidth = 650;
+         var startButton = A3($Graphics$Element.container,
+         rulesAreaWidth,
+         50,
+         $Graphics$Element.middle)(A3($Graphics$Input.button,
+         clickInput.handle,
+         Start,
+         $Basics.not(state.started) ? "Begin game!" : "Restart game"));
+         var rulesArea = A2($Graphics$Element.flow,
+         $Graphics$Element.down,
+         _L.fromArray([$Graphics$Element.width(rulesAreaWidth)($Text.centered(A2($Text.height,
+                      25,
+                      A2($Text.typeface,
+                      _L.fromArray(["Rock Salt"
+                                   ,"cursive"]),
+                      $Text.toText("Rules")))))
+                      ,A2($Graphics$Element.spacer,
+                      5,
+                      5)
+                      ,$Graphics$Element.width(rulesAreaWidth)($Text.leftAligned($Text.toText("&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles.")))
+                      ,$Graphics$Element.width(rulesAreaWidth)($Text.leftAligned($Text.toText("&bull; If the tile you placed has the highest value in a row and/or column (ties don\'t count), you score one point for each tile in that row and/or column.")))
+                      ,A2($Graphics$Element.spacer,
+                      5,
+                      5)
+                      ,pieceRules
+                      ,startButton]));
+         var withSpacing = F2(function (padding,
+         elt) {
+            return A2($Graphics$Element.beside,
+            A2($Graphics$Element.spacer,
+            padding,
+            padding),
+            elt);
+         });
          var totalBoardSize = getTotalBoardSize(dims);
          var handGap = totalBoardSize - 2 * $Basics.round(handTileSize) - handPadding * 2;
+         var rightArea = _U.cmp(handGap,
+         570) > -1 ? rulesArea : _U.cmp(handGap,
+         440) > -1 ? A2($Graphics$Element.above,
+         pieceRules,
+         startButton) : startButton;
          var boardSize = getBoardSize(state);
          var tileSize = A2(getTileSizeFromBoardSize,
          boardSize,
@@ -1265,12 +1358,20 @@ Elm.Voluspa.make = function (_elm) {
                                                 state)
                                                 ,A2($Graphics$Element.spacer,
                                                 1,
-                                                handGap)
+                                                5)
+                                                ,A2(withSpacing,
+                                                10,
+                                                $Graphics$Element.color($Color.gray)(A2(withSpacing,
+                                                10,
+                                                A4($Graphics$Element.container,
+                                                rulesAreaWidth,
+                                                handGap - 10,
+                                                $Graphics$Element.midLeft,
+                                                rightArea))))
+                                                ,A2($Graphics$Element.spacer,
+                                                1,
+                                                5)
                                                 ,A2(renderHand,Blue,state)]))]))
-                      ,$Basics.not(state.started) ? A3($Graphics$Input.button,
-                      clickInput.handle,
-                      Start,
-                      "Begin game!") : $Graphics$Element.empty
                       ,$Text.asText(state)]));
       }();
    });
@@ -1370,7 +1471,6 @@ Elm.Voluspa.make = function (_elm) {
                          ,makeCpuMove: makeCpuMove
                          ,nextPlayer: nextPlayer
                          ,performAction: performAction
-                         ,tryStartGame: tryStartGame
                          ,startGame: startGame
                          ,clickInput: clickInput
                          ,pieceToImage: pieceToImage
@@ -1379,6 +1479,7 @@ Elm.Voluspa.make = function (_elm) {
                          ,drawLastPlacedOutline: drawLastPlacedOutline
                          ,renderBoard: renderBoard
                          ,renderHand: renderHand
+                         ,rulesRow: rulesRow
                          ,display: display
                          ,deckContents: deckContents
                          ,startState: startState
