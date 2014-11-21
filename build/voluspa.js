@@ -1297,7 +1297,9 @@ Elm.Voluspa.make = function (_elm) {
          $Basics.not(state.started) ? "Begin game!" : "Restart game"));
          var rulesArea = A2($Graphics$Element.flow,
          $Graphics$Element.down,
-         _L.fromArray([$Graphics$Element.width(rulesAreaWidth)($Text.centered(A2($Text.height,
+         _L.fromArray([A2($Graphics$Element.size,
+                      rulesAreaWidth,
+                      50)($Text.centered(A2($Text.height,
                       25,
                       A2($Text.typeface,
                       _L.fromArray(["Rock Salt"
