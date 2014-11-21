@@ -220,8 +220,9 @@ getTileScore (x,y) dir move board =
                   -- "Fenrir tiles next to Loki tiles are worth zero and do not contribute to the value of other Fenrir tiles."
         Skadi -> 3
         Valkyrie -> if isCurrentTile && hasSamePieceAtOtherEnd (x,y) board dir
-                    then 100 -- i.e. instantly score row
+                    then 100 -- i.e. instantly score line
                     else 2
+                  -- TODO: Loki shouldn't prevent Valkyrie from auto-scoring a line
         Loki -> 1
 
 findColumn : Location -> Board -> [Location]
@@ -486,6 +487,7 @@ renderBoard state boardSize dims =
 renderHand : Player -> State -> Element
 renderHand player state =
   let p = playerName player
+      playerType = Dict.getOrFail p state.players
       hand = Dict.getOrFail p state.hands
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
       pieceImage pieceStr = pieceToImage (pieceFromString pieceStr)
@@ -497,14 +499,17 @@ renderHand player state =
       maybeHandContents = if Dict.getOrFail p state.players == Human
                           then handContents
                           else []
-      handText = String.toUpper p |> toText
-                                  |> (if state.turn == player then bold else identity)
-                                  |> leftAligned
-                                  |> container 70 pieceSize middle
+      handText = playerType |> show
+                            |> String.toUpper
+                            |> toText
+                            |> (if state.turn == player then bold else identity)
+                            |> Text.color (playerColor player)
+                            |> leftAligned
+                            |> container 80 pieceSize middle
       score = Dict.getOrFail p state.score |> asText
-                                           |> container 40 pieceSize middle
+                                           |> container 30 pieceSize midLeft
   in
-    flow right ([handText] ++ maybeHandContents ++ [score])
+    flow right ([handText] ++ [score] ++ maybeHandContents)
 
 display : State -> WindowDims -> Element
 display state dims =
