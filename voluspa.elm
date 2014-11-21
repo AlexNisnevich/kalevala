@@ -94,26 +94,26 @@ playerColor player =
 pieceFromString : String -> Piece
 pieceFromString str =
   case str of
-    "odin" -> Odin
-    "thor" -> Thor
-    "troll" -> Troll
-    "dragon" -> Dragon
-    "fenrir" -> Fenrir
-    "skadi" -> Skadi
-    "valkyrie" -> Valkyrie
-    "loki" -> Loki
+    "Odin" -> Odin
+    "Thor" -> Thor
+    "Troll" -> Troll
+    "Dragon" -> Dragon
+    "Fenrir" -> Fenrir
+    "Skadi" -> Skadi
+    "Valkyrie" -> Valkyrie
+    "Loki" -> Loki
 
 pieceToString : Piece -> String
 pieceToString piece =
   case piece of
-    Odin -> "odin"
-    Thor -> "thor"
-    Troll -> "troll"
-    Dragon -> "dragon"
-    Fenrir -> "fenrir"
-    Skadi -> "skadi"
-    Valkyrie -> "valkyrie"
-    Loki -> "loki"
+    Odin -> "Odin"
+    Thor -> "Thor"
+    Troll -> "Troll"
+    Dragon -> "Dragon"
+    Fenrir -> "Fenrir"
+    Skadi -> "Skadi"
+    Valkyrie -> "Valkyrie"
+    Loki -> "Loki"
 
 -- HELPERS
 
@@ -216,10 +216,13 @@ getTileScore (x,y) dir move board =
                       -- (this is so that Fenrirs can beat other Fenrirs)
                   in
                     4 * numFenrirsToCount
+                  -- TODO: Fenrir-Loki interaction is actually quite tricky.
+                  -- "Fenrir tiles next to Loki tiles are worth zero and do not contribute to the value of other Fenrir tiles."
         Skadi -> 3
         Valkyrie -> if isCurrentTile && hasSamePieceAtOtherEnd (x,y) board dir
-                    then 100 -- i.e. instantly score row
+                    then 100 -- i.e. instantly score line
                     else 2
+                  -- TODO: Loki shouldn't prevent Valkyrie from auto-scoring a line
         Loki -> 1
 
 findColumn : Location -> Board -> [Location]
@@ -394,17 +397,11 @@ performAction action state =
   case action of
     PickUpPiece player idx -> tryToPickUpPiece player idx state
     PlacePiece mousePos dims -> tryMove (mouseToBoardPosition mousePos state dims) state
-    StartGame deck -> tryStartGame state deck
+    StartGame deck -> startGame deck
     NoAction -> state
 
-tryStartGame : State -> Deck -> State
-tryStartGame state deck =
-  if not state.started
-  then startGame state deck
-  else state
-
-startGame : State -> Deck -> State
-startGame state deck =
+startGame : Deck -> State
+startGame deck =
   let deckWithIndices = zip [0..(List.length deck - 1)] deck
       idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "troll")) deckWithIndices
       firstTile = pieceFromString (deck !! idxFirstNonTroll)
@@ -413,10 +410,10 @@ startGame state deck =
       blueHand = take 5 (drop 5 deckMinusFirstTile)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
       remainder = drop 10 deckMinusFirstTile
-      newState = { state | hands <- hands,
-                           deck <- remainder,
-                           started <- True,
-                           board <- Dict.singleton (0, 0) firstTile }
+      newState = { startState | hands <- hands,
+                                deck <- remainder,
+                                started <- True,
+                                board <- Dict.singleton (0, 0) firstTile }
   in
     -- if first player is Cpu, make their move
     if Dict.getOrFail (playerName newState.turn) newState.players == Cpu
@@ -484,6 +481,7 @@ renderBoard state boardSize dims =
 renderHand : Player -> State -> Element
 renderHand player state =
   let p = playerName player
+      playerType = Dict.getOrFail p state.players
       hand = Dict.getOrFail p state.hands
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
       pieceImage pieceStr = pieceToImage (pieceFromString pieceStr)
@@ -495,14 +493,26 @@ renderHand player state =
       maybeHandContents = if Dict.getOrFail p state.players == Human
                           then handContents
                           else []
-      handText = String.toUpper p |> toText
-                                  |> (if state.turn == player then bold else identity)
-                                  |> leftAligned
-                                  |> container 70 pieceSize middle
+      handText = playerType |> show
+                            |> String.toUpper
+                            |> toText
+                            |> (if state.turn == player then bold else identity)
+                            |> Text.color (playerColor player)
+                            |> leftAligned
+                            |> container 80 pieceSize middle
       score = Dict.getOrFail p state.score |> asText
-                                           |> container 40 pieceSize middle
+                                           |> container 30 pieceSize midLeft
   in
-    flow right ([handText] ++ maybeHandContents ++ [score])
+    flow right ([handText] ++ [score] ++ maybeHandContents)
+
+rulesRow : Piece -> Int -> String -> Element
+rulesRow piece value description =
+  let image = pieceToImage piece 50 `beside` spacer 10 10
+      text = flow right [ leftAligned <| bold <| toText <| concat [pieceToString piece, " (", show value, "): "]
+                        , plainText description
+                        ]
+  in
+    image `beside` container 600 50 midLeft text
 
 display : State -> WindowDims -> Element
 display state dims =
@@ -510,28 +520,55 @@ display state dims =
       totalBoardSize = getTotalBoardSize dims
       tileSize = getTileSizeFromBoardSize boardSize dims
       handGap = totalBoardSize - 2 * (round handTileSize) - (handPadding * 2)
+      withSpacing padding elt = spacer padding padding `beside` elt
+      rulesAreaWidth = 650
+      minRulesHeight = 570
+      pieceRules = flow down [ rulesRow Odin 8 "No special power"
+                             , rulesRow Thor 7 "No special power"
+                             , rulesRow Troll 6 "No other tiles may be placed adjacent to a Troll."
+                             , rulesRow Dragon 5 "May be placed on top of other tiles (except other Dragons)."
+                             , rulesRow Fenrir 4 "Value is the sum of all Fenrir tiles in the same row or column."
+                             , rulesRow Skadi 3 "You may exchange it with any tile on the table (except other Skadi)."
+                             , rulesRow Valkyrie 2 "Automatically scores when there are Valkyries on both ends of a line."
+                             , rulesRow Loki 1 "All tiles adjacent to Loki have value 1."
+                             ]
+      startButton = container rulesAreaWidth 50 middle <| button clickInput.handle Start (if not state.started then "Begin game!" else "Restart game")
+      rulesArea = flow down [ width rulesAreaWidth <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (toText "Rules")))
+                            , spacer 5 5
+                            , width rulesAreaWidth <| leftAligned <| toText "&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles."
+                            , width rulesAreaWidth <| leftAligned <| toText "&bull; If the tile you placed has the highest value in a row and/or column (ties don't count), you score one point for each tile in that row and/or column."
+                            , spacer 5 5
+                            , pieceRules
+                            , startButton
+                            ]
+      rightArea = if | handGap >= 570 -> rulesArea
+                     | handGap >= 440 -> pieceRules `above` startButton
+                     | otherwise -> startButton
   in
     flow down
       [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
       , flow right [ renderBoard state boardSize dims |> clickable clickInput.handle Board
                    , flow down [ renderHand Red state
-                               , spacer 1 handGap
-                               , renderHand Blue state]]
-      , if not state.started then (button clickInput.handle Start "Begin game!") else empty
+                               , spacer 1 5
+                               , withSpacing 10 (withSpacing 10 (container rulesAreaWidth (handGap - 10) midLeft rightArea) |> color gray)
+                               , spacer 1 5
+                               , renderHand Blue state
+                               ]
+                   ]
       , asText state
       ]
 
 -- MAIN
 
 deckContents : [String]
-deckContents = repeat 6 "odin" ++
-               repeat 8 "thor" ++
-               repeat 6 "troll" ++
-               repeat 8 "dragon" ++
-               repeat 8 "fenrir" ++
-               repeat 9 "skadi" ++
-               repeat 9 "valkyrie" ++
-               repeat 6 "loki"
+deckContents = repeat 6 "Odin" ++
+               repeat 8 "Thor" ++
+               repeat 6 "Troll" ++
+               repeat 8 "Dragon" ++
+               repeat 8 "Fenrir" ++
+               repeat 9 "Skadi" ++
+               repeat 9 "Valkyrie" ++
+               repeat 6 "Loki"
 
 startState : State
 startState =
