@@ -49,7 +49,7 @@ Elm.Voluspa.make = function (_elm) {
                case "Valkyrie":
                return "images/tile_1.jpg";}
             _E.Case($moduleName,
-            "between lines 459 and 468");
+            "between lines 462 and 471");
          }();
          return A3($Graphics$Element.image,
          $Basics.round(tileSize),
@@ -75,7 +75,7 @@ Elm.Voluspa.make = function (_elm) {
                    }();}
               break;}
          _E.Case($moduleName,
-         "between lines 483 and 486");
+         "between lines 486 and 489");
       }();
    });
    var pickUpPiece = F2(function (idx,
@@ -634,7 +634,7 @@ Elm.Voluspa.make = function (_elm) {
                      case "Start":
                      return StartGame(shuffledDeck);}
                   _E.Case($moduleName,
-                  "between lines 634 and 639");
+                  "between lines 637 and 642");
                }();
             }();
          }),
@@ -654,7 +654,7 @@ Elm.Voluspa.make = function (_elm) {
          {case "Blue": return Red;
             case "Red": return Blue;}
          _E.Case($moduleName,
-         "between lines 395 and 397");
+         "between lines 398 and 400");
       }();
    };
    var drawLastPlacedOutline = F2(function (state,
@@ -686,7 +686,7 @@ Elm.Voluspa.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 490 and 496");
+         "between lines 493 and 499");
       }();
    });
    var renderBoard = F3(function (state,
@@ -933,7 +933,7 @@ Elm.Voluspa.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _E.Case($moduleName,
-            "between lines 335 and 338");
+            "between lines 338 and 341");
          }();
          return _U.replace([["turn"
                             ,nextPlayer(state.turn)]
@@ -1000,7 +1000,8 @@ Elm.Voluspa.make = function (_elm) {
          var isUnoccupied = $Basics.not(A2($Dict.member,
          move.location,
          state.board));
-         return (isUnoccupied || canOverlapExistingTile) && (hasAdjacentTile && ($Basics.not(adjacentToTroll) && _U.cmp(longestLine,
+         return (isUnoccupied || canOverlapExistingTile) && (hasAdjacentTile && (($Basics.not(adjacentToTroll) || _U.eq(move.piece,
+         Troll)) && _U.cmp(longestLine,
          7) < 1));
       }();
    });
@@ -1166,7 +1167,7 @@ Elm.Voluspa.make = function (_elm) {
                   return $Basics.not(_U.eq(_v79._1,
                     "troll"));}
                _E.Case($moduleName,
-               "on line 434, column 66 to 87");
+               "on line 437, column 66 to 87");
             }();
          },
          deckWithIndices)));
@@ -1233,7 +1234,7 @@ Elm.Voluspa.make = function (_elm) {
                case "StartGame":
                return startGame(action._0);}
             _E.Case($moduleName,
-            "between lines 405 and 411");
+            "between lines 408 and 414");
          }();
          var p = playerName(state.turn);
          return isGameOver(newState) ? _U.replace([["gameOver"
@@ -1346,7 +1347,7 @@ Elm.Voluspa.make = function (_elm) {
                       ,A3(rulesRow,
                       Troll,
                       6,
-                      "No other tiles may be placed adjacent to a Troll.")
+                      "No other tiles (except Trolls) may be placed adjacent to a Troll.")
                       ,A3(rulesRow,
                       Dragon,
                       5,
@@ -1366,7 +1367,7 @@ Elm.Voluspa.make = function (_elm) {
                       ,A3(rulesRow,
                       Loki,
                       1,
-                      "All tiles adjacent to Loki have value 1.")]));
+                      "All tiles adjacent to Loki have value 0.")]));
          var minRulesHeight = 570;
          var rulesAreaWidth = 650;
          var startButton = A3($Graphics$Element.container,
