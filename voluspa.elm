@@ -517,7 +517,7 @@ renderHand player state =
       makePiece idx pieceStr = pieceImage pieceStr handTileSize |> container pieceSize pieceSize middle
                                                                 |> color (if isPieceHeld idx then (playerColor state.turn) else white)
                                                                 |> clickable clickInput.handle (PieceInHand player idx)
-      playerHand = if isEmpty hand && (not <| isGameOver state)
+      playerHand = if isEmpty hand && (not state.gameOver)
                    then [button clickInput.handle PassButton "Pass" |> container 100 100 middle]
                    else indexedMap makePiece hand
       hiddenPiece = image (round handTileSize) (round handTileSize) "images/tile_back.jpg"
@@ -528,7 +528,7 @@ renderHand player state =
       handText = playerType |> show
                             |> String.toUpper
                             |> toText
-                            |> (if state.turn == player then bold else identity)
+                            |> (if state.turn == player && (not state.gameOver) then bold else identity)
                             |> Text.color (playerColor player)
                             |> leftAligned
                             |> container 80 pieceSize middle
