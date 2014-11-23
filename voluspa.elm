@@ -321,7 +321,10 @@ isValidMove move state =
       hasAdjacentTile = not <| List.isEmpty adjacents
       adjacentToTroll = any (\loc -> Dict.getOrFail loc state.board == Troll) adjacents
   in
-    (isUnoccupied || canOverlapExistingTile) && hasAdjacentTile && not adjacentToTroll && longestLine <= 7
+    (isUnoccupied || canOverlapExistingTile)
+    && hasAdjacentTile
+    && ((not adjacentToTroll) || move.piece == Troll) -- only Trolls can be placed next to other Trolls
+    && longestLine <= 7
 
 makeMove : Move -> State -> State
 makeMove move state =
@@ -561,12 +564,12 @@ display state dims =
       minRulesHeight = 570
       pieceRules = flow down [ rulesRow Odin 8 "No special power"
                              , rulesRow Thor 7 "No special power"
-                             , rulesRow Troll 6 "No other tiles may be placed adjacent to a Troll."
+                             , rulesRow Troll 6 "No other tiles (except Trolls) may be placed adjacent to a Troll."
                              , rulesRow Dragon 5 "May be placed on top of other tiles (except other Dragons)."
                              , rulesRow Fenrir 4 "Value is the sum of all Fenrir tiles in the same row or column."
                              , rulesRow Skadi 3 "You may exchange it with any tile on the table (except other Skadi)."
                              , rulesRow Valkyrie 2 "Automatically scores when there are Valkyries on both ends of a line."
-                             , rulesRow Loki 1 "All tiles adjacent to Loki have value 1."
+                             , rulesRow Loki 1 "All tiles adjacent to Loki have value 0."
                              ]
       startButton = container rulesAreaWidth 50 middle <| button clickInput.handle Start (if not state.started then "Begin game!" else "Restart game")
       rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (toText "Rules")))
