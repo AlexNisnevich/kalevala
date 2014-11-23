@@ -26,7 +26,8 @@ type State = {
   started : Bool,
   heldPiece : Maybe Int,
   lastPlaced : Maybe Location,
-  delta : Dict String String
+  delta : Dict String String,
+  gameOver : Bool
 }
 
 type Board = Dict Location Piece
@@ -57,11 +58,13 @@ data PlayerType = Human
 data Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
             | StartGame Deck
+            | Pass
             | NoAction
 
 data ClickEvent = Start
                 | Board
                 | PieceInHand Player Int
+                | PassButton
                 | None
 
 data Direction = Vertical
@@ -341,7 +344,7 @@ makeMove move state =
             , started <- True
             , heldPiece <- Nothing
             , lastPlaced <- Just move.location
-            , delta <- Dict.insert p (String.concat ["(+", show delta, ")"]) state.delta}
+            , delta <- Dict.insert p (String.concat ["(+", show delta, ")"]) state.delta }
 
 scoreMove : Move -> State -> Int
 scoreMove move state =
@@ -397,11 +400,33 @@ nextPlayer player =
 
 performAction : Action -> State -> State
 performAction action state =
-  case action of
-    PickUpPiece player idx -> tryToPickUpPiece player idx state
-    PlacePiece mousePos dims -> tryMove (mouseToBoardPosition mousePos state dims) state
-    StartGame deck -> startGame deck
-    NoAction -> state
+  let p = playerName state.turn
+      newState =
+        case action of
+          PickUpPiece player idx -> tryToPickUpPiece player idx state
+          PlacePiece mousePos dims -> tryMove (mouseToBoardPosition mousePos state dims) state
+          StartGame deck -> startGame deck
+          Pass -> { state | turn <- nextPlayer state.turn }
+          NoAction -> state
+  in
+    if | isGameOver newState -> { newState | gameOver <- True }
+       | mustPass newState -> { newState | turn <- nextPlayer newState.turn
+                                         , delta <- Dict.insert p "(+0)" newState.delta }
+       | otherwise -> newState
+
+noTilesInHand : Player -> State -> Bool
+noTilesInHand player state =
+  let p = playerName player
+  in
+    isEmpty <| Dict.getOrFail p state.hands
+
+isGameOver : State -> Bool
+isGameOver state =
+  (noTilesInHand Red state) && (noTilesInHand Blue state)
+
+mustPass : State -> Bool
+mustPass state =
+  noTilesInHand state.turn state
 
 startGame : Deck -> State
 startGame deck =
@@ -413,10 +438,10 @@ startGame deck =
       blueHand = take 5 (drop 5 deckMinusFirstTile)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
       remainder = drop 10 deckMinusFirstTile
-      newState = { startState | hands <- hands,
-                                deck <- remainder,
-                                started <- True,
-                                board <- Dict.singleton (0, 0) firstTile }
+      newState = { startState | hands <- hands
+                              , deck <- remainder
+                              , started <- True
+                              , board <- Dict.singleton (0, 0) firstTile }
   in
     -- if first player is Cpu, make their move
     if Dict.getOrFail (playerName newState.turn) newState.players == Cpu
@@ -492,10 +517,14 @@ renderHand player state =
       makePiece idx pieceStr = pieceImage pieceStr handTileSize |> container pieceSize pieceSize middle
                                                                 |> color (if isPieceHeld idx then (playerColor state.turn) else white)
                                                                 |> clickable clickInput.handle (PieceInHand player idx)
-      handContents = indexedMap makePiece hand
-      maybeHandContents = if Dict.getOrFail p state.players == Human
-                          then handContents
-                          else []
+      playerHand = if isEmpty hand && (not <| isGameOver state)
+                   then [button clickInput.handle PassButton "Pass" |> container 100 100 middle]
+                   else indexedMap makePiece hand
+      hiddenPiece = image (round handTileSize) (round handTileSize) "images/tile_back.jpg"
+      cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
+      handContents = if Dict.getOrFail p state.players == Human
+                     then playerHand
+                     else cpuHand
       handText = playerType |> show
                             |> String.toUpper
                             |> toText
@@ -504,13 +533,13 @@ renderHand player state =
                             |> leftAligned
                             |> container 80 pieceSize middle
       score = Dict.getOrFail p state.score |> asText
-                                           |> container 20 pieceSize midLeft
+                                           |> container 25 pieceSize midLeft
       delta = Dict.getOrFail p state.delta |> toText
                                            |> Text.height 9
                                            |> leftAligned
                                            |> container 20 pieceSize midLeft
   in
-    flow right ([handText] ++ [score] ++ [delta] ++ maybeHandContents)
+    flow right ([handText] ++ [score] ++ [delta] ++ handContents)
 
 rulesRow : Piece -> Int -> String -> Element
 rulesRow piece value description =
@@ -589,6 +618,7 @@ startState =
   , heldPiece = Nothing
   , lastPlaced = Nothing
   , delta = Dict.fromList [("red", ""), ("blue", "")]
+  , gameOver = False
   }
 
 processClick : Signal ClickEvent -> Signal Action
@@ -605,6 +635,7 @@ processClick signal =
                 Start -> StartGame shuffledDeck
                 Board -> PlacePiece mousePos dims
                 PieceInHand player idx -> PickUpPiece player idx
+                PassButton -> Pass
                 None -> NoAction)
       signal shuffled sampledMouse Window.dimensions
 
