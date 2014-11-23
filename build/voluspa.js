@@ -49,7 +49,7 @@ Elm.Voluspa.make = function (_elm) {
                case "Valkyrie":
                return "images/tile_1.jpg";}
             _E.Case($moduleName,
-            "between lines 434 and 443");
+            "between lines 459 and 468");
          }();
          return A3($Graphics$Element.image,
          $Basics.round(tileSize),
@@ -75,7 +75,7 @@ Elm.Voluspa.make = function (_elm) {
                    }();}
               break;}
          _E.Case($moduleName,
-         "between lines 458 and 461");
+         "between lines 483 and 486");
       }();
    });
    var pickUpPiece = F2(function (idx,
@@ -112,7 +112,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v7._1},
               board)) : _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 255 and 257");
+         "between lines 258 and 260");
       }();
    });
    var findLeftward = F2(function (_v11,
@@ -133,7 +133,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v11._1},
               board)) : _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 249 and 251");
+         "between lines 252 and 254");
       }();
    });
    var findBelow = F2(function (_v15,
@@ -154,7 +154,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v15._1 + 1},
               board)) : _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 243 and 245");
+         "between lines 246 and 248");
       }();
    });
    var findAbove = F2(function (_v19,
@@ -175,7 +175,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v19._1 - 1},
               board)) : _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 237 and 239");
+         "between lines 240 and 242");
       }();
    });
    var hasSamePieceAtOtherEnd = F3(function (_v23,
@@ -242,11 +242,11 @@ Elm.Voluspa.make = function (_elm) {
                        case "Vertical":
                        return samePieceBelow || samePieceAbove;}
                     _E.Case($moduleName,
-                    "between lines 274 and 276");
+                    "between lines 277 and 279");
                  }();
               }();}
          _E.Case($moduleName,
-         "between lines 263 and 276");
+         "between lines 266 and 279");
       }();
    });
    var findRow = F2(function (_v28,
@@ -265,7 +265,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v28._1},
               board));}
          _E.Case($moduleName,
-         "on line 233, column 24 to 83");
+         "on line 236, column 24 to 83");
       }();
    });
    var findColumn = F2(function (_v32,
@@ -284,7 +284,7 @@ Elm.Voluspa.make = function (_elm) {
               ,_1: _v32._1 + 1},
               board));}
          _E.Case($moduleName,
-         "on line 230, column 27 to 79");
+         "on line 233, column 27 to 79");
       }();
    });
    var isAdjacent = F2(function (_v36,
@@ -301,10 +301,10 @@ Elm.Voluspa.make = function (_elm) {
                       _v37._0) && _U.eq($Basics.abs(_v36._1 - _v37._1),
                       1);}
                  _E.Case($moduleName,
-                 "on line 190, column 4 to 70");
+                 "on line 193, column 4 to 70");
               }();}
          _E.Case($moduleName,
-         "on line 190, column 4 to 70");
+         "on line 193, column 4 to 70");
       }();
    });
    var adjacentTiles = F2(function (_v44,
@@ -322,7 +322,7 @@ Elm.Voluspa.make = function (_elm) {
               },
               $Dict.keys(board));}
          _E.Case($moduleName,
-         "on line 194, column 3 to 58");
+         "on line 197, column 3 to 58");
       }();
    });
    var getBoardSize = function (state) {
@@ -438,7 +438,7 @@ Elm.Voluspa.make = function (_elm) {
             case "Valkyrie":
             return "Valkyrie";}
          _E.Case($moduleName,
-         "between lines 109 and 117");
+         "between lines 112 and 120");
       }();
    };
    var rulesRow = F3(function (piece,
@@ -473,7 +473,7 @@ Elm.Voluspa.make = function (_elm) {
             return $Color.blue;
             case "Red": return $Color.red;}
          _E.Case($moduleName,
-         "between lines 91 and 93");
+         "between lines 94 and 96");
       }();
    };
    var playerName = function (player) {
@@ -482,8 +482,22 @@ Elm.Voluspa.make = function (_elm) {
          {case "Blue": return "blue";
             case "Red": return "red";}
          _E.Case($moduleName,
-         "between lines 85 and 87");
+         "between lines 88 and 90");
       }();
+   };
+   var noTilesInHand = F2(function (player,
+   state) {
+      return function () {
+         var p = playerName(player);
+         return $List.isEmpty(A2($Dict.getOrFail,
+         p,
+         state.hands));
+      }();
+   });
+   var mustPass = function (state) {
+      return A2(noTilesInHand,
+      state.turn,
+      state);
    };
    var handTileSize = 100;
    var handPadding = 10;
@@ -494,7 +508,7 @@ Elm.Voluspa.make = function (_elm) {
          {case "_Tuple2":
             return _v51._1 - gameHeaderSize;}
          _E.Case($moduleName,
-         "on line 172, column 37 to 60");
+         "on line 175, column 37 to 60");
       }();
    };
    var getTileSizeFromBoardSize = F2(function (boardSize,
@@ -551,13 +565,14 @@ Elm.Voluspa.make = function (_elm) {
                         ,_1: boardY};
               }();}
          _E.Case($moduleName,
-         "between lines 179 and 186");
+         "between lines 182 and 189");
       }();
    });
    var Horizontal = {ctor: "Horizontal"};
    var Vertical = {ctor: "Vertical"};
    var None = {ctor: "None"};
    var clickInput = $Graphics$Input.input(None);
+   var PassButton = {ctor: "PassButton"};
    var PieceInHand = F2(function (a,
    b) {
       return {ctor: "PieceInHand"
@@ -567,6 +582,7 @@ Elm.Voluspa.make = function (_elm) {
    var Board = {ctor: "Board"};
    var Start = {ctor: "Start"};
    var NoAction = {ctor: "NoAction"};
+   var Pass = {ctor: "Pass"};
    var StartGame = function (a) {
       return {ctor: "StartGame"
              ,_0: a};
@@ -610,6 +626,7 @@ Elm.Voluspa.make = function (_elm) {
                        mousePos,
                        dims);
                      case "None": return NoAction;
+                     case "PassButton": return Pass;
                      case "PieceInHand":
                      return A2(PickUpPiece,
                        clickType._0,
@@ -617,7 +634,7 @@ Elm.Voluspa.make = function (_elm) {
                      case "Start":
                      return StartGame(shuffledDeck);}
                   _E.Case($moduleName,
-                  "between lines 604 and 608");
+                  "between lines 634 and 639");
                }();
             }();
          }),
@@ -637,7 +654,7 @@ Elm.Voluspa.make = function (_elm) {
          {case "Blue": return Red;
             case "Red": return Blue;}
          _E.Case($moduleName,
-         "between lines 392 and 394");
+         "between lines 395 and 397");
       }();
    };
    var drawLastPlacedOutline = F2(function (state,
@@ -669,7 +686,7 @@ Elm.Voluspa.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _E.Case($moduleName,
-         "between lines 465 and 471");
+         "between lines 490 and 496");
       }();
    });
    var renderBoard = F3(function (state,
@@ -700,6 +717,13 @@ Elm.Voluspa.make = function (_elm) {
          _L.append(pieces,outline)));
       }();
    });
+   var isGameOver = function (state) {
+      return A2(noTilesInHand,
+      Red,
+      state) && A2(noTilesInHand,
+      Blue,
+      state);
+   };
    var startState = {_: {}
                     ,board: $Dict.empty
                     ,deck: _L.fromArray([])
@@ -709,6 +733,7 @@ Elm.Voluspa.make = function (_elm) {
                                                         ,{ctor: "_Tuple2"
                                                          ,_0: "blue"
                                                          ,_1: ""}]))
+                    ,gameOver: false
                     ,hands: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                          ,_0: "red"
                                                          ,_1: _L.fromArray([])}
@@ -778,7 +803,7 @@ Elm.Voluspa.make = function (_elm) {
                                   case "Vertical":
                                   return findColumn;}
                                _E.Case($moduleName,
-                               "between lines 211 and 212");
+                               "between lines 214 and 215");
                             }(),
                             {ctor: "_Tuple2"
                             ,_0: _v67._0
@@ -813,11 +838,11 @@ Elm.Voluspa.make = function (_elm) {
                          board,
                          dir) ? 100 : 2;}
                     _E.Case($moduleName,
-                    "between lines 206 and 227");
+                    "between lines 209 and 230");
                  }();
               }();}
          _E.Case($moduleName,
-         "between lines 198 and 227");
+         "between lines 201 and 230");
       }();
    });
    var scoreMove = F2(function (move,
@@ -908,7 +933,7 @@ Elm.Voluspa.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _E.Case($moduleName,
-            "between lines 332 and 335");
+            "between lines 335 and 338");
          }();
          return _U.replace([["turn"
                             ,nextPlayer(state.turn)]
@@ -994,7 +1019,7 @@ Elm.Voluspa.make = function (_elm) {
             case "Valkyrie":
             return Valkyrie;}
          _E.Case($moduleName,
-         "between lines 97 and 105");
+         "between lines 100 and 108");
       }();
    };
    var makeCpuMove = function (state) {
@@ -1100,7 +1125,7 @@ Elm.Voluspa.make = function (_elm) {
                        case "Human":
                        return $Basics.identity;}
                     _E.Case($moduleName,
-                    "between lines 300 and 303");
+                    "between lines 303 and 306");
                  }();
                  var p = playerName(state.turn);
                  var hand = A2($Dict.getOrFail,
@@ -1124,7 +1149,7 @@ Elm.Voluspa.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _E.Case($moduleName,
-         "between lines 292 and 305");
+         "between lines 295 and 308");
       }();
    });
    var startGame = function (deck) {
@@ -1141,7 +1166,7 @@ Elm.Voluspa.make = function (_elm) {
                   return $Basics.not(_U.eq(_v79._1,
                     "troll"));}
                _E.Case($moduleName,
-               "on line 409, column 66 to 87");
+               "on line 434, column 66 to 87");
             }();
          },
          deckWithIndices)));
@@ -1186,29 +1211,50 @@ Elm.Voluspa.make = function (_elm) {
    var performAction = F2(function (action,
    state) {
       return function () {
-         switch (action.ctor)
-         {case "NoAction": return state;
-            case "PickUpPiece":
-            return A3(tryToPickUpPiece,
-              action._0,
-              action._1,
-              state);
-            case "PlacePiece":
-            return A2(tryMove,
-              A3(mouseToBoardPosition,
-              action._0,
-              state,
-              action._1),
-              state);
-            case "StartGame":
-            return startGame(action._0);}
-         _E.Case($moduleName,
-         "between lines 400 and 404");
+         var newState = function () {
+            switch (action.ctor)
+            {case "NoAction": return state;
+               case "Pass":
+               return _U.replace([["turn"
+                                  ,nextPlayer(state.turn)]],
+                 state);
+               case "PickUpPiece":
+               return A3(tryToPickUpPiece,
+                 action._0,
+                 action._1,
+                 state);
+               case "PlacePiece":
+               return A2(tryMove,
+                 A3(mouseToBoardPosition,
+                 action._0,
+                 state,
+                 action._1),
+                 state);
+               case "StartGame":
+               return startGame(action._0);}
+            _E.Case($moduleName,
+            "between lines 405 and 411");
+         }();
+         var p = playerName(state.turn);
+         return isGameOver(newState) ? _U.replace([["gameOver"
+                                                   ,true]],
+         newState) : mustPass(newState) ? _U.replace([["turn"
+                                                      ,nextPlayer(newState.turn)]
+                                                     ,["delta"
+                                                      ,A3($Dict.insert,
+                                                      p,
+                                                      "(+0)",
+                                                      newState.delta)]],
+         newState) : newState;
       }();
    });
    var renderHand = F2(function (player,
    state) {
       return function () {
+         var hiddenPiece = A3($Graphics$Element.image,
+         $Basics.round(handTileSize),
+         $Basics.round(handTileSize),
+         "images/tile_back.jpg");
          var pieceSize = $Basics.round(handTileSize) + handPadding;
          var pieceImage = function (pieceStr) {
             return pieceToImage(pieceFromString(pieceStr));
@@ -1239,19 +1285,33 @@ Elm.Voluspa.make = function (_elm) {
          80,
          pieceSize,
          $Graphics$Element.middle)($Text.leftAligned($Text.color(playerColor(player))((_U.eq(state.turn,
-         player) ? $Text.bold : $Basics.identity)($Text.toText($String.toUpper($String.show(playerType)))))));
+         player) && $Basics.not(state.gameOver) ? $Text.bold : $Basics.identity)($Text.toText($String.toUpper($String.show(playerType)))))));
          var hand = A2($Dict.getOrFail,
          p,
          state.hands);
-         var handContents = A2($List.indexedMap,
+         var playerHand = $List.isEmpty(hand) && $Basics.not(state.gameOver) ? _L.fromArray([A3($Graphics$Element.container,
+         100,
+         100,
+         $Graphics$Element.middle)(A3($Graphics$Input.button,
+         clickInput.handle,
+         PassButton,
+         "Pass"))]) : A2($List.indexedMap,
          makePiece,
          hand);
-         var maybeHandContents = _U.eq(A2($Dict.getOrFail,
+         var cpuHand = A2($List.map,
+         function (x) {
+            return A3($Graphics$Element.container,
+            pieceSize,
+            pieceSize,
+            $Graphics$Element.middle)(hiddenPiece);
+         },
+         hand);
+         var handContents = _U.eq(A2($Dict.getOrFail,
          p,
          state.players),
-         Human) ? handContents : _L.fromArray([]);
+         Human) ? playerHand : cpuHand;
          var score = A3($Graphics$Element.container,
-         20,
+         25,
          pieceSize,
          $Graphics$Element.midLeft)($Text.asText(A2($Dict.getOrFail,
          p,
@@ -1267,7 +1327,7 @@ Elm.Voluspa.make = function (_elm) {
          _L.append(_L.fromArray([handText]),
          _L.append(_L.fromArray([score]),
          _L.append(_L.fromArray([delta]),
-         maybeHandContents))));
+         handContents))));
       }();
    });
    var display = F2(function (state,
@@ -1425,17 +1485,20 @@ Elm.Voluspa.make = function (_elm) {
                         return function (h) {
                            return function (i) {
                               return function (j) {
-                                 return {_: {}
-                                        ,board: c
-                                        ,deck: e
-                                        ,delta: j
-                                        ,hands: f
-                                        ,heldPiece: h
-                                        ,lastPlaced: i
-                                        ,players: a
-                                        ,score: d
-                                        ,started: g
-                                        ,turn: b};
+                                 return function (k) {
+                                    return {_: {}
+                                           ,board: c
+                                           ,deck: e
+                                           ,delta: j
+                                           ,gameOver: k
+                                           ,hands: f
+                                           ,heldPiece: h
+                                           ,lastPlaced: i
+                                           ,players: a
+                                           ,score: d
+                                           ,started: g
+                                           ,turn: b};
+                                 };
                               };
                            };
                         };
@@ -1464,10 +1527,12 @@ Elm.Voluspa.make = function (_elm) {
                          ,PickUpPiece: PickUpPiece
                          ,PlacePiece: PlacePiece
                          ,StartGame: StartGame
+                         ,Pass: Pass
                          ,NoAction: NoAction
                          ,Start: Start
                          ,Board: Board
                          ,PieceInHand: PieceInHand
+                         ,PassButton: PassButton
                          ,None: None
                          ,Vertical: Vertical
                          ,Horizontal: Horizontal
@@ -1505,6 +1570,9 @@ Elm.Voluspa.make = function (_elm) {
                          ,makeCpuMove: makeCpuMove
                          ,nextPlayer: nextPlayer
                          ,performAction: performAction
+                         ,noTilesInHand: noTilesInHand
+                         ,isGameOver: isGameOver
+                         ,mustPass: mustPass
                          ,startGame: startGame
                          ,clickInput: clickInput
                          ,pieceToImage: pieceToImage
