@@ -83,22 +83,22 @@ scoreMove : Move -> State -> Int
 scoreMove move state =
   let column = findColumn move.location state.board
       columnSize = List.length column + 1
-      columnScores = map (\loc -> getTileScore loc Vertical move state.board) column
+      columnScores = map (\loc -> getTileValue loc Vertical move state.board) column
       columnHighScore = if isEmpty column then 0 else maximum columnScores
-      tileScoreInColumn = getTileScore move.location Vertical move state.board
+      tileScoreInColumn = getTileValue move.location Vertical move state.board
       columnPoints = if (tileScoreInColumn > columnHighScore && columnSize >= 2) then columnSize else 0
 
       row = findRow move.location state.board
       rowSize = List.length row + 1
-      rowScores = map (\loc -> getTileScore loc Horizontal move state.board) row
+      rowScores = map (\loc -> getTileValue loc Horizontal move state.board) row
       rowHighScore = if isEmpty row then 0 else maximum rowScores
-      tileScoreInRow = getTileScore move.location Horizontal move state.board
+      tileScoreInRow = getTileValue move.location Horizontal move state.board
       rowPoints = if (tileScoreInRow > rowHighScore && rowSize >= 2) then rowSize else 0
   in
     columnPoints + rowPoints
 
-getTileScore : Location -> Direction -> Move -> Board -> Int
-getTileScore (x,y) dir move board =
+getTileValue : Location -> Direction -> Move -> Board -> Int
+getTileValue (x,y) dir move board =
   let piece = Dict.getOrFail (x,y) board
       adjacents = adjacentTiles (x,y) board
       adjacentToLoki = any (\loc -> Dict.getOrFail loc board == Loki) adjacents
