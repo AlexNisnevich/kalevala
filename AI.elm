@@ -19,7 +19,7 @@ getMove state =
         idxs = [0..(List.length hand)-1]
 
         boardSize = getBoardSize state
-        xs = map (\x -> toFloat (x - (boardSize // 2))) [0..(boardSize - 1)]
+        xs = map (\x -> (x - (boardSize // 2))) [0..(boardSize - 1)]
         locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
 
         pieceAtIdx i = pieceFromString (hand !! i)

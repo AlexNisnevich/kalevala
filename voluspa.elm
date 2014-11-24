@@ -133,9 +133,9 @@ tryMove location state =
           nextPlayerType = Dict.getOrFail (playerName <| nextPlayer state.turn) state.players
           nextAction = case nextPlayerType of
                          Human -> identity
-                         Cpu -> \state -> 
+                         Cpu -> \state ->
                                     case AI.getMove state of
-                                        Just move -> tryMove move.location { state | heldPiece <- Just move.idx } 
+                                        Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
                                         Nothing -> pass state
       in
         if (isValidMove move state) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
@@ -255,8 +255,8 @@ drawGrid boardSize dims =
 
 drawPiece : (Location, Piece) -> Float -> Form
 drawPiece ((x', y'), piece) tileSize =
-  let x = x' * tileSize
-      y = y' * tileSize
+  let x = toFloat x' * tileSize
+      y = toFloat y' * tileSize
   in
     move (x, y) (toForm (pieceToImage piece tileSize))
 
