@@ -9,6 +9,12 @@ data PlayerType = Human
 data Player = Red
             | Blue
 
+playerName : Player -> String
+playerName player =
+  case player of
+    Red -> "red"
+    Blue -> "blue"
+
 type Move = { piece : Piece, idx : Int, location : Location }
 type Location = (Float, Float) --TODO this probably ought to be (int, int)
 
@@ -25,6 +31,31 @@ data Piece = Odin
            | Skadi
            | Valkyrie
            | Loki
+
+pieceFromString : String -> Piece
+pieceFromString str =
+  case str of
+    "Odin" -> Odin
+    "Thor" -> Thor
+    "Troll" -> Troll
+    "Dragon" -> Dragon
+    "Fenrir" -> Fenrir
+    "Skadi" -> Skadi
+    "Valkyrie" -> Valkyrie
+    "Loki" -> Loki
+
+pieceToString : Piece -> String
+pieceToString piece =
+  case piece of
+    Odin -> "Odin"
+    Thor -> "Thor"
+    Troll -> "Troll"
+    Dragon -> "Dragon"
+    Fenrir -> "Fenrir"
+    Skadi -> "Skadi"
+    Valkyrie -> "Valkyrie"
+    Loki -> "Loki"
+
 
 type State = {
   players : Dict String PlayerType,

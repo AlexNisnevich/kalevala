@@ -14,7 +14,10 @@ import Window
 
 import Debug
 
+import Helpers (..)
 import GameTypes (..)
+import Board (..)
+import AI
 
 -- TYPES
 
@@ -33,9 +36,6 @@ data ClickEvent = Start
                 | PassButton
                 | None
 
-data Direction = Vertical
-               | Horizontal
-
 -- GLOBAL CONSTANTS
 
 gameHeaderSize : Int
@@ -49,47 +49,13 @@ handTileSize = 100
 
 -- MAGIC STRINGS
 
-playerName : Player -> String
-playerName player =
-  case player of
-    Red -> "red"
-    Blue -> "blue"
-
 playerColor : Player -> Color
 playerColor player =
   case player of
     Red -> red
     Blue -> blue
 
-pieceFromString : String -> Piece
-pieceFromString str =
-  case str of
-    "Odin" -> Odin
-    "Thor" -> Thor
-    "Troll" -> Troll
-    "Dragon" -> Dragon
-    "Fenrir" -> Fenrir
-    "Skadi" -> Skadi
-    "Valkyrie" -> Valkyrie
-    "Loki" -> Loki
-
-pieceToString : Piece -> String
-pieceToString piece =
-  case piece of
-    Odin -> "Odin"
-    Thor -> "Thor"
-    Troll -> "Troll"
-    Dragon -> "Dragon"
-    Fenrir -> "Fenrir"
-    Skadi -> "Skadi"
-    Valkyrie -> "Valkyrie"
-    Loki -> "Loki"
-
 -- HELPERS
-
-(!!) : [a] -> Int -> a
-(!!) list idx = head (drop idx list)
-infixl 4 !!
 
 repeat : Int -> a -> [a]
 repeat num elt = Array.toList <| Array.repeat num elt
@@ -123,20 +89,6 @@ shuffle list signal =
 
 -- BOARD
 
-getBoardSize : State -> Int
-getBoardSize state =
-  if List.isEmpty <| Dict.toList state.board
-  then 5
-  else
-    let locations = Dict.keys state.board
-        xs = map fst locations
-        ys = map snd locations
-        maxX = max (maximum xs) (abs <| minimum xs)
-        maxY = max (maximum ys) (abs <| minimum ys)
-        distFromCenter = (max maxX maxY) + 2
-    in
-      (distFromCenter * 2) + 1
-
 getTotalBoardSize : WindowDims -> Int
 getTotalBoardSize (width, height) = height - gameHeaderSize
 
@@ -154,96 +106,6 @@ mouseToBoardPosition (x', y') state dims =
       boardY = 0 - ((y // tileSize) - offset) |> toFloat
   in (boardX, boardY)
 
-isAdjacent : Location -> Location -> Bool
-isAdjacent (x1, y1) (x2, y2) =
-  (y1 == y2 && abs (x1 - x2) == 1) || (x1 == x2 && abs (y1 - y2) == 1)
-
-adjacentTiles : Location -> Board -> [Location]
-adjacentTiles (x, y) board =
-  filter (\loc -> isAdjacent loc (x, y)) (Dict.keys board)
-
-getTileScore : Location -> Direction -> Move -> Board -> Int
-getTileScore (x,y) dir move board =
-  let piece = Dict.getOrFail (x,y) board
-      adjacents = adjacentTiles (x,y) board
-      adjacentToLoki = any (\loc -> Dict.getOrFail loc board == Loki) adjacents
-      isCurrentTile = (move.location == (x,y)) -- is this the tile that was placed this turn?
-  in
-    if adjacentToLoki && not (piece == Loki)
-    then 0 -- Loki makes all tiles around him 0 (except other Lokis)
-    else
-      case piece of
-        Odin -> 8
-        Thor -> 7
-        Troll -> 6
-        Dragon -> 5
-        Fenrir -> let line = (case dir of Horizontal -> findRow
-                                          Vertical -> findColumn) (x,y) board
-                      piecesInLine = map (\loc -> Dict.getOrFail loc board) line
-                      numOtherFenrirs = length <| filter (\p -> p == Fenrir) piecesInLine
-                      numFenrirsToCount = numOtherFenrirs + if (isCurrentTile || not (move.piece == Fenrir)) then 1 else 0
-                      -- count the tile itself, but don't count Fenrir placed this turn for other Fenrirs
-                      -- (this is so that Fenrirs can beat other Fenrirs)
-                  in
-                    4 * numFenrirsToCount
-                  -- TODO: Fenrir-Loki interaction is actually quite tricky.
-                  -- "Fenrir tiles next to Loki tiles are worth zero and do not contribute to the value of other Fenrir tiles."
-        Skadi -> 3
-        Valkyrie -> if isCurrentTile && hasSamePieceAtOtherEnd (x,y) board dir
-                    then 100 -- i.e. instantly score line
-                    else 2
-                  -- TODO: Loki shouldn't prevent Valkyrie from auto-scoring a line
-        Loki -> 1
-
-findColumn : Location -> Board -> [Location]
-findColumn (x,y) board = (findAbove (x,y-1) board) ++ (findBelow (x,y+1) board)
-
-findRow : Location -> Board -> [Location]
-findRow (x,y) board = (findLeftward (x-1,y) board) ++ (findRightward (x+1,y) board)
-
-findAbove : Location -> Board -> [Location]
-findAbove (x,y) board =
-  if Dict.member (x,y) board
-  then [(x,y)] ++ findAbove (x,y-1) board
-  else []
-
-findBelow : Location -> Board -> [Location]
-findBelow (x,y) board =
-  if Dict.member (x,y) board
-  then [(x,y)] ++ findBelow (x,y+1) board
-  else []
-
-findLeftward : Location -> Board -> [Location]
-findLeftward (x,y) board =
-  if Dict.member (x,y) board
-  then [(x,y)] ++ findLeftward (x-1,y) board
-  else []
-
-findRightward : Location -> Board -> [Location]
-findRightward (x,y) board =
-  if Dict.member (x,y) board
-  then [(x,y)] ++ findRightward (x+1,y) board
-  else []
-
--- is this piece at one end of a line with the same kind of piece
--- at the other end? (used by Valkyrie)
-hasSamePieceAtOtherEnd : Location -> Board -> Direction -> Bool
-hasSamePieceAtOtherEnd (x,y) board dir =
-  let pieceAt pos = Dict.getOrFail pos board
-      samePieces pos1 pos2 = pieceAt pos1 == pieceAt pos2
-      above = findAbove (x,y-1) board
-      below = findBelow (x,y+1) board
-      left = findLeftward (x-1,y) board
-      right = findRightward (x+1,y) board
-      samePieceBelow = isEmpty above && not (isEmpty below) && samePieces (last below) (x,y)
-      samePieceAbove = isEmpty below && not (isEmpty above) && samePieces (last above) (x,y)
-      samePieceLeft = isEmpty right && not (isEmpty left) && samePieces (last left) (x,y)
-      samePieceRight = isEmpty left && not (isEmpty right) && samePieces (last right) (x,y)
-  in
-    case dir of
-      Horizontal -> samePieceLeft || samePieceRight
-      Vertical -> samePieceBelow || samePieceAbove
-
 -- MOVES
 
 tryToPickUpPiece : Player -> Int -> State -> State
@@ -255,6 +117,9 @@ tryToPickUpPiece player idx state =
 pickUpPiece : Int -> State -> State
 pickUpPiece idx state =
   { state | heldPiece <- Just idx }
+
+pass : State -> State
+pass state = { state | turn <- nextPlayer state.turn }
 
 tryMove : Location -> State -> State
 tryMove location state =
@@ -268,29 +133,13 @@ tryMove location state =
           nextPlayerType = Dict.getOrFail (playerName <| nextPlayer state.turn) state.players
           nextAction = case nextPlayerType of
                          Human -> identity
-                         Cpu -> makeCpuMove
+                         Cpu -> \state -> 
+                                    case AI.getMove state of
+                                        Just move -> tryMove move.location { state | heldPiece <- Just move.idx } 
+                                        Nothing -> pass state
       in
         if (isValidMove move state) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
     Nothing -> state
-
-isValidMove : Move -> State -> Bool
-isValidMove move state =
-  let isUnoccupied = not <| Dict.member move.location state.board
-      existingTile = Dict.get move.location state.board
-      canOverlapExistingTile = (move.piece == Dragon || move.piece == Skadi)
-                               && not (existingTile == Just move.piece)
-                               -- can't Skadi a Skadi, can't Dragon a Dragon
-      columnLength = length (findColumn move.location state.board) + 1
-      rowLength = length (findRow move.location state.board) + 1
-      longestLine = max columnLength rowLength
-      adjacents = adjacentTiles move.location state.board
-      hasAdjacentTile = not <| List.isEmpty adjacents
-      adjacentToTroll = any (\loc -> Dict.getOrFail loc state.board == Troll) adjacents
-  in
-    (isUnoccupied || canOverlapExistingTile)
-    && hasAdjacentTile
-    && ((not adjacentToTroll) || move.piece == Troll) -- only Trolls can be placed next to other Trolls
-    && longestLine <= 7
 
 makeMove : Move -> State -> State
 makeMove move state =
@@ -315,49 +164,6 @@ makeMove move state =
             , lastPlaced <- Just move.location
             , delta <- Dict.insert p (String.concat ["(+", show delta, ")"]) state.delta }
 
-scoreMove : Move -> State -> Int
-scoreMove move state =
-  let column = findColumn move.location state.board
-      columnSize = List.length column + 1
-      columnScores = map (\loc -> getTileScore loc Vertical move state.board) column
-      columnHighScore = if isEmpty column then 0 else maximum columnScores
-      tileScoreInColumn = getTileScore move.location Vertical move state.board
-      columnPoints = if (tileScoreInColumn > columnHighScore && columnSize >= 2) then columnSize else 0
-
-      row = findRow move.location state.board
-      rowSize = List.length row + 1
-      rowScores = map (\loc -> getTileScore loc Horizontal move state.board) row
-      rowHighScore = if isEmpty row then 0 else maximum rowScores
-      tileScoreInRow = getTileScore move.location Horizontal move state.board
-      rowPoints = if (tileScoreInRow > rowHighScore && rowSize >= 2) then rowSize else 0
-  in
-    columnPoints + rowPoints
-
--- 1-ply AI
-makeCpuMove : State -> State
-makeCpuMove state =
-  if Dict.getOrFail (playerName state.turn) state.hands |> List.isEmpty
-  then state -- TODO: handle turn skipping (in case one player runs out of tiles before the other)
-  else
-    let p = playerName state.turn
-        hand = Dict.getOrFail p state.hands
-        idxs = [0..(List.length hand)-1]
-
-        boardSize = getBoardSize state
-        xs = map (\x -> toFloat (x - (boardSize // 2))) [0..(boardSize - 1)]
-        locations = concatMap (\x -> (map (\y -> (x, y)) xs)) xs
-
-        pieceAtIdx i = pieceFromString (hand !! i)
-        validLocationsByPiece piece = List.filter (\loc -> isValidMove { piece = piece, idx = 0, location = loc } state) locations
-        validMoves = concatMap (\i -> let piece = pieceAtIdx i
-                                          move loc = { piece = piece, idx = i, location = loc}
-                                          stateAfterMoveTo loc = { state | board <- Dict.insert loc piece state.board }
-                                          moveWithScore loc = (move loc, scoreMove (move loc) (stateAfterMoveTo loc))
-                                      in
-                                        map moveWithScore (validLocationsByPiece piece)) idxs
-        (bestMove, bestScore) = sortBy snd validMoves |> reverse |> Debug.watch "best moves" |> head
-    in
-      tryMove bestMove.location { state | heldPiece <- Just bestMove.idx }
 
 nextPlayer : Player -> Player
 nextPlayer player =
@@ -414,7 +220,7 @@ startGame deck =
   in
     -- if first player is Cpu, make their move
     if Dict.getOrFail (playerName newState.turn) newState.players == Cpu
-    then makeCpuMove newState
+    then newState --TODO this doesn't make sense in the cae where the first player is the AI, but we'll fix it later
     else newState
 
 -- DISPLAY
