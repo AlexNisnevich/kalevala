@@ -23,39 +23,6 @@ type Score = Dict String Int
 type Deck = [String]
 type Hands = Dict String [String]
 
-data Piece = Odin
-           | Thor
-           | Troll
-           | Dragon
-           | Fenrir
-           | Skadi
-           | Valkyrie
-           | Loki
-
-pieceFromString : String -> Piece
-pieceFromString str =
-  case str of
-    "Odin" -> Odin
-    "Thor" -> Thor
-    "Troll" -> Troll
-    "Dragon" -> Dragon
-    "Fenrir" -> Fenrir
-    "Skadi" -> Skadi
-    "Valkyrie" -> Valkyrie
-    "Loki" -> Loki
-
-pieceToString : Piece -> String
-pieceToString piece =
-  case piece of
-    Odin -> "Odin"
-    Thor -> "Thor"
-    Troll -> "Troll"
-    Dragon -> "Dragon"
-    Fenrir -> "Fenrir"
-    Skadi -> "Skadi"
-    Valkyrie -> "Valkyrie"
-    Loki -> "Loki"
-
 type State = {
   players : Dict String PlayerType,
   turn : Player,
@@ -69,6 +36,15 @@ type State = {
   delta : Dict String String,
   gameOver : Bool
 }
+
+data Piece = Odin
+           | Thor
+           | Troll
+           | Dragon
+           | Fenrir
+           | Skadi
+           | Valkyrie
+           | Loki
 
 type MousePos = (Int, Int)
 type WindowDims = (Int, Int)

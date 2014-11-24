@@ -6,8 +6,9 @@ import String
 import Text
 
 import GameTypes (..)
+import Piece
 import Board (getBoardSize)
-import Player (..)
+import Player
 
 gameHeaderSize : Int
 gameHeaderSize = 100
@@ -28,7 +29,7 @@ mouseToBoardPosition: MousePos -> State -> WindowDims -> Location
 mouseToBoardPosition (x', y') state dims =
   let x = x'
       y = (y' - gameHeaderSize)
-      boardSize = getBoardSize state
+      boardSize = getBoardSize state.board
       tileSize = round <| getTileSizeFromBoardSize boardSize dims
       offset = boardSize // 2
       boardX = (x // tileSize) - offset
@@ -72,7 +73,7 @@ drawLastPlacedOutline state tileSize =
   case state.lastPlaced of
     Just (x, y) ->
       let thick c = { defaultLine | color <- c, width <- 4}
-          lastPlacedColor = playerColor <| nextPlayer state.turn
+          lastPlacedColor = Player.color <| Player.next state.turn
           lastPlacedOutline = move (tileSize * (toFloat x), tileSize * (toFloat y)) (outlined (thick lastPlacedColor) (square (tileSize + 4)))
       in [lastPlacedOutline]
     Nothing -> []
@@ -94,10 +95,10 @@ renderHand player state clickInput =
       playerType = Dict.getOrFail p state.players
       hand = Dict.getOrFail p state.hands
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
-      pieceImage pieceStr = pieceToImage (pieceFromString pieceStr)
+      pieceImage pieceStr = pieceToImage (Piece.fromString pieceStr)
       pieceSize = (round handTileSize) + handPadding
       makePiece idx pieceStr = pieceImage pieceStr handTileSize |> container pieceSize pieceSize middle
-                                                                |> color (if isPieceHeld idx then (playerColor state.turn) else white)
+                                                                |> color (if isPieceHeld idx then (Player.color state.turn) else white)
                                                                 |> clickable clickInput.handle (PieceInHand player idx)
       playerHand = if isEmpty hand && state.started && (not state.gameOver)
                    then [button clickInput.handle PassButton "Pass" |> container 100 100 middle]
@@ -111,7 +112,7 @@ renderHand player state clickInput =
                             |> String.toUpper
                             |> toText
                             |> (if state.turn == player && (not state.gameOver) then bold else identity)
-                            |> Text.color (playerColor player)
+                            |> Text.color (Player.color player)
                             |> leftAligned
                             |> container 80 pieceSize middle
       score = Dict.getOrFail p state.score |> asText
@@ -123,10 +124,11 @@ renderHand player state clickInput =
   in
     flow right ([handText] ++ [score] ++ [delta] ++ handContents)
 
-rulesRow : Piece -> Int -> String -> Element
-rulesRow piece value description =
+rulesRow : Piece -> String -> Element
+rulesRow piece description =
   let image = pieceToImage piece 50 `beside` spacer 10 10
-      text = flow right [ leftAligned <| bold <| toText <| concat [pieceToString piece, " (", show value, "): "]
+      value = Piece.baseValue piece
+      text = flow right [ leftAligned <| bold <| toText <| concat [Piece.toString piece, " (", show value, "): "]
                         , plainText description
                         ]
   in
@@ -134,19 +136,19 @@ rulesRow piece value description =
 
 pieceRules : Element
 pieceRules = flow down
-    [ rulesRow Odin 8 "No special power"
-    , rulesRow Thor 7 "No special power"
-    , rulesRow Troll 6 "No other tiles (except Trolls) may be placed adjacent to a Troll."
-    , rulesRow Dragon 5 "May be placed on top of other tiles (except other Dragons)."
-    , rulesRow Fenrir 4 "Value is the sum of all Fenrir tiles in the same row or column."
-    , rulesRow Skadi 3 "You may exchange it with any tile on the table (except other Skadi)."
-    , rulesRow Valkyrie 2 "Automatically scores when there are Valkyries on both ends of a line."
-    , rulesRow Loki 1 "All tiles adjacent to Loki have value 0."
+    [ rulesRow Odin "No special power"
+    , rulesRow Thor "No special power"
+    , rulesRow Troll "No other tiles (except other Trolls) may be placed adjacent to a Troll."
+    , rulesRow Dragon "May be placed on top of other tiles (except other Dragons)."
+    , rulesRow Fenrir "Value is the sum of all Fenrir tiles in the same row or column."
+    , rulesRow Skadi "You may exchange it with any tile on the table (except other Skadi)."
+    , rulesRow Valkyrie "Automatically scores when there are Valkyries on both ends of a line."
+    , rulesRow Loki "All tiles adjacent to Loki (except other Lokis) have value 0."
     ]
 
 render : Input ClickEvent -> State -> WindowDims -> Element
 render clickInput state dims =
-  let boardSize = getBoardSize state
+  let boardSize = getBoardSize state.board
       totalBoardSize = getTotalBoardSize dims
       tileSize = getTileSizeFromBoardSize boardSize dims
       handGap = totalBoardSize - 2 * (round handTileSize) - (handPadding * 2)

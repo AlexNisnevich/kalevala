@@ -12,8 +12,9 @@ import Window
 
 import Helpers (..)
 import GameTypes (..)
+import Piece
 import Board
-import Player (nextPlayer)
+import Player
 import Display
 import AI
 
@@ -30,7 +31,7 @@ pickUpPiece idx state =
   { state | heldPiece <- Just idx }
 
 pass : State -> State
-pass state = { state | turn <- nextPlayer state.turn }
+pass state = { state | turn <- Player.next state.turn }
 
 tryMove : Location -> State -> State
 tryMove location state =
@@ -39,9 +40,9 @@ tryMove location state =
       let p = playerName state.turn
           hand = Dict.getOrFail p state.hands
           pieceStr = head <| drop idx hand
-          piece = pieceFromString pieceStr
+          piece = Piece.fromString pieceStr
           move = { piece = piece, idx = idx, location = location }
-          nextPlayerType = Dict.getOrFail (playerName <| nextPlayer state.turn) state.players
+          nextPlayerType = Dict.getOrFail (playerName <| Player.next state.turn) state.players
           nextAction = case nextPlayerType of
                          Human -> identity
                          Cpu -> \state ->
@@ -49,23 +50,23 @@ tryMove location state =
                                         Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
                                         Nothing -> pass state
       in
-        if (Board.isValidMove move state) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
+        if (Board.isValidMove move state.board) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
     Nothing -> state
 
 makeMove : Move -> State -> State
 makeMove move state =
   let p = playerName state.turn
       newBoard = Dict.insert move.location move.piece state.board
-      delta = Board.scoreMove move { state | board <- newBoard }
+      delta = Board.scoreMove move newBoard
       newScore = (Dict.getOrFail p state.score) + delta
       hand = Dict.getOrFail p state.hands
       existingTile = Dict.get move.location state.board
       handWithDrawnTile = without move.idx hand ++ (if (not <| List.isEmpty state.deck) then (take 1 state.deck) else [])
       newHand = case existingTile of
-        Just piece -> if move.piece == Skadi then (replaceAtIndex move.idx (pieceToString piece) hand) else handWithDrawnTile
+        Just piece -> if move.piece == Skadi then (replaceAtIndex move.idx (Piece.toString piece) hand) else handWithDrawnTile
         Nothing -> handWithDrawnTile
   in
-    { state | turn <- nextPlayer state.turn
+    { state | turn <- Player.next state.turn
             , board <- newBoard
             , score <- Dict.insert p newScore state.score
             , deck <- drop 1 state.deck
@@ -83,47 +84,43 @@ performAction action state =
           PickUpPiece player idx -> tryToPickUpPiece player idx state
           PlacePiece mousePos dims -> tryMove (Display.mouseToBoardPosition mousePos state dims) state
           StartGame deck -> startGame deck
-          Pass -> { state | turn <- nextPlayer state.turn }
+          Pass -> { state | turn <- Player.next state.turn }
           NoAction -> state
   in
     if | isGameOver newState -> { newState | gameOver <- True }
-       | mustPass newState -> { newState | turn <- nextPlayer newState.turn
+       | mustPass newState -> { newState | turn <- Player.next newState.turn
                                          , delta <- Dict.insert p "(+0)" newState.delta }
        | otherwise -> newState
 
-noTilesInHand : Player -> State -> Bool
-noTilesInHand player state =
-  let p = playerName player
-  in
-    isEmpty <| Dict.getOrFail p state.hands
-
 isGameOver : State -> Bool
 isGameOver state =
-  (noTilesInHand Red state) && (noTilesInHand Blue state)
+  (Player.noTilesInHand Red state) && (Player.noTilesInHand Blue state)
 
 mustPass : State -> Bool
 mustPass state =
-  noTilesInHand state.turn state
+  Player.noTilesInHand state.turn state
 
 startGame : Deck -> State
 startGame deck =
   let deckWithIndices = zip [0..(List.length deck - 1)] deck
       idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "Troll")) deckWithIndices
-      firstTile = pieceFromString (deck !! idxFirstNonTroll)
+      firstTile = Piece.fromString (deck !! idxFirstNonTroll)
       deckMinusFirstTile = without idxFirstNonTroll deck
       redHand = take 5 deckMinusFirstTile
       blueHand = take 5 (drop 5 deckMinusFirstTile)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
       remainder = drop 10 deckMinusFirstTile
-      newState = { startState | hands <- hands
-                              , deck <- remainder
-                              , started <- True
-                              , board <- Dict.singleton (0, 0) firstTile }
+      state = { startState | hands <- hands
+                           , deck <- remainder
+                           , started <- True
+                           , board <- Dict.singleton (0, 0) firstTile }
   in
     -- if first player is Cpu, make their move
-    if Dict.getOrFail (playerName newState.turn) newState.players == Cpu
-    then newState --TODO this doesn't make sense in the cae where the first player is the AI, but we'll fix it later
-    else newState
+    if Dict.getOrFail (playerName state.turn) state.players == Cpu
+    then case AI.getMove state of
+                Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
+                Nothing -> pass state
+    else state
 
 clickInput : Input ClickEvent
 clickInput = input None
