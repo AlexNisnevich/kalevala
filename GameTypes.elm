@@ -16,7 +16,7 @@ playerName player =
     Blue -> "blue"
 
 type Move = { piece : Piece, idx : Int, location : Location }
-type Location = (Float, Float) --TODO this probably ought to be (int, int)
+type Location = (Int, Int) --TODO this probably ought to be (int, int)
 
 type Board = Dict Location Piece
 type Score = Dict String Int
