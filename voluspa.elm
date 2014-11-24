@@ -102,8 +102,8 @@ mouseToBoardPosition (x', y') state dims =
       boardSize = getBoardSize state
       tileSize = round <| getTileSizeFromBoardSize boardSize dims
       offset = boardSize // 2
-      boardX = (x // tileSize) - offset |> toFloat
-      boardY = 0 - ((y // tileSize) - offset) |> toFloat
+      boardX = (x // tileSize) - offset
+      boardY = 0 - ((y // tileSize) - offset)
   in (boardX, boardY)
 
 -- MOVES
@@ -263,10 +263,10 @@ drawPiece ((x', y'), piece) tileSize =
 drawLastPlacedOutline : State -> Float -> [Form]
 drawLastPlacedOutline state tileSize =
   case state.lastPlaced of
-    Just (x,y) ->
+    Just (x, y) ->
       let thick c = { defaultLine | color <- c, width <- 4}
           lastPlacedColor = playerColor <| nextPlayer state.turn
-          lastPlacedOutline = move (tileSize * x, tileSize * y) (outlined (thick lastPlacedColor) (square (tileSize + 4)))
+          lastPlacedOutline = move (tileSize * (toFloat x), tileSize * (toFloat y)) (outlined (thick lastPlacedColor) (square (tileSize + 4)))
       in [lastPlacedOutline]
     Nothing -> []
 
