@@ -5,9 +5,7 @@ import List
 import Dict
 import Dict (Dict)
 import Mouse
-import Graphics.Collage (Form)
-import Graphics.Input (..)
-import String
+import Graphics.Input (Input, input)
 import Window
 
 import Helpers (..)
@@ -81,7 +79,7 @@ makeMove move state =
             , started <- True
             , heldPiece <- Nothing
             , lastPlaced <- Just move.location
-            , delta <- Dict.insert p (String.concat ["(+", show delta, ")"]) state.delta }
+            , delta <- Dict.insert p ("(+" ++ (show delta) ++ ")") state.delta }
 
 performAction : Action -> State -> State
 performAction action state =

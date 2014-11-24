@@ -6,8 +6,6 @@ import Dict
 import GameTypes (..)
 import Piece
 
-import Debug
-
 data Direction = Vertical
                | Horizontal
 
