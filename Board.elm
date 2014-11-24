@@ -108,14 +108,13 @@ getTileValue (x,y) dir move board =
   in
     if  | piece == Fenrir ->
             let line = (case dir of Horizontal -> findRow
-                                    Vertical -> findColumn) (x,y) board
-                numOtherFenrirs = length <| filter (\loc -> not (adjacentToLoki loc) && Dict.getOrFail loc board == Fenrir) line
-                countThisTile = isCurrentTile && move.piece == Fenrir && not (adjacentToLoki (x,y))
-                numFenrirsToCount = numOtherFenrirs + if countThisTile then 1 else 0
-                -- count the tile itself, but don't count Fenrir placed this turn for other Fenrirs
-                -- (this is so that Fenrirs can beat other Fenrirs)
+                                    Vertical -> findColumn) (x,y) board ++ [(x,y)]
+                numFenrirs = length <| filter (\loc -> not (adjacentToLoki loc) &&
+                                                       Dict.getOrFail loc board == Fenrir &&
+                                                       (not (loc == move.location) || isCurrentTile)) line
+                -- don't count Fenrir placed this turn for other Fenrirs (this is so that Fenrirs can beat other Fenrirs)
             in
-              4 * numFenrirsToCount
+              4 * numFenrirs
         | piece == Valkyrie && isCurrentTile && hasSamePieceAtOtherEnd (x,y) board dir ->
             100 -- i.e. instantly score line
         | adjacentToLoki (x,y) && not (piece == Loki) ->
