@@ -189,7 +189,7 @@ mustPass state =
 startGame : Deck -> State
 startGame deck =
   let deckWithIndices = zip [0..(List.length deck - 1)] deck
-      idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "troll")) deckWithIndices
+      idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "Troll")) deckWithIndices
       firstTile = pieceFromString (deck !! idxFirstNonTroll)
       deckMinusFirstTile = without idxFirstNonTroll deck
       redHand = take 5 deckMinusFirstTile
