@@ -349,7 +349,6 @@ display state dims =
                                , renderHand Blue state
                                ]
                    ]
-      , asText state
       ]
 
 -- MAIN
