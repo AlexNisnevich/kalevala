@@ -14,46 +14,12 @@ import Window
 
 import Debug
 
+import GameTypes (..)
+
 -- TYPES
 
-type State = {
-  players : Dict String PlayerType,
-  turn : Player,
-  board : Board,
-  score : Score,
-  deck : Deck,
-  hands : Hands,
-  started : Bool,
-  heldPiece : Maybe Int,
-  lastPlaced : Maybe Location,
-  delta : Dict String String,
-  gameOver : Bool
-}
-
-type Board = Dict Location Piece
-type Score = Dict String Int
-type Deck = [String]
-type Hands = Dict String [String]
-
-type Move = { piece : Piece, idx : Int, location : Location }
-type Location = (Float, Float)
 type MousePos = (Int, Int)
 type WindowDims = (Int, Int)
-
-data Piece = Odin
-           | Thor
-           | Troll
-           | Dragon
-           | Fenrir
-           | Skadi
-           | Valkyrie
-           | Loki
-
-data Player = Red
-            | Blue
-
-data PlayerType = Human
-                | Cpu
 
 data Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
