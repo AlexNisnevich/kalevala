@@ -69,3 +69,18 @@ type State = {
   delta : Dict String String,
   gameOver : Bool
 }
+
+type MousePos = (Int, Int)
+type WindowDims = (Int, Int)
+
+data Action = PickUpPiece Player Int
+            | PlacePiece MousePos WindowDims
+            | StartGame Deck
+            | Pass
+            | NoAction
+
+data ClickEvent = Start
+                | Board
+                | PieceInHand Player Int
+                | PassButton
+                | None
