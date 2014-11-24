@@ -57,23 +57,6 @@ playerColor player =
 
 -- HELPERS
 
-repeat : Int -> a -> [a]
-repeat num elt = Array.toList <| Array.repeat num elt
-
-without : Int -> [a] -> [a]
-without i arr =
-  let before = take i arr
-      after = drop (i+1) arr
-  in
-    before ++ after
-
-replaceAtIndex : Int -> a -> [a] -> [a]
-replaceAtIndex i elt arr =
-  let before = take i arr
-      after = drop (i+1) arr
-  in
-    before ++ [elt] ++ after
-
 shuffle : [a] -> Signal b -> Signal [a]
 shuffle list signal =
   let randomsFromSignal signal = Random.floatList <| lift (\x -> List.length list) signal
@@ -372,14 +355,17 @@ display state dims =
 -- MAIN
 
 deckContents : [String]
-deckContents = repeat 6 "Odin" ++
-               repeat 8 "Thor" ++
-               repeat 6 "Troll" ++
-               repeat 8 "Dragon" ++
-               repeat 8 "Fenrir" ++
-               repeat 9 "Skadi" ++
-               repeat 9 "Valkyrie" ++
-               repeat 6 "Loki"
+deckContents =
+    let r = List.repeat
+    in
+        r 6 "Odin" ++
+        r 8 "Thor" ++
+        r 6 "Troll" ++
+        r 8 "Dragon" ++
+        r 8 "Fenrir" ++
+        r 9 "Skadi" ++
+        r 9 "Valkyrie" ++
+        r 6 "Loki"
 
 startState : State
 startState =
