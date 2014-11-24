@@ -31,7 +31,11 @@ pickUpPiece idx state =
   { state | heldPiece <- Just idx }
 
 pass : State -> State
-pass state = { state | turn <- Player.next state.turn }
+pass state =
+  let p = playerName state.turn
+  in
+    { state | turn <- Player.next state.turn
+            , delta <- Dict.insert p "(+0)" state.delta }
 
 tryMove : Location -> State -> State
 tryMove location state =
@@ -45,13 +49,16 @@ tryMove location state =
           nextPlayerType = Dict.getOrFail (playerName <| Player.next state.turn) state.players
           nextAction = case nextPlayerType of
                          Human -> identity
-                         Cpu -> \state ->
-                                    case AI.getMove state of
-                                        Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
-                                        Nothing -> pass state
+                         Cpu -> tryAIMove
       in
         if (Board.isValidMove move state.board) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
     Nothing -> state
+
+tryAIMove : State -> State
+tryAIMove state =
+  case AI.getMove state of
+    Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
+    Nothing -> pass state
 
 makeMove : Move -> State -> State
 makeMove move state =
@@ -88,8 +95,7 @@ performAction action state =
           NoAction -> state
   in
     if | isGameOver newState -> { newState | gameOver <- True }
-       | mustPass newState -> { newState | turn <- Player.next newState.turn
-                                         , delta <- Dict.insert p "(+0)" newState.delta }
+       | mustPass newState -> pass newState
        | otherwise -> newState
 
 isGameOver : State -> Bool
@@ -117,9 +123,7 @@ startGame deck =
   in
     -- if first player is Cpu, make their move
     if Dict.getOrFail (playerName state.turn) state.players == Cpu
-    then case AI.getMove state of
-                Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
-                Nothing -> pass state
+    then tryAIMove state
     else state
 
 clickInput : Input ClickEvent
