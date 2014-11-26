@@ -51,7 +51,7 @@ type WindowDims = (Int, Int)
 
 data Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
-            | StartGame Deck
+            | StartGame Deck Player
             | Pass
             | NoAction
 

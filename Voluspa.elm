@@ -88,7 +88,7 @@ performAction action state =
         case action of
           PickUpPiece player idx -> tryToPickUpPiece player idx state
           PlacePiece mousePos dims -> tryMove (Display.mouseToBoardPosition mousePos state dims) state
-          StartGame deck -> startGame deck
+          StartGame deck player -> startGame deck player
           Pass -> { state | turn <- Player.next state.turn }
           NoAction -> state
   in
@@ -104,8 +104,8 @@ mustPass : State -> Bool
 mustPass state =
   Player.noTilesInHand state.turn state
 
-startGame : Deck -> State
-startGame deck =
+startGame : Deck -> Player -> State
+startGame deck player =
   let deckWithIndices = zip [0..(List.length deck - 1)] deck
       idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "Troll")) deckWithIndices
       firstTile = Piece.fromString (deck !! idxFirstNonTroll)
@@ -117,7 +117,8 @@ startGame deck =
       state = { startState | hands <- hands
                            , deck <- remainder
                            , started <- True
-                           , board <- Dict.singleton (0, 0) firstTile }
+                           , board <- Dict.singleton (0, 0) firstTile
+                           , turn <- player}
   in
     -- if first player is Cpu, make their move
     if Dict.getOrFail (playerName state.turn) state.players == Cpu
@@ -158,20 +159,21 @@ startState =
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let shuffled = shuffle deckContents signal
+      randomPlayer = head <~ shuffle [Red, Blue] signal
       sampledMouse = sampleOn signal Mouse.position
   in
-    lift4 (\clickType shuffledDeck mousePos dims ->
+    lift5 (\clickType shuffledDeck randomPlayer mousePos dims ->
             let
               pos = (Debug.watch "Mouse.position" mousePos)
               click = (Debug.watch "clickInput.signal" clickType)
             in
               case clickType of
-                Start -> StartGame shuffledDeck
+                Start -> StartGame shuffledDeck randomPlayer
                 Board -> PlacePiece mousePos dims
                 PieceInHand player idx -> PickUpPiece player idx
                 PassButton -> Pass
                 None -> NoAction)
-      signal shuffled sampledMouse Window.dimensions
+      signal shuffled randomPlayer sampledMouse Window.dimensions
 
 main : Signal Element
 main =
