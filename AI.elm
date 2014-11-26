@@ -31,6 +31,8 @@ getMove state =
                                           moveWithScore loc = (move loc, scoreMove (move loc) (boardAfterMoveTo loc))
                                       in
                                         map moveWithScore (validLocationsByPiece piece)) idxs
-        (bestMove, _) = sortBy snd validMoves |> reverse |> Debug.watch "best moves" |> head
+        (bestMove, _) = sortBy snd validMoves |> reverse
+                                            --|> Debug.watch "best moves"
+                                              |> head
     in
       Just bestMove

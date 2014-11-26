@@ -7,6 +7,7 @@ import Dict (Dict)
 import Mouse
 import Graphics.Input (Input, input)
 import Window
+import WebSocket
 
 import Helpers (..)
 import GameTypes (..)
@@ -156,28 +157,31 @@ startState =
   , gameOver = False
   }
 
+constructAction : ClickEvent -> (Deck, Player) -> MousePos -> WindowDims -> Action
+constructAction clickType (startDeck, startPlayer) mousePos dims =
+  let
+    pos = (Debug.watch "Mouse.position" mousePos)
+    click = (Debug.watch "clickInput.signal" clickType)
+  in
+    case clickType of
+      Start -> StartGame startDeck startPlayer
+      Board -> PlacePiece mousePos dims
+      PieceInHand player idx -> PickUpPiece player idx
+      PassButton -> Pass
+      None -> NoAction
+
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
-  let shuffled = shuffle deckContents signal
-      randomPlayer = head <~ shuffle [Red, Blue] signal
+  let startState = (,) <~ (shuffle deckContents signal) ~ (head <~ shuffle [Red, Blue] signal)
       sampledMouse = sampleOn signal Mouse.position
   in
-    lift5 (\clickType shuffledDeck randomPlayer mousePos dims ->
-            let
-              pos = (Debug.watch "Mouse.position" mousePos)
-              click = (Debug.watch "clickInput.signal" clickType)
-            in
-              case clickType of
-                Start -> StartGame shuffledDeck randomPlayer
-                Board -> PlacePiece mousePos dims
-                PieceInHand player idx -> PickUpPiece player idx
-                PassButton -> Pass
-                None -> NoAction)
-      signal shuffled randomPlayer sampledMouse Window.dimensions
+    constructAction <~ signal ~ startState ~ sampledMouse ~ Window.dimensions
 
 main : Signal Element
 main =
   let
-    state = (foldp performAction startState (processClick clickInput.signal))
+    action = processClick clickInput.signal
+    socket = Debug.watch "socket" <~ WebSocket.connect "ws://echo.websocket.org" (show <~ action)
+    state = foldp performAction startState action
   in
     Display.render clickInput <~ state ~ Window.dimensions
