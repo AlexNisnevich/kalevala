@@ -8,6 +8,8 @@ import Mouse
 import Graphics.Input (Input, input)
 import Window
 import WebSocket
+import Json
+import Json (Value (..))
 
 import Helpers (..)
 import GameTypes (..)
@@ -97,6 +99,17 @@ performAction action state =
        | mustPass newState -> pass newState
        | otherwise -> newState
 
+-- TODO actually serialize all the datas
+-- TODO also, deserialize!
+serializeAction : Action -> Value
+serializeAction action =
+  case action of
+    PickUpPiece player idx -> Object <| Dict.fromList [("action", String "PickUpPiece")]
+    PlacePiece mousePos dims -> Object <| Dict.fromList [("action", String "PlacePiece")]
+    StartGame deck player -> Object <| Dict.fromList [("action", String "StartGame")]
+    Pass -> Object <| Dict.fromList [("action", String "Pass")]
+    NoAction -> Object <| Dict.fromList [("action", String "NoAction")]
+
 isGameOver : State -> Bool
 isGameOver state =
   (Player.noTilesInHand Red state) && (Player.noTilesInHand Blue state)
@@ -181,7 +194,7 @@ main : Signal Element
 main =
   let
     action = processClick clickInput.signal
-    socket = Debug.watch "socket" <~ WebSocket.connect "ws://echo.websocket.org" (show <~ action)
+    socket = Debug.watch "socket" <~ WebSocket.connect "ws://echo.websocket.org" ((Json.toString "" << serializeAction) <~ action)
     state = foldp performAction startState action
   in
     Display.render clickInput <~ state ~ Window.dimensions
