@@ -9,7 +9,6 @@ import Graphics.Input (Input, input)
 import Window
 import WebSocket
 import Json
-import Json (Value (..))
 
 import Helpers (..)
 import GameTypes (..)
@@ -18,6 +17,7 @@ import Board
 import Player
 import Display
 import AI
+import Serialize (..)
 
 import Debug
 
@@ -98,17 +98,6 @@ performAction action state =
     if | isGameOver newState -> { newState | gameOver <- True }
        | mustPass newState -> pass newState
        | otherwise -> newState
-
--- TODO actually serialize all the datas
--- TODO also, deserialize!
-serializeAction : Action -> Value
-serializeAction action =
-  case action of
-    PickUpPiece player idx -> Object <| Dict.fromList [("action", String "PickUpPiece")]
-    PlacePiece mousePos dims -> Object <| Dict.fromList [("action", String "PlacePiece")]
-    StartGame deck player -> Object <| Dict.fromList [("action", String "StartGame")]
-    Pass -> Object <| Dict.fromList [("action", String "Pass")]
-    NoAction -> Object <| Dict.fromList [("action", String "NoAction")]
 
 isGameOver : State -> Bool
 isGameOver state =
