@@ -183,7 +183,12 @@ main : Signal Element
 main =
   let
     action = processClick clickInput.signal
+
+    -- TODO: actually do something with this socket
     socket = Debug.watch "socket" <~ WebSocket.connect "ws://echo.websocket.org" ((Json.toString "" << serializeAction) <~ action)
+    deserialized = Debug.watch "deserialized" <~ ((\json -> case Json.fromString json of Just action -> deserializeAction action
+                                                                                         Nothing -> NoAction) <~ socket)
+
     state = foldp performAction startState action
   in
     Display.render clickInput <~ state ~ Window.dimensions
