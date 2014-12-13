@@ -126,13 +126,14 @@ renderHand player state clickInput =
 
 rulesRow : Piece -> String -> Element
 rulesRow piece description =
-  let image = pieceToImage piece 50 `beside` spacer 10 10
+  let height = 30
+      image = pieceToImage piece height `beside` spacer 10 10
       value = Piece.baseValue piece
       text = flow right [ leftAligned <| bold <| toText <| concat [Piece.toString piece, " (", show value, "): "]
                         , plainText description
                         ]
   in
-    image `beside` container 600 50 midLeft text
+    image `beside` container 600 height midLeft text
 
 pieceRules : Element
 pieceRules = flow down
@@ -164,8 +165,8 @@ render clickInput state dims =
                             , pieceRules
                             , startButton
                             ]
-      rightArea = if | handGap >= 570 -> rulesArea
-                     | handGap >= 440 -> pieceRules `above` startButton
+      rightArea = if | handGap >= 420 -> rulesArea
+                     | handGap >= 280 -> pieceRules `above` startButton
                      | otherwise -> startButton
   in
     flow down
