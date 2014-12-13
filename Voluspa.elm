@@ -184,11 +184,11 @@ main =
   let
     action = processClick clickInput.signal
 
-    -- TODO: actually do something with this socket
-    socket = Debug.watch "socket" <~ WebSocket.connect "ws://echo.websocket.org" ((Json.toString "" << serializeAction) <~ action)
-    deserialized = Debug.watch "deserialized" <~ ((\json -> case Json.fromString json of Just action -> deserializeAction action
-                                                                                         Nothing -> NoAction) <~ socket)
+    request = (Debug.watch "request" << Json.toString "" << serializeAction) <~ action
+    response = Debug.watch "response" <~ WebSocket.connect "ws://echo.websocket.org" request
+    responseAction = Debug.watch "deserialized" <~ ((\json -> case Json.fromString json of Just action -> deserializeAction action
+                                                                                           Nothing -> NoAction) <~ response)
 
-    state = foldp performAction startState action
+    state = foldp performAction startState (merge action responseAction)
   in
     Display.render clickInput <~ state ~ Window.dimensions
