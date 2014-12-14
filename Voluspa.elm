@@ -134,9 +134,6 @@ startGame deck player =
     then tryAIMove state
     else state
 
-clickChannel : Channel ClickEvent
-clickChannel = channel None
-
 deckContents : List String
 deckContents =
     let r = List.repeat
@@ -190,7 +187,7 @@ processClick signal =
 main : Signal Element
 main =
   let
-    action = processClick (subscribe clickChannel)
+    action = processClick (subscribe Display.clickChannel)
 
     request = (Debug.watch "request" << encode 0 << serializeAction) <~ action
     response = Debug.watch "response" <~ WebSocket.connect "ws://echo.websocket.org" request
@@ -199,4 +196,4 @@ main =
 
     state = foldp performAction startState (merge action responseAction)
   in
-    Display.render clickChannel <~ state ~ Window.dimensions
+    Display.render <~ state ~ Window.dimensions
