@@ -14,9 +14,6 @@ import String
 import Text
 import Text (..)
 
-import Html
-import Html.Events (onClick)
-
 import GameTypes (..)
 import Piece
 import Board (getBoardSize)
