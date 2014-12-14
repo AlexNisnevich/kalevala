@@ -1,14 +1,20 @@
 module Voluspa where
 
 import Array
-import List
 import Dict
 import Dict (Dict)
+import Graphics.Element (Element)
+import List
+import List (..)
+import Maybe (Maybe (..), withDefault)
 import Mouse
-import Graphics.Input (Input, input)
+import Random (initialSeed)
+import Signal (..)
+import Time
 import Window
 import WebSocket
-import Json
+import Json.Decode (decodeValue)
+import Json.Encode (encode)
 
 import Helpers (..)
 import GameTypes (..)
@@ -17,7 +23,8 @@ import Board
 import Player
 import Display
 import AI
-import Serialize (..)
+--import Serialize (..)
+--import Deserialize (..)
 
 import Debug
 
@@ -42,12 +49,11 @@ tryMove : Location -> State -> State
 tryMove location state =
   case state.heldPiece of
     Just idx ->
-      let p = playerName state.turn
-          hand = Dict.getOrFail p state.hands
+      let hand = Player.getHand state.turn state
           pieceStr = head <| drop idx hand
           piece = Piece.fromString pieceStr
           move = { piece = piece, idx = idx, location = location }
-          nextPlayerType = Dict.getOrFail (playerName <| Player.next state.turn) state.players
+          nextPlayerType = withDefault Human (Dict.get (playerName <| Player.next state.turn) state.players)
           nextAction = case nextPlayerType of
                          Human -> identity
                          Cpu -> tryAIMove
@@ -66,8 +72,8 @@ makeMove move state =
   let p = playerName state.turn
       newBoard = Dict.insert move.location move.piece state.board
       delta = Board.scoreMove move newBoard
-      newScore = (Dict.getOrFail p state.score) + delta
-      hand = Dict.getOrFail p state.hands
+      newScore = (withDefault 0 <| Dict.get p state.score) + delta
+      hand = Player.getHand state.turn state
       existingTile = Dict.get move.location state.board
       handWithDrawnTile = without move.idx hand ++ (if (not <| List.isEmpty state.deck) then (take 1 state.deck) else [])
       newHand = case existingTile of
@@ -82,7 +88,7 @@ makeMove move state =
             , started <- True
             , heldPiece <- Nothing
             , lastPlaced <- Just move.location
-            , delta <- Dict.insert p ("(+" ++ (show delta) ++ ")") state.delta }
+            , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta }
 
 performAction : Action -> State -> State
 performAction action state =
@@ -109,7 +115,7 @@ mustPass state =
 
 startGame : Deck -> Player -> State
 startGame deck player =
-  let deckWithIndices = zip [0..(List.length deck - 1)] deck
+  let deckWithIndices = List.map2 (,) [0..(List.length deck - 1)] deck
       idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "Troll")) deckWithIndices
       firstTile = Piece.fromString (deck !! idxFirstNonTroll)
       deckMinusFirstTile = without idxFirstNonTroll deck
@@ -124,14 +130,14 @@ startGame deck player =
                            , turn <- player}
   in
     -- if first player is Cpu, make their move
-    if Dict.getOrFail (playerName state.turn) state.players == Cpu
+    if withDefault Human (Dict.get (playerName state.turn) state.players) == Cpu
     then tryAIMove state
     else state
 
-clickInput : Input ClickEvent
-clickInput = input None
+clickChannel : Channel ClickEvent
+clickChannel = channel None
 
-deckContents : [String]
+deckContents : List String
 deckContents =
     let r = List.repeat
     in
@@ -167,14 +173,16 @@ constructAction clickType (startDeck, startPlayer) mousePos dims =
   in
     case clickType of
       Start -> StartGame startDeck startPlayer
-      Board -> PlacePiece mousePos dims
+      BoardClick -> PlacePiece mousePos dims
       PieceInHand player idx -> PickUpPiece player idx
       PassButton -> Pass
       None -> NoAction
 
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
-  let startState = (,) <~ (shuffle deckContents signal) ~ (head <~ shuffle [Red, Blue] signal)
+  let timestamp = fst <~ Time.timestamp signal
+      startState = (\time -> let seed = initialSeed (round time)
+                             in (shuffle deckContents seed, head <| shuffle [Red, Blue] seed)) <~ timestamp
       sampledMouse = sampleOn signal Mouse.position
   in
     constructAction <~ signal ~ startState ~ sampledMouse ~ Window.dimensions
@@ -182,13 +190,13 @@ processClick signal =
 main : Signal Element
 main =
   let
-    action = processClick clickInput.signal
+    action = processClick (subscribe clickChannel)
 
-    request = (Debug.watch "request" << Json.toString "" << serializeAction) <~ action
-    response = Debug.watch "response" <~ WebSocket.connect "ws://echo.websocket.org" request
-    responseAction = Debug.watch "deserialized" <~ ((\json -> case Json.fromString json of Just action -> deserializeAction action
-                                                                                           Nothing -> NoAction) <~ response)
+    --request = (Debug.watch "request" << encode 0 << serializeAction) <~ action
+    --response = Debug.watch "response" <~ WebSocket.connect "ws://echo.websocket.org" request
+    --responseAction = Debug.watch "deserialized" <~ ((\json -> case decodeValue json of Ok action -> deserializeAction action
+    --                                                                                   Err -> NoAction) <~ response)
 
-    state = foldp performAction startState (merge action responseAction)
+    state = foldp performAction startState action --(merge action responseAction)
   in
-    Display.render clickInput <~ state ~ Window.dimensions
+    Display.render clickChannel <~ state ~ Window.dimensions

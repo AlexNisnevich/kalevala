@@ -1,12 +1,14 @@
 module Board where
 
 import List
+import List (..)
+import Maybe (Maybe (..), withDefault)
 import Dict
 
 import GameTypes (..)
 import Piece
 
-data Direction = Vertical
+type Direction = Vertical
                | Horizontal
 
 getBoardSize : Board -> Int
@@ -23,41 +25,44 @@ getBoardSize board =
     in
       (distFromCenter * 2) + 1
 
-findAbove : Location -> Board -> [Location]
+pieceAt : Location -> Board -> Piece
+pieceAt loc board = withDefault NoPiece (Dict.get loc board)
+
+findAbove : Location -> Board -> List Location
 findAbove (x,y) board =
   if Dict.member (x,y) board
   then [(x,y)] ++ findAbove (x,y-1) board
   else []
 
-findBelow : Location -> Board -> [Location]
+findBelow : Location -> Board -> List Location
 findBelow (x,y) board =
   if Dict.member (x,y) board
   then [(x,y)] ++ findBelow (x,y+1) board
   else []
 
-findLeftward : Location -> Board -> [Location]
+findLeftward : Location -> Board -> List Location
 findLeftward (x,y) board =
   if Dict.member (x,y) board
   then [(x,y)] ++ findLeftward (x-1,y) board
   else []
 
-findRightward : Location -> Board -> [Location]
+findRightward : Location -> Board -> List Location
 findRightward (x,y) board =
   if Dict.member (x,y) board
   then [(x,y)] ++ findRightward (x+1,y) board
   else []
 
-findColumn : Location -> Board -> [Location]
+findColumn : Location -> Board -> List Location
 findColumn (x,y) board = (findAbove (x,y-1) board) ++ (findBelow (x,y+1) board)
 
-findRow : Location -> Board -> [Location]
+findRow : Location -> Board -> List Location
 findRow (x,y) board = (findLeftward (x-1,y) board) ++ (findRightward (x+1,y) board)
 
 isAdjacent : Location -> Location -> Bool
 isAdjacent (x1, y1) (x2, y2) =
   (y1 == y2 && abs (x1 - x2) == 1) || (x1 == x2 && abs (y1 - y2) == 1)
 
-adjacentTiles : Location -> Board -> [Location]
+adjacentTiles : Location -> Board -> List Location
 adjacentTiles (x, y) board =
   filter (\loc -> isAdjacent loc (x, y)) (Dict.keys board)
 
@@ -73,7 +78,7 @@ isValidMove move board =
       longestLine = max columnLength rowLength
       adjacents = adjacentTiles move.location board
       hasAdjacentTile = not <| List.isEmpty adjacents
-      adjacentToTroll = any (\loc -> Dict.getOrFail loc board == Troll) adjacents
+      adjacentToTroll = any (\loc -> pieceAt loc board == Troll) adjacents
   in
     (isUnoccupied || canOverlapExistingTile)
     && hasAdjacentTile
@@ -100,15 +105,15 @@ scoreMove move board =
 
 getTileValue : Location -> Direction -> Move -> Board -> Int
 getTileValue (x,y) dir move board =
-  let piece = Dict.getOrFail (x,y) board
-      adjacentToLoki loc = any (\l -> Dict.getOrFail l board == Loki) <| adjacentTiles loc board
+  let piece = pieceAt (x,y) board
+      adjacentToLoki loc = any (\l -> pieceAt l board == Loki) <| adjacentTiles loc board
       isCurrentTile = (move.location == (x,y)) -- is this the tile that was placed this turn?
   in
     if  | piece == Fenrir ->
             let line = (case dir of Horizontal -> findRow
                                     Vertical -> findColumn) (x,y) board ++ [(x,y)]
                 numFenrirs = length <| filter (\loc -> not (adjacentToLoki loc) &&
-                                                       Dict.getOrFail loc board == Fenrir &&
+                                                       pieceAt loc board == Fenrir &&
                                                        (not (loc == move.location) || isCurrentTile)) line
                 -- don't count Fenrir placed this turn for other Fenrirs (this is so that Fenrirs can beat other Fenrirs)
             in
@@ -123,8 +128,8 @@ getTileValue (x,y) dir move board =
 -- is this piece at one end of a line with the same kind of piece at the other end? (used by Valkyrie)
 hasSamePieceAtOtherEnd : Location -> Board -> Direction -> Bool
 hasSamePieceAtOtherEnd (x,y) board dir =
-  let pieceAt pos = Dict.getOrFail pos board
-      samePieces pos1 pos2 = pieceAt pos1 == pieceAt pos2
+  let last list = head <| reverse list
+      samePieces pos1 pos2 = pieceAt pos1 board == pieceAt pos2 board
       above = findAbove (x,y-1) board
       below = findBelow (x,y+1) board
       left = findLeftward (x-1,y) board

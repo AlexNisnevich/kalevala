@@ -1,22 +1,24 @@
 module AI where
 
 import List
+import List (..)
 import Dict
 
 import Helpers (..)
 import GameTypes (..)
 import Piece
+import Player
 import Board (getBoardSize, isValidMove, scoreMove)
 
 import Debug
 
 getMove : State -> Maybe Move
 getMove state =
-  if Dict.getOrFail (playerName state.turn) state.hands |> List.isEmpty
+  if List.isEmpty (Player.getHand state.turn state)
   then Nothing
   else
     let p = playerName state.turn
-        hand = Dict.getOrFail p state.hands
+        hand = Player.getHand state.turn state
         idxs = [0..(List.length hand)-1]
 
         boardSize = getBoardSize state.board

@@ -2,11 +2,12 @@ module GameTypes where
 
 import Dict
 import Dict (Dict)
+import Random (Seed)
 
-data PlayerType = Human
+type PlayerType = Human
                 | Cpu
 
-data Player = Red
+type Player = Red
             | Blue
 
 playerName : Player -> String
@@ -15,15 +16,15 @@ playerName player =
     Red -> "red"
     Blue -> "blue"
 
-type Move = { piece : Piece, idx : Int, location : Location }
-type Location = (Int, Int)
+type alias Move = { piece : Piece, idx : Int, location : Location }
+type alias Location = (Int, Int)
 
-type Board = Dict Location Piece
-type Score = Dict String Int
-type Deck = [String]
-type Hands = Dict String [String]
+type alias Board = Dict Location Piece
+type alias Score = Dict String Int
+type alias Deck = List String
+type alias Hands = Dict String (List String)
 
-type State = {
+type alias State = {
   players : Dict String PlayerType,
   turn : Player,
   board : Board,
@@ -37,7 +38,7 @@ type State = {
   gameOver : Bool
 }
 
-data Piece = Odin
+type Piece = Odin
            | Thor
            | Troll
            | Dragon
@@ -45,18 +46,19 @@ data Piece = Odin
            | Skadi
            | Valkyrie
            | Loki
+           | NoPiece  -- represents error in board lookup
 
-type MousePos = (Int, Int)
-type WindowDims = (Int, Int)
+type alias MousePos = (Int, Int)
+type alias WindowDims = (Int, Int)
 
-data Action = PickUpPiece Player Int
+type Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
             | StartGame Deck Player
             | Pass
             | NoAction
 
-data ClickEvent = Start
-                | Board
+type ClickEvent = Start
+                | BoardClick
                 | PieceInHand Player Int
                 | PassButton
                 | None

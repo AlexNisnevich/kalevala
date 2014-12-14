@@ -1,9 +1,21 @@
 module Display where
 
+import Color (..)
 import Dict
+import Graphics.Collage (..)
+import Graphics.Element
+import Graphics.Element (..)
 import Graphics.Input (..)
+import List
+import List (..)
+import Maybe (Maybe (..), withDefault)
+import Signal (Channel, send)
 import String
 import Text
+import Text (..)
+
+import Html
+import Html.Events (onClick)
 
 import GameTypes (..)
 import Piece
@@ -51,7 +63,16 @@ pieceToImage piece tileSize =
   in
     image (round tileSize) (round tileSize) imgPath
 
-drawGrid : Int -> WindowDims -> [Form]
+clickable : Int -> Int -> Element -> Channel ClickEvent -> ClickEvent -> Element
+clickable width height element channel event =
+  let
+    div = Html.div 
+              [onClick (send channel BoardClick)]
+              [Html.fromElement element]
+  in 
+    Html.toElement width height div
+
+drawGrid : Int -> WindowDims -> List Form
 drawGrid boardSize dims =
   let num = toFloat boardSize
       tileSize = getTileSizeFromBoardSize boardSize dims
@@ -68,7 +89,7 @@ drawPiece ((x', y'), piece) tileSize =
   in
     move (x, y) (toForm (pieceToImage piece tileSize))
 
-drawLastPlacedOutline : State -> Float -> [Form]
+drawLastPlacedOutline : State -> Float -> List Form
 drawLastPlacedOutline state tileSize =
   case state.lastPlaced of
     Just (x, y) ->
@@ -78,49 +99,53 @@ drawLastPlacedOutline state tileSize =
       in [lastPlacedOutline]
     Nothing -> []
 
-renderBoard : State -> Int -> WindowDims -> Element
-renderBoard state boardSize dims =
+renderBoard : State -> Channel ClickEvent -> Int -> WindowDims -> Element
+renderBoard state channel boardSize dims =
   let tileSize = getTileSizeFromBoardSize boardSize dims
       size = boardSize * (round tileSize) + 1
 
       grid = drawGrid boardSize dims
       pieces = map (\p -> drawPiece p tileSize) (Dict.toList state.board)
       outline = drawLastPlacedOutline state tileSize
-  in
-    collage size size (grid ++ pieces ++ outline)
 
-renderHand : Player -> State -> Input ClickEvent -> Element
-renderHand player state clickInput =
+      board = collage size size (grid ++ pieces ++ outline)
+  in
+    clickable size size board channel BoardClick
+
+renderHand : Player -> State -> Channel ClickEvent -> Element
+renderHand player state channel =
   let p = playerName player
-      playerType = Dict.getOrFail p state.players
-      hand = Dict.getOrFail p state.hands
+      playerType = withDefault Human (Dict.get p state.players)
+      hand = Player.getHand player state
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
       pieceImage pieceStr = pieceToImage (Piece.fromString pieceStr)
       pieceSize = (round handTileSize) + handPadding
       makePiece idx pieceStr = pieceImage pieceStr handTileSize |> container pieceSize pieceSize middle
-                                                                |> color (if isPieceHeld idx then (Player.color state.turn) else white)
-                                                                |> clickable clickInput.handle (PieceInHand player idx)
+                                                                |> Graphics.Element.color (if isPieceHeld idx then (Player.color state.turn) else white)
+      makeClickablePiece idx pieceStr = clickable pieceSize pieceSize (makePiece idx pieceStr) channel (PieceInHand player idx)
       playerHand = if isEmpty hand && state.started && (not state.gameOver)
-                   then [button clickInput.handle PassButton "Pass" |> container 100 100 middle]
-                   else indexedMap makePiece hand
+                   then [button (send channel PassButton) "Pass" |> container 100 100 middle]
+                   else indexedMap makeClickablePiece hand
       hiddenPiece = image (round handTileSize) (round handTileSize) "images/tile_back.jpg"
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
-      handContents = if Dict.getOrFail p state.players == Human
+      handContents = if playerType == Human
                      then playerHand
                      else cpuHand
-      handText = playerType |> show
+      handText = playerType |> toString
                             |> String.toUpper
-                            |> toText
+                            |> fromString
                             |> (if state.turn == player && (not state.gameOver) then bold else identity)
                             |> Text.color (Player.color player)
                             |> leftAligned
                             |> container 80 pieceSize middle
-      score = Dict.getOrFail p state.score |> asText
-                                           |> container 25 pieceSize midLeft
-      delta = Dict.getOrFail p state.delta |> toText
-                                           |> Text.height 9
-                                           |> leftAligned
-                                           |> container 20 pieceSize midLeft
+      score = Dict.get p state.score |> withDefault 0
+                                     |> asText
+                                     |> container 25 pieceSize midLeft
+      delta = Dict.get p state.delta |> withDefault ""
+                                     |> fromString
+                                     |> Text.height 9
+                                     |> leftAligned
+                                     |> container 20 pieceSize midLeft
   in
     flow right ([handText] ++ [score] ++ [delta] ++ handContents)
 
@@ -129,7 +154,8 @@ rulesRow piece description =
   let height = 30
       image = pieceToImage piece height `beside` spacer 10 10
       value = Piece.baseValue piece
-      text = flow right [ leftAligned <| bold <| toText <| concat [Piece.toString piece, " (", show value, "): "]
+      nameAndValue = Text.concat <| map fromString [Piece.toString piece, " (", toString value, "): "]
+      text = flow right [ leftAligned <| bold <| nameAndValue
                         , plainText description
                         ]
   in
@@ -147,8 +173,8 @@ pieceRules = flow down
     , rulesRow Loki "All tiles adjacent to Loki (except other Lokis) have value 0."
     ]
 
-render : Input ClickEvent -> State -> WindowDims -> Element
-render clickInput state dims =
+render : Channel ClickEvent -> State -> WindowDims -> Element
+render channel state dims =
   let boardSize = getBoardSize state.board
       totalBoardSize = getTotalBoardSize dims
       tileSize = getTileSizeFromBoardSize boardSize dims
@@ -156,11 +182,11 @@ render clickInput state dims =
       withSpacing padding elt = spacer padding padding `beside` elt
       rulesAreaWidth = 650
       minRulesHeight = 570
-      startButton = container rulesAreaWidth 50 middle <| button clickInput.handle Start (if not state.started then "Begin game!" else "Restart game")
-      rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (toText "Rules")))
+      startButton = container rulesAreaWidth 50 middle <| button (send channel Start) (if not state.started then "Begin game!" else "Restart game")
+      rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (fromString "Rules")))
                             , spacer 5 5
-                            , width rulesAreaWidth <| leftAligned <| toText "&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles."
-                            , width rulesAreaWidth <| leftAligned <| toText "&bull; If the tile you placed has the highest value in a row and/or column (ties don't count), you score one point for each tile in that row and/or column."
+                            , width rulesAreaWidth <| leftAligned <| fromString "&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles."
+                            , width rulesAreaWidth <| leftAligned <| fromString "&bull; If the tile you placed has the highest value in a row and/or column (ties don't count), you score one point for each tile in that row and/or column."
                             , spacer 5 5
                             , pieceRules
                             , startButton
@@ -170,13 +196,13 @@ render clickInput state dims =
                      | otherwise -> startButton
   in
     flow down
-      [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (toText "V&ouml;lusp&aacute;"))))
-      , flow right [ renderBoard state boardSize dims |> clickable clickInput.handle Board
-                   , flow down [ renderHand Red state clickInput
+      [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (fromString "V&ouml;lusp&aacute;"))))
+      , flow right [ renderBoard state channel boardSize dims
+                   , flow down [ renderHand Red state channel
                                , spacer 1 5
-                               , withSpacing 10 (withSpacing 10 (container rulesAreaWidth (handGap - 10) midLeft rightArea) |> color gray)
+                               , withSpacing 10 (withSpacing 10 (container rulesAreaWidth (handGap - 10) midLeft rightArea) |> Graphics.Element.color gray)
                                , spacer 1 5
-                               , renderHand Blue state clickInput
+                               , renderHand Blue state channel
                                ]
                    ]
       ]
