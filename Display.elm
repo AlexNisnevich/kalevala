@@ -63,15 +63,6 @@ pieceToImage piece tileSize =
   in
     image (round tileSize) (round tileSize) imgPath
 
-clickable : Int -> Int -> Element -> Channel ClickEvent -> ClickEvent -> Element
-clickable width height element channel event =
-  let
-    div = Html.div 
-              [onClick (send channel BoardClick)]
-              [Html.fromElement element]
-  in 
-    Html.toElement width height div
-
 drawGrid : Int -> WindowDims -> List Form
 drawGrid boardSize dims =
   let num = toFloat boardSize
@@ -110,7 +101,7 @@ renderBoard state channel boardSize dims =
 
       board = collage size size (grid ++ pieces ++ outline)
   in
-    clickable size size board channel BoardClick
+    clickable (send channel BoardClick) board
 
 renderHand : Player -> State -> Channel ClickEvent -> Element
 renderHand player state channel =
@@ -122,10 +113,10 @@ renderHand player state channel =
       pieceSize = (round handTileSize) + handPadding
       makePiece idx pieceStr = pieceImage pieceStr handTileSize |> container pieceSize pieceSize middle
                                                                 |> Graphics.Element.color (if isPieceHeld idx then (Player.color state.turn) else white)
-      makeClickablePiece idx pieceStr = clickable pieceSize pieceSize (makePiece idx pieceStr) channel (PieceInHand player idx)
+                                                                |> clickable (send channel (PieceInHand player idx))
       playerHand = if isEmpty hand && state.started && (not state.gameOver)
                    then [button (send channel PassButton) "Pass" |> container 100 100 middle]
-                   else indexedMap makeClickablePiece hand
+                   else indexedMap makePiece hand
       hiddenPiece = image (round handTileSize) (round handTileSize) "images/tile_back.jpg"
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
       handContents = if playerType == Human
