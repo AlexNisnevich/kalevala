@@ -23,7 +23,7 @@ import Board
 import Player
 import Display
 import AI
---import Serialize (..)
+import Serialize (..)
 --import Deserialize (..)
 
 import Debug
@@ -192,8 +192,8 @@ main =
   let
     action = processClick (subscribe clickChannel)
 
-    --request = (Debug.watch "request" << encode 0 << serializeAction) <~ action
-    --response = Debug.watch "response" <~ WebSocket.connect "ws://echo.websocket.org" request
+    request = (Debug.watch "request" << encode 0 << serializeAction) <~ action
+    response = Debug.watch "response" <~ WebSocket.connect "ws://echo.websocket.org" request
     --responseAction = Debug.watch "deserialized" <~ ((\json -> case decodeValue json of Ok action -> deserializeAction action
     --                                                                                   Err -> NoAction) <~ response)
 
