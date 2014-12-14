@@ -13,7 +13,7 @@ import Signal (..)
 import Time
 import Window
 import WebSocket
-import Json.Decode (decodeValue)
+import Json.Decode (decodeString)
 import Json.Encode (encode)
 
 import Helpers (..)
@@ -24,7 +24,7 @@ import Player
 import Display
 import AI
 import Serialize (..)
---import Deserialize (..)
+import Deserialize
 
 import Debug
 
@@ -194,9 +194,9 @@ main =
 
     request = (Debug.watch "request" << encode 0 << serializeAction) <~ action
     response = Debug.watch "response" <~ WebSocket.connect "ws://echo.websocket.org" request
-    --responseAction = Debug.watch "deserialized" <~ ((\json -> case decodeValue json of Ok action -> deserializeAction action
-    --                                                                                   Err -> NoAction) <~ response)
+    responseAction = Debug.watch "deserialized" <~ ((\json -> case decodeString Deserialize.action json of Ok action -> action
+                                                                                                           Err err -> NoAction) <~ response)
 
-    state = foldp performAction startState action --(merge action responseAction)
+    state = foldp performAction startState (merge action responseAction)
   in
     Display.render clickChannel <~ state ~ Window.dimensions

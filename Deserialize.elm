@@ -1,29 +1,40 @@
 module Deserialize where
 
 import Dict
-import List (..)
 import Json.Decode (..)
 
 import Helpers (..)
 import GameTypes (..)
 import Player
 
-deserializeAction : Value -> Action
-deserializeAction action =
-  case action of
-    Object dict ->
-      let lookup field = Dict.getOrFail field dict
-      in case lookup "action" of
-        String "PickUpPiece" -> PickUpPiece (deserializePlayer <| lookup "player") (deserializeInt <| lookup "idx")
-        String "PlacePiece" -> PlacePiece (deserializeMousePos <| lookup "mousePos") (deserializeWindowDims <| lookup "dims")
-        String "StartGame" -> StartGame (deserializeDeck <| lookup "deck") (deserializePlayer <| lookup "player")
-        String "Pass" -> Pass
-        String "NoAction" -> NoAction
+action : Decoder Action
+action =
+  ("action" := string) `andThen` actionInfo
 
-deserializeDeck : Value -> Deck
-deserializeDeck deck =
-  case deck of
-    Array values -> map string values
+actionInfo : String -> Decoder Action
+actionInfo actionType =
+  case actionType of
+    "PickUpPiece" ->
+      object2 PickUpPiece
+        ("player" := player)
+        ("idx" := int)
+    "PlacePiece" ->
+      object2 PlacePiece
+        ("mousePos" := mousePos)
+        ("dims" := windowDims)
+    "StartGame" ->
+      object2 StartGame
+        ("deck" := deck)
+        ("player" := player)
+    "Pass" ->
+      null Pass
+    "NoAction" ->
+      null NoAction
+    _ ->
+      fail (actionType ++ " is not a recognized type of action")
+
+deck : Decoder Deck
+deck = list string
 
 player : Decoder Player
 player = map Player.fromString string
