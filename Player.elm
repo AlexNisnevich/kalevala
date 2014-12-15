@@ -33,6 +33,10 @@ next player =
     Red -> Blue
     Blue -> Red
 
+getType : Player -> State -> PlayerType
+getType player state =
+  withDefault Human (Dict.get (name player) state.players)
+
 getHand : Player -> State -> List String
 getHand player state =
   withDefault [] (Dict.get (name player) state.hands)

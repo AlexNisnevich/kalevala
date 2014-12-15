@@ -53,7 +53,7 @@ tryMove location state =
           pieceStr = head <| drop idx hand
           piece = Piece.fromString pieceStr
           move = { piece = piece, idx = idx, location = location }
-          nextPlayerType = withDefault Human (Dict.get (Player.name <| Player.next state.turn) state.players)
+          nextPlayerType = Player.getType (Player.next state.turn) state
           nextAction = case nextPlayerType of
                          Human -> identity
                          Cpu -> tryAIMove
@@ -130,7 +130,7 @@ startGame deck player =
                            , turn <- player}
   in
     -- if first player is Cpu, make their move
-    if withDefault Human (Dict.get (Player.name state.turn) state.players) == Cpu
+    if Player.getType state.turn state == Cpu
     then tryAIMove state
     else state
 
