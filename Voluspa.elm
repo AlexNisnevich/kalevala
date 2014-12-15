@@ -8,7 +8,7 @@ import List
 import List (..)
 import Maybe (Maybe (..), withDefault)
 import Mouse
-import Random (initialSeed)
+import Random (Seed, initialSeed)
 import Signal (..)
 import Time
 import Window
@@ -162,14 +162,14 @@ startState =
   , gameOver = False
   }
 
-constructAction : ClickEvent -> (Deck, Player) -> MousePos -> WindowDims -> Action
-constructAction clickType (startDeck, startPlayer) mousePos dims =
+constructAction : ClickEvent -> Seed -> MousePos -> WindowDims -> Action
+constructAction clickType seed mousePos dims =
   let
     pos = (Debug.watch "Mouse.position" mousePos)
     click = (Debug.watch "clickInput.signal" clickType)
   in
     case clickType of
-      Start -> StartGame startDeck startPlayer
+      Start -> StartGame (shuffle deckContents seed) (sample [Red, Blue] seed)
       BoardClick -> PlacePiece mousePos dims
       PieceInHand player idx -> PickUpPiece player idx
       PassButton -> Pass
@@ -178,11 +178,9 @@ constructAction clickType (startDeck, startPlayer) mousePos dims =
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let seedSignal = (initialSeed << round << fst) <~ Time.timestamp signal
-      randomDeck = shuffle deckContents <~ seedSignal
-      randomPlayer = sample [Red, Blue] <~ seedSignal
       sampledMouse = sampleOn signal Mouse.position
   in
-    constructAction <~ signal ~ ((,) <~ randomDeck ~ randomPlayer) ~ sampledMouse ~ Window.dimensions
+    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions
 
 main : Signal Element
 main =
