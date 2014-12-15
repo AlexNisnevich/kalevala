@@ -40,7 +40,7 @@ pickUpPiece idx state =
 
 pass : State -> State
 pass state =
-  let p = playerName state.turn
+  let p = Player.name state.turn
   in
     { state | turn <- Player.next state.turn
             , delta <- Dict.insert p "(+0)" state.delta }
@@ -53,7 +53,7 @@ tryMove location state =
           pieceStr = head <| drop idx hand
           piece = Piece.fromString pieceStr
           move = { piece = piece, idx = idx, location = location }
-          nextPlayerType = withDefault Human (Dict.get (playerName <| Player.next state.turn) state.players)
+          nextPlayerType = withDefault Human (Dict.get (Player.name <| Player.next state.turn) state.players)
           nextAction = case nextPlayerType of
                          Human -> identity
                          Cpu -> tryAIMove
@@ -69,7 +69,7 @@ tryAIMove state =
 
 makeMove : Move -> State -> State
 makeMove move state =
-  let p = playerName state.turn
+  let p = Player.name state.turn
       newBoard = Dict.insert move.location move.piece state.board
       delta = Board.scoreMove move newBoard
       newScore = (withDefault 0 <| Dict.get p state.score) + delta
@@ -92,7 +92,7 @@ makeMove move state =
 
 performAction : Action -> State -> State
 performAction action state =
-  let p = playerName state.turn
+  let p = Player.name state.turn
       newState =
         case action of
           PickUpPiece player idx -> tryToPickUpPiece player idx state
@@ -130,7 +130,7 @@ startGame deck player =
                            , turn <- player}
   in
     -- if first player is Cpu, make their move
-    if withDefault Human (Dict.get (playerName state.turn) state.players) == Cpu
+    if withDefault Human (Dict.get (Player.name state.turn) state.players) == Cpu
     then tryAIMove state
     else state
 
@@ -177,12 +177,12 @@ constructAction clickType (startDeck, startPlayer) mousePos dims =
 
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
-  let timestamp = fst <~ Time.timestamp signal
-      deckAndPlayer = (\time -> let seed = initialSeed (round time)
-                                in (shuffle deckContents seed, sample [Red, Blue] seed)) <~ timestamp
+  let seedSignal = (initialSeed << round << fst) <~ Time.timestamp signal
+      randomDeck = shuffle deckContents <~ seedSignal
+      randomPlayer = sample [Red, Blue] <~ seedSignal
       sampledMouse = sampleOn signal Mouse.position
   in
-    constructAction <~ signal ~ deckAndPlayer ~ sampledMouse ~ Window.dimensions
+    constructAction <~ signal ~ ((,) <~ randomDeck ~ randomPlayer) ~ sampledMouse ~ Window.dimensions
 
 main : Signal Element
 main =

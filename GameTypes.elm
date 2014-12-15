@@ -10,12 +10,6 @@ type PlayerType = Human
 type Player = Red
             | Blue
 
-playerName : Player -> String
-playerName player =
-  case player of
-    Red -> "red"
-    Blue -> "blue"
-
 type alias Move = { piece : Piece, idx : Int, location : Location }
 type alias Location = (Int, Int)
 

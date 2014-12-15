@@ -21,6 +21,12 @@ fromString str =
     "red" -> Red
     "blue" -> Blue
 
+name : Player -> String
+name player =
+  case player of
+    Red -> "red"
+    Blue -> "blue"
+
 next : Player -> Player
 next player =
   case player of
@@ -29,9 +35,7 @@ next player =
 
 getHand : Player -> State -> List String
 getHand player state =
-  let p = playerName player
-  in
-    withDefault [] (Dict.get p state.hands)
+  withDefault [] (Dict.get (name player) state.hands)
 
 noTilesInHand : Player -> State -> Bool
 noTilesInHand player state =

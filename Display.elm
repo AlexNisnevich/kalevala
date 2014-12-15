@@ -113,7 +113,7 @@ renderBoard state boardSize dims =
 
 renderHand : Player -> State -> Element
 renderHand player state =
-  let p = playerName player
+  let p = Player.name player
       playerType = withDefault Human (Dict.get p state.players)
       hand = Player.getHand player state
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx

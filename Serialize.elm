@@ -6,6 +6,7 @@ import Json.Encode (..)
 
 import Helpers (..)
 import GameTypes (..)
+import Player
 
 action : Action -> Value
 action a =
@@ -25,7 +26,7 @@ deck : Deck -> Value
 deck = list << map string
 
 player : Player -> Value
-player = string << playerName
+player = string << Player.name
 
 intPair : (Int, Int) -> Value
 intPair (x, y) = list <| map int [x, y]
