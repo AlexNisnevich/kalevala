@@ -7,31 +7,25 @@ import Json.Encode (..)
 import Helpers (..)
 import GameTypes (..)
 
-serializeAction : Action -> Value
-serializeAction action =
-  case action of
-    PickUpPiece player idx -> 
-      object [("action", string "PickUpPiece"), ("player", serializePlayer player), ("idx", int idx)]
+action : Action -> Value
+action a =
+  case a of
+    PickUpPiece pl idx -> 
+      object [("action", string "PickUpPiece"), ("player", player pl), ("idx", int idx)]
     PlacePiece mousePos dims -> 
-      object [("action", string "PlacePiece"), ("mousePos", serializeIntPair mousePos), ("dims", serializeIntPair dims)]
-    StartGame deck player -> 
-      object [("action", string "StartGame"), ("deck", serializeDeck deck), ("player", serializePlayer player)]
+      object [("action", string "PlacePiece"), ("mousePos", intPair mousePos), ("dims", intPair dims)]
+    StartGame d pl -> 
+      object [("action", string "StartGame"), ("deck", deck d), ("player", player pl)]
     Pass -> 
       object [("action", string "Pass")]
     NoAction -> 
       object [("action", string "NoAction")]
 
-serializeDeck : Deck -> Value
-serializeDeck deck = list <| map string deck
+deck : Deck -> Value
+deck = list << map string
 
-serializePlayer : Player -> Value
-serializePlayer player = string <| playerName player
+player : Player -> Value
+player = string << playerName
 
-serializeMousePos : MousePos -> Value
-serializeMousePos = serializeIntPair
-
-serializeWindowDims : WindowDims -> Value
-serializeWindowDims = serializeIntPair
-
-serializeIntPair : (Int, Int) -> Value
-serializeIntPair (x, y) = list <| map int [x, y]
+intPair : (Int, Int) -> Value
+intPair (x, y) = list <| map int [x, y]

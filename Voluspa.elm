@@ -13,8 +13,8 @@ import Signal (..)
 import Time
 import Window
 import WebSocket
-import Json.Decode (decodeString)
-import Json.Encode (encode)
+import Json.Decode
+import Json.Encode
 
 import Helpers (..)
 import GameTypes (..)
@@ -23,7 +23,7 @@ import Board
 import Player
 import Display
 import AI
-import Serialize (..)
+import Serialize
 import Deserialize
 
 import Debug
@@ -138,14 +138,14 @@ deckContents : List String
 deckContents =
     let r = List.repeat
     in
-        r 6 "Odin" ++
-        r 8 "Thor" ++
-        r 6 "Troll" ++
-        r 8 "Dragon" ++
-        r 8 "Fenrir" ++
-        r 9 "Skadi" ++
-        r 9 "Valkyrie" ++
-        r 6 "Loki"
+      r 6 "Odin" ++
+      r 8 "Thor" ++
+      r 6 "Troll" ++
+      r 8 "Dragon" ++
+      r 8 "Fenrir" ++
+      r 9 "Skadi" ++
+      r 9 "Valkyrie" ++
+      r 6 "Loki"
 
 startState : State
 startState =
@@ -178,21 +178,24 @@ constructAction clickType (startDeck, startPlayer) mousePos dims =
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let timestamp = fst <~ Time.timestamp signal
-      startState = (\time -> let seed = initialSeed (round time)
-                             in (shuffle deckContents seed, head <| shuffle [Red, Blue] seed)) <~ timestamp
+      deckAndPlayer = (\time -> let seed = initialSeed (round time)
+                                in (shuffle deckContents seed, sample [Red, Blue] seed)) <~ timestamp
       sampledMouse = sampleOn signal Mouse.position
   in
-    constructAction <~ signal ~ startState ~ sampledMouse ~ Window.dimensions
+    constructAction <~ signal ~ deckAndPlayer ~ sampledMouse ~ Window.dimensions
 
 main : Signal Element
 main =
   let
+    encode action = Json.Encode.encode 0 (Serialize.action action)
+    decode action = case Json.Decode.decodeString Deserialize.action action of Ok action -> action
+                                                                               Err e -> NoAction
+
     action = processClick (subscribe Display.clickChannel)
 
-    request = (Debug.watch "request" << encode 0 << serializeAction) <~ action
+    request = Debug.watch "request" <~ (encode <~ action)
     response = Debug.watch "response" <~ WebSocket.connect "ws://echo.websocket.org" request
-    responseAction = Debug.watch "deserialized" <~ ((\json -> case decodeString Deserialize.action json of Ok action -> action
-                                                                                                           Err err -> NoAction) <~ response)
+    responseAction = Debug.watch "deserialized" <~ (decode <~ response)
 
     state = foldp performAction startState (merge action responseAction)
   in

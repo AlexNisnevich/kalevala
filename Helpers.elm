@@ -30,3 +30,7 @@ shuffle list seed =
         (i, newSeed) = generate generator seed
     in
       [list !! i] ++ shuffle (without i list) newSeed
+
+sample : List a -> Seed -> a
+sample list seed = 
+  head <| shuffle list seed

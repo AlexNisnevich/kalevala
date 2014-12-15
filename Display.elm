@@ -180,7 +180,6 @@ render state dims =
       handGap = totalBoardSize - 2 * (round handTileSize) - (handPadding * 2)
       withSpacing padding elt = spacer padding padding `beside` elt
       rulesAreaWidth = 650
-      minRulesHeight = 570
       startButton = container rulesAreaWidth 50 middle <| button (send clickChannel Start) (if not state.started then "Begin game!" else "Restart game")
       rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (fromString "Rules")))
                             , spacer 5 5
