@@ -186,8 +186,9 @@ processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let seedSignal = (initialSeed << round << fst) <~ Time.timestamp signal
       sampledMouse = sampleOn signal Mouse.position
+      sampledGameType = sampleOn signal <| subscribe Display.gameTypeChannel
   in
-    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ (subscribe Display.gameTypeChannel)
+    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ sampledGameType
 
 main : Signal Element
 main =
