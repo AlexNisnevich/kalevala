@@ -8,6 +8,11 @@ type GameType = HumanVsCpu
               | HumanVsHumanLocal
               | HumanVsHumanRemote
 
+type GameState = NotStarted
+               | WaitingForPlayers
+               | Ongoing
+               | GameOver
+
 type PlayerType = Human
                 | Cpu
 
@@ -23,17 +28,17 @@ type alias Deck = List String
 type alias Hands = Dict String (List String)
 
 type alias State = {
+  gameType : GameType,
+  gameState : GameState,
   players : Dict String PlayerType,
   turn : Player,
   board : Board,
   score : Score,
   deck : Deck,
   hands : Hands,
-  started : Bool,
   heldPiece : Maybe Int,
   lastPlaced : Maybe Location,
-  delta : Dict String String,
-  gameOver : Bool
+  delta : Dict String String
 }
 
 type Piece = Odin

@@ -85,7 +85,6 @@ makeMove move state =
             , score <- Dict.insert p newScore state.score
             , deck <- drop 1 state.deck
             , hands <- Dict.insert p newHand state.hands
-            , started <- True
             , heldPiece <- Nothing
             , lastPlaced <- Just move.location
             , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta }
@@ -101,13 +100,13 @@ performAction action state =
           Pass -> { state | turn <- Player.next state.turn }
           NoAction -> state
   in
-    if | isGameOver newState -> { newState | gameOver <- True }
+    if | isGameOver newState -> { newState | gameState <- GameOver }
        | mustPass newState -> pass newState
        | otherwise -> newState
 
 isGameOver : State -> Bool
 isGameOver state =
-  (Player.noTilesInHand Red state) && (Player.noTilesInHand Blue state)
+  (state.gameState == Ongoing) && (Player.noTilesInHand Red state) && (Player.noTilesInHand Blue state)
 
 mustPass : State -> Bool
 mustPass state =
@@ -124,12 +123,18 @@ startGame gameType deck player =
       blueHand = take 5 (drop 5 deckMinusFirstTile)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
       remainder = drop 10 deckMinusFirstTile
-      state = { startState | players <- players
-                           , hands <- hands
-                           , deck <- remainder
-                           , started <- True
-                           , board <- Dict.singleton (0, 0) firstTile
-                           , turn <- player}
+      state = if gameType == HumanVsHumanRemote
+              then { startState | gameType <- gameType
+                                , gameState <- WaitingForPlayers
+                                , players <- players
+                                , turn <- player}
+              else { startState | gameType <- gameType
+                                , gameState <- Ongoing
+                                , players <- players
+                                , hands <- hands
+                                , deck <- remainder
+                                , board <- Dict.singleton (0, 0) firstTile
+                                , turn <- player}
   in
     -- if first player is Cpu, make their move
     if Player.getType state.turn state == Cpu
@@ -151,17 +156,17 @@ deckContents =
 
 startState : State
 startState =
-  { players = Dict.fromList [("red", Human), ("blue", Cpu)]
+  { gameType = HumanVsCpu
+  , gameState = NotStarted
+  , players = Dict.fromList [("red", Human), ("blue", Cpu)]
   , turn = Red
   , board = Dict.empty
   , score = Dict.fromList [("red", 0), ("blue", 0)]
   , deck = []
   , hands = Dict.fromList [("red", []), ("blue", [])]
-  , started = False
   , heldPiece = Nothing
   , lastPlaced = Nothing
   , delta = Dict.fromList [("red", ""), ("blue", "")]
-  , gameOver = False
   }
 
 constructAction : ClickEvent -> Seed -> MousePos -> WindowDims -> GameType -> Action
@@ -179,10 +184,10 @@ constructAction clickType seed mousePos dims gameType =
 
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
-  let seedSignal = (initialSeed << Debug.watch "seed" << round << fst) <~ Time.timestamp signal
+  let seedSignal = (initialSeed << round << fst) <~ Time.timestamp signal
       sampledMouse = sampleOn signal Mouse.position
   in
-    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ (sampleOn signal (subscribe Display.gameTypeChannel))
+    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ (subscribe Display.gameTypeChannel)
 
 main : Signal Element
 main =
