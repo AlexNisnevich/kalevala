@@ -35,6 +35,9 @@ handTileSize = 100
 clickChannel : Channel ClickEvent
 clickChannel = channel None
 
+gameTypeChannel : Channel GameType
+gameTypeChannel = channel HumanVsCpu
+
 -- Helpers
 
 getTotalBoardSize : WindowDims -> Int
@@ -180,14 +183,20 @@ render state dims =
       handGap = totalBoardSize - 2 * (round handTileSize) - (handPadding * 2)
       withSpacing padding elt = spacer padding padding `beside` elt
       rulesAreaWidth = 650
-      startButton = container rulesAreaWidth 50 middle <| button (send clickChannel Start) (if not state.started then "Begin game!" else "Restart game")
+      startButton = button (send clickChannel Start) (if not state.started then "Begin game!" else "Restart game")
+      gameTypeDropDown = dropDown (send gameTypeChannel)
+                            [ ("Human vs AI", HumanVsCpu)
+                            , ("Human vs Human (hotseat)" , HumanVsHumanLocal)
+                            , ("Human vs Human (online)" , HumanVsHumanRemote)
+                            ]
+                         |> size 180 40
       rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (fromString "Rules")))
                             , spacer 5 5
                             , width rulesAreaWidth <| leftAligned <| fromString "&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles."
                             , width rulesAreaWidth <| leftAligned <| fromString "&bull; If the tile you placed has the highest value in a row and/or column (ties don't count), you score one point for each tile in that row and/or column."
                             , spacer 5 5
                             , pieceRules
-                            , startButton
+                            , container rulesAreaWidth 40 middle <| flow right [ gameTypeDropDown, startButton ]
                             ]
       rightArea = if | handGap >= 420 -> rulesArea
                      | handGap >= 280 -> pieceRules `above` startButton

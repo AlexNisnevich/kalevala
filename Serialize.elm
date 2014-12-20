@@ -15,7 +15,7 @@ action a =
       object [("action", string "PickUpPiece"), ("player", player pl), ("idx", int idx)]
     PlacePiece mousePos dims -> 
       object [("action", string "PlacePiece"), ("mousePos", intPair mousePos), ("dims", intPair dims)]
-    StartGame d pl -> 
+    StartGame t d pl -> 
       object [("action", string "StartGame"), ("deck", deck d), ("player", player pl)]
     Pass -> 
       object [("action", string "Pass")]

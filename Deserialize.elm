@@ -23,7 +23,8 @@ actionInfo actionType =
         ("mousePos" := mousePos)
         ("dims" := windowDims)
     "StartGame" ->
-      object2 StartGame
+      object3 StartGame
+        (succeed HumanVsHumanRemote)
         ("deck" := deck)
         ("player" := player)
     "Pass" ->

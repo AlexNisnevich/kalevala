@@ -4,6 +4,10 @@ import Dict
 import Dict (Dict)
 import Random (Seed)
 
+type GameType = HumanVsCpu
+              | HumanVsHumanLocal
+              | HumanVsHumanRemote
+
 type PlayerType = Human
                 | Cpu
 
@@ -47,7 +51,7 @@ type alias WindowDims = (Int, Int)
 
 type Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
-            | StartGame Deck Player
+            | StartGame GameType Deck Player
             | Pass
             | NoAction
 

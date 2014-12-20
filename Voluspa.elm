@@ -97,7 +97,7 @@ performAction action state =
         case action of
           PickUpPiece player idx -> tryToPickUpPiece player idx state
           PlacePiece mousePos dims -> tryMove (Display.mouseToBoardPosition mousePos state dims) state
-          StartGame deck player -> startGame deck player
+          StartGame gameType deck player -> startGame gameType deck player
           Pass -> { state | turn <- Player.next state.turn }
           NoAction -> state
   in
@@ -113,9 +113,10 @@ mustPass : State -> Bool
 mustPass state =
   Player.noTilesInHand state.turn state
 
-startGame : Deck -> Player -> State
-startGame deck player =
-  let deckWithIndices = List.map2 (,) [0..(List.length deck - 1)] deck
+startGame : GameType -> Deck -> Player -> State
+startGame gameType deck player =
+  let players = Dict.fromList [("red", Human), ("blue", if gameType == HumanVsCpu then Cpu else Human)]
+      deckWithIndices = List.map2 (,) [0..(List.length deck - 1)] deck
       idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "Troll")) deckWithIndices
       firstTile = Piece.fromString (deck !! idxFirstNonTroll)
       deckMinusFirstTile = without idxFirstNonTroll deck
@@ -123,7 +124,8 @@ startGame deck player =
       blueHand = take 5 (drop 5 deckMinusFirstTile)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
       remainder = drop 10 deckMinusFirstTile
-      state = { startState | hands <- hands
+      state = { startState | players <- players
+                           , hands <- hands
                            , deck <- remainder
                            , started <- True
                            , board <- Dict.singleton (0, 0) firstTile
@@ -162,14 +164,14 @@ startState =
   , gameOver = False
   }
 
-constructAction : ClickEvent -> Seed -> MousePos -> WindowDims -> Action
-constructAction clickType seed mousePos dims =
+constructAction : ClickEvent -> Seed -> MousePos -> WindowDims -> GameType -> Action
+constructAction clickType seed mousePos dims gameType =
   let
-    pos = (Debug.watch "Mouse.position" mousePos)
-    click = (Debug.watch "clickInput.signal" clickType)
+    pos = Debug.watch "Mouse.position" mousePos
+    click = Debug.watch "clickInput.signal" clickType
   in
     case clickType of
-      Start -> StartGame (shuffle deckContents seed) (sample [Red, Blue] seed)
+      Start -> StartGame gameType (shuffle deckContents seed) (sample [Red, Blue] seed)
       BoardClick -> PlacePiece mousePos dims
       PieceInHand player idx -> PickUpPiece player idx
       PassButton -> Pass
@@ -177,17 +179,17 @@ constructAction clickType seed mousePos dims =
 
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
-  let seedSignal = (initialSeed << round << fst) <~ Time.timestamp signal
+  let seedSignal = (initialSeed << Debug.watch "seed" << round << fst) <~ Time.timestamp signal
       sampledMouse = sampleOn signal Mouse.position
   in
-    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions
+    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ (sampleOn signal (subscribe Display.gameTypeChannel))
 
 main : Signal Element
 main =
   let
     encode action = Json.Encode.encode 0 (Serialize.action action)
-    decode action = case Json.Decode.decodeString Deserialize.action action of Ok action -> action
-                                                                               Err e -> NoAction
+    decode actionJson = case Json.Decode.decodeString Deserialize.action actionJson of Ok action -> action
+                                                                                       Err e -> NoAction
 
     action = processClick (subscribe Display.clickChannel)
 
@@ -195,6 +197,6 @@ main =
     response = Debug.watch "response" <~ WebSocket.connect "ws://echo.websocket.org" request
     responseAction = Debug.watch "deserialized" <~ (decode <~ response)
 
-    state = foldp performAction startState (merge action responseAction)
+    state = foldp performAction startState action -- (merge action responseAction)
   in
     Display.render <~ state ~ Window.dimensions
