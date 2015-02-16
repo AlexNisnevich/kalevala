@@ -97,6 +97,7 @@ performAction action state =
           PickUpPiece player idx -> tryToPickUpPiece player idx state
           PlacePiece mousePos dims -> tryMove (Display.mouseToBoardPosition mousePos state dims) state
           StartGame gameType deck player -> startGame gameType deck player
+          GameStarted deck player -> gameStarted deck player
           Pass -> { state | turn <- Player.next state.turn }
           NoAction -> state
   in
@@ -225,6 +226,6 @@ main =
     response = Debug.watch "response" <~ WebSocket.connect "ws://0.0.0.0:22000" request
     responseAction = Debug.watch "deserialized" <~ (decode <~ response)
 
-    state = foldp performAction startState action -- (merge action responseAction)
+    state = foldp performAction startState (merge action responseAction)
   in
     Display.render <~ state ~ Window.dimensions
