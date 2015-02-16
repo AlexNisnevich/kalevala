@@ -27,6 +27,10 @@ actionInfo actionType =
         (succeed HumanVsHumanRemote)
         ("deck" := deck)
         ("player" := player)
+    "GameStarted" ->
+      object2 GameStarted
+        ("deck" := deck)
+        ("player" := player)
     "Pass" ->
       null Pass
     "NoAction" ->

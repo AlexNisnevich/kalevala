@@ -141,6 +141,28 @@ startGame gameType deck player =
     then tryAIMove state
     else state
 
+-- (only for HumanVsHumanRemote games) Event triggers when players are matched together into a game
+-- TODO separate out common code between this and startGame
+gameStarted : Deck -> Player -> State
+gameStarted deck player =
+  let players = Dict.fromList [("red", Human), ("blue", Human)]
+      deckWithIndices = List.map2 (,) [0..(List.length deck - 1)] deck
+      idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "Troll")) deckWithIndices
+      firstTile = Piece.fromString (deck !! idxFirstNonTroll)
+      deckMinusFirstTile = without idxFirstNonTroll deck
+      redHand = take 5 deckMinusFirstTile
+      blueHand = take 5 (drop 5 deckMinusFirstTile)
+      hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
+      remainder = drop 10 deckMinusFirstTile
+  in
+    { startState | gameType <- HumanVsHumanRemote
+                 , gameState <- Ongoing
+                 , players <- players
+                 , hands <- hands
+                 , deck <- remainder
+                 , board <- Dict.singleton (0, 0) firstTile
+                 , turn <- player}
+
 deckContents : List String
 deckContents =
     let r = List.repeat
@@ -200,7 +222,7 @@ main =
     action = processClick (subscribe Display.clickChannel)
 
     request = Debug.watch "request" <~ (encode <~ action)
-    response = Debug.watch "response" <~ WebSocket.connect "ws://echo.websocket.org" request
+    response = Debug.watch "response" <~ WebSocket.connect "ws://0.0.0.0:22000" request
     responseAction = Debug.watch "deserialized" <~ (decode <~ response)
 
     state = foldp performAction startState action -- (merge action responseAction)

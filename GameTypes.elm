@@ -57,6 +57,7 @@ type alias WindowDims = (Int, Int)
 type Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
             | StartGame GameType Deck Player
+            | GameStarted Deck Player  -- this should only be sent from the server
             | Pass
             | NoAction
 

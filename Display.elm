@@ -199,9 +199,10 @@ render state dims =
                             , pieceRules
                             , container rulesAreaWidth 40 middle <| flow right [ waitingText, gameTypeDropDown, startButton ]
                             ]
+      controls = flow right [ waitingText, gameTypeDropDown, startButton ]
       rightArea = if | handGap >= 420 -> rulesArea
-                     | handGap >= 280 -> pieceRules `above` startButton
-                     | otherwise -> startButton
+                     | handGap >= 280 -> pieceRules `above` controls
+                     | otherwise -> controls
   in
     flow down
       [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (fromString "V&ouml;lusp&aacute;"))))
