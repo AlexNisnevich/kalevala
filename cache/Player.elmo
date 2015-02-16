@@ -1,0 +1,54 @@
+Elm.Player = Elm.Player || {};
+Elm.Player.make = function (_elm) {
+   "use strict";
+   _elm.Player = _elm.Player || {};
+   if (_elm.Player.values)
+   return _elm.Player.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Player",
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $List = Elm.List.make(_elm);
+   var noTilesInHand = F2(function (player,
+   state) {
+      return function () {
+         var p = $GameTypes.playerName(player);
+         return $List.isEmpty(A2($Dict.getOrFail,
+         p,
+         state.hands));
+      }();
+   });
+   var next = function (player) {
+      return function () {
+         switch (player.ctor)
+         {case "Blue":
+            return $GameTypes.Red;
+            case "Red":
+            return $GameTypes.Blue;}
+         _E.Case($moduleName,
+         "between lines 15 and 17");
+      }();
+   };
+   var color = function (player) {
+      return function () {
+         switch (player.ctor)
+         {case "Blue":
+            return $Color.blue;
+            case "Red": return $Color.red;}
+         _E.Case($moduleName,
+         "between lines 9 and 11");
+      }();
+   };
+   _elm.Player.values = {_op: _op
+                        ,color: color
+                        ,next: next
+                        ,noTilesInHand: noTilesInHand};
+   return _elm.Player.values;
+};

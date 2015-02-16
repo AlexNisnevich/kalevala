@@ -1,0 +1,94 @@
+Elm.Deserialize = Elm.Deserialize || {};
+Elm.Deserialize.make = function (_elm) {
+   "use strict";
+   _elm.Deserialize = _elm.Deserialize || {};
+   if (_elm.Deserialize.values)
+   return _elm.Deserialize.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Deserialize",
+   $Basics = Elm.Basics.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $Player = Elm.Player.make(_elm);
+   var windowDims = A3($Json$Decode.tuple2,
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   $Json$Decode.$int,
+   $Json$Decode.$int);
+   var mousePos = A3($Json$Decode.tuple2,
+   F2(function (v0,v1) {
+      return {ctor: "_Tuple2"
+             ,_0: v0
+             ,_1: v1};
+   }),
+   $Json$Decode.$int,
+   $Json$Decode.$int);
+   var player = A2($Json$Decode.map,
+   $Player.fromString,
+   $Json$Decode.string);
+   var deck = $Json$Decode.list($Json$Decode.string);
+   var actionInfo = function (actionType) {
+      return function () {
+         switch (actionType)
+         {case "NoAction":
+            return $Json$Decode.succeed($GameTypes.NoAction);
+            case "OpponentDisconnected":
+            return $Json$Decode.succeed($GameTypes.OpponentDisconnected);
+            case "Pass":
+            return $Json$Decode.succeed($GameTypes.Pass);
+            case "PickUpPiece":
+            return A3($Json$Decode.object2,
+              $GameTypes.PickUpPiece,
+              A2($Json$Decode._op[":="],
+              "player",
+              player),
+              A2($Json$Decode._op[":="],
+              "idx",
+              $Json$Decode.$int));
+            case "PlacePiece":
+            return A3($Json$Decode.object2,
+              $GameTypes.PlacePiece,
+              A2($Json$Decode._op[":="],
+              "mousePos",
+              mousePos),
+              A2($Json$Decode._op[":="],
+              "dims",
+              windowDims));
+            case "StartGame":
+            return A4($Json$Decode.object3,
+              $GameTypes.GameStarted,
+              A2($Json$Decode._op[":="],
+              "deck",
+              deck),
+              A2($Json$Decode._op[":="],
+              "player",
+              player),
+              A2($Json$Decode._op[":="],
+              "color",
+              player));}
+         return $Json$Decode.fail(A2($Basics._op["++"],
+         actionType,
+         " is not a recognized type of action"));
+      }();
+   };
+   var action = A2($Json$Decode.andThen,
+   A2($Json$Decode._op[":="],
+   "action",
+   $Json$Decode.string),
+   actionInfo);
+   _elm.Deserialize.values = {_op: _op
+                             ,action: action
+                             ,actionInfo: actionInfo
+                             ,deck: deck
+                             ,player: player
+                             ,mousePos: mousePos
+                             ,windowDims: windowDims};
+   return _elm.Deserialize.values;
+};

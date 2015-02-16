@@ -1,0 +1,622 @@
+Elm.Voluspa = Elm.Voluspa || {};
+Elm.Voluspa.make = function (_elm) {
+   "use strict";
+   _elm.Voluspa = _elm.Voluspa || {};
+   if (_elm.Voluspa.values)
+   return _elm.Voluspa.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Voluspa",
+   $AI = Elm.AI.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Board = Elm.Board.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Deserialize = Elm.Deserialize.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Display = Elm.Display.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Helpers = Elm.Helpers.make(_elm),
+   $Json$Decode = Elm.Json.Decode.make(_elm),
+   $Json$Encode = Elm.Json.Encode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Mouse = Elm.Mouse.make(_elm),
+   $Piece = Elm.Piece.make(_elm),
+   $Player = Elm.Player.make(_elm),
+   $Random = Elm.Random.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Serialize = Elm.Serialize.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $WebSocket = Elm.WebSocket.make(_elm),
+   $Window = Elm.Window.make(_elm);
+   var startState = {_: {}
+                    ,board: $Dict.empty
+                    ,deck: _L.fromArray([])
+                    ,delta: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "red"
+                                                         ,_1: ""}
+                                                        ,{ctor: "_Tuple2"
+                                                         ,_0: "blue"
+                                                         ,_1: ""}]))
+                    ,gameState: $GameTypes.NotStarted
+                    ,gameType: $GameTypes.HumanVsCpu
+                    ,hands: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "red"
+                                                         ,_1: _L.fromArray([])}
+                                                        ,{ctor: "_Tuple2"
+                                                         ,_0: "blue"
+                                                         ,_1: _L.fromArray([])}]))
+                    ,heldPiece: $Maybe.Nothing
+                    ,lastPlaced: $Maybe.Nothing
+                    ,players: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                           ,_0: "red"
+                                                           ,_1: $GameTypes.Human}
+                                                          ,{ctor: "_Tuple2"
+                                                           ,_0: "blue"
+                                                           ,_1: $GameTypes.Cpu}]))
+                    ,score: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "red"
+                                                         ,_1: 0}
+                                                        ,{ctor: "_Tuple2"
+                                                         ,_0: "blue"
+                                                         ,_1: 0}]))
+                    ,turn: $GameTypes.Red};
+   var deckContents = function () {
+      var r = $List.repeat;
+      return A2($Basics._op["++"],
+      A2(r,6,"Odin"),
+      A2($Basics._op["++"],
+      A2(r,8,"Thor"),
+      A2($Basics._op["++"],
+      A2(r,6,"Troll"),
+      A2($Basics._op["++"],
+      A2(r,8,"Dragon"),
+      A2($Basics._op["++"],
+      A2(r,8,"Fenrir"),
+      A2($Basics._op["++"],
+      A2(r,9,"Skadi"),
+      A2($Basics._op["++"],
+      A2(r,9,"Valkyrie"),
+      A2(r,6,"Loki"))))))));
+   }();
+   var constructAction = F5(function (clickType,
+   seed,
+   mousePos,
+   dims,
+   gameType) {
+      return function () {
+         var click = A2($Debug.watch,
+         "clickInput.signal",
+         clickType);
+         var pos = A2($Debug.watch,
+         "Mouse.position",
+         mousePos);
+         return function () {
+            switch (clickType.ctor)
+            {case "BoardClick":
+               return A2($GameTypes.PlacePiece,
+                 mousePos,
+                 dims);
+               case "None":
+               return $GameTypes.NoAction;
+               case "PassButton":
+               return $GameTypes.Pass;
+               case "PieceInHand":
+               return A2($GameTypes.PickUpPiece,
+                 clickType._0,
+                 clickType._1);
+               case "Start":
+               return A3($GameTypes.StartGame,
+                 gameType,
+                 A2($Helpers.shuffle,
+                 deckContents,
+                 seed),
+                 A2($Helpers.sample,
+                 _L.fromArray([$GameTypes.Red
+                              ,$GameTypes.Blue]),
+                 seed));}
+            _U.badCase($moduleName,
+            "between lines 205 and 210");
+         }();
+      }();
+   });
+   var processClick = function (signal) {
+      return function () {
+         var sampledGameType = $Signal.sampleOn(signal)($Signal.subscribe($Display.gameTypeChannel));
+         var sampledMouse = A2($Signal.sampleOn,
+         signal,
+         $Mouse.position);
+         var seedSignal = A2($Signal._op["<~"],
+         function ($) {
+            return $Random.initialSeed($Basics.round($Basics.fst($)));
+         },
+         $Time.timestamp(signal));
+         return A2($Signal._op["~"],
+         A2($Signal._op["~"],
+         A2($Signal._op["~"],
+         A2($Signal._op["~"],
+         A2($Signal._op["<~"],
+         constructAction,
+         signal),
+         seedSignal),
+         sampledMouse),
+         $Window.dimensions),
+         sampledGameType);
+      }();
+   };
+   var gameStarted = F3(function (deck,
+   startPlayer,
+   localPlayer) {
+      return function () {
+         var deckWithIndices = A3($List.map2,
+         F2(function (v0,v1) {
+            return {ctor: "_Tuple2"
+                   ,_0: v0
+                   ,_1: v1};
+         }),
+         _L.range(0,
+         $List.length(deck) - 1),
+         deck);
+         var idxFirstNonTroll = $Basics.fst($List.head(A2($List.filter,
+         function (_v3) {
+            return function () {
+               switch (_v3.ctor)
+               {case "_Tuple2":
+                  return $Basics.not(_U.eq(_v3._1,
+                    "Troll"));}
+               _U.badCase($moduleName,
+               "on line 155, column 66 to 87");
+            }();
+         },
+         deckWithIndices)));
+         var firstTile = $Piece.fromString(A2($Helpers._op["!!"],
+         deck,
+         idxFirstNonTroll));
+         var deckMinusFirstTile = A2($Helpers.without,
+         idxFirstNonTroll,
+         deck);
+         var redHand = A2($List.take,
+         5,
+         deckMinusFirstTile);
+         var blueHand = A2($List.take,
+         5,
+         A2($List.drop,
+         5,
+         deckMinusFirstTile));
+         var hands = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: "red"
+                                                  ,_1: redHand}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: "blue"
+                                                  ,_1: blueHand}]));
+         var remainder = A2($List.drop,
+         10,
+         deckMinusFirstTile);
+         var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                    ,_0: "red"
+                                                    ,_1: _U.eq(localPlayer,
+                                                    $GameTypes.Red) ? $GameTypes.Human : $GameTypes.Remote}
+                                                   ,{ctor: "_Tuple2"
+                                                    ,_0: "blue"
+                                                    ,_1: _U.eq(localPlayer,
+                                                    $GameTypes.Blue) ? $GameTypes.Human : $GameTypes.Remote}]));
+         return _U.replace([["gameType"
+                            ,$GameTypes.HumanVsHumanRemote]
+                           ,["gameState"
+                            ,$GameTypes.Ongoing]
+                           ,["players",players]
+                           ,["hands",hands]
+                           ,["deck",remainder]
+                           ,["board"
+                            ,A2($Dict.singleton,
+                            {ctor: "_Tuple2",_0: 0,_1: 0},
+                            firstTile)]
+                           ,["turn",startPlayer]],
+         startState);
+      }();
+   });
+   var mustPass = function (state) {
+      return A2($Player.noTilesInHand,
+      state.turn,
+      state);
+   };
+   var isGameOver = function (state) {
+      return _U.eq(state.gameState,
+      $GameTypes.Ongoing) && (A2($Player.noTilesInHand,
+      $GameTypes.Red,
+      state) && A2($Player.noTilesInHand,
+      $GameTypes.Blue,
+      state));
+   };
+   var makeMove = F2(function (move,
+   state) {
+      return function () {
+         var existingTile = A2($Dict.get,
+         move.location,
+         state.board);
+         var hand = A2($Player.getHand,
+         state.turn,
+         state);
+         var handWithDrawnTile = A2($Basics._op["++"],
+         A2($Helpers.without,
+         move.idx,
+         hand),
+         $Basics.not($List.isEmpty(state.deck)) ? A2($List.take,
+         1,
+         state.deck) : _L.fromArray([]));
+         var newHand = function () {
+            switch (existingTile.ctor)
+            {case "Just":
+               return _U.eq(move.piece,
+                 $GameTypes.Skadi) ? A3($Helpers.replaceAtIndex,
+                 move.idx,
+                 $Piece.toString(existingTile._0),
+                 hand) : handWithDrawnTile;
+               case "Nothing":
+               return handWithDrawnTile;}
+            _U.badCase($moduleName,
+            "between lines 80 and 83");
+         }();
+         var newBoard = A3($Dict.insert,
+         move.location,
+         move.piece,
+         state.board);
+         var delta = A2($Board.scoreMove,
+         move,
+         newBoard);
+         var p = $Player.name(state.turn);
+         var newScore = $Maybe.withDefault(0)(A2($Dict.get,
+         p,
+         state.score)) + delta;
+         return _U.replace([["turn"
+                            ,$Player.next(state.turn)]
+                           ,["board",newBoard]
+                           ,["score"
+                            ,A3($Dict.insert,
+                            p,
+                            newScore,
+                            state.score)]
+                           ,["deck"
+                            ,A2($List.drop,1,state.deck)]
+                           ,["hands"
+                            ,A3($Dict.insert,
+                            p,
+                            newHand,
+                            state.hands)]
+                           ,["heldPiece",$Maybe.Nothing]
+                           ,["lastPlaced"
+                            ,$Maybe.Just(move.location)]
+                           ,["delta"
+                            ,A3($Dict.insert,
+                            p,
+                            A2($Basics._op["++"],
+                            "(+",
+                            A2($Basics._op["++"],
+                            $Basics.toString(delta),
+                            ")")),
+                            state.delta)]],
+         state);
+      }();
+   });
+   var pass = function (state) {
+      return function () {
+         var p = $Player.name(state.turn);
+         return _U.replace([["turn"
+                            ,$Player.next(state.turn)]
+                           ,["delta"
+                            ,A3($Dict.insert,
+                            p,
+                            "(+0)",
+                            state.delta)]],
+         state);
+      }();
+   };
+   var tryAIMove = function (state) {
+      return function () {
+         var _v9 = $AI.getMove(state);
+         switch (_v9.ctor)
+         {case "Just": return A2(tryMove,
+              _v9._0.location,
+              _U.replace([["heldPiece"
+                          ,$Maybe.Just(_v9._0.idx)]],
+              state));
+            case "Nothing":
+            return pass(state);}
+         _U.badCase($moduleName,
+         "between lines 67 and 69");
+      }();
+   };
+   var tryMove = F2(function (location,
+   state) {
+      return function () {
+         var _v11 = state.heldPiece;
+         switch (_v11.ctor)
+         {case "Just":
+            return function () {
+                 var nextPlayerType = A2($Player.getType,
+                 $Player.next(state.turn),
+                 state);
+                 var nextAction = function () {
+                    switch (nextPlayerType.ctor)
+                    {case "Cpu": return tryAIMove;
+                       case "Human":
+                       return $Basics.identity;
+                       case "Remote":
+                       return $Basics.identity;}
+                    _U.badCase($moduleName,
+                    "between lines 57 and 61");
+                 }();
+                 var hand = A2($Player.getHand,
+                 state.turn,
+                 state);
+                 var pieceStr = $List.head(A2($List.drop,
+                 _v11._0,
+                 hand));
+                 var piece = $Piece.fromString(pieceStr);
+                 var move = {_: {}
+                            ,idx: _v11._0
+                            ,location: location
+                            ,piece: piece};
+                 return A2($Board.isValidMove,
+                 move,
+                 state.board) ? nextAction(A2(makeMove,
+                 move,
+                 state)) : _U.replace([["heldPiece"
+                                       ,$Maybe.Nothing]],
+                 state);
+              }();
+            case "Nothing": return state;}
+         _U.badCase($moduleName,
+         "between lines 50 and 63");
+      }();
+   });
+   var startGame = F3(function (gameType,
+   deck,
+   player) {
+      return function () {
+         var deckWithIndices = A3($List.map2,
+         F2(function (v0,v1) {
+            return {ctor: "_Tuple2"
+                   ,_0: v0
+                   ,_1: v1};
+         }),
+         _L.range(0,
+         $List.length(deck) - 1),
+         deck);
+         var idxFirstNonTroll = $Basics.fst($List.head(A2($List.filter,
+         function (_v14) {
+            return function () {
+               switch (_v14.ctor)
+               {case "_Tuple2":
+                  return $Basics.not(_U.eq(_v14._1,
+                    "Troll"));}
+               _U.badCase($moduleName,
+               "on line 123, column 66 to 87");
+            }();
+         },
+         deckWithIndices)));
+         var firstTile = $Piece.fromString(A2($Helpers._op["!!"],
+         deck,
+         idxFirstNonTroll));
+         var deckMinusFirstTile = A2($Helpers.without,
+         idxFirstNonTroll,
+         deck);
+         var redHand = A2($List.take,
+         5,
+         deckMinusFirstTile);
+         var blueHand = A2($List.take,
+         5,
+         A2($List.drop,
+         5,
+         deckMinusFirstTile));
+         var hands = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: "red"
+                                                  ,_1: redHand}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: "blue"
+                                                  ,_1: blueHand}]));
+         var remainder = A2($List.drop,
+         10,
+         deckMinusFirstTile);
+         var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                    ,_0: "red"
+                                                    ,_1: $GameTypes.Human}
+                                                   ,{ctor: "_Tuple2"
+                                                    ,_0: "blue"
+                                                    ,_1: _U.eq(gameType,
+                                                    $GameTypes.HumanVsCpu) ? $GameTypes.Cpu : $GameTypes.Human}]));
+         var state = _U.eq(gameType,
+         $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"
+                                                      ,gameType]
+                                                     ,["gameState"
+                                                      ,$GameTypes.WaitingForPlayers]
+                                                     ,["players",players]
+                                                     ,["turn",player]],
+         startState) : _U.replace([["gameType"
+                                   ,gameType]
+                                  ,["gameState"
+                                   ,$GameTypes.Ongoing]
+                                  ,["players",players]
+                                  ,["hands",hands]
+                                  ,["deck",remainder]
+                                  ,["board"
+                                   ,A2($Dict.singleton,
+                                   {ctor: "_Tuple2",_0: 0,_1: 0},
+                                   firstTile)]
+                                  ,["turn",player]],
+         startState);
+         return _U.eq(A2($Player.getType,
+         state.turn,
+         state),
+         $GameTypes.Cpu) ? tryAIMove(state) : state;
+      }();
+   });
+   var pickUpPiece = F2(function (idx,
+   state) {
+      return _U.replace([["heldPiece"
+                         ,$Maybe.Just(idx)]],
+      state);
+   });
+   var tryToPickUpPiece = F3(function (player,
+   idx,
+   state) {
+      return _U.eq(state.turn,
+      player) && _U.eq(state.gameState,
+      $GameTypes.Ongoing) ? A2(pickUpPiece,
+      idx,
+      state) : _U.replace([["heldPiece"
+                           ,$Maybe.Nothing]],
+      state);
+   });
+   var performAction = F2(function (action,
+   state) {
+      return function () {
+         var newState = function () {
+            switch (action.ctor)
+            {case "GameStarted":
+               return A3(gameStarted,
+                 action._0,
+                 action._1,
+                 action._2);
+               case "NoAction": return state;
+               case "OpponentDisconnected":
+               return _U.replace([["gameState"
+                                  ,$GameTypes.Disconnected]],
+                 state);
+               case "ParseError": return state;
+               case "Pass":
+               return _U.replace([["turn"
+                                  ,$Player.next(state.turn)]],
+                 state);
+               case "PickUpPiece":
+               return A3(tryToPickUpPiece,
+                 action._0,
+                 action._1,
+                 state);
+               case "PlacePiece":
+               return A2(tryMove,
+                 A3($Display.mouseToBoardPosition,
+                 action._0,
+                 state,
+                 action._1),
+                 state);
+               case "StartGame":
+               return A3(startGame,
+                 action._0,
+                 action._1,
+                 action._2);}
+            _U.badCase($moduleName,
+            "between lines 97 and 106");
+         }();
+         var p = $Player.name(state.turn);
+         return isGameOver(newState) ? _U.replace([["gameState"
+                                                   ,$GameTypes.GameOver]],
+         newState) : mustPass(newState) ? pass(newState) : newState;
+      }();
+   });
+   var main = function () {
+      var action = processClick($Signal.subscribe($Display.clickChannel));
+      var actionWithGameType = A2($Signal._op["~"],
+      A2($Signal._op["<~"],
+      F2(function (a,t) {
+         return {ctor: "_Tuple2"
+                ,_0: a
+                ,_1: t};
+      }),
+      action),
+      $Signal.subscribe($Display.gameTypeChannel));
+      var actionForRemote = A2($Signal._op["<~"],
+      function (_v30) {
+         return function () {
+            switch (_v30.ctor)
+            {case "_Tuple2":
+               return _v30._0;}
+            _U.badCase($moduleName,
+            "on line 232, column 35 to 36");
+         }();
+      },
+      A3($Signal.keepIf,
+      function (_v34) {
+         return function () {
+            switch (_v34.ctor)
+            {case "_Tuple2":
+               return _U.eq(_v34._1,
+                 $GameTypes.HumanVsHumanRemote);}
+            _U.badCase($moduleName,
+            "on line 232, column 60 to 83");
+         }();
+      },
+      {ctor: "_Tuple2"
+      ,_0: $GameTypes.NoAction
+      ,_1: $GameTypes.HumanVsCpu},
+      actionWithGameType));
+      var server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000";
+      var decode = function (actionJson) {
+         return function () {
+            var _v38 = A2($Json$Decode.decodeString,
+            $Deserialize.action,
+            actionJson);
+            switch (_v38.ctor)
+            {case "Err":
+               return $GameTypes.ParseError(_v38._0);
+               case "Ok": return _v38._0;}
+            _U.badCase($moduleName,
+            "between lines 224 and 227");
+         }();
+      };
+      var encode = function (action) {
+         return A2($Json$Encode.encode,
+         0,
+         $Serialize.action(action));
+      };
+      var request = A2($Signal._op["<~"],
+      $Debug.watch("request"),
+      A2($Signal._op["<~"],
+      encode,
+      actionForRemote));
+      var response = A2($Signal._op["<~"],
+      $Debug.watch("response"),
+      A2($WebSocket.connect,
+      server,
+      request));
+      var responseAction = A2($Signal._op["<~"],
+      $Debug.watch("deserialized"),
+      A2($Signal._op["<~"],
+      decode,
+      response));
+      var state = A3($Signal.foldp,
+      performAction,
+      startState,
+      A2($Signal.merge,
+      action,
+      responseAction));
+      return A2($Signal._op["~"],
+      A2($Signal._op["<~"],
+      $Display.render,
+      state),
+      $Window.dimensions);
+   }();
+   _elm.Voluspa.values = {_op: _op
+                         ,tryToPickUpPiece: tryToPickUpPiece
+                         ,pickUpPiece: pickUpPiece
+                         ,pass: pass
+                         ,tryMove: tryMove
+                         ,tryAIMove: tryAIMove
+                         ,makeMove: makeMove
+                         ,performAction: performAction
+                         ,isGameOver: isGameOver
+                         ,mustPass: mustPass
+                         ,startGame: startGame
+                         ,gameStarted: gameStarted
+                         ,deckContents: deckContents
+                         ,startState: startState
+                         ,constructAction: constructAction
+                         ,processClick: processClick
+                         ,main: main};
+   return _elm.Voluspa.values;
+};

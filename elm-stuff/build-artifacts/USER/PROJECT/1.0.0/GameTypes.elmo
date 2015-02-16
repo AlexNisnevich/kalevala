@@ -1,0 +1,161 @@
+Elm.GameTypes = Elm.GameTypes || {};
+Elm.GameTypes.make = function (_elm) {
+   "use strict";
+   _elm.GameTypes = _elm.GameTypes || {};
+   if (_elm.GameTypes.values)
+   return _elm.GameTypes.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "GameTypes",
+   $Dict = Elm.Dict.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm);
+   var None = {ctor: "None"};
+   var PassButton = {ctor: "PassButton"};
+   var PieceInHand = F2(function (a,
+   b) {
+      return {ctor: "PieceInHand"
+             ,_0: a
+             ,_1: b};
+   });
+   var BoardClick = {ctor: "BoardClick"};
+   var Start = {ctor: "Start"};
+   var ParseError = function (a) {
+      return {ctor: "ParseError"
+             ,_0: a};
+   };
+   var NoAction = {ctor: "NoAction"};
+   var OpponentDisconnected = {ctor: "OpponentDisconnected"};
+   var Pass = {ctor: "Pass"};
+   var GameStarted = F3(function (a,
+   b,
+   c) {
+      return {ctor: "GameStarted"
+             ,_0: a
+             ,_1: b
+             ,_2: c};
+   });
+   var StartGame = F3(function (a,
+   b,
+   c) {
+      return {ctor: "StartGame"
+             ,_0: a
+             ,_1: b
+             ,_2: c};
+   });
+   var PlacePiece = F2(function (a,
+   b) {
+      return {ctor: "PlacePiece"
+             ,_0: a
+             ,_1: b};
+   });
+   var PickUpPiece = F2(function (a,
+   b) {
+      return {ctor: "PickUpPiece"
+             ,_0: a
+             ,_1: b};
+   });
+   var NoPiece = {ctor: "NoPiece"};
+   var Loki = {ctor: "Loki"};
+   var Valkyrie = {ctor: "Valkyrie"};
+   var Skadi = {ctor: "Skadi"};
+   var Fenrir = {ctor: "Fenrir"};
+   var Dragon = {ctor: "Dragon"};
+   var Troll = {ctor: "Troll"};
+   var Thor = {ctor: "Thor"};
+   var Odin = {ctor: "Odin"};
+   var State = function (a) {
+      return function (b) {
+         return function (c) {
+            return function (d) {
+               return function (e) {
+                  return function (f) {
+                     return function (g) {
+                        return function (h) {
+                           return function (i) {
+                              return function (j) {
+                                 return function (k) {
+                                    return {_: {}
+                                           ,board: e
+                                           ,deck: g
+                                           ,delta: k
+                                           ,gameState: b
+                                           ,gameType: a
+                                           ,hands: h
+                                           ,heldPiece: i
+                                           ,lastPlaced: j
+                                           ,players: c
+                                           ,score: f
+                                           ,turn: d};
+                                 };
+                              };
+                           };
+                        };
+                     };
+                  };
+               };
+            };
+         };
+      };
+   };
+   var Move = F3(function (a,b,c) {
+      return {_: {}
+             ,idx: b
+             ,location: c
+             ,piece: a};
+   });
+   var Blue = {ctor: "Blue"};
+   var Red = {ctor: "Red"};
+   var Remote = {ctor: "Remote"};
+   var Cpu = {ctor: "Cpu"};
+   var Human = {ctor: "Human"};
+   var Disconnected = {ctor: "Disconnected"};
+   var GameOver = {ctor: "GameOver"};
+   var Ongoing = {ctor: "Ongoing"};
+   var WaitingForPlayers = {ctor: "WaitingForPlayers"};
+   var NotStarted = {ctor: "NotStarted"};
+   var HumanVsHumanRemote = {ctor: "HumanVsHumanRemote"};
+   var HumanVsHumanLocal = {ctor: "HumanVsHumanLocal"};
+   var HumanVsCpu = {ctor: "HumanVsCpu"};
+   _elm.GameTypes.values = {_op: _op
+                           ,HumanVsCpu: HumanVsCpu
+                           ,HumanVsHumanLocal: HumanVsHumanLocal
+                           ,HumanVsHumanRemote: HumanVsHumanRemote
+                           ,NotStarted: NotStarted
+                           ,WaitingForPlayers: WaitingForPlayers
+                           ,Ongoing: Ongoing
+                           ,GameOver: GameOver
+                           ,Disconnected: Disconnected
+                           ,Human: Human
+                           ,Cpu: Cpu
+                           ,Remote: Remote
+                           ,Red: Red
+                           ,Blue: Blue
+                           ,Move: Move
+                           ,State: State
+                           ,Odin: Odin
+                           ,Thor: Thor
+                           ,Troll: Troll
+                           ,Dragon: Dragon
+                           ,Fenrir: Fenrir
+                           ,Skadi: Skadi
+                           ,Valkyrie: Valkyrie
+                           ,Loki: Loki
+                           ,NoPiece: NoPiece
+                           ,PickUpPiece: PickUpPiece
+                           ,PlacePiece: PlacePiece
+                           ,StartGame: StartGame
+                           ,GameStarted: GameStarted
+                           ,Pass: Pass
+                           ,OpponentDisconnected: OpponentDisconnected
+                           ,NoAction: NoAction
+                           ,ParseError: ParseError
+                           ,Start: Start
+                           ,BoardClick: BoardClick
+                           ,PieceInHand: PieceInHand
+                           ,PassButton: PassButton
+                           ,None: None};
+   return _elm.GameTypes.values;
+};

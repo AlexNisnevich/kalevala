@@ -1,0 +1,84 @@
+Elm.Helpers = Elm.Helpers || {};
+Elm.Helpers.make = function (_elm) {
+   "use strict";
+   _elm.Helpers = _elm.Helpers || {};
+   if (_elm.Helpers.values)
+   return _elm.Helpers.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Helpers",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Random = Elm.Random.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var replaceAtIndex = F3(function (i,
+   elt,
+   arr) {
+      return function () {
+         var after = A2($List.drop,
+         i + 1,
+         arr);
+         var before = A2($List.take,
+         i,
+         arr);
+         return _L.append(before,
+         _L.append(_L.fromArray([elt]),
+         after));
+      }();
+   });
+   var without = F2(function (i,
+   arr) {
+      return function () {
+         var after = A2($List.drop,
+         i + 1,
+         arr);
+         var before = A2($List.take,
+         i,
+         arr);
+         return _L.append(before,after);
+      }();
+   });
+   _op["!!"] = F2(function (list,
+   idx) {
+      return $List.head(A2($List.drop,
+      idx,
+      list));
+   });
+   var shuffle = F2(function (list,
+   signal) {
+      return function () {
+         var shuffleWithRandoms = F2(function (list,
+         randoms) {
+            return $List.isEmpty(list) ? _L.fromArray([]) : function () {
+               var i = $Basics.floor($List.head(randoms) * $Basics.toFloat($List.length(list)));
+               return _L.append(_L.fromArray([A2(_op["!!"],
+               list,
+               i)]),
+               A2(shuffleWithRandoms,
+               A2(without,i,list),
+               $List.tail(randoms)));
+            }();
+         });
+         var randomsFromSignal = function (signal) {
+            return $Random.floatList(A2($Signal.lift,
+            function (x) {
+               return $List.length(list);
+            },
+            signal));
+         };
+         return A3($Signal.lift2,
+         shuffleWithRandoms,
+         $Signal.constant(list),
+         randomsFromSignal(signal));
+      }();
+   });
+   _elm.Helpers.values = {_op: _op
+                         ,without: without
+                         ,replaceAtIndex: replaceAtIndex
+                         ,shuffle: shuffle};
+   return _elm.Helpers.values;
+};

@@ -1,0 +1,87 @@
+Elm.Serialize = Elm.Serialize || {};
+Elm.Serialize.make = function (_elm) {
+   "use strict";
+   _elm.Serialize = _elm.Serialize || {};
+   if (_elm.Serialize.values)
+   return _elm.Serialize.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Serialize",
+   $Basics = Elm.Basics.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $Json$Encode = Elm.Json.Encode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Player = Elm.Player.make(_elm);
+   var intPair = function (_v0) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return $Json$Encode.list(A2($List.map,
+              $Json$Encode.$int,
+              _L.fromArray([_v0._0
+                           ,_v0._1])));}
+         _U.badCase($moduleName,
+         "on line 32, column 18 to 40");
+      }();
+   };
+   var player = function ($) {
+      return $Json$Encode.string($Player.name($));
+   };
+   var deck = function ($) {
+      return $Json$Encode.list($List.map($Json$Encode.string)($));
+   };
+   var action = function (a) {
+      return function () {
+         switch (a.ctor)
+         {case "NoAction":
+            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                     ,_0: "action"
+                                                     ,_1: $Json$Encode.string("NoAction")}]));
+            case "Pass":
+            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                     ,_0: "action"
+                                                     ,_1: $Json$Encode.string("Pass")}]));
+            case "PickUpPiece":
+            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                     ,_0: "action"
+                                                     ,_1: $Json$Encode.string("PickUpPiece")}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "player"
+                                                     ,_1: player(a._0)}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "idx"
+                                                     ,_1: $Json$Encode.$int(a._1)}]));
+            case "PlacePiece":
+            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                     ,_0: "action"
+                                                     ,_1: $Json$Encode.string("PlacePiece")}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "mousePos"
+                                                     ,_1: intPair(a._0)}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "dims"
+                                                     ,_1: intPair(a._1)}]));
+            case "StartGame":
+            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                     ,_0: "action"
+                                                     ,_1: $Json$Encode.string("StartGame")}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "deck"
+                                                     ,_1: deck(a._1)}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "player"
+                                                     ,_1: player(a._2)}]));}
+         _U.badCase($moduleName,
+         "between lines 13 and 23");
+      }();
+   };
+   _elm.Serialize.values = {_op: _op
+                           ,action: action
+                           ,deck: deck
+                           ,player: player
+                           ,intPair: intPair};
+   return _elm.Serialize.values;
+};

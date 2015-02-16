@@ -1,0 +1,205 @@
+Elm.Serialize = Elm.Serialize || {};
+Elm.Serialize.make = function (_elm) {
+   "use strict";
+   _elm.Serialize = _elm.Serialize || {};
+   if (_elm.Serialize.values)
+   return _elm.Serialize.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Serialize",
+   $Basics = Elm.Basics.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $Helpers = Elm.Helpers.make(_elm),
+   $Json = Elm.Json.make(_elm),
+   $List = Elm.List.make(_elm);
+   var deserializeString = function (val) {
+      return function () {
+         switch (val.ctor)
+         {case "String": return val._0;}
+         _E.Case($moduleName,
+         "between lines 84 and 85");
+      }();
+   };
+   var deserializeInt = function (val) {
+      return function () {
+         switch (val.ctor)
+         {case "Number":
+            return $Basics.round(val._0);}
+         _E.Case($moduleName,
+         "between lines 74 and 75");
+      }();
+   };
+   var deserializeIntPair = function (val) {
+      return function () {
+         switch (val.ctor)
+         {case "Array":
+            return {ctor: "_Tuple2"
+                   ,_0: deserializeInt(A2($Helpers._op["!!"],
+                   val._0,
+                   0))
+                   ,_1: deserializeInt(A2($Helpers._op["!!"],
+                   val._0,
+                   1))};}
+         _E.Case($moduleName,
+         "between lines 79 and 80");
+      }();
+   };
+   var deserializeWindowDims = deserializeIntPair;
+   var deserializeMousePos = deserializeIntPair;
+   var deserializePlayer = function (player) {
+      return function () {
+         switch (player.ctor)
+         {case "String":
+            switch (player._0)
+              {case "blue":
+                 return $GameTypes.Blue;
+                 case "red":
+                 return $GameTypes.Red;}
+              break;}
+         _E.Case($moduleName,
+         "between lines 62 and 64");
+      }();
+   };
+   var deserializeDeck = function (deck) {
+      return function () {
+         switch (deck.ctor)
+         {case "Array":
+            return A2($List.map,
+              deserializeString,
+              deck._0);}
+         _E.Case($moduleName,
+         "between lines 57 and 58");
+      }();
+   };
+   var deserializeAction = function (action) {
+      return function () {
+         switch (action.ctor)
+         {case "Object":
+            return function () {
+                 var lookup = function (field) {
+                    return A2($Dict.getOrFail,
+                    field,
+                    action._0);
+                 };
+                 return function () {
+                    var _v12 = lookup("action");
+                    switch (_v12.ctor)
+                    {case "String": switch (_v12._0)
+                         {case "NoAction":
+                            return $GameTypes.NoAction;
+                            case "Pass":
+                            return $GameTypes.Pass;
+                            case "PickUpPiece":
+                            return A2($GameTypes.PickUpPiece,
+                              deserializePlayer(lookup("player")),
+                              deserializeInt(lookup("idx")));
+                            case "PlacePiece":
+                            return A2($GameTypes.PlacePiece,
+                              deserializeMousePos(lookup("mousePos")),
+                              deserializeWindowDims(lookup("dims")));
+                            case "StartGame":
+                            return A2($GameTypes.StartGame,
+                              deserializeDeck(lookup("deck")),
+                              deserializePlayer(lookup("player")));}
+                         break;}
+                    _E.Case($moduleName,
+                    "between lines 48 and 53");
+                 }();
+              }();}
+         _E.Case($moduleName,
+         "between lines 45 and 53");
+      }();
+   };
+   var serializeInt = function (i) {
+      return $Json.Number($Basics.toFloat(i));
+   };
+   var serializeIntPair = function (_v14) {
+      return function () {
+         switch (_v14.ctor)
+         {case "_Tuple2":
+            return $Json.Array(A2($List.map,
+              serializeInt,
+              _L.fromArray([_v14._0
+                           ,_v14._1])));}
+         _E.Case($moduleName,
+         "on line 38, column 27 to 59");
+      }();
+   };
+   var serializeWindowDims = serializeIntPair;
+   var serializeMousePos = serializeIntPair;
+   var serializePlayer = function (player) {
+      return $Json.String($GameTypes.playerName(player));
+   };
+   var serializeDeck = function (deck) {
+      return $Json.Array(A2($List.map,
+      $Json.String,
+      deck));
+   };
+   var serializeAction = function (action) {
+      return function () {
+         switch (action.ctor)
+         {case "NoAction":
+            return $Json.Object($Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                             ,_0: "action"
+                                                             ,_1: $Json.String("NoAction")}])));
+            case "Pass":
+            return $Json.Object($Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                             ,_0: "action"
+                                                             ,_1: $Json.String("Pass")}])));
+            case "PickUpPiece":
+            return $Json.Object($Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                             ,_0: "action"
+                                                             ,_1: $Json.String("PickUpPiece")}
+                                                            ,{ctor: "_Tuple2"
+                                                             ,_0: "player"
+                                                             ,_1: serializePlayer(action._0)}
+                                                            ,{ctor: "_Tuple2"
+                                                             ,_0: "idx"
+                                                             ,_1: serializeInt(action._1)}])));
+            case "PlacePiece":
+            return $Json.Object($Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                             ,_0: "action"
+                                                             ,_1: $Json.String("PlacePiece")}
+                                                            ,{ctor: "_Tuple2"
+                                                             ,_0: "mousePos"
+                                                             ,_1: serializeIntPair(action._0)}
+                                                            ,{ctor: "_Tuple2"
+                                                             ,_0: "dims"
+                                                             ,_1: serializeIntPair(action._1)}])));
+            case "StartGame":
+            return $Json.Object($Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                             ,_0: "action"
+                                                             ,_1: $Json.String("StartGame")}
+                                                            ,{ctor: "_Tuple2"
+                                                             ,_0: "deck"
+                                                             ,_1: serializeDeck(action._0)}
+                                                            ,{ctor: "_Tuple2"
+                                                             ,_0: "player"
+                                                             ,_1: serializePlayer(action._1)}])));}
+         _E.Case($moduleName,
+         "between lines 12 and 20");
+      }();
+   };
+   _elm.Serialize.values = {_op: _op
+                           ,serializeAction: serializeAction
+                           ,serializeDeck: serializeDeck
+                           ,serializePlayer: serializePlayer
+                           ,serializeMousePos: serializeMousePos
+                           ,serializeWindowDims: serializeWindowDims
+                           ,serializeInt: serializeInt
+                           ,serializeIntPair: serializeIntPair
+                           ,deserializeAction: deserializeAction
+                           ,deserializeDeck: deserializeDeck
+                           ,deserializePlayer: deserializePlayer
+                           ,deserializeMousePos: deserializeMousePos
+                           ,deserializeWindowDims: deserializeWindowDims
+                           ,deserializeInt: deserializeInt
+                           ,deserializeIntPair: deserializeIntPair
+                           ,deserializeString: deserializeString};
+   return _elm.Serialize.values;
+};

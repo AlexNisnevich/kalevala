@@ -1,0 +1,134 @@
+Elm.GameTypes = Elm.GameTypes || {};
+Elm.GameTypes.make = function (_elm) {
+   "use strict";
+   _elm.GameTypes = _elm.GameTypes || {};
+   if (_elm.GameTypes.values)
+   return _elm.GameTypes.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "GameTypes",
+   $Dict = Elm.Dict.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm);
+   var None = {ctor: "None"};
+   var PassButton = {ctor: "PassButton"};
+   var PieceInHand = F2(function (a,
+   b) {
+      return {ctor: "PieceInHand"
+             ,_0: a
+             ,_1: b};
+   });
+   var Board = {ctor: "Board"};
+   var Start = {ctor: "Start"};
+   var NoAction = {ctor: "NoAction"};
+   var Pass = {ctor: "Pass"};
+   var StartGame = F2(function (a,
+   b) {
+      return {ctor: "StartGame"
+             ,_0: a
+             ,_1: b};
+   });
+   var PlacePiece = F2(function (a,
+   b) {
+      return {ctor: "PlacePiece"
+             ,_0: a
+             ,_1: b};
+   });
+   var PickUpPiece = F2(function (a,
+   b) {
+      return {ctor: "PickUpPiece"
+             ,_0: a
+             ,_1: b};
+   });
+   var Loki = {ctor: "Loki"};
+   var Valkyrie = {ctor: "Valkyrie"};
+   var Skadi = {ctor: "Skadi"};
+   var Fenrir = {ctor: "Fenrir"};
+   var Dragon = {ctor: "Dragon"};
+   var Troll = {ctor: "Troll"};
+   var Thor = {ctor: "Thor"};
+   var Odin = {ctor: "Odin"};
+   var State = function (a) {
+      return function (b) {
+         return function (c) {
+            return function (d) {
+               return function (e) {
+                  return function (f) {
+                     return function (g) {
+                        return function (h) {
+                           return function (i) {
+                              return function (j) {
+                                 return function (k) {
+                                    return {_: {}
+                                           ,board: c
+                                           ,deck: e
+                                           ,delta: j
+                                           ,gameOver: k
+                                           ,hands: f
+                                           ,heldPiece: h
+                                           ,lastPlaced: i
+                                           ,players: a
+                                           ,score: d
+                                           ,started: g
+                                           ,turn: b};
+                                 };
+                              };
+                           };
+                        };
+                     };
+                  };
+               };
+            };
+         };
+      };
+   };
+   var Move = F3(function (a,b,c) {
+      return {_: {}
+             ,idx: b
+             ,location: c
+             ,piece: a};
+   });
+   var playerName = function (player) {
+      return function () {
+         switch (player.ctor)
+         {case "Blue": return "blue";
+            case "Red": return "red";}
+         _E.Case($moduleName,
+         "between lines 14 and 16");
+      }();
+   };
+   var Blue = {ctor: "Blue"};
+   var Red = {ctor: "Red"};
+   var Cpu = {ctor: "Cpu"};
+   var Human = {ctor: "Human"};
+   _elm.GameTypes.values = {_op: _op
+                           ,Human: Human
+                           ,Cpu: Cpu
+                           ,Red: Red
+                           ,Blue: Blue
+                           ,playerName: playerName
+                           ,Move: Move
+                           ,State: State
+                           ,Odin: Odin
+                           ,Thor: Thor
+                           ,Troll: Troll
+                           ,Dragon: Dragon
+                           ,Fenrir: Fenrir
+                           ,Skadi: Skadi
+                           ,Valkyrie: Valkyrie
+                           ,Loki: Loki
+                           ,PickUpPiece: PickUpPiece
+                           ,PlacePiece: PlacePiece
+                           ,StartGame: StartGame
+                           ,Pass: Pass
+                           ,NoAction: NoAction
+                           ,Start: Start
+                           ,Board: Board
+                           ,PieceInHand: PieceInHand
+                           ,PassButton: PassButton
+                           ,None: None};
+   return _elm.GameTypes.values;
+};

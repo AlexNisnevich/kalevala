@@ -1,0 +1,85 @@
+Elm.Helpers = Elm.Helpers || {};
+Elm.Helpers.make = function (_elm) {
+   "use strict";
+   _elm.Helpers = _elm.Helpers || {};
+   if (_elm.Helpers.values)
+   return _elm.Helpers.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Helpers",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Random = Elm.Random.make(_elm);
+   var replaceAtIndex = F3(function (i,
+   elt,
+   arr) {
+      return function () {
+         var after = A2($List.drop,
+         i + 1,
+         arr);
+         var before = A2($List.take,
+         i,
+         arr);
+         return A2($Basics._op["++"],
+         before,
+         A2($Basics._op["++"],
+         _L.fromArray([elt]),
+         after));
+      }();
+   });
+   var without = F2(function (i,
+   arr) {
+      return function () {
+         var after = A2($List.drop,
+         i + 1,
+         arr);
+         var before = A2($List.take,
+         i,
+         arr);
+         return A2($Basics._op["++"],
+         before,
+         after);
+      }();
+   });
+   _op["!!"] = F2(function (list,
+   idx) {
+      return $List.head(A2($List.drop,
+      idx,
+      list));
+   });
+   var shuffle = F2(function (list,
+   seed) {
+      return $List.isEmpty(list) ? _L.fromArray([]) : function () {
+         var generator = A2($Random.$int,
+         0,
+         $List.length(list) - 1);
+         var $ = A2($Random.generate,
+         generator,
+         seed),
+         i = $._0,
+         newSeed = $._1;
+         return A2($Basics._op["++"],
+         _L.fromArray([A2(_op["!!"],
+         list,
+         i)]),
+         A2(shuffle,
+         A2(without,i,list),
+         newSeed));
+      }();
+   });
+   var sample = F2(function (list,
+   seed) {
+      return $List.head(A2(shuffle,
+      list,
+      seed));
+   });
+   _elm.Helpers.values = {_op: _op
+                         ,without: without
+                         ,replaceAtIndex: replaceAtIndex
+                         ,shuffle: shuffle
+                         ,sample: sample};
+   return _elm.Helpers.values;
+};

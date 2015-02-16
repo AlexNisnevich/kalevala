@@ -1,0 +1,469 @@
+Elm.Voluspa = Elm.Voluspa || {};
+Elm.Voluspa.make = function (_elm) {
+   "use strict";
+   _elm.Voluspa = _elm.Voluspa || {};
+   if (_elm.Voluspa.values)
+   return _elm.Voluspa.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _A = _N.Array.make(_elm),
+   _E = _N.Error.make(_elm),
+   $moduleName = "Voluspa",
+   $AI = Elm.AI.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Board = Elm.Board.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $Display = Elm.Display.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Graphics$Input = Elm.Graphics.Input.make(_elm),
+   $Helpers = Elm.Helpers.make(_elm),
+   $Json = Elm.Json.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Mouse = Elm.Mouse.make(_elm),
+   $Piece = Elm.Piece.make(_elm),
+   $Player = Elm.Player.make(_elm),
+   $Serialize = Elm.Serialize.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $String = Elm.String.make(_elm),
+   $WebSocket = Elm.WebSocket.make(_elm),
+   $Window = Elm.Window.make(_elm);
+   var constructAction = F4(function (clickType,
+   _v0,
+   mousePos,
+   dims) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var click = A2($Debug.watch,
+                 "clickInput.signal",
+                 clickType);
+                 var pos = A2($Debug.watch,
+                 "Mouse.position",
+                 mousePos);
+                 return function () {
+                    switch (clickType.ctor)
+                    {case "Board":
+                       return A2($GameTypes.PlacePiece,
+                         mousePos,
+                         dims);
+                       case "None":
+                       return $GameTypes.NoAction;
+                       case "PassButton":
+                       return $GameTypes.Pass;
+                       case "PieceInHand":
+                       return A2($GameTypes.PickUpPiece,
+                         clickType._0,
+                         clickType._1);
+                       case "Start":
+                       return A2($GameTypes.StartGame,
+                         _v0._0,
+                         _v0._1);}
+                    _E.Case($moduleName,
+                    "between lines 168 and 173");
+                 }();
+              }();}
+         _E.Case($moduleName,
+         "between lines 164 and 173");
+      }();
+   });
+   var startState = {_: {}
+                    ,board: $Dict.empty
+                    ,deck: _L.fromArray([])
+                    ,delta: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "red"
+                                                         ,_1: ""}
+                                                        ,{ctor: "_Tuple2"
+                                                         ,_0: "blue"
+                                                         ,_1: ""}]))
+                    ,gameOver: false
+                    ,hands: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "red"
+                                                         ,_1: _L.fromArray([])}
+                                                        ,{ctor: "_Tuple2"
+                                                         ,_0: "blue"
+                                                         ,_1: _L.fromArray([])}]))
+                    ,heldPiece: $Maybe.Nothing
+                    ,lastPlaced: $Maybe.Nothing
+                    ,players: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                           ,_0: "red"
+                                                           ,_1: $GameTypes.Human}
+                                                          ,{ctor: "_Tuple2"
+                                                           ,_0: "blue"
+                                                           ,_1: $GameTypes.Cpu}]))
+                    ,score: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                         ,_0: "red"
+                                                         ,_1: 0}
+                                                        ,{ctor: "_Tuple2"
+                                                         ,_0: "blue"
+                                                         ,_1: 0}]))
+                    ,started: false
+                    ,turn: $GameTypes.Red};
+   var deckContents = function () {
+      var r = $List.repeat;
+      return _L.append(A2(r,6,"Odin"),
+      _L.append(A2(r,8,"Thor"),
+      _L.append(A2(r,6,"Troll"),
+      _L.append(A2(r,8,"Dragon"),
+      _L.append(A2(r,8,"Fenrir"),
+      _L.append(A2(r,9,"Skadi"),
+      _L.append(A2(r,9,"Valkyrie"),
+      A2(r,6,"Loki"))))))));
+   }();
+   var processClick = function (signal) {
+      return function () {
+         var sampledMouse = A2($Signal.sampleOn,
+         signal,
+         $Mouse.position);
+         var startState = A2($Signal._op["~"],
+         A2($Signal._op["<~"],
+         F2(function (v0,v1) {
+            return {ctor: "_Tuple2"
+                   ,_0: v0
+                   ,_1: v1};
+         }),
+         A2($Helpers.shuffle,
+         deckContents,
+         signal)),
+         A2($Signal._op["<~"],
+         $List.head,
+         A2($Helpers.shuffle,
+         _L.fromArray([$GameTypes.Red
+                      ,$GameTypes.Blue]),
+         signal)));
+         return A2($Signal._op["~"],
+         A2($Signal._op["~"],
+         A2($Signal._op["~"],
+         A2($Signal._op["<~"],
+         constructAction,
+         signal),
+         startState),
+         sampledMouse),
+         $Window.dimensions);
+      }();
+   };
+   var clickInput = $Graphics$Input.input($GameTypes.None);
+   var mustPass = function (state) {
+      return A2($Player.noTilesInHand,
+      state.turn,
+      state);
+   };
+   var isGameOver = function (state) {
+      return A2($Player.noTilesInHand,
+      $GameTypes.Red,
+      state) && A2($Player.noTilesInHand,
+      $GameTypes.Blue,
+      state);
+   };
+   var makeMove = F2(function (move,
+   state) {
+      return function () {
+         var existingTile = A2($Dict.get,
+         move.location,
+         state.board);
+         var newBoard = A3($Dict.insert,
+         move.location,
+         move.piece,
+         state.board);
+         var delta = A2($Board.scoreMove,
+         move,
+         newBoard);
+         var p = $GameTypes.playerName(state.turn);
+         var newScore = A2($Dict.getOrFail,
+         p,
+         state.score) + delta;
+         var hand = A2($Dict.getOrFail,
+         p,
+         state.hands);
+         var handWithDrawnTile = _L.append(A2($Helpers.without,
+         move.idx,
+         hand),
+         $Basics.not($List.isEmpty(state.deck)) ? A2($List.take,
+         1,
+         state.deck) : _L.fromArray([]));
+         var newHand = function () {
+            switch (existingTile.ctor)
+            {case "Just":
+               return _U.eq(move.piece,
+                 $GameTypes.Skadi) ? A3($Helpers.replaceAtIndex,
+                 move.idx,
+                 $Piece.toString(existingTile._0),
+                 hand) : handWithDrawnTile;
+               case "Nothing":
+               return handWithDrawnTile;}
+            _E.Case($moduleName,
+            "between lines 73 and 76");
+         }();
+         return _U.replace([["turn"
+                            ,$Player.next(state.turn)]
+                           ,["board",newBoard]
+                           ,["score"
+                            ,A3($Dict.insert,
+                            p,
+                            newScore,
+                            state.score)]
+                           ,["deck"
+                            ,A2($List.drop,1,state.deck)]
+                           ,["hands"
+                            ,A3($Dict.insert,
+                            p,
+                            newHand,
+                            state.hands)]
+                           ,["started",true]
+                           ,["heldPiece",$Maybe.Nothing]
+                           ,["lastPlaced"
+                            ,$Maybe.Just(move.location)]
+                           ,["delta"
+                            ,A3($Dict.insert,
+                            p,
+                            _L.append("(+",
+                            _L.append($String.show(delta),
+                            ")")),
+                            state.delta)]],
+         state);
+      }();
+   });
+   var pass = function (state) {
+      return function () {
+         var p = $GameTypes.playerName(state.turn);
+         return _U.replace([["turn"
+                            ,$Player.next(state.turn)]
+                           ,["delta"
+                            ,A3($Dict.insert,
+                            p,
+                            "(+0)",
+                            state.delta)]],
+         state);
+      }();
+   };
+   var tryAIMove = function (state) {
+      return function () {
+         var _v9 = $AI.getMove(state);
+         switch (_v9.ctor)
+         {case "Just": return A2(tryMove,
+              _v9._0.location,
+              _U.replace([["heldPiece"
+                          ,$Maybe.Just(_v9._0.idx)]],
+              state));
+            case "Nothing":
+            return pass(state);}
+         _E.Case($moduleName,
+         "between lines 60 and 62");
+      }();
+   };
+   var tryMove = F2(function (location,
+   state) {
+      return function () {
+         var _v11 = state.heldPiece;
+         switch (_v11.ctor)
+         {case "Just":
+            return function () {
+                 var nextPlayerType = A2($Dict.getOrFail,
+                 $GameTypes.playerName($Player.next(state.turn)),
+                 state.players);
+                 var nextAction = function () {
+                    switch (nextPlayerType.ctor)
+                    {case "Cpu": return tryAIMove;
+                       case "Human":
+                       return $Basics.identity;}
+                    _E.Case($moduleName,
+                    "between lines 51 and 54");
+                 }();
+                 var p = $GameTypes.playerName(state.turn);
+                 var hand = A2($Dict.getOrFail,
+                 p,
+                 state.hands);
+                 var pieceStr = $List.head(A2($List.drop,
+                 _v11._0,
+                 hand));
+                 var piece = $Piece.fromString(pieceStr);
+                 var move = {_: {}
+                            ,idx: _v11._0
+                            ,location: location
+                            ,piece: piece};
+                 return A2($Board.isValidMove,
+                 move,
+                 state.board) ? nextAction(A2(makeMove,
+                 move,
+                 state)) : _U.replace([["heldPiece"
+                                       ,$Maybe.Nothing]],
+                 state);
+              }();
+            case "Nothing": return state;}
+         _E.Case($moduleName,
+         "between lines 43 and 56");
+      }();
+   });
+   var startGame = F2(function (deck,
+   player) {
+      return function () {
+         var deckWithIndices = A2($List.zip,
+         _L.range(0,
+         $List.length(deck) - 1),
+         deck);
+         var idxFirstNonTroll = $Basics.fst($List.head(A2($List.filter,
+         function (_v14) {
+            return function () {
+               switch (_v14.ctor)
+               {case "_Tuple2":
+                  return $Basics.not(_U.eq(_v14._1,
+                    "Troll"));}
+               _E.Case($moduleName,
+               "on line 113, column 66 to 87");
+            }();
+         },
+         deckWithIndices)));
+         var firstTile = $Piece.fromString(A2($Helpers._op["!!"],
+         deck,
+         idxFirstNonTroll));
+         var deckMinusFirstTile = A2($Helpers.without,
+         idxFirstNonTroll,
+         deck);
+         var redHand = A2($List.take,
+         5,
+         deckMinusFirstTile);
+         var blueHand = A2($List.take,
+         5,
+         A2($List.drop,
+         5,
+         deckMinusFirstTile));
+         var hands = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: "red"
+                                                  ,_1: redHand}
+                                                 ,{ctor: "_Tuple2"
+                                                  ,_0: "blue"
+                                                  ,_1: blueHand}]));
+         var remainder = A2($List.drop,
+         10,
+         deckMinusFirstTile);
+         var state = _U.replace([["hands"
+                                 ,hands]
+                                ,["deck",remainder]
+                                ,["started",true]
+                                ,["board"
+                                 ,A2($Dict.singleton,
+                                 {ctor: "_Tuple2",_0: 0,_1: 0},
+                                 firstTile)]
+                                ,["turn",player]],
+         startState);
+         return _U.eq(A2($Dict.getOrFail,
+         $GameTypes.playerName(state.turn),
+         state.players),
+         $GameTypes.Cpu) ? tryAIMove(state) : state;
+      }();
+   });
+   var pickUpPiece = F2(function (idx,
+   state) {
+      return _U.replace([["heldPiece"
+                         ,$Maybe.Just(idx)]],
+      state);
+   });
+   var tryToPickUpPiece = F3(function (player,
+   idx,
+   state) {
+      return _U.eq(state.turn,
+      player) ? A2(pickUpPiece,
+      idx,
+      state) : _U.replace([["heldPiece"
+                           ,$Maybe.Nothing]],
+      state);
+   });
+   var performAction = F2(function (action,
+   state) {
+      return function () {
+         var newState = function () {
+            switch (action.ctor)
+            {case "NoAction": return state;
+               case "Pass":
+               return _U.replace([["turn"
+                                  ,$Player.next(state.turn)]],
+                 state);
+               case "PickUpPiece":
+               return A3(tryToPickUpPiece,
+                 action._0,
+                 action._1,
+                 state);
+               case "PlacePiece":
+               return A2(tryMove,
+                 A3($Display.mouseToBoardPosition,
+                 action._0,
+                 state,
+                 action._1),
+                 state);
+               case "StartGame":
+               return A2(startGame,
+                 action._0,
+                 action._1);}
+            _E.Case($moduleName,
+            "between lines 91 and 97");
+         }();
+         var p = $GameTypes.playerName(state.turn);
+         return isGameOver(newState) ? _U.replace([["gameOver"
+                                                   ,true]],
+         newState) : mustPass(newState) ? pass(newState) : newState;
+      }();
+   });
+   var main = function () {
+      var action = processClick(clickInput.signal);
+      var request = A2($Signal._op["<~"],
+      function ($) {
+         return $Debug.watch("request")($Json.toString("")($Serialize.serializeAction($)));
+      },
+      action);
+      var response = A2($Signal._op["<~"],
+      $Debug.watch("response"),
+      A2($WebSocket.connect,
+      "ws://echo.websocket.org",
+      request));
+      var responseAction = A2($Signal._op["<~"],
+      $Debug.watch("deserialized"),
+      A2($Signal._op["<~"],
+      function (json) {
+         return function () {
+            var _v25 = $Json.fromString(json);
+            switch (_v25.ctor)
+            {case "Just":
+               return $Serialize.deserializeAction(_v25._0);
+               case "Nothing":
+               return $GameTypes.NoAction;}
+            _E.Case($moduleName,
+            "between lines 189 and 190");
+         }();
+      },
+      response));
+      var state = A3($Signal.foldp,
+      performAction,
+      startState,
+      A2($Signal.merge,
+      action,
+      responseAction));
+      return A2($Signal._op["~"],
+      A2($Signal._op["<~"],
+      $Display.render(clickInput),
+      state),
+      $Window.dimensions);
+   }();
+   _elm.Voluspa.values = {_op: _op
+                         ,tryToPickUpPiece: tryToPickUpPiece
+                         ,pickUpPiece: pickUpPiece
+                         ,pass: pass
+                         ,tryMove: tryMove
+                         ,tryAIMove: tryAIMove
+                         ,makeMove: makeMove
+                         ,performAction: performAction
+                         ,isGameOver: isGameOver
+                         ,mustPass: mustPass
+                         ,startGame: startGame
+                         ,clickInput: clickInput
+                         ,deckContents: deckContents
+                         ,startState: startState
+                         ,constructAction: constructAction
+                         ,processClick: processClick
+                         ,main: main};
+   return _elm.Voluspa.values;
+};

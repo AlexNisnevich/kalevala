@@ -1,0 +1,110 @@
+Elm.AI = Elm.AI || {};
+Elm.AI.make = function (_elm) {
+   "use strict";
+   _elm.AI = _elm.AI || {};
+   if (_elm.AI.values)
+   return _elm.AI.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "AI",
+   $Basics = Elm.Basics.make(_elm),
+   $Board = Elm.Board.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $Helpers = Elm.Helpers.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Piece = Elm.Piece.make(_elm),
+   $Player = Elm.Player.make(_elm);
+   var getMove = function (state) {
+      return $List.isEmpty(A2($Player.getHand,
+      state.turn,
+      state)) ? $Maybe.Nothing : function () {
+         var boardSize = $Board.getBoardSize(state.board);
+         var xs = A2($List.map,
+         function (x) {
+            return x - (boardSize / 2 | 0);
+         },
+         _L.range(0,boardSize - 1));
+         var locations = A2($List.concatMap,
+         function (x) {
+            return A2($List.map,
+            function (y) {
+               return {ctor: "_Tuple2"
+                      ,_0: x
+                      ,_1: y};
+            },
+            xs);
+         },
+         xs);
+         var validLocationsByPiece = function (piece) {
+            return A2($List.filter,
+            function (loc) {
+               return A2($Board.isValidMove,
+               {_: {}
+               ,idx: 0
+               ,location: loc
+               ,piece: piece},
+               state.board);
+            },
+            locations);
+         };
+         var hand = A2($Player.getHand,
+         state.turn,
+         state);
+         var idxs = _L.range(0,
+         $List.length(hand) - 1);
+         var pieceAtIdx = function (i) {
+            return $Piece.fromString(A2($Helpers._op["!!"],
+            hand,
+            i));
+         };
+         var validMoves = A2($List.concatMap,
+         function (i) {
+            return function () {
+               var piece = pieceAtIdx(i);
+               var move = function (loc) {
+                  return {_: {}
+                         ,idx: i
+                         ,location: loc
+                         ,piece: piece};
+               };
+               var boardAfterMoveTo = function (loc) {
+                  return A3($Dict.insert,
+                  loc,
+                  piece,
+                  state.board);
+               };
+               var moveWithScore = function (loc) {
+                  return {ctor: "_Tuple2"
+                         ,_0: move(loc)
+                         ,_1: A2($Board.scoreMove,
+                         move(loc),
+                         boardAfterMoveTo(loc))};
+               };
+               return A2($List.map,
+               moveWithScore,
+               validLocationsByPiece(piece));
+            }();
+         },
+         idxs);
+         var _ = $List.head($List.reverse(A2($List.sortBy,
+         $Basics.snd,
+         validMoves)));
+         var bestMove = function () {
+            switch (_.ctor)
+            {case "_Tuple2": return _._0;}
+            _U.badCase($moduleName,
+            "between lines 36 and 38");
+         }();
+         var p = $Player.name(state.turn);
+         return $Maybe.Just(bestMove);
+      }();
+   };
+   _elm.AI.values = {_op: _op
+                    ,getMove: getMove};
+   return _elm.AI.values;
+};

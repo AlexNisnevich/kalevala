@@ -1,0 +1,73 @@
+Elm.Piece = Elm.Piece || {};
+Elm.Piece.make = function (_elm) {
+   "use strict";
+   _elm.Piece = _elm.Piece || {};
+   if (_elm.Piece.values)
+   return _elm.Piece.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Piece",
+   $GameTypes = Elm.GameTypes.make(_elm);
+   var baseValue = function (piece) {
+      return function () {
+         switch (piece.ctor)
+         {case "Dragon": return 5;
+            case "Fenrir": return 4;
+            case "Loki": return 1;
+            case "Odin": return 8;
+            case "Skadi": return 3;
+            case "Thor": return 7;
+            case "Troll": return 6;
+            case "Valkyrie": return 2;}
+         _U.badCase($moduleName,
+         "between lines 31 and 39");
+      }();
+   };
+   var toString = function (piece) {
+      return function () {
+         switch (piece.ctor)
+         {case "Dragon": return "Dragon";
+            case "Fenrir": return "Fenrir";
+            case "Loki": return "Loki";
+            case "Odin": return "Odin";
+            case "Skadi": return "Skadi";
+            case "Thor": return "Thor";
+            case "Troll": return "Troll";
+            case "Valkyrie":
+            return "Valkyrie";}
+         _U.badCase($moduleName,
+         "between lines 19 and 27");
+      }();
+   };
+   var fromString = function (str) {
+      return function () {
+         switch (str)
+         {case "Dragon":
+            return $GameTypes.Dragon;
+            case "Fenrir":
+            return $GameTypes.Fenrir;
+            case "Loki":
+            return $GameTypes.Loki;
+            case "Odin":
+            return $GameTypes.Odin;
+            case "Skadi":
+            return $GameTypes.Skadi;
+            case "Thor":
+            return $GameTypes.Thor;
+            case "Troll":
+            return $GameTypes.Troll;
+            case "Valkyrie":
+            return $GameTypes.Valkyrie;}
+         _U.badCase($moduleName,
+         "between lines 7 and 15");
+      }();
+   };
+   _elm.Piece.values = {_op: _op
+                       ,fromString: fromString
+                       ,toString: toString
+                       ,baseValue: baseValue};
+   return _elm.Piece.values;
+};

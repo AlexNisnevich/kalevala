@@ -1,0 +1,90 @@
+Elm.Player = Elm.Player || {};
+Elm.Player.make = function (_elm) {
+   "use strict";
+   _elm.Player = _elm.Player || {};
+   if (_elm.Player.values)
+   return _elm.Player.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Player",
+   $Color = Elm.Color.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm);
+   var next = function (player) {
+      return function () {
+         switch (player.ctor)
+         {case "Blue":
+            return $GameTypes.Red;
+            case "Red":
+            return $GameTypes.Blue;}
+         _U.badCase($moduleName,
+         "between lines 32 and 34");
+      }();
+   };
+   var name = function (player) {
+      return function () {
+         switch (player.ctor)
+         {case "Blue": return "blue";
+            case "Red": return "red";}
+         _U.badCase($moduleName,
+         "between lines 26 and 28");
+      }();
+   };
+   var getType = F2(function (player,
+   state) {
+      return A2($Maybe.withDefault,
+      $GameTypes.Human,
+      A2($Dict.get,
+      name(player),
+      state.players));
+   });
+   var getHand = F2(function (player,
+   state) {
+      return A2($Maybe.withDefault,
+      _L.fromArray([]),
+      A2($Dict.get,
+      name(player),
+      state.hands));
+   });
+   var noTilesInHand = F2(function (player,
+   state) {
+      return $List.isEmpty(A2(getHand,
+      player,
+      state));
+   });
+   var fromString = function (str) {
+      return function () {
+         switch (str)
+         {case "blue":
+            return $GameTypes.Blue;
+            case "red":
+            return $GameTypes.Red;}
+         _U.badCase($moduleName,
+         "between lines 20 and 22");
+      }();
+   };
+   var color = function (player) {
+      return function () {
+         switch (player.ctor)
+         {case "Blue":
+            return $Color.blue;
+            case "Red": return $Color.red;}
+         _U.badCase($moduleName,
+         "between lines 14 and 16");
+      }();
+   };
+   _elm.Player.values = {_op: _op
+                        ,color: color
+                        ,fromString: fromString
+                        ,name: name
+                        ,next: next
+                        ,getType: getType
+                        ,getHand: getHand
+                        ,noTilesInHand: noTilesInHand};
+   return _elm.Player.values;
+};
