@@ -15,6 +15,7 @@ type GameState = NotStarted
 
 type PlayerType = Human
                 | Cpu
+                | Remote
 
 type Player = Red
             | Blue
@@ -57,7 +58,7 @@ type alias WindowDims = (Int, Int)
 type Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
             | StartGame GameType Deck Player
-            | GameStarted Deck Player  -- this should only be sent from the server
+            | GameStarted Deck Player Player -- represents a StartGame message sent from the server
             | Pass
             | NoAction
 

@@ -23,9 +23,10 @@ actionInfo actionType =
         ("mousePos" := mousePos)
         ("dims" := windowDims)
     "StartGame" ->
-      object2 GameStarted
+      object3 GameStarted
         ("deck" := deck)
         ("player" := player)
+        ("color" := player)
     "Pass" ->
       null Pass
     "NoAction" ->

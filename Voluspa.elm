@@ -56,6 +56,7 @@ tryMove location state =
           nextPlayerType = Player.getType (Player.next state.turn) state
           nextAction = case nextPlayerType of
                          Human -> identity
+                         Remote -> identity
                          Cpu -> tryAIMove
       in
         if (Board.isValidMove move state.board) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
@@ -97,7 +98,7 @@ performAction action state =
           PickUpPiece player idx -> tryToPickUpPiece player idx state
           PlacePiece mousePos dims -> tryMove (Display.mouseToBoardPosition mousePos state dims) state
           StartGame gameType deck player -> startGame gameType deck player
-          GameStarted deck player -> gameStarted deck player
+          GameStarted deck startPlayer localPlayer -> gameStarted deck startPlayer localPlayer
           Pass -> { state | turn <- Player.next state.turn }
           NoAction -> state
   in
@@ -144,9 +145,10 @@ startGame gameType deck player =
 
 -- (only for HumanVsHumanRemote games) Event triggers when players are matched together into a game
 -- TODO separate out common code between this and startGame
-gameStarted : Deck -> Player -> State
-gameStarted deck player =
-  let players = Dict.fromList [("red", Human), ("blue", Human)]
+gameStarted : Deck -> Player -> Player -> State
+gameStarted deck startPlayer localPlayer =
+  let players = Dict.fromList [ ("red", if localPlayer == Red then Human else Remote)
+                              , ("blue", if localPlayer == Blue then Human else Remote)]
       deckWithIndices = List.map2 (,) [0..(List.length deck - 1)] deck
       idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "Troll")) deckWithIndices
       firstTile = Piece.fromString (deck !! idxFirstNonTroll)
@@ -162,7 +164,7 @@ gameStarted deck player =
                  , hands <- hands
                  , deck <- remainder
                  , board <- Dict.singleton (0, 0) firstTile
-                 , turn <- player}
+                 , turn <- startPlayer}
 
 deckContents : List String
 deckContents =
