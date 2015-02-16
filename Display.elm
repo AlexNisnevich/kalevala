@@ -134,6 +134,7 @@ renderHand player state =
                      then playerHand
                      else cpuHand
       handText = playerType |> toString
+                            |> (\t -> if t == "Human" then "Player" else t)
                             |> String.toUpper
                             |> fromString
                             |> (if state.turn == player && state.gameState == Ongoing then bold else identity)
@@ -185,24 +186,25 @@ render state dims =
       rulesAreaWidth = 650
       startButton = button (send clickChannel Start) "New game"
       gameTypeDropDown = dropDown (send gameTypeChannel)
-                            [ ("Human vs AI", HumanVsCpu)
-                            , ("Human vs Human (hotseat)" , HumanVsHumanLocal)
-                            , ("Human vs Human (online)" , HumanVsHumanRemote)
+                            [ ("Player vs AI", HumanVsCpu)
+                            , ("Player vs Player (hotseat)" , HumanVsHumanLocal)
+                            , ("Player vs Player (online)" , HumanVsHumanRemote)
                             ]
                          |> size 180 40
-      waitingText = leftAligned <| fromString <| if | state.gameState == WaitingForPlayers -> "Waiting for opponent ...  "
-                                                    | state.gameState == Ongoing && state.gameType == HumanVsHumanRemote -> "Connected "
-                                                    | state.gameState == Disconnected -> "Opponent disconnected "
-                                                    | otherwise -> ""
+      statusText = if | state.gameState == WaitingForPlayers -> "Waiting for opponent ... "
+                      | state.gameState == Ongoing && state.gameType == HumanVsHumanRemote -> "Connected "
+                      | state.gameState == Disconnected -> "Opponent disconnected "
+                      | otherwise -> ""
+      statusTextBlock = container 150 40 middle <| centered <| Text.height 11 <| fromString <| statusText
+      controls = container rulesAreaWidth 40 middle <|  flow right [ statusTextBlock, gameTypeDropDown, startButton ]
       rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (fromString "Rules")))
                             , spacer 5 5
                             , width rulesAreaWidth <| leftAligned <| fromString "&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles."
                             , width rulesAreaWidth <| leftAligned <| fromString "&bull; If the tile you placed has the highest value in a row and/or column (ties don't count), you score one point for each tile in that row and/or column."
                             , spacer 5 5
                             , pieceRules
-                            , container rulesAreaWidth 40 middle <| flow right [ waitingText, gameTypeDropDown, startButton ]
+                            , controls
                             ]
-      controls = flow right [ waitingText, gameTypeDropDown, startButton ]
       rightArea = if | handGap >= 420 -> rulesArea
                      | handGap >= 280 -> pieceRules `above` controls
                      | otherwise -> controls
