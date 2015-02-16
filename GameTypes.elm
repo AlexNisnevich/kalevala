@@ -12,6 +12,7 @@ type GameState = NotStarted
                | WaitingForPlayers
                | Ongoing
                | GameOver
+               | Disconnected
 
 type PlayerType = Human
                 | Cpu
@@ -60,7 +61,9 @@ type Action = PickUpPiece Player Int
             | StartGame GameType Deck Player
             | GameStarted Deck Player Player -- represents a StartGame message sent from the server
             | Pass
+            | OpponentDisconnected
             | NoAction
+            | ParseError String
 
 type ClickEvent = Start
                 | BoardClick

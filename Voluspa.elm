@@ -30,7 +30,7 @@ import Debug
 
 tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
-  if state.turn == player
+  if (state.turn == player) && (state.gameState == Ongoing)
   then pickUpPiece idx state
   else { state | heldPiece <- Nothing }
 
@@ -100,7 +100,9 @@ performAction action state =
           StartGame gameType deck player -> startGame gameType deck player
           GameStarted deck startPlayer localPlayer -> gameStarted deck startPlayer localPlayer
           Pass -> { state | turn <- Player.next state.turn }
+          OpponentDisconnected -> { state | gameState <- Disconnected }
           NoAction -> state
+          ParseError e -> state
   in
     if | isGameOver newState -> { newState | gameState <- GameOver }
        | mustPass newState -> pass newState
@@ -220,7 +222,7 @@ main =
   let
     encode action = Json.Encode.encode 0 (Serialize.action action)
     decode actionJson = case Json.Decode.decodeString Deserialize.action actionJson of Ok action -> action
-                                                                                       Err e -> NoAction
+                                                                                       Err e -> ParseError e
 
     action = processClick (subscribe Display.clickChannel)
 

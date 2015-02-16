@@ -192,6 +192,7 @@ render state dims =
                          |> size 180 40
       waitingText = leftAligned <| fromString <| if | state.gameState == WaitingForPlayers -> "Waiting for opponent ...  "
                                                     | state.gameState == Ongoing && state.gameType == HumanVsHumanRemote -> "Connected "
+                                                    | state.gameState == Disconnected -> "Opponent disconnected "
                                                     | otherwise -> ""
       rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (fromString "Rules")))
                             , spacer 5 5

@@ -13,7 +13,7 @@ action =
 
 actionInfo : String -> Decoder Action
 actionInfo actionType =
-  case actionType of
+   case actionType of
     "PickUpPiece" ->
       object2 PickUpPiece
         ("player" := player)
@@ -28,9 +28,11 @@ actionInfo actionType =
         ("player" := player)
         ("color" := player)
     "Pass" ->
-      null Pass
+      succeed Pass
+    "OpponentDisconnected" ->
+      succeed OpponentDisconnected
     "NoAction" ->
-      null NoAction
+      succeed NoAction
     _ ->
       fail (actionType ++ " is not a recognized type of action")
 
