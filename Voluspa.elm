@@ -222,7 +222,10 @@ main =
 
     action = processClick (subscribe Display.clickChannel)
 
-    request = Debug.watch "request" <~ (encode <~ action)
+    actionWithGameType = (\a t -> (a, t)) <~ action ~ (subscribe Display.gameTypeChannel)
+    actionForRemote = (\(a, t) -> a) <~ keepIf (\(a, t) -> t == HumanVsHumanRemote) (NoAction, HumanVsCpu) actionWithGameType
+
+    request = Debug.watch "request" <~ (encode <~ actionForRemote)
     response = Debug.watch "response" <~ WebSocket.connect "ws://0.0.0.0:22000" request
     responseAction = Debug.watch "deserialized" <~ (decode <~ response)
 
