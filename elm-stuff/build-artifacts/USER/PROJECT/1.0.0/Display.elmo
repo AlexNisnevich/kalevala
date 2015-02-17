@@ -229,7 +229,10 @@ Elm.Display.make = function (_elm) {
          pieceSize,
          $Graphics$Element.middle)($Text.leftAligned($Text.color($Player.color(player))((_U.eq(state.turn,
          player) && _U.eq(state.gameState,
-         $GameTypes.Ongoing) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper($Basics.toString(playerType)))))));
+         $GameTypes.Ongoing) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(function (t) {
+            return _U.eq(t,
+            "Human") ? "Player" : t;
+         }($Basics.toString(playerType))))))));
          var score = A3($Graphics$Element.container,
          25,
          pieceSize,
@@ -359,35 +362,42 @@ Elm.Display.make = function (_elm) {
    var render = F2(function (state,
    dims) {
       return function () {
-         var waitingText = $Text.leftAligned($Text.fromString(_U.eq(state.gameState,
-         $GameTypes.WaitingForPlayers) ? "Waiting for opponent ...  " : _U.eq(state.gameState,
+         var statusText = _U.eq(state.gameState,
+         $GameTypes.WaitingForPlayers) ? "Waiting for opponent ... " : _U.eq(state.gameState,
          $GameTypes.Ongoing) && _U.eq(state.gameType,
          $GameTypes.HumanVsHumanRemote) ? "Connected " : _U.eq(state.gameState,
-         $GameTypes.Disconnected) ? "Opponent disconnected " : ""));
+         $GameTypes.Disconnected) ? "Opponent disconnected " : "";
+         var statusTextBlock = A3($Graphics$Element.container,
+         150,
+         40,
+         $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(statusText))));
          var gameTypeDropDown = A2($Graphics$Element.size,
          180,
          40)(A2($Graphics$Input.dropDown,
          $Signal.send(gameTypeChannel),
          _L.fromArray([{ctor: "_Tuple2"
-                       ,_0: "Human vs AI"
+                       ,_0: "Player vs AI"
                        ,_1: $GameTypes.HumanVsCpu}
                       ,{ctor: "_Tuple2"
-                       ,_0: "Human vs Human (hotseat)"
+                       ,_0: "Player vs Player (hotseat)"
                        ,_1: $GameTypes.HumanVsHumanLocal}
                       ,{ctor: "_Tuple2"
-                       ,_0: "Human vs Human (online)"
+                       ,_0: "Player vs Player (online)"
                        ,_1: $GameTypes.HumanVsHumanRemote}])));
          var startButton = A2($Graphics$Input.button,
          A2($Signal.send,
          clickChannel,
          $GameTypes.Start),
          "New game");
-         var controls = A2($Graphics$Element.flow,
-         $Graphics$Element.right,
-         _L.fromArray([waitingText
-                      ,gameTypeDropDown
-                      ,startButton]));
          var rulesAreaWidth = 650;
+         var controls = A3($Graphics$Element.container,
+         rulesAreaWidth,
+         40,
+         $Graphics$Element.middle)(A2($Graphics$Element.flow,
+         $Graphics$Element.right,
+         _L.fromArray([statusTextBlock
+                      ,gameTypeDropDown
+                      ,startButton])));
          var rulesArea = A2($Graphics$Element.flow,
          $Graphics$Element.down,
          _L.fromArray([A2($Graphics$Element.size,
@@ -407,14 +417,7 @@ Elm.Display.make = function (_elm) {
                       5,
                       5)
                       ,pieceRules
-                      ,A3($Graphics$Element.container,
-                      rulesAreaWidth,
-                      40,
-                      $Graphics$Element.middle)(A2($Graphics$Element.flow,
-                      $Graphics$Element.right,
-                      _L.fromArray([waitingText
-                                   ,gameTypeDropDown
-                                   ,startButton])))]));
+                      ,controls]));
          var withSpacing = F2(function (padding,
          elt) {
             return A2($Graphics$Element.beside,
