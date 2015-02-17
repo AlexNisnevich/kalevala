@@ -28,16 +28,20 @@ import Deserialize
 
 import Debug
 
+{- Pick up a piece if it's the given player's turn, do nothing otherwise. 
+   Returns the new state. -}
 tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
   if (state.turn == player) && (state.gameState == Ongoing)
   then pickUpPiece idx state
   else { state | heldPiece <- Nothing }
 
+{- Pick up a piece at the given index. Returns the new state. -}
 pickUpPiece : Int -> State -> State
 pickUpPiece idx state =
   { state | heldPiece <- Just idx }
 
+{- Pass the current player's turn. Returns the new state. -}
 pass : State -> State
 pass state =
   let p = Player.name state.turn
@@ -45,6 +49,9 @@ pass state =
     { state | turn <- Player.next state.turn
             , delta <- Dict.insert p "(+0)" state.delta }
 
+{- Move the currently held piece to the given location if possible. 
+   Do nothing if there is no held piece or the move is invalid.
+   Returns the new state. -}
 tryMove : Location -> State -> State
 tryMove location state =
   case state.heldPiece of
@@ -62,12 +69,16 @@ tryMove location state =
         if (Board.isValidMove move state.board) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
     Nothing -> state
 
+{- Try to make a move for the AI player. 
+   If no valid move is found, pass.
+   Returns the new state. -}
 tryAIMove : State -> State
 tryAIMove state =
   case AI.getMove state of
     Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
     Nothing -> pass state
 
+{- Make the given move. Returns the new state. -}
 makeMove : Move -> State -> State
 makeMove move state =
   let p = Player.name state.turn
@@ -90,6 +101,7 @@ makeMove move state =
             , lastPlaced <- Just move.location
             , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta }
 
+{- Perform an action on the current state and return the resulting state. -}
 performAction : Action -> State -> State
 performAction action state =
   let p = Player.name state.turn
@@ -108,14 +120,19 @@ performAction action state =
        | mustPass newState -> pass newState
        | otherwise -> newState
 
+{- Does neither player have any tiles left in the given state? -}
 isGameOver : State -> Bool
 isGameOver state =
   (state.gameState == Ongoing) && (Player.noTilesInHand Red state) && (Player.noTilesInHand Blue state)
 
+{- Must the current player pass in the given state? -}
 mustPass : State -> Bool
 mustPass state =
   Player.noTilesInHand state.turn state
 
+{- Start a game of the given type, with the given starting deck and starting player.
+   If the first player is an AI player, make their move.
+   Returns the state corresponding to the start of the game. -}
 startGame : GameType -> Deck -> Player -> State
 startGame gameType deck player =
   let players = Dict.fromList [("red", Human), ("blue", if gameType == HumanVsCpu then Cpu else Human)]
@@ -145,8 +162,9 @@ startGame gameType deck player =
     then tryAIMove state
     else state
 
--- (only for HumanVsHumanRemote games) Event triggers when players are matched together into a game
--- TODO separate out common code between this and startGame
+{- (only for HumanVsHumanRemote games) 
+   This functions triggers when players are matched together into a game
+   TODO: separate out common code between this and startGame! -}
 gameStarted : Deck -> Player -> Player -> State
 gameStarted deck startPlayer localPlayer =
   let players = Dict.fromList [ ("red", if localPlayer == Red then Human else Remote)
@@ -168,6 +186,7 @@ gameStarted deck startPlayer localPlayer =
                  , board <- Dict.singleton (0, 0) firstTile
                  , turn <- startPlayer}
 
+{- The cards in a Voluspa deck -}
 deckContents : List String
 deckContents =
     let r = List.repeat
@@ -181,6 +200,7 @@ deckContents =
       r 9 "Valkyrie" ++
       r 6 "Loki"
 
+{- The initial state on page load (before a game is started) -}
 startState : State
 startState =
   { gameType = HumanVsCpu
@@ -196,6 +216,7 @@ startState =
   , delta = Dict.fromList [("red", ""), ("blue", "")]
   }
 
+{- Turn a ClickEvent into an Action -}
 constructAction : ClickEvent -> Seed -> MousePos -> WindowDims -> GameType -> Action
 constructAction clickType seed mousePos dims gameType =
   let
@@ -209,6 +230,7 @@ constructAction clickType seed mousePos dims gameType =
       PassButton -> Pass
       None -> NoAction
 
+{- Turn a signal of ClickEvents into a signal of Actions -}
 processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let seedSignal = (initialSeed << round << fst) <~ Time.timestamp signal
@@ -217,14 +239,23 @@ processClick signal =
   in
     constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ sampledGameType
 
+{- Path to a Voluspa game server 
+   (see https://github.com/neunenak/voluspa-server) -}
+server : String
+server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000"
+
+{- The main game loop. 
+   The state is folded over time over a stream of Actions, coming from the client and from the server (for an online game.)
+   Actions from the client are constructed by processing a signal of ClickEvents from Display.clickChannel.
+   In the case the the game type is HumanVsHumanRemote, Actions are also sent to the server over a websocket,
+   and the Actions that are received from the server are merged into the signal of client Actions.
+   For each Action in this resulting signal, (performAction action state) returns the new state. -}
 main : Signal Element
 main =
   let
     encode action = Json.Encode.encode 0 (Serialize.action action)
     decode actionJson = case Json.Decode.decodeString Deserialize.action actionJson of Ok action -> action
                                                                                        Err e -> ParseError e
-
-    server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000"
 
     action = processClick (subscribe Display.clickChannel)
 
