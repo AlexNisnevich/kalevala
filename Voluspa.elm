@@ -28,18 +28,13 @@ import Deserialize
 
 import Debug
 
-{- Pick up a piece if it's the given player's turn, do nothing otherwise. 
+{- Pick up a piece if it's the given player's turn, otherwise pick up nothing. 
    Returns the new state. -}
 tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
   if (state.turn == player) && (state.gameState == Ongoing)
-  then pickUpPiece idx state
+  then { state | heldPiece <- Just idx }
   else { state | heldPiece <- Nothing }
-
-{- Pick up a piece at the given index. Returns the new state. -}
-pickUpPiece : Int -> State -> State
-pickUpPiece idx state =
-  { state | heldPiece <- Just idx }
 
 {- Pass the current player's turn. Returns the new state. -}
 pass : State -> State
@@ -130,13 +125,11 @@ mustPass : State -> Bool
 mustPass state =
   Player.noTilesInHand state.turn state
 
-{- Start a game of the given type, with the given starting deck and starting player.
-   If the first player is an AI player, make their move.
-   Returns the state corresponding to the start of the game. -}
-startGame : GameType -> Deck -> Player -> State
-startGame gameType deck player =
-  let players = Dict.fromList [("red", Human), ("blue", if gameType == HumanVsCpu then Cpu else Human)]
-      deckWithIndices = List.map2 (,) [0..(List.length deck - 1)] deck
+{- Given a deck, returns the starting center tile (which must not be a Troll),
+   two 5-tile hands, and the remaining deck. -}
+getFirstTileHandsAndDeck : Deck -> (Piece, Hands, Deck)
+getFirstTileHandsAndDeck deck =
+  let deckWithIndices = List.map2 (,) [0..(List.length deck - 1)] deck
       idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "Troll")) deckWithIndices
       firstTile = Piece.fromString (deck !! idxFirstNonTroll)
       deckMinusFirstTile = without idxFirstNonTroll deck
@@ -144,6 +137,18 @@ startGame gameType deck player =
       blueHand = take 5 (drop 5 deckMinusFirstTile)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
       remainder = drop 10 deckMinusFirstTile
+  in
+    (firstTile, hands, remainder)
+
+{- Start a game of the given type, with the given starting deck and starting player.
+   If the first player is an AI player, make their move.
+   Returns the state corresponding to the start of the game.
+   NOTE: For HumanVsHumanRemote games, startGame triggers when matchmaking begins, and 
+         gameStarted triggers when a match has been found. -}
+startGame : GameType -> Deck -> Player -> State
+startGame gameType deck player =
+  let players = Dict.fromList [("red", Human), ("blue", if gameType == HumanVsCpu then Cpu else Human)]
+      (firstTile, hands, deck) = getFirstTileHandsAndDeck deck
       state = if gameType == HumanVsHumanRemote
               then { startState | gameType <- gameType
                                 , gameState <- WaitingForPlayers
@@ -153,7 +158,7 @@ startGame gameType deck player =
                                 , gameState <- Ongoing
                                 , players <- players
                                 , hands <- hands
-                                , deck <- remainder
+                                , deck <- deck
                                 , board <- Dict.singleton (0, 0) firstTile
                                 , turn <- player}
   in
@@ -162,27 +167,19 @@ startGame gameType deck player =
     then tryAIMove state
     else state
 
-{- (only for HumanVsHumanRemote games) 
-   This functions triggers when players are matched together into a game
-   TODO: separate out common code between this and startGame! -}
+{- Start a HumanVsHumanRemote game after an opponent has been found.
+   Returns the state corresponding to the start of the game. -}
 gameStarted : Deck -> Player -> Player -> State
 gameStarted deck startPlayer localPlayer =
   let players = Dict.fromList [ ("red", if localPlayer == Red then Human else Remote)
                               , ("blue", if localPlayer == Blue then Human else Remote)]
-      deckWithIndices = List.map2 (,) [0..(List.length deck - 1)] deck
-      idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "Troll")) deckWithIndices
-      firstTile = Piece.fromString (deck !! idxFirstNonTroll)
-      deckMinusFirstTile = without idxFirstNonTroll deck
-      redHand = take 5 deckMinusFirstTile
-      blueHand = take 5 (drop 5 deckMinusFirstTile)
-      hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
-      remainder = drop 10 deckMinusFirstTile
+      (firstTile, hands, deck) = getFirstTileHandsAndDeck deck
   in
     { startState | gameType <- HumanVsHumanRemote
                  , gameState <- Ongoing
                  , players <- players
                  , hands <- hands
-                 , deck <- remainder
+                 , deck <- deck
                  , board <- Dict.singleton (0, 0) firstTile
                  , turn <- startPlayer}
 
