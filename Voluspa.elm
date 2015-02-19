@@ -148,7 +148,7 @@ getFirstTileHandsAndDeck deck =
 startGame : GameType -> Deck -> Player -> State
 startGame gameType deck player =
   let players = Dict.fromList [("red", Human), ("blue", if gameType == HumanVsCpu then Cpu else Human)]
-      (firstTile, hands, deck) = getFirstTileHandsAndDeck deck
+      (firstTile, hands, remainder) = getFirstTileHandsAndDeck deck
       state = if gameType == HumanVsHumanRemote
               then { startState | gameType <- gameType
                                 , gameState <- WaitingForPlayers
@@ -158,7 +158,7 @@ startGame gameType deck player =
                                 , gameState <- Ongoing
                                 , players <- players
                                 , hands <- hands
-                                , deck <- deck
+                                , deck <- remainder
                                 , board <- Dict.singleton (0, 0) firstTile
                                 , turn <- player}
   in
@@ -173,13 +173,13 @@ gameStarted : Deck -> Player -> Player -> State
 gameStarted deck startPlayer localPlayer =
   let players = Dict.fromList [ ("red", if localPlayer == Red then Human else Remote)
                               , ("blue", if localPlayer == Blue then Human else Remote)]
-      (firstTile, hands, deck) = getFirstTileHandsAndDeck deck
+      (firstTile, hands, remainder) = getFirstTileHandsAndDeck deck
   in
     { startState | gameType <- HumanVsHumanRemote
                  , gameState <- Ongoing
                  , players <- players
                  , hands <- hands
-                 , deck <- deck
+                 , deck <- remainder
                  , board <- Dict.singleton (0, 0) firstTile
                  , turn <- startPlayer}
 
