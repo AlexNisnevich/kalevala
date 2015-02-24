@@ -207,7 +207,10 @@ render state dims gameType playerName =
                              then field Graphics.Input.Field.defaultStyle (send playerNameChannel) "Your name" playerName
                              else container 150 40 middle <| centered <| Text.height 11 <| fromString <| remoteGameStatusText
       statusArea = if gameType == HumanVsHumanRemote then remoteGameStatusArea else Graphics.Element.empty
-      controls = container rulesAreaWidth 40 middle <|  flow right [ statusArea, gameTypeDropDown, startButton ]
+      deckSizeArea = if isOngoing state
+                     then container 70 40 middle <| centered <| Text.height 11 <| fromString <| "Deck: " ++ toString (length state.deck)
+                     else Graphics.Element.empty
+      controls = container rulesAreaWidth 40 middle <| flow right [ statusArea, gameTypeDropDown, startButton, deckSizeArea ]
       rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (fromString "Rules")))
                             , spacer 5 5
                             , width rulesAreaWidth <| leftAligned <| fromString "&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles."

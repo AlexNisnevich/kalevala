@@ -29,14 +29,6 @@ import Deserialize
 
 import Debug
 
-{- Is the game ongoing in the given state? -}
-isOngoing : State -> Bool
-isOngoing state =
-  case state.gameState of
-    Ongoing -> True
-    Connected opponentName -> True
-    _ -> False
-
 {- Pick up a piece if it's the given player's turn, otherwise pick up nothing. 
    Returns the new state. -}
 tryToPickUpPiece : Player -> Int -> State -> State
