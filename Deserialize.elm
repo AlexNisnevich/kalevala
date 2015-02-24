@@ -23,10 +23,11 @@ actionInfo actionType =
         ("mousePos" := mousePos)
         ("dims" := windowDims)
     "StartGame" ->
-      object3 GameStarted
+      object4 GameStarted
         ("deck" := deck)
         ("player" := player)
         ("color" := player)
+        ("opponentName" := string)
     "Pass" ->
       succeed Pass
     "OpponentDisconnected" ->

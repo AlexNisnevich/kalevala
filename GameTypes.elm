@@ -11,6 +11,7 @@ type GameType = HumanVsCpu
 type GameState = NotStarted
                | WaitingForPlayers
                | Ongoing
+               | Connected String
                | GameOver
                | Disconnected
 
@@ -58,8 +59,8 @@ type alias WindowDims = (Int, Int)
 
 type Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
-            | StartGame GameType Deck Player
-            | GameStarted Deck Player Player -- represents a StartGame message sent from the server
+            | StartGame GameType Deck Player String
+            | GameStarted Deck Player Player String -- represents a StartGame message sent from the server
             | Pass
             | OpponentDisconnected
             | NoAction
