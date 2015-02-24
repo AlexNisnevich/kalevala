@@ -2814,6 +2814,12 @@ Elm.Display.make = function (_elm) {
    gameType,
    playerName) {
       return function () {
+         var deckSizeArea = $GameTypes.isOngoing(state) ? A3($Graphics$Element.container,
+         70,
+         40,
+         $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(A2($Basics._op["++"],
+         "Deck: ",
+         $Basics.toString($List.length(state.deck))))))) : $Graphics$Element.empty;
          var remoteGameStatusText = function () {
             var _v19 = state.gameState;
             switch (_v19.ctor)
@@ -2866,7 +2872,8 @@ Elm.Display.make = function (_elm) {
          $Graphics$Element.right,
          _L.fromArray([statusArea
                       ,gameTypeDropDown
-                      ,startButton])));
+                      ,startButton
+                      ,deckSizeArea])));
          var rulesArea = A2($Graphics$Element.flow,
          $Graphics$Element.down,
          _L.fromArray([A2($Graphics$Element.size,
@@ -2983,6 +2990,15 @@ Elm.GameTypes.make = function (_elm) {
    $moduleName = "GameTypes",
    $Dict = Elm.Dict.make(_elm),
    $Maybe = Elm.Maybe.make(_elm);
+   var isOngoing = function (state) {
+      return function () {
+         var _v0 = state.gameState;
+         switch (_v0.ctor)
+         {case "Connected": return true;
+            case "Ongoing": return true;}
+         return false;
+      }();
+   };
    var None = {ctor: "None"};
    var PassButton = {ctor: "PassButton"};
    var PieceInHand = F2(function (a,
@@ -3136,7 +3152,8 @@ Elm.GameTypes.make = function (_elm) {
                            ,BoardClick: BoardClick
                            ,PieceInHand: PieceInHand
                            ,PassButton: PassButton
-                           ,None: None};
+                           ,None: None
+                           ,isOngoing: isOngoing};
    return _elm.GameTypes.values;
 };
 Elm.Graphics = Elm.Graphics || {};
@@ -11352,7 +11369,7 @@ Elm.Voluspa.make = function (_elm) {
                  seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 232 and 239");
+            "between lines 224 and 231");
          }();
       }();
    });
@@ -11402,7 +11419,7 @@ Elm.Voluspa.make = function (_elm) {
                   return $Basics.not(_U.eq(_v3._1,
                     "Troll"));}
                _U.badCase($moduleName,
-               "on line 142, column 66 to 87");
+               "on line 134, column 66 to 87");
             }();
          },
          deckWithIndices)));
@@ -11472,6 +11489,13 @@ Elm.Voluspa.make = function (_elm) {
       state.turn,
       state);
    };
+   var isGameOver = function (state) {
+      return $GameTypes.isOngoing(state) && (A2($Player.noTilesInHand,
+      $GameTypes.Red,
+      state) && A2($Player.noTilesInHand,
+      $GameTypes.Blue,
+      state));
+   };
    var makeMove = F2(function (move,
    state) {
       return function () {
@@ -11499,7 +11523,7 @@ Elm.Voluspa.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 95 and 98");
+            "between lines 87 and 90");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -11567,7 +11591,7 @@ Elm.Voluspa.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 81 and 85");
+         "between lines 73 and 77");
       }();
    };
    var tryMove = F2(function (location,
@@ -11588,7 +11612,7 @@ Elm.Voluspa.make = function (_elm) {
                        case "Remote":
                        return $Basics.identity;}
                     _U.badCase($moduleName,
-                    "between lines 68 and 72");
+                    "between lines 60 and 64");
                  }();
                  var hand = A2($Player.getHand,
                  state.turn,
@@ -11611,7 +11635,7 @@ Elm.Voluspa.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 61 and 78");
+         "between lines 53 and 70");
       }();
    });
    var startGame = F3(function (gameType,
@@ -11655,32 +11679,16 @@ Elm.Voluspa.make = function (_elm) {
          $GameTypes.Cpu) ? tryAIMove(state) : state;
       }();
    });
-   var isOngoing = function (state) {
-      return function () {
-         var _v14 = state.gameState;
-         switch (_v14.ctor)
-         {case "Connected": return true;
-            case "Ongoing": return true;}
-         return false;
-      }();
-   };
    var tryToPickUpPiece = F3(function (player,
    idx,
    state) {
       return _U.eq(state.turn,
-      player) && isOngoing(state) ? _U.replace([["heldPiece"
-                                                ,$Maybe.Just(idx)]],
+      player) && $GameTypes.isOngoing(state) ? _U.replace([["heldPiece"
+                                                           ,$Maybe.Just(idx)]],
       state) : _U.replace([["heldPiece"
                            ,$Maybe.Nothing]],
       state);
    });
-   var isGameOver = function (state) {
-      return isOngoing(state) && (A2($Player.noTilesInHand,
-      $GameTypes.Red,
-      state) && A2($Player.noTilesInHand,
-      $GameTypes.Blue,
-      state));
-   };
    var performAction = F2(function (action,
    state) {
       return function () {
@@ -11720,7 +11728,7 @@ Elm.Voluspa.make = function (_elm) {
                  action._1,
                  action._2);}
             _U.badCase($moduleName,
-            "between lines 113 and 122");
+            "between lines 105 and 114");
          }();
          var p = $Player.name(state.turn);
          return isGameOver(newState) ? _U.replace([["gameState"
@@ -11740,24 +11748,24 @@ Elm.Voluspa.make = function (_elm) {
       action),
       $Signal.subscribe($Display.gameTypeChannel));
       var actionForRemote = A2($Signal._op["<~"],
-      function (_v30) {
+      function (_v28) {
          return function () {
-            switch (_v30.ctor)
+            switch (_v28.ctor)
             {case "_Tuple2":
-               return _v30._0;}
+               return _v28._0;}
             _U.badCase($moduleName,
-            "on line 270, column 35 to 36");
+            "on line 262, column 35 to 36");
          }();
       },
       A3($Signal.keepIf,
-      function (_v34) {
+      function (_v32) {
          return function () {
-            switch (_v34.ctor)
+            switch (_v32.ctor)
             {case "_Tuple2":
-               return _U.eq(_v34._1,
+               return _U.eq(_v32._1,
                  $GameTypes.HumanVsHumanRemote);}
             _U.badCase($moduleName,
-            "on line 270, column 60 to 83");
+            "on line 262, column 60 to 83");
          }();
       },
       {ctor: "_Tuple2"
@@ -11766,15 +11774,15 @@ Elm.Voluspa.make = function (_elm) {
       actionWithGameType));
       var decode = function (actionJson) {
          return function () {
-            var _v38 = A2($Json$Decode.decodeString,
+            var _v36 = A2($Json$Decode.decodeString,
             $Deserialize.action,
             actionJson);
-            switch (_v38.ctor)
+            switch (_v36.ctor)
             {case "Err":
-               return $GameTypes.ParseError(_v38._0);
-               case "Ok": return _v38._0;}
+               return $GameTypes.ParseError(_v36._0);
+               case "Ok": return _v36._0;}
             _U.badCase($moduleName,
-            "between lines 264 and 267");
+            "between lines 256 and 259");
          }();
       };
       var encode = function (action) {
@@ -11814,7 +11822,6 @@ Elm.Voluspa.make = function (_elm) {
       $Signal.subscribe($Display.playerNameChannel));
    }();
    _elm.Voluspa.values = {_op: _op
-                         ,isOngoing: isOngoing
                          ,tryToPickUpPiece: tryToPickUpPiece
                          ,pass: pass
                          ,tryMove: tryMove

@@ -12,6 +12,15 @@ Elm.GameTypes.make = function (_elm) {
    $moduleName = "GameTypes",
    $Dict = Elm.Dict.make(_elm),
    $Maybe = Elm.Maybe.make(_elm);
+   var isOngoing = function (state) {
+      return function () {
+         var _v0 = state.gameState;
+         switch (_v0.ctor)
+         {case "Connected": return true;
+            case "Ongoing": return true;}
+         return false;
+      }();
+   };
    var None = {ctor: "None"};
    var PassButton = {ctor: "PassButton"};
    var PieceInHand = F2(function (a,
@@ -165,6 +174,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,BoardClick: BoardClick
                            ,PieceInHand: PieceInHand
                            ,PassButton: PassButton
-                           ,None: None};
+                           ,None: None
+                           ,isOngoing: isOngoing};
    return _elm.GameTypes.values;
 };
