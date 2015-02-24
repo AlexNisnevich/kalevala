@@ -29,21 +29,25 @@ Elm.GameTypes.make = function (_elm) {
    var NoAction = {ctor: "NoAction"};
    var OpponentDisconnected = {ctor: "OpponentDisconnected"};
    var Pass = {ctor: "Pass"};
-   var GameStarted = F3(function (a,
+   var GameStarted = F4(function (a,
    b,
-   c) {
+   c,
+   d) {
       return {ctor: "GameStarted"
              ,_0: a
              ,_1: b
-             ,_2: c};
+             ,_2: c
+             ,_3: d};
    });
-   var StartGame = F3(function (a,
+   var StartGame = F4(function (a,
    b,
-   c) {
+   c,
+   d) {
       return {ctor: "StartGame"
              ,_0: a
              ,_1: b
-             ,_2: c};
+             ,_2: c
+             ,_3: d};
    });
    var PlacePiece = F2(function (a,
    b) {
@@ -113,6 +117,10 @@ Elm.GameTypes.make = function (_elm) {
    var Human = {ctor: "Human"};
    var Disconnected = {ctor: "Disconnected"};
    var GameOver = {ctor: "GameOver"};
+   var Connected = function (a) {
+      return {ctor: "Connected"
+             ,_0: a};
+   };
    var Ongoing = {ctor: "Ongoing"};
    var WaitingForPlayers = {ctor: "WaitingForPlayers"};
    var NotStarted = {ctor: "NotStarted"};
@@ -126,6 +134,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,NotStarted: NotStarted
                            ,WaitingForPlayers: WaitingForPlayers
                            ,Ongoing: Ongoing
+                           ,Connected: Connected
                            ,GameOver: GameOver
                            ,Disconnected: Disconnected
                            ,Human: Human

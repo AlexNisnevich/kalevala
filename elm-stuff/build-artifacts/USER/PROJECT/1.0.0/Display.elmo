@@ -18,6 +18,7 @@ Elm.Display.make = function (_elm) {
    $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Graphics$Input = Elm.Graphics.Input.make(_elm),
+   $Graphics$Input$Field = Elm.Graphics.Input.Field.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
@@ -54,7 +55,7 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 96 and 102");
+         "between lines 103 and 109");
       }();
    });
    var pieceToImage = F2(function (piece,
@@ -79,7 +80,7 @@ Elm.Display.make = function (_elm) {
                case "Valkyrie":
                return "images/tile_1.jpg";}
             _U.badCase($moduleName,
-            "between lines 63 and 72");
+            "between lines 70 and 79");
          }();
          return A3($Graphics$Element.image,
          $Basics.round(tileSize),
@@ -105,7 +106,7 @@ Elm.Display.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 89 and 92");
+         "between lines 96 and 99");
       }();
    });
    var rulesRow = F2(function (piece,
@@ -163,6 +164,7 @@ Elm.Display.make = function (_elm) {
                 ,A2(rulesRow,
                 $GameTypes.Loki,
                 "All tiles adjacent to Loki (except other Lokis) have value 0.")]));
+   var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
    var gameTypeChannel = $Signal.channel($GameTypes.HumanVsCpu);
    var clickChannel = $Signal.channel($GameTypes.None);
    var handTileSize = 100;
@@ -263,7 +265,7 @@ Elm.Display.make = function (_elm) {
          {case "_Tuple2":
             return _v11._1 - gameHeaderSize;}
          _U.badCase($moduleName,
-         "on line 44, column 37 to 60");
+         "on line 51, column 37 to 60");
       }();
    };
    var getTileSizeFromBoardSize = F2(function (boardSize,
@@ -356,21 +358,40 @@ Elm.Display.make = function (_elm) {
                         ,_1: boardY};
               }();}
          _U.badCase($moduleName,
-         "between lines 51 and 58");
+         "between lines 58 and 65");
       }();
    });
-   var render = F2(function (state,
-   dims) {
+   var render = F4(function (state,
+   dims,
+   gameType,
+   playerName) {
       return function () {
-         var statusText = _U.eq(state.gameState,
-         $GameTypes.WaitingForPlayers) ? "Waiting for opponent ... " : _U.eq(state.gameState,
-         $GameTypes.Ongoing) && _U.eq(state.gameType,
-         $GameTypes.HumanVsHumanRemote) ? "Connected " : _U.eq(state.gameState,
-         $GameTypes.Disconnected) ? "Opponent disconnected " : "";
-         var statusTextBlock = A3($Graphics$Element.container,
+         var remoteGameStatusText = function () {
+            var _v19 = state.gameState;
+            switch (_v19.ctor)
+            {case "Connected":
+               return A2($Basics._op["++"],
+                 "Connected to ",
+                 A2($Basics._op["++"],
+                 _v19._0,
+                 " "));
+               case "Disconnected":
+               return "Opponent disconnected ";
+               case "WaitingForPlayers":
+               return "Waiting for opponent ... ";}
+            return "";
+         }();
+         var remoteGameStatusArea = _U.eq(state.gameState,
+         $GameTypes.NotStarted) ? A4($Graphics$Input$Field.field,
+         $Graphics$Input$Field.defaultStyle,
+         $Signal.send(playerNameChannel),
+         "Your name",
+         playerName) : A3($Graphics$Element.container,
          150,
          40,
-         $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(statusText))));
+         $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(remoteGameStatusText))));
+         var statusArea = _U.eq(gameType,
+         $GameTypes.HumanVsHumanRemote) ? remoteGameStatusArea : $Graphics$Element.empty;
          var gameTypeDropDown = A2($Graphics$Element.size,
          180,
          40)(A2($Graphics$Input.dropDown,
@@ -395,7 +416,7 @@ Elm.Display.make = function (_elm) {
          40,
          $Graphics$Element.middle)(A2($Graphics$Element.flow,
          $Graphics$Element.right,
-         _L.fromArray([statusTextBlock
+         _L.fromArray([statusArea
                       ,gameTypeDropDown
                       ,startButton])));
          var rulesArea = A2($Graphics$Element.flow,
@@ -485,6 +506,7 @@ Elm.Display.make = function (_elm) {
                          ,handTileSize: handTileSize
                          ,clickChannel: clickChannel
                          ,gameTypeChannel: gameTypeChannel
+                         ,playerNameChannel: playerNameChannel
                          ,getTotalBoardSize: getTotalBoardSize
                          ,getTileSizeFromBoardSize: getTileSizeFromBoardSize
                          ,mouseToBoardPosition: mouseToBoardPosition

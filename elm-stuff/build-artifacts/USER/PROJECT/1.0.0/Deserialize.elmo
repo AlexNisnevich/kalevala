@@ -62,7 +62,7 @@ Elm.Deserialize.make = function (_elm) {
               "dims",
               windowDims));
             case "StartGame":
-            return A4($Json$Decode.object3,
+            return A5($Json$Decode.object4,
               $GameTypes.GameStarted,
               A2($Json$Decode._op[":="],
               "deck",
@@ -72,7 +72,10 @@ Elm.Deserialize.make = function (_elm) {
               player),
               A2($Json$Decode._op[":="],
               "color",
-              player));}
+              player),
+              A2($Json$Decode._op[":="],
+              "opponentName",
+              $Json$Decode.string));}
          return $Json$Decode.fail(A2($Basics._op["++"],
          actionType,
          " is not a recognized type of action"));

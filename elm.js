@@ -222,7 +222,7 @@ Elm.Basics.make = function (_elm) {
               _v0._0,
               _v0._1);}
          _U.badCase($moduleName,
-         "on line 460, column 19 to 24");
+         "on line 472, column 19 to 24");
       }();
    });
    var curry = F3(function (f,
@@ -240,7 +240,7 @@ Elm.Basics.make = function (_elm) {
          switch (_v4.ctor)
          {case "_Tuple2": return _v4._1;}
          _U.badCase($moduleName,
-         "on line 444, column 13 to 14");
+         "on line 456, column 13 to 14");
       }();
    };
    var fst = function (_v8) {
@@ -248,7 +248,7 @@ Elm.Basics.make = function (_elm) {
          switch (_v8.ctor)
          {case "_Tuple2": return _v8._0;}
          _U.badCase($moduleName,
-         "on line 440, column 13 to 14");
+         "on line 452, column 13 to 14");
       }();
    };
    var always = F2(function (a,
@@ -332,12 +332,20 @@ Elm.Basics.make = function (_elm) {
       return t;
    };
    _elm.Basics.values = {_op: _op
-                        ,radians: radians
-                        ,degrees: degrees
-                        ,turns: turns
-                        ,fromPolar: fromPolar
-                        ,toPolar: toPolar
+                        ,max: max
+                        ,min: min
+                        ,compare: compare
+                        ,not: not
+                        ,xor: xor
+                        ,otherwise: otherwise
                         ,rem: rem
+                        ,negate: negate
+                        ,abs: abs
+                        ,sqrt: sqrt
+                        ,clamp: clamp
+                        ,logBase: logBase
+                        ,e: e
+                        ,pi: pi
                         ,cos: cos
                         ,sin: sin
                         ,tan: tan
@@ -345,37 +353,29 @@ Elm.Basics.make = function (_elm) {
                         ,asin: asin
                         ,atan: atan
                         ,atan2: atan2
-                        ,sqrt: sqrt
-                        ,negate: negate
-                        ,abs: abs
-                        ,logBase: logBase
-                        ,clamp: clamp
-                        ,pi: pi
-                        ,e: e
-                        ,compare: compare
-                        ,LT: LT
-                        ,EQ: EQ
-                        ,GT: GT
-                        ,min: min
-                        ,max: max
-                        ,xor: xor
-                        ,not: not
-                        ,otherwise: otherwise
                         ,round: round
-                        ,truncate: truncate
                         ,floor: floor
                         ,ceiling: ceiling
+                        ,truncate: truncate
                         ,toFloat: toFloat
+                        ,degrees: degrees
+                        ,radians: radians
+                        ,turns: turns
+                        ,toPolar: toPolar
+                        ,fromPolar: fromPolar
                         ,isNaN: isNaN
                         ,isInfinite: isInfinite
                         ,toString: toString
-                        ,identity: identity
-                        ,always: always
                         ,fst: fst
                         ,snd: snd
+                        ,identity: identity
+                        ,always: always
                         ,flip: flip
                         ,curry: curry
-                        ,uncurry: uncurry};
+                        ,uncurry: uncurry
+                        ,LT: LT
+                        ,EQ: EQ
+                        ,GT: GT};
    return _elm.Basics.values;
 };
 Elm.Board = Elm.Board || {};
@@ -1427,7 +1427,7 @@ Elm.Deserialize.make = function (_elm) {
               "dims",
               windowDims));
             case "StartGame":
-            return A4($Json$Decode.object3,
+            return A5($Json$Decode.object4,
               $GameTypes.GameStarted,
               A2($Json$Decode._op[":="],
               "deck",
@@ -1437,7 +1437,10 @@ Elm.Deserialize.make = function (_elm) {
               player),
               A2($Json$Decode._op[":="],
               "color",
-              player));}
+              player),
+              A2($Json$Decode._op[":="],
+              "opponentName",
+              $Json$Decode.string));}
          return $Json$Decode.fail(A2($Basics._op["++"],
          actionType,
          " is not a recognized type of action"));
@@ -2463,6 +2466,7 @@ Elm.Display.make = function (_elm) {
    $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Graphics$Input = Elm.Graphics.Input.make(_elm),
+   $Graphics$Input$Field = Elm.Graphics.Input.Field.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
@@ -2499,7 +2503,7 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 96 and 102");
+         "between lines 103 and 109");
       }();
    });
    var pieceToImage = F2(function (piece,
@@ -2524,7 +2528,7 @@ Elm.Display.make = function (_elm) {
                case "Valkyrie":
                return "images/tile_1.jpg";}
             _U.badCase($moduleName,
-            "between lines 63 and 72");
+            "between lines 70 and 79");
          }();
          return A3($Graphics$Element.image,
          $Basics.round(tileSize),
@@ -2550,7 +2554,7 @@ Elm.Display.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 89 and 92");
+         "between lines 96 and 99");
       }();
    });
    var rulesRow = F2(function (piece,
@@ -2608,6 +2612,7 @@ Elm.Display.make = function (_elm) {
                 ,A2(rulesRow,
                 $GameTypes.Loki,
                 "All tiles adjacent to Loki (except other Lokis) have value 0.")]));
+   var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
    var gameTypeChannel = $Signal.channel($GameTypes.HumanVsCpu);
    var clickChannel = $Signal.channel($GameTypes.None);
    var handTileSize = 100;
@@ -2708,7 +2713,7 @@ Elm.Display.make = function (_elm) {
          {case "_Tuple2":
             return _v11._1 - gameHeaderSize;}
          _U.badCase($moduleName,
-         "on line 44, column 37 to 60");
+         "on line 51, column 37 to 60");
       }();
    };
    var getTileSizeFromBoardSize = F2(function (boardSize,
@@ -2801,21 +2806,40 @@ Elm.Display.make = function (_elm) {
                         ,_1: boardY};
               }();}
          _U.badCase($moduleName,
-         "between lines 51 and 58");
+         "between lines 58 and 65");
       }();
    });
-   var render = F2(function (state,
-   dims) {
+   var render = F4(function (state,
+   dims,
+   gameType,
+   playerName) {
       return function () {
-         var statusText = _U.eq(state.gameState,
-         $GameTypes.WaitingForPlayers) ? "Waiting for opponent ... " : _U.eq(state.gameState,
-         $GameTypes.Ongoing) && _U.eq(state.gameType,
-         $GameTypes.HumanVsHumanRemote) ? "Connected " : _U.eq(state.gameState,
-         $GameTypes.Disconnected) ? "Opponent disconnected " : "";
-         var statusTextBlock = A3($Graphics$Element.container,
+         var remoteGameStatusText = function () {
+            var _v19 = state.gameState;
+            switch (_v19.ctor)
+            {case "Connected":
+               return A2($Basics._op["++"],
+                 "Connected to ",
+                 A2($Basics._op["++"],
+                 _v19._0,
+                 " "));
+               case "Disconnected":
+               return "Opponent disconnected ";
+               case "WaitingForPlayers":
+               return "Waiting for opponent ... ";}
+            return "";
+         }();
+         var remoteGameStatusArea = _U.eq(state.gameState,
+         $GameTypes.NotStarted) ? A4($Graphics$Input$Field.field,
+         $Graphics$Input$Field.defaultStyle,
+         $Signal.send(playerNameChannel),
+         "Your name",
+         playerName) : A3($Graphics$Element.container,
          150,
          40,
-         $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(statusText))));
+         $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(remoteGameStatusText))));
+         var statusArea = _U.eq(gameType,
+         $GameTypes.HumanVsHumanRemote) ? remoteGameStatusArea : $Graphics$Element.empty;
          var gameTypeDropDown = A2($Graphics$Element.size,
          180,
          40)(A2($Graphics$Input.dropDown,
@@ -2840,7 +2864,7 @@ Elm.Display.make = function (_elm) {
          40,
          $Graphics$Element.middle)(A2($Graphics$Element.flow,
          $Graphics$Element.right,
-         _L.fromArray([statusTextBlock
+         _L.fromArray([statusArea
                       ,gameTypeDropDown
                       ,startButton])));
          var rulesArea = A2($Graphics$Element.flow,
@@ -2930,6 +2954,7 @@ Elm.Display.make = function (_elm) {
                          ,handTileSize: handTileSize
                          ,clickChannel: clickChannel
                          ,gameTypeChannel: gameTypeChannel
+                         ,playerNameChannel: playerNameChannel
                          ,getTotalBoardSize: getTotalBoardSize
                          ,getTileSizeFromBoardSize: getTileSizeFromBoardSize
                          ,mouseToBoardPosition: mouseToBoardPosition
@@ -2975,21 +3000,25 @@ Elm.GameTypes.make = function (_elm) {
    var NoAction = {ctor: "NoAction"};
    var OpponentDisconnected = {ctor: "OpponentDisconnected"};
    var Pass = {ctor: "Pass"};
-   var GameStarted = F3(function (a,
+   var GameStarted = F4(function (a,
    b,
-   c) {
+   c,
+   d) {
       return {ctor: "GameStarted"
              ,_0: a
              ,_1: b
-             ,_2: c};
+             ,_2: c
+             ,_3: d};
    });
-   var StartGame = F3(function (a,
+   var StartGame = F4(function (a,
    b,
-   c) {
+   c,
+   d) {
       return {ctor: "StartGame"
              ,_0: a
              ,_1: b
-             ,_2: c};
+             ,_2: c
+             ,_3: d};
    });
    var PlacePiece = F2(function (a,
    b) {
@@ -3059,6 +3088,10 @@ Elm.GameTypes.make = function (_elm) {
    var Human = {ctor: "Human"};
    var Disconnected = {ctor: "Disconnected"};
    var GameOver = {ctor: "GameOver"};
+   var Connected = function (a) {
+      return {ctor: "Connected"
+             ,_0: a};
+   };
    var Ongoing = {ctor: "Ongoing"};
    var WaitingForPlayers = {ctor: "WaitingForPlayers"};
    var NotStarted = {ctor: "NotStarted"};
@@ -3072,6 +3105,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,NotStarted: NotStarted
                            ,WaitingForPlayers: WaitingForPlayers
                            ,Ongoing: Ongoing
+                           ,Connected: Connected
                            ,GameOver: GameOver
                            ,Disconnected: Disconnected
                            ,Human: Human
@@ -4034,6 +4068,126 @@ Elm.Graphics.Input.make = function (_elm) {
                                 ,hoverable: hoverable
                                 ,clickable: clickable};
    return _elm.Graphics.Input.values;
+};
+Elm.Graphics = Elm.Graphics || {};
+Elm.Graphics.Input = Elm.Graphics.Input || {};
+Elm.Graphics.Input.Field = Elm.Graphics.Input.Field || {};
+Elm.Graphics.Input.Field.make = function (_elm) {
+   "use strict";
+   _elm.Graphics = _elm.Graphics || {};
+   _elm.Graphics.Input = _elm.Graphics.Input || {};
+   _elm.Graphics.Input.Field = _elm.Graphics.Input.Field || {};
+   if (_elm.Graphics.Input.Field.values)
+   return _elm.Graphics.Input.Field.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "Graphics.Input.Field",
+   $Color = Elm.Color.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Native$Graphics$Input = Elm.Native.Graphics.Input.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Text = Elm.Text.make(_elm);
+   var email = $Native$Graphics$Input.email;
+   var password = $Native$Graphics$Input.password;
+   var field = $Native$Graphics$Input.field;
+   var Backward = {ctor: "Backward"};
+   var Forward = {ctor: "Forward"};
+   var Selection = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,direction: c
+             ,end: b
+             ,start: a};
+   });
+   var Content = F2(function (a,
+   b) {
+      return {_: {}
+             ,selection: b
+             ,string: a};
+   });
+   var noContent = A2(Content,
+   "",
+   A3(Selection,0,0,Forward));
+   var Style = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,highlight: c
+             ,outline: b
+             ,padding: a
+             ,style: d};
+   });
+   var Highlight = F2(function (a,
+   b) {
+      return {_: {}
+             ,color: a
+             ,width: b};
+   });
+   var noHighlight = A2(Highlight,
+   $Color.blue,
+   0);
+   var Outline = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,color: a
+             ,radius: c
+             ,width: b};
+   });
+   var Dimensions = F4(function (a,
+   b,
+   c,
+   d) {
+      return {_: {}
+             ,bottom: d
+             ,left: a
+             ,right: b
+             ,top: c};
+   });
+   var uniformly = function (n) {
+      return A4(Dimensions,
+      n,
+      n,
+      n,
+      n);
+   };
+   var noOutline = A3(Outline,
+   $Color.grey,
+   uniformly(0),
+   0);
+   var defaultStyle = {_: {}
+                      ,highlight: A2(Highlight,
+                      $Color.blue,
+                      1)
+                      ,outline: A3(Outline,
+                      $Color.grey,
+                      uniformly(1),
+                      2)
+                      ,padding: uniformly(4)
+                      ,style: $Text.defaultStyle};
+   _elm.Graphics.Input.Field.values = {_op: _op
+                                      ,uniformly: uniformly
+                                      ,Dimensions: Dimensions
+                                      ,Outline: Outline
+                                      ,noOutline: noOutline
+                                      ,Highlight: Highlight
+                                      ,noHighlight: noHighlight
+                                      ,Style: Style
+                                      ,defaultStyle: defaultStyle
+                                      ,Content: Content
+                                      ,Selection: Selection
+                                      ,Forward: Forward
+                                      ,Backward: Backward
+                                      ,noContent: noContent
+                                      ,field: field
+                                      ,password: password
+                                      ,email: email};
+   return _elm.Graphics.Input.Field.values;
 };
 Elm.Helpers = Elm.Helpers || {};
 Elm.Helpers.make = function (_elm) {
@@ -5453,7 +5607,7 @@ Elm.Native.Char.make = function(elm) {
 
     return elm.Native.Char.values = {
         fromCode : function(c) { return String.fromCharCode(c); },
-        toCode   : function(c) { return c.toUpperCase().charCodeAt(0); },
+        toCode   : function(c) { return c.charCodeAt(0); },
         toUpper  : function(c) { return Utils.chr(c.toUpperCase()); },
         toLower  : function(c) { return Utils.chr(c.toLowerCase()); },
         toLocaleUpper : function(c) { return Utils.chr(c.toLocaleUpperCase()); },
@@ -10606,7 +10760,10 @@ Elm.Serialize.make = function (_elm) {
                                                      ,_1: deck(a._1)}
                                                     ,{ctor: "_Tuple2"
                                                      ,_0: "player"
-                                                     ,_1: player(a._2)}]));}
+                                                     ,_1: player(a._2)}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "playerName"
+                                                     ,_1: $Json$Encode.string(a._3)}]));}
          _U.badCase($moduleName,
          "between lines 13 and 23");
       }();
@@ -11089,6 +11246,7 @@ Elm.Voluspa.make = function (_elm) {
    $Display = Elm.Display.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Graphics$Input$Field = Elm.Graphics.Input.Field.make(_elm),
    $Helpers = Elm.Helpers.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $Json$Encode = Elm.Json.Encode.make(_elm),
@@ -11104,6 +11262,7 @@ Elm.Voluspa.make = function (_elm) {
    $Time = Elm.Time.make(_elm),
    $WebSocket = Elm.WebSocket.make(_elm),
    $Window = Elm.Window.make(_elm);
+   var server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000";
    var startState = {_: {}
                     ,board: $Dict.empty
                     ,deck: _L.fromArray([])
@@ -11154,11 +11313,12 @@ Elm.Voluspa.make = function (_elm) {
       A2(r,9,"Valkyrie"),
       A2(r,6,"Loki"))))))));
    }();
-   var constructAction = F5(function (clickType,
+   var constructAction = F6(function (clickType,
    seed,
    mousePos,
    dims,
-   gameType) {
+   gameType,
+   playerName) {
       return function () {
          var click = A2($Debug.watch,
          "clickInput.signal",
@@ -11181,7 +11341,7 @@ Elm.Voluspa.make = function (_elm) {
                  clickType._0,
                  clickType._1);
                case "Start":
-               return A3($GameTypes.StartGame,
+               return A4($GameTypes.StartGame,
                  gameType,
                  A2($Helpers.shuffle,
                  deckContents,
@@ -11189,14 +11349,16 @@ Elm.Voluspa.make = function (_elm) {
                  A2($Helpers.sample,
                  _L.fromArray([$GameTypes.Red
                               ,$GameTypes.Blue]),
-                 seed));}
+                 seed),
+                 playerName.string);}
             _U.badCase($moduleName,
-            "between lines 205 and 210");
+            "between lines 232 and 239");
          }();
       }();
    });
    var processClick = function (signal) {
       return function () {
+         var sampledPlayerName = $Signal.sampleOn(signal)($Signal.subscribe($Display.playerNameChannel));
          var sampledGameType = $Signal.sampleOn(signal)($Signal.subscribe($Display.gameTypeChannel));
          var sampledMouse = A2($Signal.sampleOn,
          signal,
@@ -11210,18 +11372,18 @@ Elm.Voluspa.make = function (_elm) {
          A2($Signal._op["~"],
          A2($Signal._op["~"],
          A2($Signal._op["~"],
+         A2($Signal._op["~"],
          A2($Signal._op["<~"],
          constructAction,
          signal),
          seedSignal),
          sampledMouse),
          $Window.dimensions),
-         sampledGameType);
+         sampledGameType),
+         sampledPlayerName);
       }();
    };
-   var gameStarted = F3(function (deck,
-   startPlayer,
-   localPlayer) {
+   var getFirstTileHandsAndDeck = function (deck) {
       return function () {
          var deckWithIndices = A3($List.map2,
          F2(function (v0,v1) {
@@ -11240,7 +11402,7 @@ Elm.Voluspa.make = function (_elm) {
                   return $Basics.not(_U.eq(_v3._1,
                     "Troll"));}
                _U.badCase($moduleName,
-               "on line 155, column 66 to 87");
+               "on line 142, column 66 to 87");
             }();
          },
          deckWithIndices)));
@@ -11267,6 +11429,21 @@ Elm.Voluspa.make = function (_elm) {
          var remainder = A2($List.drop,
          10,
          deckMinusFirstTile);
+         return {ctor: "_Tuple3"
+                ,_0: firstTile
+                ,_1: hands
+                ,_2: remainder};
+      }();
+   };
+   var gameStarted = F4(function (deck,
+   startPlayer,
+   localPlayer,
+   opponentName) {
+      return function () {
+         var $ = getFirstTileHandsAndDeck(deck),
+         firstTile = $._0,
+         hands = $._1,
+         remainder = $._2;
          var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                     ,_0: "red"
                                                     ,_1: _U.eq(localPlayer,
@@ -11278,7 +11455,7 @@ Elm.Voluspa.make = function (_elm) {
          return _U.replace([["gameType"
                             ,$GameTypes.HumanVsHumanRemote]
                            ,["gameState"
-                            ,$GameTypes.Ongoing]
+                            ,$GameTypes.Connected(opponentName)]
                            ,["players",players]
                            ,["hands",hands]
                            ,["deck",remainder]
@@ -11294,14 +11471,6 @@ Elm.Voluspa.make = function (_elm) {
       return A2($Player.noTilesInHand,
       state.turn,
       state);
-   };
-   var isGameOver = function (state) {
-      return _U.eq(state.gameState,
-      $GameTypes.Ongoing) && (A2($Player.noTilesInHand,
-      $GameTypes.Red,
-      state) && A2($Player.noTilesInHand,
-      $GameTypes.Blue,
-      state));
    };
    var makeMove = F2(function (move,
    state) {
@@ -11330,7 +11499,7 @@ Elm.Voluspa.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 80 and 83");
+            "between lines 95 and 98");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -11398,7 +11567,7 @@ Elm.Voluspa.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 67 and 69");
+         "between lines 81 and 85");
       }();
    };
    var tryMove = F2(function (location,
@@ -11419,7 +11588,7 @@ Elm.Voluspa.make = function (_elm) {
                        case "Remote":
                        return $Basics.identity;}
                     _U.badCase($moduleName,
-                    "between lines 57 and 61");
+                    "between lines 68 and 72");
                  }();
                  var hand = A2($Player.getHand,
                  state.turn,
@@ -11442,57 +11611,17 @@ Elm.Voluspa.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 50 and 63");
+         "between lines 61 and 78");
       }();
    });
    var startGame = F3(function (gameType,
    deck,
    player) {
       return function () {
-         var deckWithIndices = A3($List.map2,
-         F2(function (v0,v1) {
-            return {ctor: "_Tuple2"
-                   ,_0: v0
-                   ,_1: v1};
-         }),
-         _L.range(0,
-         $List.length(deck) - 1),
-         deck);
-         var idxFirstNonTroll = $Basics.fst($List.head(A2($List.filter,
-         function (_v14) {
-            return function () {
-               switch (_v14.ctor)
-               {case "_Tuple2":
-                  return $Basics.not(_U.eq(_v14._1,
-                    "Troll"));}
-               _U.badCase($moduleName,
-               "on line 123, column 66 to 87");
-            }();
-         },
-         deckWithIndices)));
-         var firstTile = $Piece.fromString(A2($Helpers._op["!!"],
-         deck,
-         idxFirstNonTroll));
-         var deckMinusFirstTile = A2($Helpers.without,
-         idxFirstNonTroll,
-         deck);
-         var redHand = A2($List.take,
-         5,
-         deckMinusFirstTile);
-         var blueHand = A2($List.take,
-         5,
-         A2($List.drop,
-         5,
-         deckMinusFirstTile));
-         var hands = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                  ,_0: "red"
-                                                  ,_1: redHand}
-                                                 ,{ctor: "_Tuple2"
-                                                  ,_0: "blue"
-                                                  ,_1: blueHand}]));
-         var remainder = A2($List.drop,
-         10,
-         deckMinusFirstTile);
+         var $ = getFirstTileHandsAndDeck(deck),
+         firstTile = $._0,
+         hands = $._1,
+         remainder = $._2;
          var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                     ,_0: "red"
                                                     ,_1: $GameTypes.Human}
@@ -11526,33 +11655,43 @@ Elm.Voluspa.make = function (_elm) {
          $GameTypes.Cpu) ? tryAIMove(state) : state;
       }();
    });
-   var pickUpPiece = F2(function (idx,
-   state) {
-      return _U.replace([["heldPiece"
-                         ,$Maybe.Just(idx)]],
-      state);
-   });
+   var isOngoing = function (state) {
+      return function () {
+         var _v14 = state.gameState;
+         switch (_v14.ctor)
+         {case "Connected": return true;
+            case "Ongoing": return true;}
+         return false;
+      }();
+   };
    var tryToPickUpPiece = F3(function (player,
    idx,
    state) {
       return _U.eq(state.turn,
-      player) && _U.eq(state.gameState,
-      $GameTypes.Ongoing) ? A2(pickUpPiece,
-      idx,
+      player) && isOngoing(state) ? _U.replace([["heldPiece"
+                                                ,$Maybe.Just(idx)]],
       state) : _U.replace([["heldPiece"
                            ,$Maybe.Nothing]],
       state);
    });
+   var isGameOver = function (state) {
+      return isOngoing(state) && (A2($Player.noTilesInHand,
+      $GameTypes.Red,
+      state) && A2($Player.noTilesInHand,
+      $GameTypes.Blue,
+      state));
+   };
    var performAction = F2(function (action,
    state) {
       return function () {
          var newState = function () {
             switch (action.ctor)
             {case "GameStarted":
-               return A3(gameStarted,
+               return A4(gameStarted,
                  action._0,
                  action._1,
-                 action._2);
+                 action._2,
+                 action._3);
                case "NoAction": return state;
                case "OpponentDisconnected":
                return _U.replace([["gameState"
@@ -11581,7 +11720,7 @@ Elm.Voluspa.make = function (_elm) {
                  action._1,
                  action._2);}
             _U.badCase($moduleName,
-            "between lines 97 and 106");
+            "between lines 113 and 122");
          }();
          var p = $Player.name(state.turn);
          return isGameOver(newState) ? _U.replace([["gameState"
@@ -11607,7 +11746,7 @@ Elm.Voluspa.make = function (_elm) {
             {case "_Tuple2":
                return _v30._0;}
             _U.badCase($moduleName,
-            "on line 232, column 35 to 36");
+            "on line 270, column 35 to 36");
          }();
       },
       A3($Signal.keepIf,
@@ -11618,14 +11757,13 @@ Elm.Voluspa.make = function (_elm) {
                return _U.eq(_v34._1,
                  $GameTypes.HumanVsHumanRemote);}
             _U.badCase($moduleName,
-            "on line 232, column 60 to 83");
+            "on line 270, column 60 to 83");
          }();
       },
       {ctor: "_Tuple2"
       ,_0: $GameTypes.NoAction
       ,_1: $GameTypes.HumanVsCpu},
       actionWithGameType));
-      var server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000";
       var decode = function (actionJson) {
          return function () {
             var _v38 = A2($Json$Decode.decodeString,
@@ -11636,7 +11774,7 @@ Elm.Voluspa.make = function (_elm) {
                return $GameTypes.ParseError(_v38._0);
                case "Ok": return _v38._0;}
             _U.badCase($moduleName,
-            "between lines 224 and 227");
+            "between lines 264 and 267");
          }();
       };
       var encode = function (action) {
@@ -11666,14 +11804,18 @@ Elm.Voluspa.make = function (_elm) {
       action,
       responseAction));
       return A2($Signal._op["~"],
+      A2($Signal._op["~"],
+      A2($Signal._op["~"],
       A2($Signal._op["<~"],
       $Display.render,
       state),
-      $Window.dimensions);
+      $Window.dimensions),
+      $Signal.subscribe($Display.gameTypeChannel)),
+      $Signal.subscribe($Display.playerNameChannel));
    }();
    _elm.Voluspa.values = {_op: _op
+                         ,isOngoing: isOngoing
                          ,tryToPickUpPiece: tryToPickUpPiece
-                         ,pickUpPiece: pickUpPiece
                          ,pass: pass
                          ,tryMove: tryMove
                          ,tryAIMove: tryAIMove
@@ -11681,12 +11823,14 @@ Elm.Voluspa.make = function (_elm) {
                          ,performAction: performAction
                          ,isGameOver: isGameOver
                          ,mustPass: mustPass
+                         ,getFirstTileHandsAndDeck: getFirstTileHandsAndDeck
                          ,startGame: startGame
                          ,gameStarted: gameStarted
                          ,deckContents: deckContents
                          ,startState: startState
                          ,constructAction: constructAction
                          ,processClick: processClick
+                         ,server: server
                          ,main: main};
    return _elm.Voluspa.values;
 };

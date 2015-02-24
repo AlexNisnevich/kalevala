@@ -73,7 +73,10 @@ Elm.Serialize.make = function (_elm) {
                                                      ,_1: deck(a._1)}
                                                     ,{ctor: "_Tuple2"
                                                      ,_0: "player"
-                                                     ,_1: player(a._2)}]));}
+                                                     ,_1: player(a._2)}
+                                                    ,{ctor: "_Tuple2"
+                                                     ,_0: "playerName"
+                                                     ,_1: $Json$Encode.string(a._3)}]));}
          _U.badCase($moduleName,
          "between lines 13 and 23");
       }();
