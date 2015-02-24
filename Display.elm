@@ -6,6 +6,8 @@ import Graphics.Collage (..)
 import Graphics.Element
 import Graphics.Element (..)
 import Graphics.Input (..)
+import Graphics.Input.Field
+import Graphics.Input.Field (..)
 import List
 import List (..)
 import Maybe (Maybe (..), withDefault)
@@ -18,6 +20,8 @@ import GameTypes (..)
 import Piece
 import Board (getBoardSize)
 import Player
+
+import Debug
 
 -- Constants
 
@@ -37,6 +41,9 @@ clickChannel = channel None
 
 gameTypeChannel : Channel GameType
 gameTypeChannel = channel HumanVsCpu
+
+playerNameChannel : Channel Content
+playerNameChannel = channel noContent
 
 -- Helpers
 
@@ -176,8 +183,8 @@ pieceRules = flow down
     , rulesRow Loki "All tiles adjacent to Loki (except other Lokis) have value 0."
     ]
 
-render : State -> WindowDims -> Element
-render state dims =
+render : State -> WindowDims -> GameType -> Content -> Element
+render state dims gameType playerName =
   let boardSize = getBoardSize state.board
       totalBoardSize = getTotalBoardSize dims
       tileSize = getTileSizeFromBoardSize boardSize dims
@@ -191,12 +198,16 @@ render state dims =
                             , ("Player vs Player (online)" , HumanVsHumanRemote)
                             ]
                          |> size 180 40
-      statusText = if | state.gameState == WaitingForPlayers -> "Waiting for opponent ... "
-                      | state.gameState == Ongoing && state.gameType == HumanVsHumanRemote -> "Connected "
-                      | state.gameState == Disconnected -> "Opponent disconnected "
-                      | otherwise -> ""
-      statusTextBlock = container 150 40 middle <| centered <| Text.height 11 <| fromString <| statusText
-      controls = container rulesAreaWidth 40 middle <|  flow right [ statusTextBlock, gameTypeDropDown, startButton ]
+      remoteGameStatusText = case state.gameState of
+                               WaitingForPlayers -> "Waiting for opponent ... "
+                               Connected opponentName -> "Connected to " ++ opponentName ++ " "
+                               Disconnected -> "Opponent disconnected "
+                               _ -> ""
+      remoteGameStatusArea = if state.gameState == NotStarted
+                             then field Graphics.Input.Field.defaultStyle (send playerNameChannel) "Your name" playerName
+                             else container 150 40 middle <| centered <| Text.height 11 <| fromString <| remoteGameStatusText
+      statusArea = if gameType == HumanVsHumanRemote then remoteGameStatusArea else Graphics.Element.empty
+      controls = container rulesAreaWidth 40 middle <|  flow right [ statusArea, gameTypeDropDown, startButton ]
       rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (fromString "Rules")))
                             , spacer 5 5
                             , width rulesAreaWidth <| leftAligned <| fromString "&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles."
