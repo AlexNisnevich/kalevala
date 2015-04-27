@@ -18,7 +18,7 @@ import Text (..)
 
 import GameTypes (..)
 import Piece
-import Board (getBoardSize)
+import Board (getBoardSize, isValidMove)
 import Player
 
 import Debug
@@ -81,15 +81,29 @@ pieceToImage piece tileSize =
 
 -- Display
 
-drawGrid : Int -> WindowDims -> List Form
-drawGrid boardSize dims =
+drawGrid : State -> Int -> WindowDims -> List Form
+drawGrid state boardSize dims =
   let num = toFloat boardSize
       tileSize = getTileSizeFromBoardSize boardSize dims
       size = num * tileSize
       offset = tileSize / 2 - size / 2
-      shape x y = move (tileSize * x + offset, tileSize * y + offset) (outlined (solid black) (square tileSize))
+      shape x y color = let pos = (tileSize * x + offset, tileSize * y + offset) 
+                        in
+                          [ move pos (outlined (solid black) (square tileSize))
+                          , move pos (filled color (square tileSize))
+                          ]
+      isValidSquare x y = case state.heldPiece of
+                            Just idx ->
+                              let hand = Player.getHand state.turn state
+                                  piece = Piece.fromString <| head <| drop idx hand
+                                  location = ((round x) - floor (num / 2), (round y) - floor (num / 2))
+                              in
+                                isValidMove { piece = piece, idx = idx, location = location } state.board
+                            Nothing -> False
+      transparent = rgba 0 0 0 0.0
+      transpGreen = rgba 0 255 0 0.5
   in
-    (concatMap (\x -> (map (\y -> shape x y) [0..(num - 1)])) [0..(num - 1)])
+    (concatMap (\x -> (concatMap (\y -> shape x y (if (isValidSquare x y) then transpGreen else transparent)) [0..(num - 1)])) [0..(num - 1)])
 
 drawPiece : (Location, Piece) -> Float -> Form
 drawPiece ((x', y'), piece) tileSize =
@@ -113,11 +127,11 @@ renderBoard state boardSize dims =
   let tileSize = getTileSizeFromBoardSize boardSize dims
       size = boardSize * (round tileSize) + 1
 
-      grid = drawGrid boardSize dims
+      grid = drawGrid state boardSize dims
       pieces = map (\p -> drawPiece p tileSize) (Dict.toList state.board)
       outline = drawLastPlacedOutline state tileSize
 
-      board = collage size size (grid ++ pieces ++ outline)
+      board = collage size size (pieces ++ grid ++ outline)
   in
     clickable (send clickChannel BoardClick) board
 

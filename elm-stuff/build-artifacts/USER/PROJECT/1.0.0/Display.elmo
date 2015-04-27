@@ -55,7 +55,7 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 103 and 109");
+         "between lines 117 and 123");
       }();
    });
    var pieceToImage = F2(function (piece,
@@ -106,7 +106,7 @@ Elm.Display.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 96 and 99");
+         "between lines 110 and 113");
       }();
    });
    var rulesRow = F2(function (piece,
@@ -272,29 +272,83 @@ Elm.Display.make = function (_elm) {
    dims) {
       return $Basics.toFloat(getTotalBoardSize(dims) / boardSize | 0);
    });
-   var drawGrid = F2(function (boardSize,
+   var drawGrid = F3(function (state,
+   boardSize,
    dims) {
       return function () {
+         var transpGreen = A4($Color.rgba,
+         0,
+         255,
+         0,
+         0.5);
+         var transparent = A4($Color.rgba,
+         0,
+         0,
+         0,
+         0.0);
          var tileSize = A2(getTileSizeFromBoardSize,
          boardSize,
          dims);
          var num = $Basics.toFloat(boardSize);
          var size = num * tileSize;
          var offset = tileSize / 2 - size / 2;
-         var shape = F2(function (x,y) {
-            return A2($Graphics$Collage.move,
-            {ctor: "_Tuple2"
-            ,_0: tileSize * x + offset
-            ,_1: tileSize * y + offset},
-            A2($Graphics$Collage.outlined,
-            $Graphics$Collage.solid($Color.black),
-            $Graphics$Collage.square(tileSize)));
+         var shape = F3(function (x,
+         y,
+         color) {
+            return function () {
+               var pos = {ctor: "_Tuple2"
+                         ,_0: tileSize * x + offset
+                         ,_1: tileSize * y + offset};
+               return _L.fromArray([A2($Graphics$Collage.move,
+                                   pos,
+                                   A2($Graphics$Collage.outlined,
+                                   $Graphics$Collage.solid($Color.black),
+                                   $Graphics$Collage.square(tileSize)))
+                                   ,A2($Graphics$Collage.move,
+                                   pos,
+                                   A2($Graphics$Collage.filled,
+                                   color,
+                                   $Graphics$Collage.square(tileSize)))]);
+            }();
+         });
+         var isValidSquare = F2(function (x,
+         y) {
+            return function () {
+               var _v15 = state.heldPiece;
+               switch (_v15.ctor)
+               {case "Just":
+                  return function () {
+                       var location = {ctor: "_Tuple2"
+                                      ,_0: $Basics.round(x) - $Basics.floor(num / 2)
+                                      ,_1: $Basics.round(y) - $Basics.floor(num / 2)};
+                       var hand = A2($Player.getHand,
+                       state.turn,
+                       state);
+                       var piece = $Piece.fromString($List.head(A2($List.drop,
+                       _v15._0,
+                       hand)));
+                       return A2($Board.isValidMove,
+                       {_: {}
+                       ,idx: _v15._0
+                       ,location: location
+                       ,piece: piece},
+                       state.board);
+                    }();
+                  case "Nothing": return false;}
+               _U.badCase($moduleName,
+               "between lines 95 and 103");
+            }();
          });
          return A2($List.concatMap,
          function (x) {
-            return A2($List.map,
+            return A2($List.concatMap,
             function (y) {
-               return A2(shape,x,y);
+               return A3(shape,
+               x,
+               y,
+               A2(isValidSquare,
+               x,
+               y) ? transpGreen : transparent);
             },
             _L.range(0,num - 1));
          },
@@ -305,7 +359,8 @@ Elm.Display.make = function (_elm) {
    boardSize,
    dims) {
       return function () {
-         var grid = A2(drawGrid,
+         var grid = A3(drawGrid,
+         state,
          boardSize,
          dims);
          var tileSize = A2(getTileSizeFromBoardSize,
@@ -326,9 +381,9 @@ Elm.Display.make = function (_elm) {
          size,
          size,
          A2($Basics._op["++"],
-         grid,
-         A2($Basics._op["++"],
          pieces,
+         A2($Basics._op["++"],
+         grid,
          outline)));
          return A2($Graphics$Input.clickable,
          A2($Signal.send,
@@ -337,11 +392,11 @@ Elm.Display.make = function (_elm) {
          board);
       }();
    });
-   var mouseToBoardPosition = F3(function (_v15,
+   var mouseToBoardPosition = F3(function (_v17,
    state,
    dims) {
       return function () {
-         switch (_v15.ctor)
+         switch (_v17.ctor)
          {case "_Tuple2":
             return function () {
                  var boardSize = $Board.getBoardSize(state.board);
@@ -349,9 +404,9 @@ Elm.Display.make = function (_elm) {
                  boardSize,
                  dims));
                  var offset = boardSize / 2 | 0;
-                 var y = _v15._1 - gameHeaderSize;
+                 var y = _v17._1 - gameHeaderSize;
                  var boardY = 0 - ((y / tileSize | 0) - offset);
-                 var x = _v15._0;
+                 var x = _v17._0;
                  var boardX = (x / tileSize | 0) - offset;
                  return {ctor: "_Tuple2"
                         ,_0: boardX
@@ -373,13 +428,13 @@ Elm.Display.make = function (_elm) {
          "Deck: ",
          $Basics.toString($List.length(state.deck))))))) : $Graphics$Element.empty;
          var remoteGameStatusText = function () {
-            var _v19 = state.gameState;
-            switch (_v19.ctor)
+            var _v21 = state.gameState;
+            switch (_v21.ctor)
             {case "Connected":
                return A2($Basics._op["++"],
                  "Connected to ",
                  A2($Basics._op["++"],
-                 _v19._0,
+                 _v21._0,
                  " "));
                case "Disconnected":
                return "Opponent disconnected ";
