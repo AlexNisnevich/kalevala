@@ -197,8 +197,8 @@ pieceRules = flow down
     , rulesRow Loki "All tiles adjacent to Loki (except other Lokis) have value 0."
     ]
 
-render : State -> WindowDims -> GameType -> Content -> Element
-render state dims gameType playerName =
+render : State -> WindowDims -> GameType -> Content -> Maybe MousePos -> Element
+render state dims gameType playerName tooltipState =
   let boardSize = getBoardSize state.board
       totalBoardSize = getTotalBoardSize dims
       tileSize = getTileSizeFromBoardSize boardSize dims
@@ -245,6 +245,7 @@ render state dims gameType playerName =
                                , withSpacing 10 (withSpacing 10 (container rulesAreaWidth (handGap - 10) midLeft rightArea) |> Graphics.Element.color gray)
                                , spacer 1 5
                                , renderHand Blue state
+                               , centered <| fromString <| toString tooltipState
                                ]
                    ]
       ]

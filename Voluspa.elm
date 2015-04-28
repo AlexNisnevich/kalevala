@@ -10,6 +10,7 @@ import List (..)
 import Maybe (Maybe (..), withDefault)
 import Mouse
 import Random (Seed, initialSeed)
+import Signal
 import Signal (..)
 import Time
 import Window
@@ -243,6 +244,34 @@ processClick signal =
 server : String
 server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000"
 
+{- stuff for tooltip -}
+
+type Hovering = YesHovering (Time.Time, MousePos) | NoHovering Time.Time
+tooltipState : Signal (Maybe MousePos) -- Just (x, y) when the mouse has been static for a while, Nothing otherwise
+tooltipState =
+  let
+     mousePosWithTime : Signal (Time.Time, MousePos)
+     mousePosWithTime = Debug.watch "MP: " Signal.sampleOn (Time.every (Time.millisecond*10)) (Time.timestamp Mouse.position)
+
+     interval : Time.Time
+     interval = 500 * Time.millisecond -- hover for 500 seconds before it registers
+
+     foldFn : (Time.Time, MousePos) -> Hovering -> Hovering
+     foldFn (tNew, (xNew, yNew)) oldState =
+         case oldState of 
+             NoHovering tOld -> if (tNew - tOld) > interval then YesHovering (tNew, (xNew, yNew)) else NoHovering tNew
+             YesHovering (tOld, (xOld, yOld)) -> if xOld /= xNew || yOld /= yNew then NoHovering tNew else YesHovering (tNew, (xNew, yNew))
+
+     intermediarySignal : Signal Hovering
+     intermediarySignal = Signal.foldp foldFn (NoHovering 0) mousePosWithTime
+
+  in 
+     --Signal.foldp foldFn Nothing mousePosWithTime
+    Signal.map (\h -> case h of
+       YesHovering (t, mp) -> Just mp
+       NoHovering _ -> Nothing)
+       (Debug.watch "im" intermediarySignal)
+
 {- The main game loop. 
    The state is folded over time over a stream of Actions, coming from the client and from the server (for an online game.)
    Actions from the client are constructed by processing a signal of ClickEvents from Display.clickChannel.
@@ -266,5 +295,6 @@ main =
     responseAction = Debug.watch "deserialized" <~ (decode <~ response)
 
     state = foldp performAction startState (merge action responseAction)
+
   in
-    Display.render <~ state ~ Window.dimensions ~ (subscribe Display.gameTypeChannel) ~ (subscribe Display.playerNameChannel)
+    Display.render <~ state ~ Window.dimensions ~ (subscribe Display.gameTypeChannel) ~ (subscribe Display.playerNameChannel) ~ (Debug.watch "q" tooltipState)
