@@ -98,9 +98,8 @@ Elm.AI.make = function (_elm) {
             switch (_.ctor)
             {case "_Tuple2": return _._0;}
             _U.badCase($moduleName,
-            "between lines 36 and 38");
+            "between lines 35 and 37");
          }();
-         var p = $Player.color(state.turn);
          return $Maybe.Just(bestMove);
       }();
    };

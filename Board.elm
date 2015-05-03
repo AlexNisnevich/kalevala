@@ -126,6 +126,25 @@ getTileValue (x,y) dir move board =
         | otherwise ->
             Piece.baseValue piece
 
+-- this is just used for determining piece images
+-- TODO: remove overlap between this and getTileValue (but note that there are subtle differences!)
+getDisplayedTileValue : Location -> Board -> String
+getDisplayedTileValue (x,y) board =
+  let piece = pieceAt (x,y) board
+      adjacentToLoki = any (\l -> pieceAt l board == Loki) <| adjacentTiles (x,y) board
+  in
+    if | adjacentToLoki && not (piece == Loki) -> 
+            "0" 
+       | piece == Fenrir -> 
+            let row = findRow (x,y) board
+                column = findColumn (x,y) board
+            in
+              if any (\loc -> not (adjacentToLoki) && pieceAt loc board == Fenrir) (row ++ column)
+              then "4_star"
+              else "4"
+       | otherwise ->
+            toString <| Piece.baseValue piece
+
 -- is this piece at one end of a line with the same kind of piece at the other end? (used by Valkyrie)
 hasSamePieceAtOtherEnd : Location -> Board -> Direction -> Bool
 hasSamePieceAtOtherEnd (x,y) board dir =

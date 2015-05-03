@@ -26,7 +26,7 @@ deck : Deck -> Value
 deck = list << map string
 
 player : Player -> Value
-player = string << Player.color
+player = string << Player.toString
 
 intPair : (Int, Int) -> Value
 intPair (x, y) = list <| map int [x, y]

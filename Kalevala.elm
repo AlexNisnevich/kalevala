@@ -25,8 +25,7 @@ import Debug
 {- Perform an action on the current state and return the resulting state. -}
 performAction : Action -> State -> State
 performAction action state =
-  let p = Player.color state.turn
-      newState =
+  let newState =
         case action of
           PickUpPiece player idx -> Game.tryToPickUpPiece player idx state
           PlacePiece mousePos dims -> Game.tryMove (Display.mouseToBoardPosition mousePos state dims) state

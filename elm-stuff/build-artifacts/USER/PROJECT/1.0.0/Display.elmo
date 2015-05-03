@@ -55,10 +55,11 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 116 and 122");
+         "between lines 117 and 123");
       }();
    });
-   var pieceToImage = F2(function (piece,
+   var pieceToImage = F3(function (piece,
+   value,
    tileSize) {
       return function () {
          var imgPath = function () {
@@ -88,7 +89,8 @@ Elm.Display.make = function (_elm) {
          imgPath);
       }();
    });
-   var drawPiece = F2(function (_v5,
+   var drawPiece = F3(function (_v5,
+   board,
    tileSize) {
       return function () {
          switch (_v5.ctor)
@@ -96,17 +98,23 @@ Elm.Display.make = function (_elm) {
             switch (_v5._0.ctor)
               {case "_Tuple2":
                  return function () {
+                      var value = A2($Board.getDisplayedTileValue,
+                      {ctor: "_Tuple2"
+                      ,_0: _v5._0._0
+                      ,_1: _v5._0._1},
+                      board);
                       var y = $Basics.toFloat(_v5._0._1) * tileSize;
                       var x = $Basics.toFloat(_v5._0._0) * tileSize;
                       return A2($Graphics$Collage.move,
                       {ctor: "_Tuple2",_0: x,_1: y},
-                      $Graphics$Collage.toForm(A2(pieceToImage,
+                      $Graphics$Collage.toForm(A3(pieceToImage,
                       _v5._1,
+                      value,
                       tileSize)));
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 109 and 112");
+         "between lines 109 and 113");
       }();
    });
    var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
@@ -149,8 +157,9 @@ Elm.Display.make = function (_elm) {
             idx)))($Graphics$Element.color(isPieceHeld(idx) ? $Player.toColor(state.turn) : $Color.white)(A3($Graphics$Element.container,
             pieceSize,
             pieceSize,
-            $Graphics$Element.middle)(A2(pieceImage,
+            $Graphics$Element.middle)(A3(pieceImage,
             pieceStr,
+            $Basics.toString($Piece.baseValue($Piece.fromString(pieceStr))),
             handTileSize))));
          });
          var hand = A2($Player.getHand,
@@ -175,7 +184,7 @@ Elm.Display.make = function (_elm) {
             $Graphics$Element.middle)(hiddenPiece);
          },
          hand);
-         var p = $Player.color(player);
+         var p = $Player.toString(player);
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
@@ -281,8 +290,9 @@ Elm.Display.make = function (_elm) {
          var size = boardSize * $Basics.round(tileSize) + 1;
          var pieces = A2($List.map,
          function (p) {
-            return A2(drawPiece,
+            return A3(drawPiece,
             p,
+            state.board,
             tileSize);
          },
          $Dict.toList(state.board));
@@ -339,7 +349,7 @@ Elm.Display.make = function (_elm) {
                {case "_Tuple2":
                   return $Text.leftAligned($Text.color(_v19._0)($Text.fromString(_v19._1)));}
                _U.badCase($moduleName,
-               "on line 219, column 49 to 99");
+               "on line 207, column 49 to 99");
             }();
          })($List.take(5)(state.log)));
          var deckSizeArea = $GameTypes.isOngoing(state) ? A3($Graphics$Element.container,

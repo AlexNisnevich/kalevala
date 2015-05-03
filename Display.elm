@@ -18,7 +18,7 @@ import Text (..)
 
 import GameTypes (..)
 import Piece
-import Board (getBoardSize, isValidMove, isValidSquareToMove)
+import Board
 import Player
 
 import Debug
@@ -63,15 +63,15 @@ mouseToBoardPosition: MousePos -> State -> WindowDims -> Location
 mouseToBoardPosition (x', y') state dims =
   let x = x'
       y = (y' - gameHeaderSize)
-      boardSize = getBoardSize state.board
+      boardSize = Board.getBoardSize state.board
       tileSize = round <| getTileSizeFromBoardSize boardSize dims
       offset = boardSize // 2
       boardX = (x // tileSize) - offset
       boardY = 0 - ((y // tileSize) - offset)
   in (boardX, boardY)
 
-pieceToImage: Piece -> Float -> Element
-pieceToImage piece tileSize =
+pieceToImage: Piece -> String -> Float -> Element
+pieceToImage piece value tileSize =
   let imgPath =
         case piece of
           Odin -> "images/tile_7.jpg"
@@ -94,7 +94,7 @@ drawGrid state boardSize dims =
       offset = tileSize / 2 - totalSize / 2
       shape x y = 
         let pos = (tileSize * (toFloat x) + offset, tileSize * (toFloat y) + offset)
-            color = if (isValidSquareToMove state (x, y) boardSize) then transpGreen else transparent
+            color = if (Board.isValidSquareToMove state (x, y) boardSize) then transpGreen else transparent
         in
           [ move pos (outlined (solid black) (square tileSize))
           , move pos (filled color (square tileSize))
@@ -104,12 +104,13 @@ drawGrid state boardSize dims =
                                  [0..(boardSize - 1)])) 
                [0..(boardSize - 1)])
 
-drawPiece : (Location, Piece) -> Float -> Form
-drawPiece ((x', y'), piece) tileSize =
+drawPiece : (Location, Piece) -> Board -> Float -> Form
+drawPiece ((x', y'), piece) board tileSize =
   let x = toFloat x' * tileSize
       y = toFloat y' * tileSize
+      value = Board.getDisplayedTileValue (x',y') board
   in
-    move (x, y) (toForm (pieceToImage piece tileSize))
+    move (x, y) (toForm (pieceToImage piece value tileSize))
 
 drawLastPlacedOutline : State -> Float -> List Form
 drawLastPlacedOutline state tileSize =
@@ -127,7 +128,7 @@ renderBoard state boardSize dims =
       size = boardSize * (round tileSize) + 1
 
       grid = drawGrid state boardSize dims
-      pieces = map (\p -> drawPiece p tileSize) (Dict.toList state.board)
+      pieces = map (\p -> drawPiece p state.board tileSize) (Dict.toList state.board)
       outline = drawLastPlacedOutline state tileSize
 
       board = collage size size (pieces ++ grid ++ outline)
@@ -136,15 +137,16 @@ renderBoard state boardSize dims =
 
 renderHand : Player -> State -> Element
 renderHand player state =
-  let p = Player.color player
+  let p = Player.toString player
       playerType = withDefault Human (Dict.get p state.players)
       hand = Player.getHand player state
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
-      pieceImage pieceStr = pieceToImage (Piece.fromString pieceStr)
+      pieceImage pieceStr = pieceToImage <| Piece.fromString pieceStr
       pieceSize = (round handTileSize) + handPadding
-      makePiece idx pieceStr = pieceImage pieceStr handTileSize |> container pieceSize pieceSize middle
-                                                                |> Graphics.Element.color (if isPieceHeld idx then (Player.toColor state.turn) else white)
-                                                                |> clickable (send clickChannel (PieceInHand player idx))
+      makePiece idx pieceStr = pieceImage pieceStr (toString <| Piece.baseValue <| Piece.fromString pieceStr) handTileSize
+                                  |> container pieceSize pieceSize middle
+                                  |> Graphics.Element.color (if isPieceHeld idx then (Player.toColor state.turn) else white)
+                                  |> clickable (send clickChannel (PieceInHand player idx))
       playerHand = if isEmpty hand && state.gameState == Ongoing
                    then [button (send clickChannel PassButton) "Pass" |> container 100 100 middle]
                    else indexedMap makePiece hand
@@ -172,23 +174,9 @@ renderHand player state =
   in
     flow right ([handText] ++ [score] ++ [delta] ++ handContents)
 
-{-
-rulesRow : Piece -> String -> Element
-rulesRow piece description =
-  let height = 30
-      image = pieceToImage piece height `beside` spacer 10 10
-      value = Piece.baseValue piece
-      nameAndValue = Text.concat <| map fromString [Piece.toString piece, " (", toString value, "): "]
-      text = flow right [ leftAligned <| bold <| nameAndValue
-                        , plainText description
-                        ]
-  in
-    image `beside` container 600 height midLeft text
--}
-
 render : State -> WindowDims -> GameType -> Content -> Element
 render state dims gameType playerName =
-  let boardSize = getBoardSize state.board
+  let boardSize = Board.getBoardSize state.board
       totalBoardSize = getTotalBoardSize dims
       tileSize = getTileSizeFromBoardSize boardSize dims
       handGap = totalBoardSize - 2 * (round handTileSize) - (handPadding * 2)

@@ -139,10 +139,10 @@ Elm.Game.make = function (_elm) {
          hands = $._1,
          remainder = $._2;
          var playerNames = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                        ,_0: $Player.color(localPlayer)
+                                                        ,_0: $Player.toString(localPlayer)
                                                         ,_1: "You"}
                                                        ,{ctor: "_Tuple2"
-                                                        ,_0: $Player.color($Player.next(localPlayer))
+                                                        ,_0: $Player.toString($Player.next(localPlayer))
                                                         ,_1: opponentName}]));
          var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                     ,_0: "red"
@@ -216,13 +216,13 @@ Elm.Game.make = function (_elm) {
          var delta = A2($Board.scoreMove,
          move,
          newBoard);
-         var p = $Player.color(state.turn);
+         var p = $Player.toString(state.turn);
          var newScore = $Maybe.withDefault(0)(A2($Dict.get,
          p,
          state.score)) + delta;
          var logText = A2($Basics._op["++"],
          $Maybe.withDefault("")(A2($Dict.get,
-         $Player.color(state.turn),
+         $Player.toString(state.turn),
          state.playerNames)),
          A2($Basics._op["++"],
          " placed a ",
@@ -277,7 +277,7 @@ Elm.Game.make = function (_elm) {
    });
    var pass = function (state) {
       return function () {
-         var p = $Player.color(state.turn);
+         var p = $Player.toString(state.turn);
          return _U.replace([["turn"
                             ,$Player.next(state.turn)]
                            ,["delta"
@@ -357,18 +357,18 @@ Elm.Game.make = function (_elm) {
          hands = $._1,
          remainder = $._2;
          var playerNames = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                        ,_0: $Player.color(player)
+                                                        ,_0: $Player.toString(player)
                                                         ,_1: _U.eq(gameType,
-                                                        $GameTypes.HumanVsCpu) ? "You" : $Player.color(player)}
+                                                        $GameTypes.HumanVsCpu) ? "You" : $Player.toString(player)}
                                                        ,{ctor: "_Tuple2"
-                                                        ,_0: $Player.color($Player.next(player))
+                                                        ,_0: $Player.toString($Player.next(player))
                                                         ,_1: _U.eq(gameType,
-                                                        $GameTypes.HumanVsCpu) ? "CPU" : $Player.color($Player.next(player))}]));
+                                                        $GameTypes.HumanVsCpu) ? "CPU" : $Player.toString($Player.next(player))}]));
          var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                    ,_0: $Player.color(player)
+                                                    ,_0: $Player.toString(player)
                                                     ,_1: $GameTypes.Human}
                                                    ,{ctor: "_Tuple2"
-                                                    ,_0: $Player.color($Player.next(player))
+                                                    ,_0: $Player.toString($Player.next(player))
                                                     ,_1: _U.eq(gameType,
                                                     $GameTypes.HumanVsCpu) ? $GameTypes.Cpu : $GameTypes.Human}]));
          var state = _U.eq(gameType,

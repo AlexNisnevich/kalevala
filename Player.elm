@@ -22,8 +22,8 @@ fromString str =
     "red" -> Red
     "blue" -> Blue
 
-color : Player -> String
-color player =
+toString : Player -> String
+toString player =
   case player of
     Red -> "red"
     Blue -> "blue"
@@ -36,11 +36,11 @@ next player =
 
 getType : Player -> State -> PlayerType
 getType player state =
-  withDefault Human (Dict.get (color player) state.players)
+  withDefault Human (Dict.get (toString player) state.players)
 
 getHand : Player -> State -> List String
 getHand player state =
-  withDefault [] (Dict.get (color player) state.hands)
+  withDefault [] (Dict.get (toString player) state.hands)
 
 noTilesInHand : Player -> State -> Bool
 noTilesInHand player state =

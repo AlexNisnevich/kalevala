@@ -24,7 +24,7 @@ tryToPickUpPiece player idx state =
 {- Pass the current player's turn. Returns the new state. -}
 pass : State -> State
 pass state =
-  let p = Player.color state.turn
+  let p = Player.toString state.turn
   in
     { state | turn <- Player.next state.turn
             , delta <- Dict.insert p "(+0)" state.delta }
@@ -61,7 +61,7 @@ tryAIMove state =
 {- Make the given move. Returns the new state. -}
 makeMove : Move -> State -> State
 makeMove move state =
-  let p = Player.color state.turn
+  let p = Player.toString state.turn
       newBoard = Dict.insert move.location move.piece state.board
       delta = Board.scoreMove move newBoard
       newScore = (withDefault 0 <| Dict.get p state.score) + delta
@@ -71,7 +71,7 @@ makeMove move state =
       newHand = case existingTile of
         Just piece -> if move.piece == Skadi then (replaceAtIndex move.idx (Piece.toString piece) hand) else handWithDrawnTile
         Nothing -> handWithDrawnTile
-      logText = (withDefault "" <| Dict.get (Player.color state.turn) state.playerNames) ++ " placed a " ++ 
+      logText = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " placed a " ++ 
                   Piece.toString move.piece ++ " for " ++ toString delta ++ " points" ++ 
                   " (total: " ++ toString newScore ++ ")"
   in
@@ -117,11 +117,11 @@ getFirstTileHandsAndDeck deck =
          gameStarted triggers when a match has been found. -}
 startGame : GameType -> Deck -> Player -> String -> State
 startGame gameType deck player playerName =
-  let players = Dict.fromList [ (Player.color player, Human)
-                              , (Player.color <| Player.next player, if gameType == HumanVsCpu then Cpu else Human)
+  let players = Dict.fromList [ (Player.toString player, Human)
+                              , (Player.toString <| Player.next player, if gameType == HumanVsCpu then Cpu else Human)
                               ]
-      playerNames = Dict.fromList [ (Player.color player, if gameType == HumanVsCpu then "You" else Player.color player)
-                                  , (Player.color <| Player.next player, if gameType == HumanVsCpu then "CPU" else Player.color <| Player.next player)
+      playerNames = Dict.fromList [ (Player.toString player, if gameType == HumanVsCpu then "You" else Player.toString player)
+                                  , (Player.toString <| Player.next player, if gameType == HumanVsCpu then "CPU" else Player.toString <| Player.next player)
                                   ]
       (firstTile, hands, remainder) = getFirstTileHandsAndDeck deck
       state = if gameType == HumanVsHumanRemote
@@ -151,8 +151,8 @@ gameStarted deck startPlayer localPlayer opponentName =
   let players = Dict.fromList [ ("red", if localPlayer == Red then Human else Remote)
                               , ("blue", if localPlayer == Blue then Human else Remote)
                               ]
-      playerNames = Dict.fromList [ (Player.color localPlayer, "You")
-                                  , (Player.color <| Player.next localPlayer, opponentName)
+      playerNames = Dict.fromList [ (Player.toString localPlayer, "You")
+                                  , (Player.toString <| Player.next localPlayer, opponentName)
                                   ]
       (firstTile, hands, remainder) = getFirstTileHandsAndDeck deck
   in

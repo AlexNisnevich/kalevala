@@ -257,38 +257,88 @@ Elm.Board.make = function (_elm) {
                       }();
                     case "Nothing": return false;}
                  _U.badCase($moduleName,
-                 "between lines 151 and 159");
+                 "between lines 170 and 178");
               }() : false;}
          _U.badCase($moduleName,
-         "between lines 149 and 159");
+         "between lines 168 and 178");
       }();
    });
-   var hasSamePieceAtOtherEnd = F3(function (_v42,
-   board,
-   dir) {
+   var getDisplayedTileValue = F2(function (_v42,
+   board) {
       return function () {
          switch (_v42.ctor)
          {case "_Tuple2":
             return function () {
+                 var adjacentToLoki = $List.any(function (l) {
+                    return _U.eq(A2(pieceAt,
+                    l,
+                    board),
+                    $GameTypes.Loki);
+                 })(A2(adjacentTiles,
+                 {ctor: "_Tuple2"
+                 ,_0: _v42._0
+                 ,_1: _v42._1},
+                 board));
+                 var piece = A2(pieceAt,
+                 {ctor: "_Tuple2"
+                 ,_0: _v42._0
+                 ,_1: _v42._1},
+                 board);
+                 return adjacentToLoki && $Basics.not(_U.eq(piece,
+                 $GameTypes.Loki)) ? "0" : _U.eq(piece,
+                 $GameTypes.Fenrir) ? function () {
+                    var column = A2(findColumn,
+                    {ctor: "_Tuple2"
+                    ,_0: _v42._0
+                    ,_1: _v42._1},
+                    board);
+                    var row = A2(findRow,
+                    {ctor: "_Tuple2"
+                    ,_0: _v42._0
+                    ,_1: _v42._1},
+                    board);
+                    return A2($List.any,
+                    function (loc) {
+                       return $Basics.not(adjacentToLoki) && _U.eq(A2(pieceAt,
+                       loc,
+                       board),
+                       $GameTypes.Fenrir);
+                    },
+                    A2($Basics._op["++"],
+                    row,
+                    column)) ? "4_star" : "4";
+                 }() : $Basics.toString($Piece.baseValue(piece));
+              }();}
+         _U.badCase($moduleName,
+         "between lines 133 and 146");
+      }();
+   });
+   var hasSamePieceAtOtherEnd = F3(function (_v46,
+   board,
+   dir) {
+      return function () {
+         switch (_v46.ctor)
+         {case "_Tuple2":
+            return function () {
                  var right = A2(findRightward,
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0 + 1
-                 ,_1: _v42._1},
+                 ,_0: _v46._0 + 1
+                 ,_1: _v46._1},
                  board);
                  var left = A2(findLeftward,
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0 - 1
-                 ,_1: _v42._1},
+                 ,_0: _v46._0 - 1
+                 ,_1: _v46._1},
                  board);
                  var below = A2(findBelow,
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1 + 1},
+                 ,_0: _v46._0
+                 ,_1: _v46._1 + 1},
                  board);
                  var above = A2(findAbove,
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1 - 1},
+                 ,_0: _v46._0
+                 ,_1: _v46._1 - 1},
                  board);
                  var samePieces = F2(function (pos1,
                  pos2) {
@@ -303,23 +353,23 @@ Elm.Board.make = function (_elm) {
                  var samePieceBelow = $List.isEmpty(above) && ($Basics.not($List.isEmpty(below)) && A2(samePieces,
                  last(below),
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1}));
+                 ,_0: _v46._0
+                 ,_1: _v46._1}));
                  var samePieceAbove = $List.isEmpty(below) && ($Basics.not($List.isEmpty(above)) && A2(samePieces,
                  last(above),
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1}));
+                 ,_0: _v46._0
+                 ,_1: _v46._1}));
                  var samePieceLeft = $List.isEmpty(right) && ($Basics.not($List.isEmpty(left)) && A2(samePieces,
                  last(left),
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1}));
+                 ,_0: _v46._0
+                 ,_1: _v46._1}));
                  var samePieceRight = $List.isEmpty(left) && ($Basics.not($List.isEmpty(right)) && A2(samePieces,
                  last(right),
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1}));
+                 ,_0: _v46._0
+                 ,_1: _v46._1}));
                  return function () {
                     switch (dir.ctor)
                     {case "Horizontal":
@@ -327,25 +377,25 @@ Elm.Board.make = function (_elm) {
                        case "Vertical":
                        return samePieceBelow || samePieceAbove;}
                     _U.badCase($moduleName,
-                    "between lines 143 and 145");
+                    "between lines 162 and 164");
                  }();
               }();}
          _U.badCase($moduleName,
-         "between lines 132 and 145");
+         "between lines 151 and 164");
       }();
    });
-   var getTileValue = F4(function (_v47,
+   var getTileValue = F4(function (_v51,
    dir,
    move,
    board) {
       return function () {
-         switch (_v47.ctor)
+         switch (_v51.ctor)
          {case "_Tuple2":
             return function () {
                  var isCurrentTile = _U.eq(move.location,
                  {ctor: "_Tuple2"
-                 ,_0: _v47._0
-                 ,_1: _v47._1});
+                 ,_0: _v51._0
+                 ,_1: _v51._1});
                  var adjacentToLoki = function (loc) {
                     return $List.any(function (l) {
                        return _U.eq(A2(pieceAt,
@@ -356,8 +406,8 @@ Elm.Board.make = function (_elm) {
                  };
                  var piece = A2(pieceAt,
                  {ctor: "_Tuple2"
-                 ,_0: _v47._0
-                 ,_1: _v47._1},
+                 ,_0: _v51._0
+                 ,_1: _v51._1},
                  board);
                  return _U.eq(piece,
                  $GameTypes.Fenrir) ? function () {
@@ -372,12 +422,12 @@ Elm.Board.make = function (_elm) {
                        "between lines 114 and 115");
                     }(),
                     {ctor: "_Tuple2"
-                    ,_0: _v47._0
-                    ,_1: _v47._1},
+                    ,_0: _v51._0
+                    ,_1: _v51._1},
                     board),
                     _L.fromArray([{ctor: "_Tuple2"
-                                  ,_0: _v47._0
-                                  ,_1: _v47._1}]));
+                                  ,_0: _v51._0
+                                  ,_1: _v51._1}]));
                     var numFenrirs = $List.length(A2($List.filter,
                     function (loc) {
                        return $Basics.not(adjacentToLoki(loc)) && (_U.eq(A2(pieceAt,
@@ -391,12 +441,12 @@ Elm.Board.make = function (_elm) {
                  }() : _U.eq(piece,
                  $GameTypes.Valkyrie) && (isCurrentTile && A3(hasSamePieceAtOtherEnd,
                  {ctor: "_Tuple2"
-                 ,_0: _v47._0
-                 ,_1: _v47._1},
+                 ,_0: _v51._0
+                 ,_1: _v51._1},
                  board,
                  dir)) ? 100 : adjacentToLoki({ctor: "_Tuple2"
-                                              ,_0: _v47._0
-                                              ,_1: _v47._1}) && $Basics.not(_U.eq(piece,
+                                              ,_0: _v51._0
+                                              ,_1: _v51._1}) && $Basics.not(_U.eq(piece,
                  $GameTypes.Loki)) ? 0 : $Piece.baseValue(piece);
               }();}
          _U.badCase($moduleName,
@@ -492,6 +542,7 @@ Elm.Board.make = function (_elm) {
                        ,isValidMove: isValidMove
                        ,scoreMove: scoreMove
                        ,getTileValue: getTileValue
+                       ,getDisplayedTileValue: getDisplayedTileValue
                        ,hasSamePieceAtOtherEnd: hasSamePieceAtOtherEnd
                        ,isValidSquareToMove: isValidSquareToMove};
    return _elm.Board.values;

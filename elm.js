@@ -99,9 +99,8 @@ Elm.AI.make = function (_elm) {
             switch (_.ctor)
             {case "_Tuple2": return _._0;}
             _U.badCase($moduleName,
-            "between lines 36 and 38");
+            "between lines 35 and 37");
          }();
-         var p = $Player.color(state.turn);
          return $Maybe.Just(bestMove);
       }();
    };
@@ -637,38 +636,88 @@ Elm.Board.make = function (_elm) {
                       }();
                     case "Nothing": return false;}
                  _U.badCase($moduleName,
-                 "between lines 151 and 159");
+                 "between lines 170 and 178");
               }() : false;}
          _U.badCase($moduleName,
-         "between lines 149 and 159");
+         "between lines 168 and 178");
       }();
    });
-   var hasSamePieceAtOtherEnd = F3(function (_v42,
-   board,
-   dir) {
+   var getDisplayedTileValue = F2(function (_v42,
+   board) {
       return function () {
          switch (_v42.ctor)
          {case "_Tuple2":
             return function () {
+                 var adjacentToLoki = $List.any(function (l) {
+                    return _U.eq(A2(pieceAt,
+                    l,
+                    board),
+                    $GameTypes.Loki);
+                 })(A2(adjacentTiles,
+                 {ctor: "_Tuple2"
+                 ,_0: _v42._0
+                 ,_1: _v42._1},
+                 board));
+                 var piece = A2(pieceAt,
+                 {ctor: "_Tuple2"
+                 ,_0: _v42._0
+                 ,_1: _v42._1},
+                 board);
+                 return adjacentToLoki && $Basics.not(_U.eq(piece,
+                 $GameTypes.Loki)) ? "0" : _U.eq(piece,
+                 $GameTypes.Fenrir) ? function () {
+                    var column = A2(findColumn,
+                    {ctor: "_Tuple2"
+                    ,_0: _v42._0
+                    ,_1: _v42._1},
+                    board);
+                    var row = A2(findRow,
+                    {ctor: "_Tuple2"
+                    ,_0: _v42._0
+                    ,_1: _v42._1},
+                    board);
+                    return A2($List.any,
+                    function (loc) {
+                       return $Basics.not(adjacentToLoki) && _U.eq(A2(pieceAt,
+                       loc,
+                       board),
+                       $GameTypes.Fenrir);
+                    },
+                    A2($Basics._op["++"],
+                    row,
+                    column)) ? "4_star" : "4";
+                 }() : $Basics.toString($Piece.baseValue(piece));
+              }();}
+         _U.badCase($moduleName,
+         "between lines 133 and 146");
+      }();
+   });
+   var hasSamePieceAtOtherEnd = F3(function (_v46,
+   board,
+   dir) {
+      return function () {
+         switch (_v46.ctor)
+         {case "_Tuple2":
+            return function () {
                  var right = A2(findRightward,
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0 + 1
-                 ,_1: _v42._1},
+                 ,_0: _v46._0 + 1
+                 ,_1: _v46._1},
                  board);
                  var left = A2(findLeftward,
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0 - 1
-                 ,_1: _v42._1},
+                 ,_0: _v46._0 - 1
+                 ,_1: _v46._1},
                  board);
                  var below = A2(findBelow,
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1 + 1},
+                 ,_0: _v46._0
+                 ,_1: _v46._1 + 1},
                  board);
                  var above = A2(findAbove,
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1 - 1},
+                 ,_0: _v46._0
+                 ,_1: _v46._1 - 1},
                  board);
                  var samePieces = F2(function (pos1,
                  pos2) {
@@ -683,23 +732,23 @@ Elm.Board.make = function (_elm) {
                  var samePieceBelow = $List.isEmpty(above) && ($Basics.not($List.isEmpty(below)) && A2(samePieces,
                  last(below),
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1}));
+                 ,_0: _v46._0
+                 ,_1: _v46._1}));
                  var samePieceAbove = $List.isEmpty(below) && ($Basics.not($List.isEmpty(above)) && A2(samePieces,
                  last(above),
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1}));
+                 ,_0: _v46._0
+                 ,_1: _v46._1}));
                  var samePieceLeft = $List.isEmpty(right) && ($Basics.not($List.isEmpty(left)) && A2(samePieces,
                  last(left),
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1}));
+                 ,_0: _v46._0
+                 ,_1: _v46._1}));
                  var samePieceRight = $List.isEmpty(left) && ($Basics.not($List.isEmpty(right)) && A2(samePieces,
                  last(right),
                  {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1}));
+                 ,_0: _v46._0
+                 ,_1: _v46._1}));
                  return function () {
                     switch (dir.ctor)
                     {case "Horizontal":
@@ -707,25 +756,25 @@ Elm.Board.make = function (_elm) {
                        case "Vertical":
                        return samePieceBelow || samePieceAbove;}
                     _U.badCase($moduleName,
-                    "between lines 143 and 145");
+                    "between lines 162 and 164");
                  }();
               }();}
          _U.badCase($moduleName,
-         "between lines 132 and 145");
+         "between lines 151 and 164");
       }();
    });
-   var getTileValue = F4(function (_v47,
+   var getTileValue = F4(function (_v51,
    dir,
    move,
    board) {
       return function () {
-         switch (_v47.ctor)
+         switch (_v51.ctor)
          {case "_Tuple2":
             return function () {
                  var isCurrentTile = _U.eq(move.location,
                  {ctor: "_Tuple2"
-                 ,_0: _v47._0
-                 ,_1: _v47._1});
+                 ,_0: _v51._0
+                 ,_1: _v51._1});
                  var adjacentToLoki = function (loc) {
                     return $List.any(function (l) {
                        return _U.eq(A2(pieceAt,
@@ -736,8 +785,8 @@ Elm.Board.make = function (_elm) {
                  };
                  var piece = A2(pieceAt,
                  {ctor: "_Tuple2"
-                 ,_0: _v47._0
-                 ,_1: _v47._1},
+                 ,_0: _v51._0
+                 ,_1: _v51._1},
                  board);
                  return _U.eq(piece,
                  $GameTypes.Fenrir) ? function () {
@@ -752,12 +801,12 @@ Elm.Board.make = function (_elm) {
                        "between lines 114 and 115");
                     }(),
                     {ctor: "_Tuple2"
-                    ,_0: _v47._0
-                    ,_1: _v47._1},
+                    ,_0: _v51._0
+                    ,_1: _v51._1},
                     board),
                     _L.fromArray([{ctor: "_Tuple2"
-                                  ,_0: _v47._0
-                                  ,_1: _v47._1}]));
+                                  ,_0: _v51._0
+                                  ,_1: _v51._1}]));
                     var numFenrirs = $List.length(A2($List.filter,
                     function (loc) {
                        return $Basics.not(adjacentToLoki(loc)) && (_U.eq(A2(pieceAt,
@@ -771,12 +820,12 @@ Elm.Board.make = function (_elm) {
                  }() : _U.eq(piece,
                  $GameTypes.Valkyrie) && (isCurrentTile && A3(hasSamePieceAtOtherEnd,
                  {ctor: "_Tuple2"
-                 ,_0: _v47._0
-                 ,_1: _v47._1},
+                 ,_0: _v51._0
+                 ,_1: _v51._1},
                  board,
                  dir)) ? 100 : adjacentToLoki({ctor: "_Tuple2"
-                                              ,_0: _v47._0
-                                              ,_1: _v47._1}) && $Basics.not(_U.eq(piece,
+                                              ,_0: _v51._0
+                                              ,_1: _v51._1}) && $Basics.not(_U.eq(piece,
                  $GameTypes.Loki)) ? 0 : $Piece.baseValue(piece);
               }();}
          _U.badCase($moduleName,
@@ -872,6 +921,7 @@ Elm.Board.make = function (_elm) {
                        ,isValidMove: isValidMove
                        ,scoreMove: scoreMove
                        ,getTileValue: getTileValue
+                       ,getDisplayedTileValue: getDisplayedTileValue
                        ,hasSamePieceAtOtherEnd: hasSamePieceAtOtherEnd
                        ,isValidSquareToMove: isValidSquareToMove};
    return _elm.Board.values;
@@ -2540,10 +2590,11 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 116 and 122");
+         "between lines 117 and 123");
       }();
    });
-   var pieceToImage = F2(function (piece,
+   var pieceToImage = F3(function (piece,
+   value,
    tileSize) {
       return function () {
          var imgPath = function () {
@@ -2573,7 +2624,8 @@ Elm.Display.make = function (_elm) {
          imgPath);
       }();
    });
-   var drawPiece = F2(function (_v5,
+   var drawPiece = F3(function (_v5,
+   board,
    tileSize) {
       return function () {
          switch (_v5.ctor)
@@ -2581,17 +2633,23 @@ Elm.Display.make = function (_elm) {
             switch (_v5._0.ctor)
               {case "_Tuple2":
                  return function () {
+                      var value = A2($Board.getDisplayedTileValue,
+                      {ctor: "_Tuple2"
+                      ,_0: _v5._0._0
+                      ,_1: _v5._0._1},
+                      board);
                       var y = $Basics.toFloat(_v5._0._1) * tileSize;
                       var x = $Basics.toFloat(_v5._0._0) * tileSize;
                       return A2($Graphics$Collage.move,
                       {ctor: "_Tuple2",_0: x,_1: y},
-                      $Graphics$Collage.toForm(A2(pieceToImage,
+                      $Graphics$Collage.toForm(A3(pieceToImage,
                       _v5._1,
+                      value,
                       tileSize)));
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 109 and 112");
+         "between lines 109 and 113");
       }();
    });
    var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
@@ -2634,8 +2692,9 @@ Elm.Display.make = function (_elm) {
             idx)))($Graphics$Element.color(isPieceHeld(idx) ? $Player.toColor(state.turn) : $Color.white)(A3($Graphics$Element.container,
             pieceSize,
             pieceSize,
-            $Graphics$Element.middle)(A2(pieceImage,
+            $Graphics$Element.middle)(A3(pieceImage,
             pieceStr,
+            $Basics.toString($Piece.baseValue($Piece.fromString(pieceStr))),
             handTileSize))));
          });
          var hand = A2($Player.getHand,
@@ -2660,7 +2719,7 @@ Elm.Display.make = function (_elm) {
             $Graphics$Element.middle)(hiddenPiece);
          },
          hand);
-         var p = $Player.color(player);
+         var p = $Player.toString(player);
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
@@ -2766,8 +2825,9 @@ Elm.Display.make = function (_elm) {
          var size = boardSize * $Basics.round(tileSize) + 1;
          var pieces = A2($List.map,
          function (p) {
-            return A2(drawPiece,
+            return A3(drawPiece,
             p,
+            state.board,
             tileSize);
          },
          $Dict.toList(state.board));
@@ -2824,7 +2884,7 @@ Elm.Display.make = function (_elm) {
                {case "_Tuple2":
                   return $Text.leftAligned($Text.color(_v19._0)($Text.fromString(_v19._1)));}
                _U.badCase($moduleName,
-               "on line 219, column 49 to 99");
+               "on line 207, column 49 to 99");
             }();
          })($List.take(5)(state.log)));
          var deckSizeArea = $GameTypes.isOngoing(state) ? A3($Graphics$Element.container,
@@ -3109,10 +3169,10 @@ Elm.Game.make = function (_elm) {
          hands = $._1,
          remainder = $._2;
          var playerNames = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                        ,_0: $Player.color(localPlayer)
+                                                        ,_0: $Player.toString(localPlayer)
                                                         ,_1: "You"}
                                                        ,{ctor: "_Tuple2"
-                                                        ,_0: $Player.color($Player.next(localPlayer))
+                                                        ,_0: $Player.toString($Player.next(localPlayer))
                                                         ,_1: opponentName}]));
          var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                     ,_0: "red"
@@ -3186,13 +3246,13 @@ Elm.Game.make = function (_elm) {
          var delta = A2($Board.scoreMove,
          move,
          newBoard);
-         var p = $Player.color(state.turn);
+         var p = $Player.toString(state.turn);
          var newScore = $Maybe.withDefault(0)(A2($Dict.get,
          p,
          state.score)) + delta;
          var logText = A2($Basics._op["++"],
          $Maybe.withDefault("")(A2($Dict.get,
-         $Player.color(state.turn),
+         $Player.toString(state.turn),
          state.playerNames)),
          A2($Basics._op["++"],
          " placed a ",
@@ -3247,7 +3307,7 @@ Elm.Game.make = function (_elm) {
    });
    var pass = function (state) {
       return function () {
-         var p = $Player.color(state.turn);
+         var p = $Player.toString(state.turn);
          return _U.replace([["turn"
                             ,$Player.next(state.turn)]
                            ,["delta"
@@ -3327,18 +3387,18 @@ Elm.Game.make = function (_elm) {
          hands = $._1,
          remainder = $._2;
          var playerNames = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                        ,_0: $Player.color(player)
+                                                        ,_0: $Player.toString(player)
                                                         ,_1: _U.eq(gameType,
-                                                        $GameTypes.HumanVsCpu) ? "You" : $Player.color(player)}
+                                                        $GameTypes.HumanVsCpu) ? "You" : $Player.toString(player)}
                                                        ,{ctor: "_Tuple2"
-                                                        ,_0: $Player.color($Player.next(player))
+                                                        ,_0: $Player.toString($Player.next(player))
                                                         ,_1: _U.eq(gameType,
-                                                        $GameTypes.HumanVsCpu) ? "CPU" : $Player.color($Player.next(player))}]));
+                                                        $GameTypes.HumanVsCpu) ? "CPU" : $Player.toString($Player.next(player))}]));
          var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                    ,_0: $Player.color(player)
+                                                    ,_0: $Player.toString(player)
                                                     ,_1: $GameTypes.Human}
                                                    ,{ctor: "_Tuple2"
-                                                    ,_0: $Player.color($Player.next(player))
+                                                    ,_0: $Player.toString($Player.next(player))
                                                     ,_1: _U.eq(gameType,
                                                     $GameTypes.HumanVsCpu) ? $GameTypes.Cpu : $GameTypes.Human}]));
          var state = _U.eq(gameType,
@@ -4927,7 +4987,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 51 and 58");
+            "between lines 50 and 57");
          }();
       }();
    });
@@ -4998,9 +5058,8 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 30 and 39");
+            "between lines 29 and 38");
          }();
-         var p = $Player.color(state.turn);
          return $Game.isGameOver(newState) ? _U.replace([["gameState"
                                                          ,$GameTypes.GameOver]],
          newState) : $Game.mustPass(newState) ? $Game.pass(newState) : newState;
@@ -5024,7 +5083,7 @@ Elm.Kalevala.make = function (_elm) {
             {case "_Tuple2":
                return _v17._0;}
             _U.badCase($moduleName,
-            "on line 89, column 35 to 36");
+            "on line 88, column 35 to 36");
          }();
       },
       A3($Signal.keepIf,
@@ -5035,7 +5094,7 @@ Elm.Kalevala.make = function (_elm) {
                return _U.eq(_v21._1,
                  $GameTypes.HumanVsHumanRemote);}
             _U.badCase($moduleName,
-            "on line 89, column 60 to 83");
+            "on line 88, column 60 to 83");
          }();
       },
       {ctor: "_Tuple2"
@@ -5052,7 +5111,7 @@ Elm.Kalevala.make = function (_elm) {
                return $GameTypes.ParseError(_v25._0);
                case "Ok": return _v25._0;}
             _U.badCase($moduleName,
-            "between lines 83 and 86");
+            "between lines 82 and 85");
          }();
       };
       var encode = function (action) {
@@ -10775,7 +10834,7 @@ Elm.Player.make = function (_elm) {
          "between lines 33 and 35");
       }();
    };
-   var color = function (player) {
+   var toString = function (player) {
       return function () {
          switch (player.ctor)
          {case "Blue": return "blue";
@@ -10789,7 +10848,7 @@ Elm.Player.make = function (_elm) {
       return A2($Maybe.withDefault,
       $GameTypes.Human,
       A2($Dict.get,
-      color(player),
+      toString(player),
       state.players));
    });
    var isPlayerTurn = function (state) {
@@ -10803,7 +10862,7 @@ Elm.Player.make = function (_elm) {
       return A2($Maybe.withDefault,
       _L.fromArray([]),
       A2($Dict.get,
-      color(player),
+      toString(player),
       state.hands));
    });
    var noTilesInHand = F2(function (player,
@@ -10836,7 +10895,7 @@ Elm.Player.make = function (_elm) {
    _elm.Player.values = {_op: _op
                         ,toColor: toColor
                         ,fromString: fromString
-                        ,color: color
+                        ,toString: toString
                         ,next: next
                         ,getType: getType
                         ,getHand: getHand
@@ -11406,7 +11465,7 @@ Elm.Serialize.make = function (_elm) {
       }();
    };
    var player = function ($) {
-      return $Json$Encode.string($Player.color($));
+      return $Json$Encode.string($Player.toString($));
    };
    var deck = function ($) {
       return $Json$Encode.list($List.map($Json$Encode.string)($));
