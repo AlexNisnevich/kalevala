@@ -47,4 +47,4 @@ noTilesInHand player state =
 
 isPlayerTurn : State -> Bool
 isPlayerTurn state =
-  (isOngoing state) && not ((getType state.turn state) == Remote)
+  (isOngoing state) && ((getType state.turn state) == Human)

@@ -45,10 +45,10 @@ Elm.Player.make = function (_elm) {
       state.players));
    });
    var isPlayerTurn = function (state) {
-      return $GameTypes.isOngoing(state) && $Basics.not(_U.eq(A2(getType,
+      return $GameTypes.isOngoing(state) && _U.eq(A2(getType,
       state.turn,
       state),
-      $GameTypes.Remote));
+      $GameTypes.Human);
    };
    var getHand = F2(function (player,
    state) {

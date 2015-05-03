@@ -7,6 +7,7 @@ import Dict
 
 import GameTypes (..)
 import Piece
+import Player
 
 type Direction = Vertical
                | Horizontal
@@ -142,3 +143,17 @@ hasSamePieceAtOtherEnd (x,y) board dir =
     case dir of
       Horizontal -> samePieceLeft || samePieceRight
       Vertical -> samePieceBelow || samePieceAbove
+
+isValidSquareToMove : State -> Location -> Int -> Bool
+isValidSquareToMove state (x,y) size =
+  if Player.isPlayerTurn state
+  then
+    case state.heldPiece of
+      Just idx ->
+        let hand = Player.getHand state.turn state
+            piece = Piece.fromString <| head <| drop idx hand
+            location = (x - (size // 2), y - (size // 2))
+        in
+          isValidMove { piece = piece, idx = idx, location = location } state.board
+      Nothing -> False
+  else False

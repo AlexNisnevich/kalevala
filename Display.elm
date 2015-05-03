@@ -18,7 +18,7 @@ import Text (..)
 
 import GameTypes (..)
 import Piece
-import Board (getBoardSize, isValidMove)
+import Board (getBoardSize, isValidMove, isValidSquareToMove)
 import Player
 
 import Debug
@@ -33,6 +33,12 @@ handPadding = 10
 
 handTileSize : Float
 handTileSize = 100
+
+transparent : Color
+transparent = rgba 0 0 0 0.0
+
+transpGreen : Color
+transpGreen = rgba 0 255 0 0.5
 
 -- Channels
 
@@ -83,30 +89,18 @@ pieceToImage piece tileSize =
 
 drawGrid : State -> Int -> WindowDims -> List Form
 drawGrid state boardSize dims =
-  let num = toFloat boardSize
-      tileSize = getTileSizeFromBoardSize boardSize dims
-      size = num * tileSize
-      offset = tileSize / 2 - size / 2
-      shape x y color = let pos = (tileSize * x + offset, tileSize * y + offset) 
-                        in
-                          [ move pos (outlined (solid black) (square tileSize))
-                          , move pos (filled color (square tileSize))
-                          ]
-      isValidSquare x y = if Player.isPlayerTurn state
-                          then
-                            case state.heldPiece of
-                              Just idx ->
-                                let hand = Player.getHand state.turn state
-                                    piece = Piece.fromString <| head <| drop idx hand
-                                    location = ((round x) - floor (num / 2), (round y) - floor (num / 2))
-                                in
-                                  isValidMove { piece = piece, idx = idx, location = location } state.board
-                              Nothing -> False
-                          else False
-      transparent = rgba 0 0 0 0.0
-      transpGreen = rgba 0 255 0 0.5
+  let tileSize = getTileSizeFromBoardSize boardSize dims
+      totalSize = (toFloat boardSize) * tileSize
+      offset = tileSize / 2 - totalSize / 2
+      shape x y = 
+        let pos = (tileSize * (toFloat x) + offset, tileSize * (toFloat y) + offset)
+            color = if (isValidSquareToMove state (x, y) boardSize) then transpGreen else transparent)
+        in
+          [ move pos (outlined (solid black) (square tileSize))
+          , move pos (filled color (square tileSize))
+          ]
   in
-    (concatMap (\x -> (concatMap (\y -> shape x y (if (isValidSquare x y) then transpGreen else transparent)) [0..(num - 1)])) [0..(num - 1)])
+    (concatMap (\x -> (concatMap (\y -> shape x y [0..(boardSize - 1)])) [0..(boardSize - 1)])
 
 drawPiece : (Location, Piece) -> Float -> Form
 drawPiece ((x', y'), piece) tileSize =
