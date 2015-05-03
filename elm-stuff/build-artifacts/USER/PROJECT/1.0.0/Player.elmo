@@ -15,7 +15,14 @@ Elm.Player.make = function (_elm) {
    $Dict = Elm.Dict.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
    $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm);
+   $Maybe = Elm.Maybe.make(_elm),
+   $Random = Elm.Random.make(_elm);
+   var random = function (seed) {
+      return _U.cmp($Basics.fst(A2($Random.generate,
+      A2($Random.$float,0,1),
+      seed)),
+      0.5) > 0 ? $GameTypes.Red : $GameTypes.Blue;
+   };
    var next = function (player) {
       return function () {
          switch (player.ctor)
@@ -24,7 +31,7 @@ Elm.Player.make = function (_elm) {
             case "Red":
             return $GameTypes.Blue;}
          _U.badCase($moduleName,
-         "between lines 32 and 34");
+         "between lines 33 and 35");
       }();
    };
    var color = function (player) {
@@ -33,7 +40,7 @@ Elm.Player.make = function (_elm) {
          {case "Blue": return "blue";
             case "Red": return "red";}
          _U.badCase($moduleName,
-         "between lines 26 and 28");
+         "between lines 27 and 29");
       }();
    };
    var getType = F2(function (player,
@@ -72,7 +79,7 @@ Elm.Player.make = function (_elm) {
             case "red":
             return $GameTypes.Red;}
          _U.badCase($moduleName,
-         "between lines 20 and 22");
+         "between lines 21 and 23");
       }();
    };
    var toColor = function (player) {
@@ -82,7 +89,7 @@ Elm.Player.make = function (_elm) {
             return $Color.blue;
             case "Red": return $Color.red;}
          _U.badCase($moduleName,
-         "between lines 14 and 16");
+         "between lines 15 and 17");
       }();
    };
    _elm.Player.values = {_op: _op
@@ -93,6 +100,7 @@ Elm.Player.make = function (_elm) {
                         ,getType: getType
                         ,getHand: getHand
                         ,noTilesInHand: noTilesInHand
-                        ,isPlayerTurn: isPlayerTurn};
+                        ,isPlayerTurn: isPlayerTurn
+                        ,random: random};
    return _elm.Player.values;
 };

@@ -3,6 +3,8 @@ module Helpers where
 import List (..)
 import Random (..)
 
+import Debug
+
 (!!) : List a -> Int -> a
 (!!) list idx = head (drop idx list)
 infixl 4 !!
@@ -30,7 +32,3 @@ shuffle list seed =
         (i, newSeed) = generate generator seed
     in
       [list !! i] ++ shuffle (without i list) newSeed
-
-sample : List a -> Seed -> a
-sample list seed = 
-  head <| shuffle list seed

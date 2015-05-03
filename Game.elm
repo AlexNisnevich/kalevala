@@ -1,4 +1,4 @@
-module Voluspa where
+module Game where
 
 import Array
 import Dict
@@ -241,7 +241,7 @@ constructAction clickType seed mousePos dims gameType playerName =
     click = Debug.watch "clickInput.signal" clickType
   in
     case clickType of
-      Start -> StartGame gameType (shuffle deckContents seed) (sample [Red, Blue] seed) playerName.string
+      Start -> StartGame gameType (shuffle deckContents seed) (Player.random seed) playerName.string
       BoardClick -> PlacePiece mousePos dims
       PieceInHand player idx -> PickUpPiece player idx
       PassButton -> Pass

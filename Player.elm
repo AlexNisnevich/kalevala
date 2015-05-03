@@ -8,6 +8,7 @@ import Maybe (..)
 
 import GameTypes (..)
 import Helpers (..)
+import Random (Seed, float, generate)
 
 toColor : Player -> Color
 toColor player =
@@ -48,3 +49,9 @@ noTilesInHand player state =
 isPlayerTurn : State -> Bool
 isPlayerTurn state =
   (isOngoing state) && ((getType state.turn state) == Human)
+
+random : Seed -> Player
+random seed =
+  if fst (generate (float 0 1) seed) > 0.5
+  then Red
+  else Blue

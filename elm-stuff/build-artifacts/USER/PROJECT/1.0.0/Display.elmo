@@ -109,35 +109,6 @@ Elm.Display.make = function (_elm) {
          "between lines 109 and 112");
       }();
    });
-   var rulesRow = F2(function (piece,
-   description) {
-      return function () {
-         var value = $Piece.baseValue(piece);
-         var nameAndValue = $Text.concat(A2($List.map,
-         $Text.fromString,
-         _L.fromArray([$Piece.toString(piece)
-                      ," ("
-                      ,$Basics.toString(value)
-                      ,"): "])));
-         var text = A2($Graphics$Element.flow,
-         $Graphics$Element.right,
-         _L.fromArray([$Text.leftAligned($Text.bold(nameAndValue))
-                      ,$Text.plainText(description)]));
-         var height = 30;
-         var image = A2($Graphics$Element.beside,
-         A2(pieceToImage,piece,height),
-         A2($Graphics$Element.spacer,
-         10,
-         10));
-         return A2($Graphics$Element.beside,
-         image,
-         A4($Graphics$Element.container,
-         600,
-         height,
-         $Graphics$Element.midLeft,
-         text));
-      }();
-   });
    var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
    var gameTypeChannel = $Signal.channel($GameTypes.HumanVsCpu);
    var clickChannel = $Signal.channel($GameTypes.None);
@@ -368,7 +339,7 @@ Elm.Display.make = function (_elm) {
                {case "_Tuple2":
                   return $Text.leftAligned($Text.color(_v19._0)($Text.fromString(_v19._1)));}
                _U.badCase($moduleName,
-               "on line 217, column 49 to 99");
+               "on line 219, column 49 to 99");
             }();
          })($List.take(5)(state.log)));
          var deckSizeArea = $GameTypes.isOngoing(state) ? A3($Graphics$Element.container,
@@ -459,7 +430,7 @@ Elm.Display.make = function (_elm) {
                       A2($Text.typeface,
                       _L.fromArray(["Rock Salt"
                                    ,"cursive"]),
-                      $Text.fromString("V&ouml;lusp&aacute;")))))
+                      $Text.fromString("Kalevala")))))
                       ,A2($Graphics$Element.flow,
                       $Graphics$Element.right,
                       _L.fromArray([A3(renderBoard,
@@ -509,7 +480,6 @@ Elm.Display.make = function (_elm) {
                          ,drawLastPlacedOutline: drawLastPlacedOutline
                          ,renderBoard: renderBoard
                          ,renderHand: renderHand
-                         ,rulesRow: rulesRow
                          ,render: render};
    return _elm.Display.values;
 };

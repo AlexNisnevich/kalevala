@@ -172,6 +172,7 @@ renderHand player state =
   in
     flow right ([handText] ++ [score] ++ [delta] ++ handContents)
 
+{-
 rulesRow : Piece -> String -> Element
 rulesRow piece description =
   let height = 30
@@ -183,6 +184,7 @@ rulesRow piece description =
                         ]
   in
     image `beside` container 600 height midLeft text
+-}
 
 render : State -> WindowDims -> GameType -> Content -> Element
 render state dims gameType playerName =
@@ -221,7 +223,7 @@ render state dims gameType playerName =
                             ]
   in
     flow down
-      [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (fromString "V&ouml;lusp&aacute;"))))
+      [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (fromString "Kalevala"))))
       , flow right [ renderBoard state boardSize dims
                    , flow down [ renderHand Red state
                                , spacer 1 5

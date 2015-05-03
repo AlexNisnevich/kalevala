@@ -70,16 +70,9 @@ Elm.Helpers.make = function (_elm) {
          newSeed));
       }();
    });
-   var sample = F2(function (list,
-   seed) {
-      return $List.head(A2(shuffle,
-      list,
-      seed));
-   });
    _elm.Helpers.values = {_op: _op
                          ,without: without
                          ,replaceAtIndex: replaceAtIndex
-                         ,shuffle: shuffle
-                         ,sample: sample};
+                         ,shuffle: shuffle};
    return _elm.Helpers.values;
 };
