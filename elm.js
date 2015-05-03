@@ -2503,7 +2503,7 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 117 and 123");
+         "between lines 120 and 126");
       }();
    });
    var pieceToImage = F2(function (piece,
@@ -2554,7 +2554,7 @@ Elm.Display.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 110 and 113");
+         "between lines 113 and 116");
       }();
    });
    var rulesRow = F2(function (piece,
@@ -2734,7 +2734,7 @@ Elm.Display.make = function (_elm) {
          });
          var isValidSquare = F2(function (x,
          y) {
-            return function () {
+            return $Player.isPlayerTurn(state) ? function () {
                var _v15 = state.heldPiece;
                switch (_v15.ctor)
                {case "Just":
@@ -2757,8 +2757,8 @@ Elm.Display.make = function (_elm) {
                     }();
                   case "Nothing": return false;}
                _U.badCase($moduleName,
-               "between lines 95 and 103");
-            }();
+               "between lines 97 and 105");
+            }() : false;
          });
          return A2($List.concatMap,
          function (x) {
@@ -2848,7 +2848,7 @@ Elm.Display.make = function (_elm) {
                {case "_Tuple2":
                   return $Text.leftAligned($Text.color(_v21._0)($Text.fromString(_v21._1)));}
                _U.badCase($moduleName,
-               "on line 218, column 49 to 99");
+               "on line 221, column 49 to 99");
             }();
          })($List.take(5)(state.log)));
          var deckSizeArea = $GameTypes.isOngoing(state) ? A3($Graphics$Element.container,
@@ -10115,6 +10115,7 @@ Elm.Player.make = function (_elm) {
    _L = _N.List.make(_elm),
    _P = _N.Ports.make(_elm),
    $moduleName = "Player",
+   $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
    $Dict = Elm.Dict.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
@@ -10148,6 +10149,12 @@ Elm.Player.make = function (_elm) {
       color(player),
       state.players));
    });
+   var isPlayerTurn = function (state) {
+      return $GameTypes.isOngoing(state) && $Basics.not(_U.eq(A2(getType,
+      state.turn,
+      state),
+      $GameTypes.Remote));
+   };
    var getHand = F2(function (player,
    state) {
       return A2($Maybe.withDefault,
@@ -10190,7 +10197,8 @@ Elm.Player.make = function (_elm) {
                         ,next: next
                         ,getType: getType
                         ,getHand: getHand
-                        ,noTilesInHand: noTilesInHand};
+                        ,noTilesInHand: noTilesInHand
+                        ,isPlayerTurn: isPlayerTurn};
    return _elm.Player.values;
 };
 Elm.Random = Elm.Random || {};

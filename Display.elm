@@ -92,14 +92,17 @@ drawGrid state boardSize dims =
                           [ move pos (outlined (solid black) (square tileSize))
                           , move pos (filled color (square tileSize))
                           ]
-      isValidSquare x y = case state.heldPiece of
-                            Just idx ->
-                              let hand = Player.getHand state.turn state
-                                  piece = Piece.fromString <| head <| drop idx hand
-                                  location = ((round x) - floor (num / 2), (round y) - floor (num / 2))
-                              in
-                                isValidMove { piece = piece, idx = idx, location = location } state.board
-                            Nothing -> False
+      isValidSquare x y = if Player.isPlayerTurn state
+                          then
+                            case state.heldPiece of
+                              Just idx ->
+                                let hand = Player.getHand state.turn state
+                                    piece = Piece.fromString <| head <| drop idx hand
+                                    location = ((round x) - floor (num / 2), (round y) - floor (num / 2))
+                                in
+                                  isValidMove { piece = piece, idx = idx, location = location } state.board
+                              Nothing -> False
+                          else False
       transparent = rgba 0 0 0 0.0
       transpGreen = rgba 0 255 0 0.5
   in

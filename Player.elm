@@ -44,3 +44,7 @@ getHand player state =
 noTilesInHand : Player -> State -> Bool
 noTilesInHand player state =
   List.isEmpty (getHand player state)
+
+isPlayerTurn : State -> Bool
+isPlayerTurn state =
+  (isOngoing state) && not ((getType state.turn state) == Remote)

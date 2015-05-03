@@ -10,6 +10,7 @@ Elm.Player.make = function (_elm) {
    _L = _N.List.make(_elm),
    _P = _N.Ports.make(_elm),
    $moduleName = "Player",
+   $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
    $Dict = Elm.Dict.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
@@ -43,6 +44,12 @@ Elm.Player.make = function (_elm) {
       color(player),
       state.players));
    });
+   var isPlayerTurn = function (state) {
+      return $GameTypes.isOngoing(state) && $Basics.not(_U.eq(A2(getType,
+      state.turn,
+      state),
+      $GameTypes.Remote));
+   };
    var getHand = F2(function (player,
    state) {
       return A2($Maybe.withDefault,
@@ -85,6 +92,7 @@ Elm.Player.make = function (_elm) {
                         ,next: next
                         ,getType: getType
                         ,getHand: getHand
-                        ,noTilesInHand: noTilesInHand};
+                        ,noTilesInHand: noTilesInHand
+                        ,isPlayerTurn: isPlayerTurn};
    return _elm.Player.values;
 };
