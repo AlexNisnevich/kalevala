@@ -36,7 +36,7 @@ tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
   if (state.turn == player) && (isOngoing state)
   then { state | heldPiece <- Just idx }
-  else { state | heldPiece <- Nothing }
+  else state
 
 {- Pass the current player's turn. Returns the new state. -}
 pass : State -> State

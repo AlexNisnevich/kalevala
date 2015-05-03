@@ -11758,9 +11758,7 @@ Elm.Voluspa.make = function (_elm) {
       return _U.eq(state.turn,
       player) && $GameTypes.isOngoing(state) ? _U.replace([["heldPiece"
                                                            ,$Maybe.Just(idx)]],
-      state) : _U.replace([["heldPiece"
-                           ,$Maybe.Nothing]],
-      state);
+      state) : state;
    });
    var performAction = F2(function (action,
    state) {
