@@ -73,16 +73,8 @@ mouseToBoardPosition (x', y') state dims =
 
 pieceToImage: Piece -> String -> Float -> Element
 pieceToImage piece value tileSize =
-  let imgPath =
-        case piece of
-          Odin -> "images/tile_7.jpg"
-          Thor -> "images/tile_6.jpg"
-          Troll -> "images/tile_5.jpg"
-          Dragon -> "images/tile_4.jpg"
-          Fenrir -> "images/tile_3.jpg"
-          Skadi -> "images/tile_2.jpg"
-          Valkyrie -> "images/tile_1.jpg"
-          Loki -> "images/tile_0.jpg"
+  let imgSize = if tileSize > 75 then 100 else 50
+      imgPath = "images/" ++ toString imgSize ++ "/" ++ Piece.toString piece ++ "-" ++ value ++ ".png"
   in
     image (round tileSize) (round tileSize) imgPath
 

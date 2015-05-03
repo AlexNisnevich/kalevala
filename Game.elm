@@ -70,10 +70,10 @@ makeMove move state =
       existingTile = Dict.get move.location state.board
       handWithDrawnTile = without move.idx hand ++ (if (not <| List.isEmpty state.deck) then (take 1 state.deck) else [])
       newHand = case existingTile of
-        Just piece -> if move.piece == Skadi then (replaceAtIndex move.idx (Piece.toString piece) hand) else handWithDrawnTile
+        Just piece -> if move.piece == SeppoIlmarinen then (replaceAtIndex move.idx (Piece.toString piece) hand) else handWithDrawnTile
         Nothing -> handWithDrawnTile
       logText = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " placed a " ++ 
-                  Piece.toString move.piece ++ " for " ++ toString delta ++ " points" ++ 
+                  Piece.toDisplayString move.piece ++ " for " ++ toString delta ++ " points" ++ 
                   " (total: " ++ toString newScore ++ ")"
   in
     { state | turn <- Player.next state.turn
@@ -86,14 +86,14 @@ makeMove move state =
             , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta
             , log <- ((Player.toColor state.turn), logText) :: state.log }
 
-{- Given a deck, returns the starting center tile (which must not be a Troll),
+{- Given a deck, returns the starting center tile (which must not be a Kullervo),
    two 5-tile hands, and the remaining deck. -}
 getFirstTileHandsAndDeck : Deck -> (Piece, Hands, Deck)
 getFirstTileHandsAndDeck deck =
   let deckWithIndices = List.map2 (,) [0..(List.length deck - 1)] deck
-      idxFirstNonTroll = fst <| head <| filter (\(idx, piece) -> not (piece == "Troll")) deckWithIndices
-      firstTile = Piece.fromString (deck !! idxFirstNonTroll)
-      deckMinusFirstTile = without idxFirstNonTroll deck
+      idxFirstNonKullervo = fst <| head <| filter (\(idx, piece) -> not (piece == "Kullervo")) deckWithIndices
+      firstTile = Piece.fromString (deck !! idxFirstNonKullervo)
+      deckMinusFirstTile = without idxFirstNonKullervo deck
       redHand = take 5 deckMinusFirstTile
       blueHand = take 5 (drop 5 deckMinusFirstTile)
       hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
@@ -161,14 +161,14 @@ deckContents : List String
 deckContents =
     let r = List.repeat
     in
-      r 6 "Odin" ++
-      r 8 "Thor" ++
-      r 6 "Troll" ++
-      r 8 "Dragon" ++
-      r 8 "Fenrir" ++
-      r 9 "Skadi" ++
-      r 9 "Valkyrie" ++
-      r 6 "Loki"
+      r 6 "Vain" ++
+      r 8 "Ukko" ++
+      r 6 "Kullervo" ++
+      r 8 "Kaarme" ++
+      r 8 "Jouk" ++
+      r 9 "Ilmar" ++
+      r 9 "Louhi" ++
+      r 6 "Lemmi"
 
 {- The initial state on page load (before a game is started) -}
 startState : State

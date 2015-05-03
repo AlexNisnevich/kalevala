@@ -197,12 +197,12 @@ Elm.Board.make = function (_elm) {
          move.location,
          board);
          var hasAdjacentTile = $Basics.not($List.isEmpty(adjacents));
-         var adjacentToTroll = A2($List.any,
+         var adjacentToKullervo = A2($List.any,
          function (loc) {
             return _U.eq(A2(pieceAt,
             loc,
             board),
-            $GameTypes.Troll);
+            $GameTypes.Kullervo);
          },
          adjacents);
          var rowLength = $List.length(A2(findRow,
@@ -218,14 +218,14 @@ Elm.Board.make = function (_elm) {
          move.location,
          board);
          var canOverlapExistingTile = (_U.eq(move.piece,
-         $GameTypes.Dragon) || _U.eq(move.piece,
-         $GameTypes.Skadi)) && $Basics.not(_U.eq(existingTile,
+         $GameTypes.Kaarme) || _U.eq(move.piece,
+         $GameTypes.SeppoIlmarinen)) && $Basics.not(_U.eq(existingTile,
          $Maybe.Just(move.piece)));
          var isUnoccupied = $Basics.not(A2($Dict.member,
          move.location,
          board));
-         return (isUnoccupied || canOverlapExistingTile) && (hasAdjacentTile && (($Basics.not(adjacentToTroll) || _U.eq(move.piece,
-         $GameTypes.Troll)) && _U.cmp(longestLine,
+         return (isUnoccupied || canOverlapExistingTile) && (hasAdjacentTile && (($Basics.not(adjacentToKullervo) || _U.eq(move.piece,
+         $GameTypes.Kullervo)) && _U.cmp(longestLine,
          7) < 1));
       }();
    });
@@ -270,11 +270,11 @@ Elm.Board.make = function (_elm) {
          switch (_v42.ctor)
          {case "_Tuple2":
             return function () {
-                 var adjacentToLoki = $List.any(function (l) {
+                 var adjacentToLemminkainen = $List.any(function (l) {
                     return _U.eq(A2(pieceAt,
                     l,
                     board),
-                    $GameTypes.Loki);
+                    $GameTypes.Lemminkainen);
                  })(A2(adjacentTiles,
                  {ctor: "_Tuple2"
                  ,_0: _v42._0
@@ -285,9 +285,9 @@ Elm.Board.make = function (_elm) {
                  ,_0: _v42._0
                  ,_1: _v42._1},
                  board);
-                 return adjacentToLoki && $Basics.not(_U.eq(piece,
-                 $GameTypes.Loki)) ? "0" : _U.eq(piece,
-                 $GameTypes.Fenrir) ? function () {
+                 return adjacentToLemminkainen && $Basics.not(_U.eq(piece,
+                 $GameTypes.Lemminkainen)) ? "0" : _U.eq(piece,
+                 $GameTypes.Joukahainen) ? function () {
                     var column = A2(findColumn,
                     {ctor: "_Tuple2"
                     ,_0: _v42._0
@@ -300,10 +300,10 @@ Elm.Board.make = function (_elm) {
                     board);
                     return A2($List.any,
                     function (loc) {
-                       return $Basics.not(adjacentToLoki) && _U.eq(A2(pieceAt,
+                       return $Basics.not(adjacentToLemminkainen) && _U.eq(A2(pieceAt,
                        loc,
                        board),
-                       $GameTypes.Fenrir);
+                       $GameTypes.Joukahainen);
                     },
                     A2($Basics._op["++"],
                     row,
@@ -397,12 +397,12 @@ Elm.Board.make = function (_elm) {
                  {ctor: "_Tuple2"
                  ,_0: _v51._0
                  ,_1: _v51._1});
-                 var adjacentToLoki = function (loc) {
+                 var adjacentToLemminkainen = function (loc) {
                     return $List.any(function (l) {
                        return _U.eq(A2(pieceAt,
                        l,
                        board),
-                       $GameTypes.Loki);
+                       $GameTypes.Lemminkainen);
                     })(A2(adjacentTiles,loc,board));
                  };
                  var piece = A2(pieceAt,
@@ -411,7 +411,7 @@ Elm.Board.make = function (_elm) {
                  ,_1: _v51._1},
                  board);
                  return _U.eq(piece,
-                 $GameTypes.Fenrir) ? function () {
+                 $GameTypes.Joukahainen) ? function () {
                     var line = A2($Basics._op["++"],
                     A2(function () {
                        switch (dir.ctor)
@@ -429,26 +429,26 @@ Elm.Board.make = function (_elm) {
                     _L.fromArray([{ctor: "_Tuple2"
                                   ,_0: _v51._0
                                   ,_1: _v51._1}]));
-                    var numFenrirs = $List.length(A2($List.filter,
+                    var numJoukahainens = $List.length(A2($List.filter,
                     function (loc) {
-                       return $Basics.not(adjacentToLoki(loc)) && (_U.eq(A2(pieceAt,
+                       return $Basics.not(adjacentToLemminkainen(loc)) && (_U.eq(A2(pieceAt,
                        loc,
                        board),
-                       $GameTypes.Fenrir) && ($Basics.not(_U.eq(loc,
+                       $GameTypes.Joukahainen) && ($Basics.not(_U.eq(loc,
                        move.location)) || isCurrentTile));
                     },
                     line));
-                    return 4 * numFenrirs;
+                    return 4 * numJoukahainens;
                  }() : _U.eq(piece,
-                 $GameTypes.Valkyrie) && (isCurrentTile && A3(hasSamePieceAtOtherEnd,
+                 $GameTypes.Louhi) && (isCurrentTile && A3(hasSamePieceAtOtherEnd,
                  {ctor: "_Tuple2"
                  ,_0: _v51._0
                  ,_1: _v51._1},
                  board,
-                 dir)) ? 100 : adjacentToLoki({ctor: "_Tuple2"
-                                              ,_0: _v51._0
-                                              ,_1: _v51._1}) && $Basics.not(_U.eq(piece,
-                 $GameTypes.Loki)) ? 0 : $Piece.baseValue(piece);
+                 dir)) ? 100 : adjacentToLemminkainen({ctor: "_Tuple2"
+                                                      ,_0: _v51._0
+                                                      ,_1: _v51._1}) && $Basics.not(_U.eq(piece,
+                 $GameTypes.Lemminkainen)) ? 0 : $Piece.baseValue(piece);
               }();}
          _U.badCase($moduleName,
          "between lines 110 and 128");

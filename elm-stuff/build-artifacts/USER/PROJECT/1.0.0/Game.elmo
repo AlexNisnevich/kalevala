@@ -63,20 +63,20 @@ Elm.Game.make = function (_elm) {
    var deckContents = function () {
       var r = $List.repeat;
       return A2($Basics._op["++"],
-      A2(r,6,"Odin"),
+      A2(r,6,"Vain"),
       A2($Basics._op["++"],
-      A2(r,8,"Thor"),
+      A2(r,8,"Ukko"),
       A2($Basics._op["++"],
-      A2(r,6,"Troll"),
+      A2(r,6,"Kullervo"),
       A2($Basics._op["++"],
-      A2(r,8,"Dragon"),
+      A2(r,8,"Kaarme"),
       A2($Basics._op["++"],
-      A2(r,8,"Fenrir"),
+      A2(r,8,"Jouk"),
       A2($Basics._op["++"],
-      A2(r,9,"Skadi"),
+      A2(r,9,"Ilmar"),
       A2($Basics._op["++"],
-      A2(r,9,"Valkyrie"),
-      A2(r,6,"Loki"))))))));
+      A2(r,9,"Louhi"),
+      A2(r,6,"Lemmi"))))))));
    }();
    var getFirstTileHandsAndDeck = function (deck) {
       return function () {
@@ -89,23 +89,23 @@ Elm.Game.make = function (_elm) {
          _L.range(0,
          $List.length(deck) - 1),
          deck);
-         var idxFirstNonTroll = $Basics.fst($List.head(A2($List.filter,
+         var idxFirstNonKullervo = $Basics.fst($List.head(A2($List.filter,
          function (_v0) {
             return function () {
                switch (_v0.ctor)
                {case "_Tuple2":
                   return $Basics.not(_U.eq(_v0._1,
-                    "Troll"));}
+                    "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 94, column 66 to 87");
+               "on line 94, column 69 to 93");
             }();
          },
          deckWithIndices)));
          var firstTile = $Piece.fromString(A2($Helpers._op["!!"],
          deck,
-         idxFirstNonTroll));
+         idxFirstNonKullervo));
          var deckMinusFirstTile = A2($Helpers.without,
-         idxFirstNonTroll,
+         idxFirstNonKullervo,
          deck);
          var redHand = A2($List.take,
          5,
@@ -189,7 +189,7 @@ Elm.Game.make = function (_elm) {
             switch (existingTile.ctor)
             {case "Just":
                return _U.eq(move.piece,
-                 $GameTypes.Skadi) ? A3($Helpers.replaceAtIndex,
+                 $GameTypes.SeppoIlmarinen) ? A3($Helpers.replaceAtIndex,
                  move.idx,
                  $Piece.toString(existingTile._0),
                  hand) : handWithDrawnTile;
@@ -216,7 +216,7 @@ Elm.Game.make = function (_elm) {
          A2($Basics._op["++"],
          " placed a ",
          A2($Basics._op["++"],
-         $Piece.toString(move.piece),
+         $Piece.toDisplayString(move.piece),
          A2($Basics._op["++"],
          " for ",
          A2($Basics._op["++"],

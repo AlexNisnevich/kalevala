@@ -72,19 +72,19 @@ isValidMove : Move -> Board -> Bool
 isValidMove move board =
   let isUnoccupied = not <| Dict.member move.location board
       existingTile = Dict.get move.location board
-      canOverlapExistingTile = (move.piece == Dragon || move.piece == Skadi)
+      canOverlapExistingTile = (move.piece == Kaarme || move.piece == SeppoIlmarinen)
                                && not (existingTile == Just move.piece)
-                               -- can't Skadi a Skadi, can't Dragon a Dragon
+                               -- can't SeppoIlmarinen a SeppoIlmarinen, can't Kaarme a Kaarme
       columnLength = length (findColumn move.location board) + 1
       rowLength = length (findRow move.location board) + 1
       longestLine = max columnLength rowLength
       adjacents = adjacentTiles move.location board
       hasAdjacentTile = not <| List.isEmpty adjacents
-      adjacentToTroll = any (\loc -> pieceAt loc board == Troll) adjacents
+      adjacentToKullervo = any (\loc -> pieceAt loc board == Kullervo) adjacents
   in
     (isUnoccupied || canOverlapExistingTile)
     && hasAdjacentTile
-    && ((not adjacentToTroll) || move.piece == Troll) -- only Trolls can be placed next to other Trolls
+    && ((not adjacentToKullervo) || move.piece == Kullervo) -- only Kullervos can be placed next to other Kullervos
     && longestLine <= 7
 
 scoreMove : Move -> Board -> Int
@@ -108,22 +108,22 @@ scoreMove move board =
 getTileValue : Location -> Direction -> Move -> Board -> Int
 getTileValue (x,y) dir move board =
   let piece = pieceAt (x,y) board
-      adjacentToLoki loc = any (\l -> pieceAt l board == Loki) <| adjacentTiles loc board
+      adjacentToLemminkainen loc = any (\l -> pieceAt l board == Lemminkainen) <| adjacentTiles loc board
       isCurrentTile = (move.location == (x,y)) -- is this the tile that was placed this turn?
   in
-    if  | piece == Fenrir ->
+    if  | piece == Joukahainen ->
             let line = (case dir of Horizontal -> findRow
                                     Vertical -> findColumn) (x,y) board ++ [(x,y)]
-                numFenrirs = length <| filter (\loc -> not (adjacentToLoki loc) &&
-                                                       pieceAt loc board == Fenrir &&
+                numJoukahainens = length <| filter (\loc -> not (adjacentToLemminkainen loc) &&
+                                                       pieceAt loc board == Joukahainen &&
                                                        (not (loc == move.location) || isCurrentTile)) line
-                -- don't count Fenrir placed this turn for other Fenrirs (this is so that Fenrirs can beat other Fenrirs)
+                -- don't count Joukahainen placed this turn for other Joukahainens (this is so that Joukahainens can beat other Joukahainens)
             in
-              4 * numFenrirs
-        | piece == Valkyrie && isCurrentTile && hasSamePieceAtOtherEnd (x,y) board dir ->
+              4 * numJoukahainens
+        | piece == Louhi && isCurrentTile && hasSamePieceAtOtherEnd (x,y) board dir ->
             100 -- i.e. instantly score line
-        | adjacentToLoki (x,y) && not (piece == Loki) ->
-            0 -- Loki makes all tiles around him 0 (except other Lokis)
+        | adjacentToLemminkainen (x,y) && not (piece == Lemminkainen) ->
+            0 -- Lemminkainen makes all tiles around him 0 (except other Lemminkainens)
         | otherwise ->
             Piece.baseValue piece
 
@@ -132,21 +132,21 @@ getTileValue (x,y) dir move board =
 getDisplayedTileValue : Location -> Board -> String
 getDisplayedTileValue (x,y) board =
   let piece = pieceAt (x,y) board
-      adjacentToLoki = any (\l -> pieceAt l board == Loki) <| adjacentTiles (x,y) board
+      adjacentToLemminkainen = any (\l -> pieceAt l board == Lemminkainen) <| adjacentTiles (x,y) board
   in
-    if | adjacentToLoki && not (piece == Loki) -> 
+    if | adjacentToLemminkainen && not (piece == Lemminkainen) -> 
             "0" 
-       | piece == Fenrir -> 
+       | piece == Joukahainen -> 
             let row = findRow (x,y) board
                 column = findColumn (x,y) board
             in
-              if any (\loc -> not (adjacentToLoki) && pieceAt loc board == Fenrir) (row ++ column)
+              if any (\loc -> not (adjacentToLemminkainen) && pieceAt loc board == Joukahainen) (row ++ column)
               then "4_star"
               else "4"
        | otherwise ->
             toString <| Piece.baseValue piece
 
--- is this piece at one end of a line with the same kind of piece at the other end? (used by Valkyrie)
+-- is this piece at one end of a line with the same kind of piece at the other end? (used by Louhi)
 hasSamePieceAtOtherEnd : Location -> Board -> Direction -> Bool
 hasSamePieceAtOtherEnd (x,y) board dir =
   let last list = head <| reverse list

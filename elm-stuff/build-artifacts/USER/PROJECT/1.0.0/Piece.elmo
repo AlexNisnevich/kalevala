@@ -14,14 +14,34 @@ Elm.Piece.make = function (_elm) {
    var baseValue = function (piece) {
       return function () {
          switch (piece.ctor)
-         {case "Dragon": return 5;
-            case "Fenrir": return 4;
-            case "Loki": return 1;
-            case "Odin": return 8;
-            case "Skadi": return 3;
-            case "Thor": return 7;
-            case "Troll": return 6;
-            case "Valkyrie": return 2;}
+         {case "Joukahainen": return 4;
+            case "Kaarme": return 5;
+            case "Kullervo": return 6;
+            case "Lemminkainen": return 1;
+            case "Louhi": return 2;
+            case "SeppoIlmarinen": return 3;
+            case "Ukko": return 7;
+            case "Vainamoinen": return 8;}
+         _U.badCase($moduleName,
+         "between lines 43 and 51");
+      }();
+   };
+   var toDisplayString = function (piece) {
+      return function () {
+         switch (piece.ctor)
+         {case "Joukahainen":
+            return "Joukahainen";
+            case "Kaarme": return "Käärme";
+            case "Kullervo":
+            return "Kullervo";
+            case "Lemminkainen":
+            return "Lemminkäinen";
+            case "Louhi": return "Louhi";
+            case "SeppoIlmarinen":
+            return "Seppo Ilmarinen";
+            case "Ukko": return "Ukko";
+            case "Vainamoinen":
+            return "Väinämöinen";}
          _U.badCase($moduleName,
          "between lines 31 and 39");
       }();
@@ -29,15 +49,19 @@ Elm.Piece.make = function (_elm) {
    var toString = function (piece) {
       return function () {
          switch (piece.ctor)
-         {case "Dragon": return "Dragon";
-            case "Fenrir": return "Fenrir";
-            case "Loki": return "Loki";
-            case "Odin": return "Odin";
-            case "Skadi": return "Skadi";
-            case "Thor": return "Thor";
-            case "Troll": return "Troll";
-            case "Valkyrie":
-            return "Valkyrie";}
+         {case "Joukahainen":
+            return "Jouk";
+            case "Kaarme": return "Kaarme";
+            case "Kullervo":
+            return "Kullervo";
+            case "Lemminkainen":
+            return "Lemmi";
+            case "Louhi": return "Louhi";
+            case "SeppoIlmarinen":
+            return "Ilmar";
+            case "Ukko": return "Ukko";
+            case "Vainamoinen":
+            return "Vain";}
          _U.badCase($moduleName,
          "between lines 19 and 27");
       }();
@@ -45,22 +69,22 @@ Elm.Piece.make = function (_elm) {
    var fromString = function (str) {
       return function () {
          switch (str)
-         {case "Dragon":
-            return $GameTypes.Dragon;
-            case "Fenrir":
-            return $GameTypes.Fenrir;
-            case "Loki":
-            return $GameTypes.Loki;
-            case "Odin":
-            return $GameTypes.Odin;
-            case "Skadi":
-            return $GameTypes.Skadi;
-            case "Thor":
-            return $GameTypes.Thor;
-            case "Troll":
-            return $GameTypes.Troll;
-            case "Valkyrie":
-            return $GameTypes.Valkyrie;}
+         {case "Ilmar":
+            return $GameTypes.SeppoIlmarinen;
+            case "Jouk":
+            return $GameTypes.Joukahainen;
+            case "Kaarme":
+            return $GameTypes.Kaarme;
+            case "Kullervo":
+            return $GameTypes.Kullervo;
+            case "Lemmi":
+            return $GameTypes.Lemminkainen;
+            case "Louhi":
+            return $GameTypes.Louhi;
+            case "Ukko":
+            return $GameTypes.Ukko;
+            case "Vain":
+            return $GameTypes.Vainamoinen;}
          _U.badCase($moduleName,
          "between lines 7 and 15");
       }();
@@ -68,6 +92,7 @@ Elm.Piece.make = function (_elm) {
    _elm.Piece.values = {_op: _op
                        ,fromString: fromString
                        ,toString: toString
+                       ,toDisplayString: toDisplayString
                        ,baseValue: baseValue};
    return _elm.Piece.values;
 };

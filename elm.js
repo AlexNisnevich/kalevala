@@ -576,12 +576,12 @@ Elm.Board.make = function (_elm) {
          move.location,
          board);
          var hasAdjacentTile = $Basics.not($List.isEmpty(adjacents));
-         var adjacentToTroll = A2($List.any,
+         var adjacentToKullervo = A2($List.any,
          function (loc) {
             return _U.eq(A2(pieceAt,
             loc,
             board),
-            $GameTypes.Troll);
+            $GameTypes.Kullervo);
          },
          adjacents);
          var rowLength = $List.length(A2(findRow,
@@ -597,14 +597,14 @@ Elm.Board.make = function (_elm) {
          move.location,
          board);
          var canOverlapExistingTile = (_U.eq(move.piece,
-         $GameTypes.Dragon) || _U.eq(move.piece,
-         $GameTypes.Skadi)) && $Basics.not(_U.eq(existingTile,
+         $GameTypes.Kaarme) || _U.eq(move.piece,
+         $GameTypes.SeppoIlmarinen)) && $Basics.not(_U.eq(existingTile,
          $Maybe.Just(move.piece)));
          var isUnoccupied = $Basics.not(A2($Dict.member,
          move.location,
          board));
-         return (isUnoccupied || canOverlapExistingTile) && (hasAdjacentTile && (($Basics.not(adjacentToTroll) || _U.eq(move.piece,
-         $GameTypes.Troll)) && _U.cmp(longestLine,
+         return (isUnoccupied || canOverlapExistingTile) && (hasAdjacentTile && (($Basics.not(adjacentToKullervo) || _U.eq(move.piece,
+         $GameTypes.Kullervo)) && _U.cmp(longestLine,
          7) < 1));
       }();
    });
@@ -649,11 +649,11 @@ Elm.Board.make = function (_elm) {
          switch (_v42.ctor)
          {case "_Tuple2":
             return function () {
-                 var adjacentToLoki = $List.any(function (l) {
+                 var adjacentToLemminkainen = $List.any(function (l) {
                     return _U.eq(A2(pieceAt,
                     l,
                     board),
-                    $GameTypes.Loki);
+                    $GameTypes.Lemminkainen);
                  })(A2(adjacentTiles,
                  {ctor: "_Tuple2"
                  ,_0: _v42._0
@@ -664,9 +664,9 @@ Elm.Board.make = function (_elm) {
                  ,_0: _v42._0
                  ,_1: _v42._1},
                  board);
-                 return adjacentToLoki && $Basics.not(_U.eq(piece,
-                 $GameTypes.Loki)) ? "0" : _U.eq(piece,
-                 $GameTypes.Fenrir) ? function () {
+                 return adjacentToLemminkainen && $Basics.not(_U.eq(piece,
+                 $GameTypes.Lemminkainen)) ? "0" : _U.eq(piece,
+                 $GameTypes.Joukahainen) ? function () {
                     var column = A2(findColumn,
                     {ctor: "_Tuple2"
                     ,_0: _v42._0
@@ -679,10 +679,10 @@ Elm.Board.make = function (_elm) {
                     board);
                     return A2($List.any,
                     function (loc) {
-                       return $Basics.not(adjacentToLoki) && _U.eq(A2(pieceAt,
+                       return $Basics.not(adjacentToLemminkainen) && _U.eq(A2(pieceAt,
                        loc,
                        board),
-                       $GameTypes.Fenrir);
+                       $GameTypes.Joukahainen);
                     },
                     A2($Basics._op["++"],
                     row,
@@ -776,12 +776,12 @@ Elm.Board.make = function (_elm) {
                  {ctor: "_Tuple2"
                  ,_0: _v51._0
                  ,_1: _v51._1});
-                 var adjacentToLoki = function (loc) {
+                 var adjacentToLemminkainen = function (loc) {
                     return $List.any(function (l) {
                        return _U.eq(A2(pieceAt,
                        l,
                        board),
-                       $GameTypes.Loki);
+                       $GameTypes.Lemminkainen);
                     })(A2(adjacentTiles,loc,board));
                  };
                  var piece = A2(pieceAt,
@@ -790,7 +790,7 @@ Elm.Board.make = function (_elm) {
                  ,_1: _v51._1},
                  board);
                  return _U.eq(piece,
-                 $GameTypes.Fenrir) ? function () {
+                 $GameTypes.Joukahainen) ? function () {
                     var line = A2($Basics._op["++"],
                     A2(function () {
                        switch (dir.ctor)
@@ -808,26 +808,26 @@ Elm.Board.make = function (_elm) {
                     _L.fromArray([{ctor: "_Tuple2"
                                   ,_0: _v51._0
                                   ,_1: _v51._1}]));
-                    var numFenrirs = $List.length(A2($List.filter,
+                    var numJoukahainens = $List.length(A2($List.filter,
                     function (loc) {
-                       return $Basics.not(adjacentToLoki(loc)) && (_U.eq(A2(pieceAt,
+                       return $Basics.not(adjacentToLemminkainen(loc)) && (_U.eq(A2(pieceAt,
                        loc,
                        board),
-                       $GameTypes.Fenrir) && ($Basics.not(_U.eq(loc,
+                       $GameTypes.Joukahainen) && ($Basics.not(_U.eq(loc,
                        move.location)) || isCurrentTile));
                     },
                     line));
-                    return 4 * numFenrirs;
+                    return 4 * numJoukahainens;
                  }() : _U.eq(piece,
-                 $GameTypes.Valkyrie) && (isCurrentTile && A3(hasSamePieceAtOtherEnd,
+                 $GameTypes.Louhi) && (isCurrentTile && A3(hasSamePieceAtOtherEnd,
                  {ctor: "_Tuple2"
                  ,_0: _v51._0
                  ,_1: _v51._1},
                  board,
-                 dir)) ? 100 : adjacentToLoki({ctor: "_Tuple2"
-                                              ,_0: _v51._0
-                                              ,_1: _v51._1}) && $Basics.not(_U.eq(piece,
-                 $GameTypes.Loki)) ? 0 : $Piece.baseValue(piece);
+                 dir)) ? 100 : adjacentToLemminkainen({ctor: "_Tuple2"
+                                                      ,_0: _v51._0
+                                                      ,_1: _v51._1}) && $Basics.not(_U.eq(piece,
+                 $GameTypes.Lemminkainen)) ? 0 : $Piece.baseValue(piece);
               }();}
          _U.badCase($moduleName,
          "between lines 110 and 128");
@@ -2592,66 +2592,60 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 118 and 124");
+         "between lines 110 and 116");
       }();
    });
    var pieceToImage = F3(function (piece,
    value,
    tileSize) {
       return function () {
-         var imgPath = function () {
-            switch (piece.ctor)
-            {case "Dragon":
-               return "images/tile_4.jpg";
-               case "Fenrir":
-               return "images/tile_3.jpg";
-               case "Loki":
-               return "images/tile_0.jpg";
-               case "Odin":
-               return "images/tile_7.jpg";
-               case "Skadi":
-               return "images/tile_2.jpg";
-               case "Thor":
-               return "images/tile_6.jpg";
-               case "Troll":
-               return "images/tile_5.jpg";
-               case "Valkyrie":
-               return "images/tile_1.jpg";}
-            _U.badCase($moduleName,
-            "between lines 77 and 86");
-         }();
+         var imgSize = _U.cmp(tileSize,
+         75) > 0 ? 100 : 50;
+         var imgPath = A2($Basics._op["++"],
+         "images/",
+         A2($Basics._op["++"],
+         $Basics.toString(imgSize),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Piece.toString(piece),
+         A2($Basics._op["++"],
+         "-",
+         A2($Basics._op["++"],
+         value,
+         ".png"))))));
          return A3($Graphics$Element.image,
          $Basics.round(tileSize),
          $Basics.round(tileSize),
          imgPath);
       }();
    });
-   var drawPiece = F3(function (_v5,
+   var drawPiece = F3(function (_v4,
    board,
    tileSize) {
       return function () {
-         switch (_v5.ctor)
+         switch (_v4.ctor)
          {case "_Tuple2":
-            switch (_v5._0.ctor)
+            switch (_v4._0.ctor)
               {case "_Tuple2":
                  return function () {
                       var value = A2($Board.getDisplayedTileValue,
                       {ctor: "_Tuple2"
-                      ,_0: _v5._0._0
-                      ,_1: _v5._0._1},
+                      ,_0: _v4._0._0
+                      ,_1: _v4._0._1},
                       board);
-                      var y = $Basics.toFloat(_v5._0._1) * tileSize;
-                      var x = $Basics.toFloat(_v5._0._0) * tileSize;
+                      var y = $Basics.toFloat(_v4._0._1) * tileSize;
+                      var x = $Basics.toFloat(_v4._0._0) * tileSize;
                       return A2($Graphics$Collage.move,
                       {ctor: "_Tuple2",_0: x,_1: y},
                       $Graphics$Collage.toForm(A3(pieceToImage,
-                      _v5._1,
+                      _v4._1,
                       value,
                       tileSize)));
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 110 and 114");
+         "between lines 102 and 106");
       }();
    });
    var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
@@ -2759,11 +2753,11 @@ Elm.Display.make = function (_elm) {
       }();
    });
    var gameHeaderSize = 100;
-   var getTotalBoardSize = function (_v11) {
+   var getTotalBoardSize = function (_v10) {
       return function () {
-         switch (_v11.ctor)
+         switch (_v10.ctor)
          {case "_Tuple2":
-            return _v11._1 - gameHeaderSize;}
+            return _v10._1 - gameHeaderSize;}
          _U.badCase($moduleName,
          "on line 58, column 37 to 60");
       }();
@@ -2851,11 +2845,11 @@ Elm.Display.make = function (_elm) {
          board);
       }();
    });
-   var mouseToBoardPosition = F3(function (_v15,
+   var mouseToBoardPosition = F3(function (_v14,
    state,
    dims) {
       return function () {
-         switch (_v15.ctor)
+         switch (_v14.ctor)
          {case "_Tuple2":
             return function () {
                  var boardSize = $Board.getBoardSize(state.board);
@@ -2863,9 +2857,9 @@ Elm.Display.make = function (_elm) {
                  boardSize,
                  dims));
                  var offset = boardSize / 2 | 0;
-                 var y = _v15._1 - gameHeaderSize;
+                 var y = _v14._1 - gameHeaderSize;
                  var boardY = 0 - ((y / tileSize | 0) - offset);
-                 var x = _v15._0;
+                 var x = _v14._0;
                  var boardX = (x / tileSize | 0) - offset;
                  return {ctor: "_Tuple2"
                         ,_0: boardX
@@ -2880,13 +2874,13 @@ Elm.Display.make = function (_elm) {
    gameType,
    playerName) {
       return function () {
-         var logArea = $Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v19) {
+         var logArea = $Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v18) {
             return function () {
-               switch (_v19.ctor)
+               switch (_v18.ctor)
                {case "_Tuple2":
-                  return $Text.leftAligned($Text.color(_v19._0)($Text.fromString(_v19._1)));}
+                  return $Text.leftAligned($Text.color(_v18._0)($Text.fromString(_v18._1)));}
                _U.badCase($moduleName,
-               "on line 208, column 49 to 99");
+               "on line 200, column 49 to 99");
             }();
          })($List.take(5)(state.log)));
          var deckSizeArea = $State.isOngoing(state) ? A3($Graphics$Element.container,
@@ -2896,13 +2890,13 @@ Elm.Display.make = function (_elm) {
          "Deck: ",
          $Basics.toString($List.length(state.deck))))))) : $Graphics$Element.empty;
          var remoteGameStatusText = function () {
-            var _v23 = state.gameState;
-            switch (_v23.ctor)
+            var _v22 = state.gameState;
+            switch (_v22.ctor)
             {case "Connected":
                return A2($Basics._op["++"],
                  "Connected to ",
                  A2($Basics._op["++"],
-                 _v23._0,
+                 _v22._0,
                  " "));
                case "Disconnected":
                return "Opponent disconnected ";
@@ -3095,20 +3089,20 @@ Elm.Game.make = function (_elm) {
    var deckContents = function () {
       var r = $List.repeat;
       return A2($Basics._op["++"],
-      A2(r,6,"Odin"),
+      A2(r,6,"Vain"),
       A2($Basics._op["++"],
-      A2(r,8,"Thor"),
+      A2(r,8,"Ukko"),
       A2($Basics._op["++"],
-      A2(r,6,"Troll"),
+      A2(r,6,"Kullervo"),
       A2($Basics._op["++"],
-      A2(r,8,"Dragon"),
+      A2(r,8,"Kaarme"),
       A2($Basics._op["++"],
-      A2(r,8,"Fenrir"),
+      A2(r,8,"Jouk"),
       A2($Basics._op["++"],
-      A2(r,9,"Skadi"),
+      A2(r,9,"Ilmar"),
       A2($Basics._op["++"],
-      A2(r,9,"Valkyrie"),
-      A2(r,6,"Loki"))))))));
+      A2(r,9,"Louhi"),
+      A2(r,6,"Lemmi"))))))));
    }();
    var getFirstTileHandsAndDeck = function (deck) {
       return function () {
@@ -3121,23 +3115,23 @@ Elm.Game.make = function (_elm) {
          _L.range(0,
          $List.length(deck) - 1),
          deck);
-         var idxFirstNonTroll = $Basics.fst($List.head(A2($List.filter,
+         var idxFirstNonKullervo = $Basics.fst($List.head(A2($List.filter,
          function (_v0) {
             return function () {
                switch (_v0.ctor)
                {case "_Tuple2":
                   return $Basics.not(_U.eq(_v0._1,
-                    "Troll"));}
+                    "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 94, column 66 to 87");
+               "on line 94, column 69 to 93");
             }();
          },
          deckWithIndices)));
          var firstTile = $Piece.fromString(A2($Helpers._op["!!"],
          deck,
-         idxFirstNonTroll));
+         idxFirstNonKullervo));
          var deckMinusFirstTile = A2($Helpers.without,
-         idxFirstNonTroll,
+         idxFirstNonKullervo,
          deck);
          var redHand = A2($List.take,
          5,
@@ -3221,7 +3215,7 @@ Elm.Game.make = function (_elm) {
             switch (existingTile.ctor)
             {case "Just":
                return _U.eq(move.piece,
-                 $GameTypes.Skadi) ? A3($Helpers.replaceAtIndex,
+                 $GameTypes.SeppoIlmarinen) ? A3($Helpers.replaceAtIndex,
                  move.idx,
                  $Piece.toString(existingTile._0),
                  hand) : handWithDrawnTile;
@@ -3248,7 +3242,7 @@ Elm.Game.make = function (_elm) {
          A2($Basics._op["++"],
          " placed a ",
          A2($Basics._op["++"],
-         $Piece.toString(move.piece),
+         $Piece.toDisplayString(move.piece),
          A2($Basics._op["++"],
          " for ",
          A2($Basics._op["++"],
@@ -3507,14 +3501,14 @@ Elm.GameTypes.make = function (_elm) {
              ,_1: b};
    });
    var NoPiece = {ctor: "NoPiece"};
-   var Loki = {ctor: "Loki"};
-   var Valkyrie = {ctor: "Valkyrie"};
-   var Skadi = {ctor: "Skadi"};
-   var Fenrir = {ctor: "Fenrir"};
-   var Dragon = {ctor: "Dragon"};
-   var Troll = {ctor: "Troll"};
-   var Thor = {ctor: "Thor"};
-   var Odin = {ctor: "Odin"};
+   var Lemminkainen = {ctor: "Lemminkainen"};
+   var Louhi = {ctor: "Louhi"};
+   var SeppoIlmarinen = {ctor: "SeppoIlmarinen"};
+   var Joukahainen = {ctor: "Joukahainen"};
+   var Kaarme = {ctor: "Kaarme"};
+   var Kullervo = {ctor: "Kullervo"};
+   var Ukko = {ctor: "Ukko"};
+   var Vainamoinen = {ctor: "Vainamoinen"};
    var State = function (a) {
       return function (b) {
          return function (c) {
@@ -3595,14 +3589,14 @@ Elm.GameTypes.make = function (_elm) {
                            ,Blue: Blue
                            ,Move: Move
                            ,State: State
-                           ,Odin: Odin
-                           ,Thor: Thor
-                           ,Troll: Troll
-                           ,Dragon: Dragon
-                           ,Fenrir: Fenrir
-                           ,Skadi: Skadi
-                           ,Valkyrie: Valkyrie
-                           ,Loki: Loki
+                           ,Vainamoinen: Vainamoinen
+                           ,Ukko: Ukko
+                           ,Kullervo: Kullervo
+                           ,Kaarme: Kaarme
+                           ,Joukahainen: Joukahainen
+                           ,SeppoIlmarinen: SeppoIlmarinen
+                           ,Louhi: Louhi
+                           ,Lemminkainen: Lemminkainen
                            ,NoPiece: NoPiece
                            ,PickUpPiece: PickUpPiece
                            ,PlacePiece: PlacePiece
@@ -10721,14 +10715,34 @@ Elm.Piece.make = function (_elm) {
    var baseValue = function (piece) {
       return function () {
          switch (piece.ctor)
-         {case "Dragon": return 5;
-            case "Fenrir": return 4;
-            case "Loki": return 1;
-            case "Odin": return 8;
-            case "Skadi": return 3;
-            case "Thor": return 7;
-            case "Troll": return 6;
-            case "Valkyrie": return 2;}
+         {case "Joukahainen": return 4;
+            case "Kaarme": return 5;
+            case "Kullervo": return 6;
+            case "Lemminkainen": return 1;
+            case "Louhi": return 2;
+            case "SeppoIlmarinen": return 3;
+            case "Ukko": return 7;
+            case "Vainamoinen": return 8;}
+         _U.badCase($moduleName,
+         "between lines 43 and 51");
+      }();
+   };
+   var toDisplayString = function (piece) {
+      return function () {
+         switch (piece.ctor)
+         {case "Joukahainen":
+            return "Joukahainen";
+            case "Kaarme": return "Käärme";
+            case "Kullervo":
+            return "Kullervo";
+            case "Lemminkainen":
+            return "Lemminkäinen";
+            case "Louhi": return "Louhi";
+            case "SeppoIlmarinen":
+            return "Seppo Ilmarinen";
+            case "Ukko": return "Ukko";
+            case "Vainamoinen":
+            return "Väinämöinen";}
          _U.badCase($moduleName,
          "between lines 31 and 39");
       }();
@@ -10736,15 +10750,19 @@ Elm.Piece.make = function (_elm) {
    var toString = function (piece) {
       return function () {
          switch (piece.ctor)
-         {case "Dragon": return "Dragon";
-            case "Fenrir": return "Fenrir";
-            case "Loki": return "Loki";
-            case "Odin": return "Odin";
-            case "Skadi": return "Skadi";
-            case "Thor": return "Thor";
-            case "Troll": return "Troll";
-            case "Valkyrie":
-            return "Valkyrie";}
+         {case "Joukahainen":
+            return "Jouk";
+            case "Kaarme": return "Kaarme";
+            case "Kullervo":
+            return "Kullervo";
+            case "Lemminkainen":
+            return "Lemmi";
+            case "Louhi": return "Louhi";
+            case "SeppoIlmarinen":
+            return "Ilmar";
+            case "Ukko": return "Ukko";
+            case "Vainamoinen":
+            return "Vain";}
          _U.badCase($moduleName,
          "between lines 19 and 27");
       }();
@@ -10752,22 +10770,22 @@ Elm.Piece.make = function (_elm) {
    var fromString = function (str) {
       return function () {
          switch (str)
-         {case "Dragon":
-            return $GameTypes.Dragon;
-            case "Fenrir":
-            return $GameTypes.Fenrir;
-            case "Loki":
-            return $GameTypes.Loki;
-            case "Odin":
-            return $GameTypes.Odin;
-            case "Skadi":
-            return $GameTypes.Skadi;
-            case "Thor":
-            return $GameTypes.Thor;
-            case "Troll":
-            return $GameTypes.Troll;
-            case "Valkyrie":
-            return $GameTypes.Valkyrie;}
+         {case "Ilmar":
+            return $GameTypes.SeppoIlmarinen;
+            case "Jouk":
+            return $GameTypes.Joukahainen;
+            case "Kaarme":
+            return $GameTypes.Kaarme;
+            case "Kullervo":
+            return $GameTypes.Kullervo;
+            case "Lemmi":
+            return $GameTypes.Lemminkainen;
+            case "Louhi":
+            return $GameTypes.Louhi;
+            case "Ukko":
+            return $GameTypes.Ukko;
+            case "Vain":
+            return $GameTypes.Vainamoinen;}
          _U.badCase($moduleName,
          "between lines 7 and 15");
       }();
@@ -10775,6 +10793,7 @@ Elm.Piece.make = function (_elm) {
    _elm.Piece.values = {_op: _op
                        ,fromString: fromString
                        ,toString: toString
+                       ,toDisplayString: toDisplayString
                        ,baseValue: baseValue};
    return _elm.Piece.values;
 };

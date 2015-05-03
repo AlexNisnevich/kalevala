@@ -47,14 +47,14 @@ type alias State = {
   log : List (Color, String)
 }
 
-type Piece = Odin
-           | Thor
-           | Troll
-           | Dragon
-           | Fenrir
-           | Skadi
-           | Valkyrie
-           | Loki
+type Piece = Vainamoinen
+           | Ukko
+           | Kullervo
+           | Kaarme
+           | Joukahainen
+           | SeppoIlmarinen
+           | Louhi
+           | Lemminkainen
            | NoPiece  -- represents error in board lookup
 
 type alias MousePos = (Int, Int)

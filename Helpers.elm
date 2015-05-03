@@ -3,7 +3,6 @@ module Helpers where
 import List (..)
 import Random (..)
 
-
 (!!) : List a -> Int -> a
 (!!) list idx = head (drop idx list)
 infixl 4 !!

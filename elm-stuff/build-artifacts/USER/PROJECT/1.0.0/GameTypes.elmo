@@ -63,14 +63,14 @@ Elm.GameTypes.make = function (_elm) {
              ,_1: b};
    });
    var NoPiece = {ctor: "NoPiece"};
-   var Loki = {ctor: "Loki"};
-   var Valkyrie = {ctor: "Valkyrie"};
-   var Skadi = {ctor: "Skadi"};
-   var Fenrir = {ctor: "Fenrir"};
-   var Dragon = {ctor: "Dragon"};
-   var Troll = {ctor: "Troll"};
-   var Thor = {ctor: "Thor"};
-   var Odin = {ctor: "Odin"};
+   var Lemminkainen = {ctor: "Lemminkainen"};
+   var Louhi = {ctor: "Louhi"};
+   var SeppoIlmarinen = {ctor: "SeppoIlmarinen"};
+   var Joukahainen = {ctor: "Joukahainen"};
+   var Kaarme = {ctor: "Kaarme"};
+   var Kullervo = {ctor: "Kullervo"};
+   var Ukko = {ctor: "Ukko"};
+   var Vainamoinen = {ctor: "Vainamoinen"};
    var State = function (a) {
       return function (b) {
          return function (c) {
@@ -151,14 +151,14 @@ Elm.GameTypes.make = function (_elm) {
                            ,Blue: Blue
                            ,Move: Move
                            ,State: State
-                           ,Odin: Odin
-                           ,Thor: Thor
-                           ,Troll: Troll
-                           ,Dragon: Dragon
-                           ,Fenrir: Fenrir
-                           ,Skadi: Skadi
-                           ,Valkyrie: Valkyrie
-                           ,Loki: Loki
+                           ,Vainamoinen: Vainamoinen
+                           ,Ukko: Ukko
+                           ,Kullervo: Kullervo
+                           ,Kaarme: Kaarme
+                           ,Joukahainen: Joukahainen
+                           ,SeppoIlmarinen: SeppoIlmarinen
+                           ,Louhi: Louhi
+                           ,Lemminkainen: Lemminkainen
                            ,NoPiece: NoPiece
                            ,PickUpPiece: PickUpPiece
                            ,PlacePiece: PlacePiece
