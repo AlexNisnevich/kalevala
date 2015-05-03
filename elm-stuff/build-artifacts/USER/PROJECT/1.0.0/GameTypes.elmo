@@ -10,6 +10,7 @@ Elm.GameTypes.make = function (_elm) {
    _L = _N.List.make(_elm),
    _P = _N.Ports.make(_elm),
    $moduleName = "GameTypes",
+   $Color = Elm.Color.make(_elm),
    $Dict = Elm.Dict.make(_elm),
    $Maybe = Elm.Maybe.make(_elm);
    var isOngoing = function (state) {
@@ -90,18 +91,24 @@ Elm.GameTypes.make = function (_elm) {
                            return function (i) {
                               return function (j) {
                                  return function (k) {
-                                    return {_: {}
-                                           ,board: e
-                                           ,deck: g
-                                           ,delta: k
-                                           ,gameState: b
-                                           ,gameType: a
-                                           ,hands: h
-                                           ,heldPiece: i
-                                           ,lastPlaced: j
-                                           ,players: c
-                                           ,score: f
-                                           ,turn: d};
+                                    return function (l) {
+                                       return function (m) {
+                                          return {_: {}
+                                                 ,board: f
+                                                 ,deck: h
+                                                 ,delta: l
+                                                 ,gameState: b
+                                                 ,gameType: a
+                                                 ,hands: i
+                                                 ,heldPiece: j
+                                                 ,lastPlaced: k
+                                                 ,log: m
+                                                 ,playerNames: d
+                                                 ,players: c
+                                                 ,score: g
+                                                 ,turn: e};
+                                       };
+                                    };
                                  };
                               };
                            };

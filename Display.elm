@@ -117,7 +117,7 @@ drawLastPlacedOutline state tileSize =
   case state.lastPlaced of
     Just (x, y) ->
       let thick c = { defaultLine | color <- c, width <- 4}
-          lastPlacedColor = Player.color <| Player.next state.turn
+          lastPlacedColor = Player.toColor <| Player.next state.turn
           lastPlacedOutline = move (tileSize * (toFloat x), tileSize * (toFloat y)) (outlined (thick lastPlacedColor) (square (tileSize + 4)))
       in [lastPlacedOutline]
     Nothing -> []
@@ -137,14 +137,14 @@ renderBoard state boardSize dims =
 
 renderHand : Player -> State -> Element
 renderHand player state =
-  let p = Player.name player
+  let p = Player.color player
       playerType = withDefault Human (Dict.get p state.players)
       hand = Player.getHand player state
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
       pieceImage pieceStr = pieceToImage (Piece.fromString pieceStr)
       pieceSize = (round handTileSize) + handPadding
       makePiece idx pieceStr = pieceImage pieceStr handTileSize |> container pieceSize pieceSize middle
-                                                                |> Graphics.Element.color (if isPieceHeld idx then (Player.color state.turn) else white)
+                                                                |> Graphics.Element.color (if isPieceHeld idx then (Player.toColor state.turn) else white)
                                                                 |> clickable (send clickChannel (PieceInHand player idx))
       playerHand = if isEmpty hand && state.gameState == Ongoing
                    then [button (send clickChannel PassButton) "Pass" |> container 100 100 middle]
@@ -158,8 +158,8 @@ renderHand player state =
                             |> (\t -> if t == "Human" then "Player" else t)
                             |> String.toUpper
                             |> fromString
-                            |> (if state.turn == player && state.gameState == Ongoing then bold else identity)
-                            |> Text.color (Player.color player)
+                            |> (if state.turn == player && isOngoing state then bold else identity)
+                            |> Text.color (Player.toColor player)
                             |> leftAligned
                             |> container 80 pieceSize middle
       score = Dict.get p state.score |> withDefault 0
@@ -184,18 +184,6 @@ rulesRow piece description =
                         ]
   in
     image `beside` container 600 height midLeft text
-
-pieceRules : Element
-pieceRules = flow down
-    [ rulesRow Odin "No special power"
-    , rulesRow Thor "No special power"
-    , rulesRow Troll "No other tiles (except other Trolls) may be placed adjacent to a Troll."
-    , rulesRow Dragon "May be placed on top of other tiles (except other Dragons)."
-    , rulesRow Fenrir "Value is the sum of all Fenrir tiles in the same row or column."
-    , rulesRow Skadi "You may exchange it with any tile on the table (except other Skadi)."
-    , rulesRow Valkyrie "Automatically scores when there are Valkyries on both ends of a line."
-    , rulesRow Loki "All tiles adjacent to Loki (except other Lokis) have value 0."
-    ]
 
 render : State -> WindowDims -> GameType -> Content -> Element
 render state dims gameType playerName =
@@ -225,17 +213,13 @@ render state dims gameType playerName =
                      then container 70 40 middle <| centered <| Text.height 11 <| fromString <| "Deck: " ++ toString (length state.deck)
                      else Graphics.Element.empty
       controls = container rulesAreaWidth 40 middle <| flow right [ statusArea, gameTypeDropDown, startButton, deckSizeArea ]
-      rulesArea = flow down [ size rulesAreaWidth 50 <| centered (Text.height 25 (typeface ["Rock Salt", "cursive"] (fromString "Rules")))
-                            , spacer 5 5
-                            , width rulesAreaWidth <| leftAligned <| fromString "&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles."
-                            , width rulesAreaWidth <| leftAligned <| fromString "&bull; If the tile you placed has the highest value in a row and/or column (ties don't count), you score one point for each tile in that row and/or column."
-                            , spacer 5 5
-                            , pieceRules
+      logArea = state.log
+                |> take 5
+                |> (List.map (\(color, text) -> leftAligned <| Text.color color <| fromString text))
+                |> flow down
+      rightArea = flow down [ logArea
                             , controls
                             ]
-      rightArea = if | handGap >= 420 -> rulesArea
-                     | handGap >= 280 -> pieceRules `above` controls
-                     | otherwise -> controls
   in
     flow down
       [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (fromString "V&ouml;lusp&aacute;"))))

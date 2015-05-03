@@ -35,7 +35,7 @@ Elm.Display.make = function (_elm) {
             switch (_v0._0.ctor)
               {case "_Tuple2":
                  return function () {
-                      var lastPlacedColor = $Player.color($Player.next(state.turn));
+                      var lastPlacedColor = $Player.toColor($Player.next(state.turn));
                       var thick = function (c) {
                          return _U.replace([["color"
                                             ,c]
@@ -138,32 +138,6 @@ Elm.Display.make = function (_elm) {
          text));
       }();
    });
-   var pieceRules = A2($Graphics$Element.flow,
-   $Graphics$Element.down,
-   _L.fromArray([A2(rulesRow,
-                $GameTypes.Odin,
-                "No special power")
-                ,A2(rulesRow,
-                $GameTypes.Thor,
-                "No special power")
-                ,A2(rulesRow,
-                $GameTypes.Troll,
-                "No other tiles (except other Trolls) may be placed adjacent to a Troll.")
-                ,A2(rulesRow,
-                $GameTypes.Dragon,
-                "May be placed on top of other tiles (except other Dragons).")
-                ,A2(rulesRow,
-                $GameTypes.Fenrir,
-                "Value is the sum of all Fenrir tiles in the same row or column.")
-                ,A2(rulesRow,
-                $GameTypes.Skadi,
-                "You may exchange it with any tile on the table (except other Skadi).")
-                ,A2(rulesRow,
-                $GameTypes.Valkyrie,
-                "Automatically scores when there are Valkyries on both ends of a line.")
-                ,A2(rulesRow,
-                $GameTypes.Loki,
-                "All tiles adjacent to Loki (except other Lokis) have value 0.")]));
    var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
    var gameTypeChannel = $Signal.channel($GameTypes.HumanVsCpu);
    var clickChannel = $Signal.channel($GameTypes.None);
@@ -191,7 +165,7 @@ Elm.Display.make = function (_elm) {
             clickChannel,
             A2($GameTypes.PieceInHand,
             player,
-            idx)))($Graphics$Element.color(isPieceHeld(idx) ? $Player.color(state.turn) : $Color.white)(A3($Graphics$Element.container,
+            idx)))($Graphics$Element.color(isPieceHeld(idx) ? $Player.toColor(state.turn) : $Color.white)(A3($Graphics$Element.container,
             pieceSize,
             pieceSize,
             $Graphics$Element.middle)(A2(pieceImage,
@@ -220,7 +194,7 @@ Elm.Display.make = function (_elm) {
             $Graphics$Element.middle)(hiddenPiece);
          },
          hand);
-         var p = $Player.name(player);
+         var p = $Player.color(player);
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
@@ -229,9 +203,8 @@ Elm.Display.make = function (_elm) {
          var handText = A3($Graphics$Element.container,
          80,
          pieceSize,
-         $Graphics$Element.middle)($Text.leftAligned($Text.color($Player.color(player))((_U.eq(state.turn,
-         player) && _U.eq(state.gameState,
-         $GameTypes.Ongoing) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(function (t) {
+         $Graphics$Element.middle)($Text.leftAligned($Text.color($Player.toColor(player))((_U.eq(state.turn,
+         player) && $GameTypes.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(function (t) {
             return _U.eq(t,
             "Human") ? "Player" : t;
          }($Basics.toString(playerType))))))));
@@ -421,6 +394,15 @@ Elm.Display.make = function (_elm) {
    gameType,
    playerName) {
       return function () {
+         var logArea = $Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v21) {
+            return function () {
+               switch (_v21.ctor)
+               {case "_Tuple2":
+                  return $Text.leftAligned($Text.color(_v21._0)($Text.fromString(_v21._1)));}
+               _U.badCase($moduleName,
+               "on line 218, column 49 to 99");
+            }();
+         })($List.take(5)(state.log)));
          var deckSizeArea = $GameTypes.isOngoing(state) ? A3($Graphics$Element.container,
          70,
          40,
@@ -428,13 +410,13 @@ Elm.Display.make = function (_elm) {
          "Deck: ",
          $Basics.toString($List.length(state.deck))))))) : $Graphics$Element.empty;
          var remoteGameStatusText = function () {
-            var _v21 = state.gameState;
-            switch (_v21.ctor)
+            var _v25 = state.gameState;
+            switch (_v25.ctor)
             {case "Connected":
                return A2($Basics._op["++"],
                  "Connected to ",
                  A2($Basics._op["++"],
-                 _v21._0,
+                 _v25._0,
                  " "));
                case "Disconnected":
                return "Opponent disconnected ";
@@ -481,25 +463,9 @@ Elm.Display.make = function (_elm) {
                       ,gameTypeDropDown
                       ,startButton
                       ,deckSizeArea])));
-         var rulesArea = A2($Graphics$Element.flow,
+         var rightArea = A2($Graphics$Element.flow,
          $Graphics$Element.down,
-         _L.fromArray([A2($Graphics$Element.size,
-                      rulesAreaWidth,
-                      50)($Text.centered(A2($Text.height,
-                      25,
-                      A2($Text.typeface,
-                      _L.fromArray(["Rock Salt"
-                                   ,"cursive"]),
-                      $Text.fromString("Rules")))))
-                      ,A2($Graphics$Element.spacer,
-                      5,
-                      5)
-                      ,$Graphics$Element.width(rulesAreaWidth)($Text.leftAligned($Text.fromString("&bull; Players take turns placing tiles from their hand. You must place a tile next to an existing tile. Rows and columns cannot exceed seven tiles.")))
-                      ,$Graphics$Element.width(rulesAreaWidth)($Text.leftAligned($Text.fromString("&bull; If the tile you placed has the highest value in a row and/or column (ties don\'t count), you score one point for each tile in that row and/or column.")))
-                      ,A2($Graphics$Element.spacer,
-                      5,
-                      5)
-                      ,pieceRules
+         _L.fromArray([logArea
                       ,controls]));
          var withSpacing = F2(function (padding,
          elt) {
@@ -511,11 +477,6 @@ Elm.Display.make = function (_elm) {
          });
          var totalBoardSize = getTotalBoardSize(dims);
          var handGap = totalBoardSize - 2 * $Basics.round(handTileSize) - handPadding * 2;
-         var rightArea = _U.cmp(handGap,
-         420) > -1 ? rulesArea : _U.cmp(handGap,
-         280) > -1 ? A2($Graphics$Element.above,
-         pieceRules,
-         controls) : controls;
          var boardSize = $Board.getBoardSize(state.board);
          var tileSize = A2(getTileSizeFromBoardSize,
          boardSize,
@@ -579,7 +540,6 @@ Elm.Display.make = function (_elm) {
                          ,renderBoard: renderBoard
                          ,renderHand: renderHand
                          ,rulesRow: rulesRow
-                         ,pieceRules: pieceRules
                          ,render: render};
    return _elm.Display.values;
 };

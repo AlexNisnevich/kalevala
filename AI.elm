@@ -17,7 +17,7 @@ getMove state =
   if List.isEmpty (Player.getHand state.turn state)
   then Nothing
   else
-    let p = Player.name state.turn
+    let p = Player.color state.turn
         hand = Player.getHand state.turn state
         idxs = [0..(List.length hand)-1]
 

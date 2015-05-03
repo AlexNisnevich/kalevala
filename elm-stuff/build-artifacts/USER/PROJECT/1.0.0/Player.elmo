@@ -26,7 +26,7 @@ Elm.Player.make = function (_elm) {
          "between lines 32 and 34");
       }();
    };
-   var name = function (player) {
+   var color = function (player) {
       return function () {
          switch (player.ctor)
          {case "Blue": return "blue";
@@ -40,7 +40,7 @@ Elm.Player.make = function (_elm) {
       return A2($Maybe.withDefault,
       $GameTypes.Human,
       A2($Dict.get,
-      name(player),
+      color(player),
       state.players));
    });
    var getHand = F2(function (player,
@@ -48,7 +48,7 @@ Elm.Player.make = function (_elm) {
       return A2($Maybe.withDefault,
       _L.fromArray([]),
       A2($Dict.get,
-      name(player),
+      color(player),
       state.hands));
    });
    var noTilesInHand = F2(function (player,
@@ -68,7 +68,7 @@ Elm.Player.make = function (_elm) {
          "between lines 20 and 22");
       }();
    };
-   var color = function (player) {
+   var toColor = function (player) {
       return function () {
          switch (player.ctor)
          {case "Blue":
@@ -79,9 +79,9 @@ Elm.Player.make = function (_elm) {
       }();
    };
    _elm.Player.values = {_op: _op
-                        ,color: color
+                        ,toColor: toColor
                         ,fromString: fromString
-                        ,name: name
+                        ,color: color
                         ,next: next
                         ,getType: getType
                         ,getHand: getHand

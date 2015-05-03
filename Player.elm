@@ -9,8 +9,8 @@ import Maybe (..)
 import GameTypes (..)
 import Helpers (..)
 
-color : Player -> Color
-color player =
+toColor : Player -> Color
+toColor player =
   case player of
     Red -> Color.red
     Blue -> Color.blue
@@ -21,8 +21,8 @@ fromString str =
     "red" -> Red
     "blue" -> Blue
 
-name : Player -> String
-name player =
+color : Player -> String
+color player =
   case player of
     Red -> "red"
     Blue -> "blue"
@@ -35,11 +35,11 @@ next player =
 
 getType : Player -> State -> PlayerType
 getType player state =
-  withDefault Human (Dict.get (name player) state.players)
+  withDefault Human (Dict.get (color player) state.players)
 
 getHand : Player -> State -> List String
 getHand player state =
-  withDefault [] (Dict.get (name player) state.hands)
+  withDefault [] (Dict.get (color player) state.hands)
 
 noTilesInHand : Player -> State -> Bool
 noTilesInHand player state =

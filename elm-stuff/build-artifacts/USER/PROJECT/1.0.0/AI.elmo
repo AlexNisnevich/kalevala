@@ -100,7 +100,7 @@ Elm.AI.make = function (_elm) {
             _U.badCase($moduleName,
             "between lines 36 and 38");
          }();
-         var p = $Player.name(state.turn);
+         var p = $Player.color(state.turn);
          return $Maybe.Just(bestMove);
       }();
    };

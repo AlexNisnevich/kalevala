@@ -40,7 +40,7 @@ tryToPickUpPiece player idx state =
 {- Pass the current player's turn. Returns the new state. -}
 pass : State -> State
 pass state =
-  let p = Player.name state.turn
+  let p = Player.color state.turn
   in
     { state | turn <- Player.next state.turn
             , delta <- Dict.insert p "(+0)" state.delta }
@@ -77,7 +77,7 @@ tryAIMove state =
 {- Make the given move. Returns the new state. -}
 makeMove : Move -> State -> State
 makeMove move state =
-  let p = Player.name state.turn
+  let p = Player.color state.turn
       newBoard = Dict.insert move.location move.piece state.board
       delta = Board.scoreMove move newBoard
       newScore = (withDefault 0 <| Dict.get p state.score) + delta
@@ -87,6 +87,9 @@ makeMove move state =
       newHand = case existingTile of
         Just piece -> if move.piece == Skadi then (replaceAtIndex move.idx (Piece.toString piece) hand) else handWithDrawnTile
         Nothing -> handWithDrawnTile
+      logText = (withDefault "" <| Dict.get (Player.color state.turn) state.playerNames) ++ " placed a " ++ 
+                  Piece.toString move.piece ++ " for " ++ toString delta ++ " points" ++ 
+                  " (total: " ++ toString newScore ++ ")"
   in
     { state | turn <- Player.next state.turn
             , board <- newBoard
@@ -95,17 +98,18 @@ makeMove move state =
             , hands <- Dict.insert p newHand state.hands
             , heldPiece <- Nothing
             , lastPlaced <- Just move.location
-            , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta }
+            , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta
+            , log <- ((Player.toColor state.turn), logText) :: state.log }
 
 {- Perform an action on the current state and return the resulting state. -}
 performAction : Action -> State -> State
 performAction action state =
-  let p = Player.name state.turn
+  let p = Player.color state.turn
       newState =
         case action of
           PickUpPiece player idx -> tryToPickUpPiece player idx state
           PlacePiece mousePos dims -> tryMove (Display.mouseToBoardPosition mousePos state dims) state
-          StartGame gameType deck player playerName -> startGame gameType deck player
+          StartGame gameType deck player playerName -> startGame gameType deck player playerName
           GameStarted deck startPlayer localPlayer opponentName -> gameStarted deck startPlayer localPlayer opponentName
           Pass -> { state | turn <- Player.next state.turn }
           OpponentDisconnected -> { state | gameState <- Disconnected }
@@ -146,18 +150,25 @@ getFirstTileHandsAndDeck deck =
    Returns the state corresponding to the start of the game.
    NOTE: For HumanVsHumanRemote games, startGame triggers when matchmaking begins, and 
          gameStarted triggers when a match has been found. -}
-startGame : GameType -> Deck -> Player -> State
-startGame gameType deck player =
-  let players = Dict.fromList [("red", Human), ("blue", if gameType == HumanVsCpu then Cpu else Human)]
+startGame : GameType -> Deck -> Player -> String -> State
+startGame gameType deck player playerName =
+  let players = Dict.fromList [ (Player.color player, Human)
+                              , (Player.color <| Player.next player, if gameType == HumanVsCpu then Cpu else Human)
+                              ]
+      playerNames = Dict.fromList [ (Player.color player, if gameType == HumanVsCpu then "You" else Player.color player)
+                                  , (Player.color <| Player.next player, if gameType == HumanVsCpu then "CPU" else Player.color <| Player.next player)
+                                  ]
       (firstTile, hands, remainder) = getFirstTileHandsAndDeck deck
       state = if gameType == HumanVsHumanRemote
               then { startState | gameType <- gameType
                                 , gameState <- WaitingForPlayers
                                 , players <- players
+                                , playerNames <- playerNames
                                 , turn <- player}
               else { startState | gameType <- gameType
                                 , gameState <- Ongoing
                                 , players <- players
+                                , playerNames <- playerNames
                                 , hands <- hands
                                 , deck <- remainder
                                 , board <- Dict.singleton (0, 0) firstTile
@@ -173,12 +184,17 @@ startGame gameType deck player =
 gameStarted : Deck -> Player -> Player -> String -> State
 gameStarted deck startPlayer localPlayer opponentName =
   let players = Dict.fromList [ ("red", if localPlayer == Red then Human else Remote)
-                              , ("blue", if localPlayer == Blue then Human else Remote)]
+                              , ("blue", if localPlayer == Blue then Human else Remote)
+                              ]
+      playerNames = Dict.fromList [ (Player.color localPlayer, "You")
+                                  , (Player.color <| Player.next localPlayer, opponentName)
+                                  ]
       (firstTile, hands, remainder) = getFirstTileHandsAndDeck deck
   in
     { startState | gameType <- HumanVsHumanRemote
                  , gameState <- Connected opponentName
                  , players <- players
+                 , playerNames <- playerNames
                  , hands <- hands
                  , deck <- remainder
                  , board <- Dict.singleton (0, 0) firstTile
@@ -204,6 +220,7 @@ startState =
   { gameType = HumanVsCpu
   , gameState = NotStarted
   , players = Dict.fromList [("red", Human), ("blue", Cpu)]
+  , playerNames = Dict.fromList [("red", "Player"), ("blue", "CPU")]
   , turn = Red
   , board = Dict.empty
   , score = Dict.fromList [("red", 0), ("blue", 0)]
@@ -212,6 +229,7 @@ startState =
   , heldPiece = Nothing
   , lastPlaced = Nothing
   , delta = Dict.fromList [("red", ""), ("blue", "")]
+  , log = []
   }
 
 {- Turn a ClickEvent into an Action -}

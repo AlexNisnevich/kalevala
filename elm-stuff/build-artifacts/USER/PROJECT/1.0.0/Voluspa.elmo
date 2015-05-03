@@ -55,6 +55,13 @@ Elm.Voluspa.make = function (_elm) {
                                                          ,_1: _L.fromArray([])}]))
                     ,heldPiece: $Maybe.Nothing
                     ,lastPlaced: $Maybe.Nothing
+                    ,log: _L.fromArray([])
+                    ,playerNames: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                               ,_0: "red"
+                                                               ,_1: "Player"}
+                                                              ,{ctor: "_Tuple2"
+                                                               ,_0: "blue"
+                                                               ,_1: "CPU"}]))
                     ,players: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                            ,_0: "red"
                                                            ,_1: $GameTypes.Human}
@@ -125,7 +132,7 @@ Elm.Voluspa.make = function (_elm) {
                  seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 224 and 231");
+            "between lines 242 and 249");
          }();
       }();
    });
@@ -175,7 +182,7 @@ Elm.Voluspa.make = function (_elm) {
                   return $Basics.not(_U.eq(_v3._1,
                     "Troll"));}
                _U.badCase($moduleName,
-               "on line 134, column 66 to 87");
+               "on line 138, column 66 to 87");
             }();
          },
          deckWithIndices)));
@@ -217,6 +224,12 @@ Elm.Voluspa.make = function (_elm) {
          firstTile = $._0,
          hands = $._1,
          remainder = $._2;
+         var playerNames = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                        ,_0: $Player.color(localPlayer)
+                                                        ,_1: "You"}
+                                                       ,{ctor: "_Tuple2"
+                                                        ,_0: $Player.color($Player.next(localPlayer))
+                                                        ,_1: opponentName}]));
          var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                     ,_0: "red"
                                                     ,_1: _U.eq(localPlayer,
@@ -230,6 +243,7 @@ Elm.Voluspa.make = function (_elm) {
                            ,["gameState"
                             ,$GameTypes.Connected(opponentName)]
                            ,["players",players]
+                           ,["playerNames",playerNames]
                            ,["hands",hands]
                            ,["deck",remainder]
                            ,["board"
@@ -288,10 +302,29 @@ Elm.Voluspa.make = function (_elm) {
          var delta = A2($Board.scoreMove,
          move,
          newBoard);
-         var p = $Player.name(state.turn);
+         var p = $Player.color(state.turn);
          var newScore = $Maybe.withDefault(0)(A2($Dict.get,
          p,
          state.score)) + delta;
+         var logText = A2($Basics._op["++"],
+         $Maybe.withDefault("")(A2($Dict.get,
+         $Player.color(state.turn),
+         state.playerNames)),
+         A2($Basics._op["++"],
+         " placed a ",
+         A2($Basics._op["++"],
+         $Piece.toString(move.piece),
+         A2($Basics._op["++"],
+         " for ",
+         A2($Basics._op["++"],
+         $Basics.toString(delta),
+         A2($Basics._op["++"],
+         " points",
+         A2($Basics._op["++"],
+         " (total: ",
+         A2($Basics._op["++"],
+         $Basics.toString(newScore),
+         ")"))))))));
          return _U.replace([["turn"
                             ,$Player.next(state.turn)]
                            ,["board",newBoard]
@@ -318,13 +351,19 @@ Elm.Voluspa.make = function (_elm) {
                             A2($Basics._op["++"],
                             $Basics.toString(delta),
                             ")")),
-                            state.delta)]],
+                            state.delta)]
+                           ,["log"
+                            ,A2($List._op["::"],
+                            {ctor: "_Tuple2"
+                            ,_0: $Player.toColor(state.turn)
+                            ,_1: logText},
+                            state.log)]],
          state);
       }();
    });
    var pass = function (state) {
       return function () {
-         var p = $Player.name(state.turn);
+         var p = $Player.color(state.turn);
          return _U.replace([["turn"
                             ,$Player.next(state.turn)]
                            ,["delta"
@@ -394,19 +433,28 @@ Elm.Voluspa.make = function (_elm) {
          "between lines 53 and 70");
       }();
    });
-   var startGame = F3(function (gameType,
+   var startGame = F4(function (gameType,
    deck,
-   player) {
+   player,
+   playerName) {
       return function () {
          var $ = getFirstTileHandsAndDeck(deck),
          firstTile = $._0,
          hands = $._1,
          remainder = $._2;
+         var playerNames = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
+                                                        ,_0: $Player.color(player)
+                                                        ,_1: _U.eq(gameType,
+                                                        $GameTypes.HumanVsCpu) ? "You" : $Player.color(player)}
+                                                       ,{ctor: "_Tuple2"
+                                                        ,_0: $Player.color($Player.next(player))
+                                                        ,_1: _U.eq(gameType,
+                                                        $GameTypes.HumanVsCpu) ? "CPU" : $Player.color($Player.next(player))}]));
          var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                    ,_0: "red"
+                                                    ,_0: $Player.color(player)
                                                     ,_1: $GameTypes.Human}
                                                    ,{ctor: "_Tuple2"
-                                                    ,_0: "blue"
+                                                    ,_0: $Player.color($Player.next(player))
                                                     ,_1: _U.eq(gameType,
                                                     $GameTypes.HumanVsCpu) ? $GameTypes.Cpu : $GameTypes.Human}]));
          var state = _U.eq(gameType,
@@ -415,12 +463,15 @@ Elm.Voluspa.make = function (_elm) {
                                                      ,["gameState"
                                                       ,$GameTypes.WaitingForPlayers]
                                                      ,["players",players]
+                                                     ,["playerNames"
+                                                      ,playerNames]
                                                      ,["turn",player]],
          startState) : _U.replace([["gameType"
                                    ,gameType]
                                   ,["gameState"
                                    ,$GameTypes.Ongoing]
                                   ,["players",players]
+                                  ,["playerNames",playerNames]
                                   ,["hands",hands]
                                   ,["deck",remainder]
                                   ,["board"
@@ -479,14 +530,15 @@ Elm.Voluspa.make = function (_elm) {
                  action._1),
                  state);
                case "StartGame":
-               return A3(startGame,
+               return A4(startGame,
                  action._0,
                  action._1,
-                 action._2);}
+                 action._2,
+                 action._3);}
             _U.badCase($moduleName,
-            "between lines 105 and 114");
+            "between lines 109 and 118");
          }();
-         var p = $Player.name(state.turn);
+         var p = $Player.color(state.turn);
          return isGameOver(newState) ? _U.replace([["gameState"
                                                    ,$GameTypes.GameOver]],
          newState) : mustPass(newState) ? pass(newState) : newState;
@@ -510,7 +562,7 @@ Elm.Voluspa.make = function (_elm) {
             {case "_Tuple2":
                return _v28._0;}
             _U.badCase($moduleName,
-            "on line 262, column 35 to 36");
+            "on line 280, column 35 to 36");
          }();
       },
       A3($Signal.keepIf,
@@ -521,7 +573,7 @@ Elm.Voluspa.make = function (_elm) {
                return _U.eq(_v32._1,
                  $GameTypes.HumanVsHumanRemote);}
             _U.badCase($moduleName,
-            "on line 262, column 60 to 83");
+            "on line 280, column 60 to 83");
          }();
       },
       {ctor: "_Tuple2"
@@ -538,7 +590,7 @@ Elm.Voluspa.make = function (_elm) {
                return $GameTypes.ParseError(_v36._0);
                case "Ok": return _v36._0;}
             _U.badCase($moduleName,
-            "between lines 256 and 259");
+            "between lines 274 and 277");
          }();
       };
       var encode = function (action) {

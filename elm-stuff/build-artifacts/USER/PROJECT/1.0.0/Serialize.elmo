@@ -28,7 +28,7 @@ Elm.Serialize.make = function (_elm) {
       }();
    };
    var player = function ($) {
-      return $Json$Encode.string($Player.name($));
+      return $Json$Encode.string($Player.color($));
    };
    var deck = function ($) {
       return $Json$Encode.list($List.map($Json$Encode.string)($));

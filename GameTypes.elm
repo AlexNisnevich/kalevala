@@ -1,5 +1,6 @@
 module GameTypes where
 
+import Color (Color)
 import Dict
 import Dict (Dict)
 import Random (Seed)
@@ -34,6 +35,7 @@ type alias State = {
   gameType : GameType,
   gameState : GameState,
   players : Dict String PlayerType,
+  playerNames : Dict String String,
   turn : Player,
   board : Board,
   score : Score,
@@ -41,7 +43,8 @@ type alias State = {
   hands : Hands,
   heldPiece : Maybe Int,
   lastPlaced : Maybe Location,
-  delta : Dict String String
+  delta : Dict String String,
+  log : List (Color, String)
 }
 
 type Piece = Odin
