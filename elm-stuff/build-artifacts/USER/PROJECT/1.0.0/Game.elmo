@@ -13,29 +13,13 @@ Elm.Game.make = function (_elm) {
    $AI = Elm.AI.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Board = Elm.Board.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Deserialize = Elm.Deserialize.make(_elm),
    $Dict = Elm.Dict.make(_elm),
-   $Display = Elm.Display.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Graphics$Input$Field = Elm.Graphics.Input.Field.make(_elm),
    $Helpers = Elm.Helpers.make(_elm),
-   $Json$Decode = Elm.Json.Decode.make(_elm),
-   $Json$Encode = Elm.Json.Encode.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
    $Piece = Elm.Piece.make(_elm),
-   $Player = Elm.Player.make(_elm),
-   $Random = Elm.Random.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Serialize = Elm.Serialize.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Time = Elm.Time.make(_elm),
-   $WebSocket = Elm.WebSocket.make(_elm),
-   $Window = Elm.Window.make(_elm);
-   var server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000";
+   $Player = Elm.Player.make(_elm);
    var startState = {_: {}
                     ,board: $Dict.empty
                     ,deck: _L.fromArray([])
@@ -93,73 +77,6 @@ Elm.Game.make = function (_elm) {
       A2(r,9,"Valkyrie"),
       A2(r,6,"Loki"))))))));
    }();
-   var constructAction = F6(function (clickType,
-   seed,
-   mousePos,
-   dims,
-   gameType,
-   playerName) {
-      return function () {
-         var click = A2($Debug.watch,
-         "clickInput.signal",
-         clickType);
-         var pos = A2($Debug.watch,
-         "Mouse.position",
-         mousePos);
-         return function () {
-            switch (clickType.ctor)
-            {case "BoardClick":
-               return A2($GameTypes.PlacePiece,
-                 mousePos,
-                 dims);
-               case "None":
-               return $GameTypes.NoAction;
-               case "PassButton":
-               return $GameTypes.Pass;
-               case "PieceInHand":
-               return A2($GameTypes.PickUpPiece,
-                 clickType._0,
-                 clickType._1);
-               case "Start":
-               return A4($GameTypes.StartGame,
-                 gameType,
-                 A2($Helpers.shuffle,
-                 deckContents,
-                 seed),
-                 $Player.random(seed),
-                 playerName.string);}
-            _U.badCase($moduleName,
-            "between lines 243 and 250");
-         }();
-      }();
-   });
-   var processClick = function (signal) {
-      return function () {
-         var sampledPlayerName = $Signal.sampleOn(signal)($Signal.subscribe($Display.playerNameChannel));
-         var sampledGameType = $Signal.sampleOn(signal)($Signal.subscribe($Display.gameTypeChannel));
-         var sampledMouse = A2($Signal.sampleOn,
-         signal,
-         $Mouse.position);
-         var seedSignal = A2($Signal._op["<~"],
-         function ($) {
-            return $Random.initialSeed($Basics.round($Basics.fst($)));
-         },
-         $Time.timestamp(signal));
-         return A2($Signal._op["~"],
-         A2($Signal._op["~"],
-         A2($Signal._op["~"],
-         A2($Signal._op["~"],
-         A2($Signal._op["~"],
-         A2($Signal._op["<~"],
-         constructAction,
-         signal),
-         seedSignal),
-         sampledMouse),
-         $Window.dimensions),
-         sampledGameType),
-         sampledPlayerName);
-      }();
-   };
    var getFirstTileHandsAndDeck = function (deck) {
       return function () {
          var deckWithIndices = A3($List.map2,
@@ -172,14 +89,14 @@ Elm.Game.make = function (_elm) {
          $List.length(deck) - 1),
          deck);
          var idxFirstNonTroll = $Basics.fst($List.head(A2($List.filter,
-         function (_v3) {
+         function (_v0) {
             return function () {
-               switch (_v3.ctor)
+               switch (_v0.ctor)
                {case "_Tuple2":
-                  return $Basics.not(_U.eq(_v3._1,
+                  return $Basics.not(_U.eq(_v0._1,
                     "Troll"));}
                _U.badCase($moduleName,
-               "on line 139, column 66 to 87");
+               "on line 103, column 66 to 87");
             }();
          },
          deckWithIndices)));
@@ -290,7 +207,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 88 and 91");
+            "between lines 71 and 74");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -373,24 +290,24 @@ Elm.Game.make = function (_elm) {
    };
    var tryAIMove = function (state) {
       return function () {
-         var _v9 = $AI.getMove(state);
-         switch (_v9.ctor)
+         var _v6 = $AI.getMove(state);
+         switch (_v6.ctor)
          {case "Just": return A2(tryMove,
-              _v9._0.location,
+              _v6._0.location,
               _U.replace([["heldPiece"
-                          ,$Maybe.Just(_v9._0.idx)]],
+                          ,$Maybe.Just(_v6._0.idx)]],
               state));
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 74 and 78");
+         "between lines 57 and 61");
       }();
    };
    var tryMove = F2(function (location,
    state) {
       return function () {
-         var _v11 = state.heldPiece;
-         switch (_v11.ctor)
+         var _v8 = state.heldPiece;
+         switch (_v8.ctor)
          {case "Just":
             return function () {
                  var nextPlayerType = A2($Player.getType,
@@ -404,17 +321,17 @@ Elm.Game.make = function (_elm) {
                        case "Remote":
                        return $Basics.identity;}
                     _U.badCase($moduleName,
-                    "between lines 61 and 65");
+                    "between lines 44 and 48");
                  }();
                  var hand = A2($Player.getHand,
                  state.turn,
                  state);
                  var pieceStr = $List.head(A2($List.drop,
-                 _v11._0,
+                 _v8._0,
                  hand));
                  var piece = $Piece.fromString(pieceStr);
                  var move = {_: {}
-                            ,idx: _v11._0
+                            ,idx: _v8._0
                             ,location: location
                             ,piece: piece};
                  return A2($Board.isValidMove,
@@ -427,7 +344,7 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 54 and 71");
+         "between lines 37 and 54");
       }();
    });
    var startGame = F4(function (gameType,
@@ -491,156 +408,18 @@ Elm.Game.make = function (_elm) {
                                                            ,$Maybe.Just(idx)]],
       state) : state;
    });
-   var performAction = F2(function (action,
-   state) {
-      return function () {
-         var newState = function () {
-            switch (action.ctor)
-            {case "GameStarted":
-               return A4(gameStarted,
-                 action._0,
-                 action._1,
-                 action._2,
-                 action._3);
-               case "NoAction": return state;
-               case "OpponentDisconnected":
-               return _U.replace([["gameState"
-                                  ,$GameTypes.Disconnected]],
-                 state);
-               case "ParseError": return state;
-               case "Pass":
-               return _U.replace([["turn"
-                                  ,$Player.next(state.turn)]],
-                 state);
-               case "PickUpPiece":
-               return A3(tryToPickUpPiece,
-                 action._0,
-                 action._1,
-                 state);
-               case "PlacePiece":
-               return A2(tryMove,
-                 A3($Display.mouseToBoardPosition,
-                 action._0,
-                 state,
-                 action._1),
-                 state);
-               case "StartGame":
-               return A4(startGame,
-                 action._0,
-                 action._1,
-                 action._2,
-                 action._3);}
-            _U.badCase($moduleName,
-            "between lines 110 and 119");
-         }();
-         var p = $Player.color(state.turn);
-         return isGameOver(newState) ? _U.replace([["gameState"
-                                                   ,$GameTypes.GameOver]],
-         newState) : mustPass(newState) ? pass(newState) : newState;
-      }();
-   });
-   var main = function () {
-      var action = processClick($Signal.subscribe($Display.clickChannel));
-      var actionWithGameType = A2($Signal._op["~"],
-      A2($Signal._op["<~"],
-      F2(function (a,t) {
-         return {ctor: "_Tuple2"
-                ,_0: a
-                ,_1: t};
-      }),
-      action),
-      $Signal.subscribe($Display.gameTypeChannel));
-      var actionForRemote = A2($Signal._op["<~"],
-      function (_v28) {
-         return function () {
-            switch (_v28.ctor)
-            {case "_Tuple2":
-               return _v28._0;}
-            _U.badCase($moduleName,
-            "on line 281, column 35 to 36");
-         }();
-      },
-      A3($Signal.keepIf,
-      function (_v32) {
-         return function () {
-            switch (_v32.ctor)
-            {case "_Tuple2":
-               return _U.eq(_v32._1,
-                 $GameTypes.HumanVsHumanRemote);}
-            _U.badCase($moduleName,
-            "on line 281, column 60 to 83");
-         }();
-      },
-      {ctor: "_Tuple2"
-      ,_0: $GameTypes.NoAction
-      ,_1: $GameTypes.HumanVsCpu},
-      actionWithGameType));
-      var decode = function (actionJson) {
-         return function () {
-            var _v36 = A2($Json$Decode.decodeString,
-            $Deserialize.action,
-            actionJson);
-            switch (_v36.ctor)
-            {case "Err":
-               return $GameTypes.ParseError(_v36._0);
-               case "Ok": return _v36._0;}
-            _U.badCase($moduleName,
-            "between lines 275 and 278");
-         }();
-      };
-      var encode = function (action) {
-         return A2($Json$Encode.encode,
-         0,
-         $Serialize.action(action));
-      };
-      var request = A2($Signal._op["<~"],
-      $Debug.watch("request"),
-      A2($Signal._op["<~"],
-      encode,
-      actionForRemote));
-      var response = A2($Signal._op["<~"],
-      $Debug.watch("response"),
-      A2($WebSocket.connect,
-      server,
-      request));
-      var responseAction = A2($Signal._op["<~"],
-      $Debug.watch("deserialized"),
-      A2($Signal._op["<~"],
-      decode,
-      response));
-      var state = A3($Signal.foldp,
-      performAction,
-      startState,
-      A2($Signal.merge,
-      action,
-      responseAction));
-      return A2($Signal._op["~"],
-      A2($Signal._op["~"],
-      A2($Signal._op["~"],
-      A2($Signal._op["<~"],
-      $Display.render,
-      state),
-      $Window.dimensions),
-      $Signal.subscribe($Display.gameTypeChannel)),
-      $Signal.subscribe($Display.playerNameChannel));
-   }();
    _elm.Game.values = {_op: _op
                       ,tryToPickUpPiece: tryToPickUpPiece
                       ,pass: pass
                       ,tryMove: tryMove
                       ,tryAIMove: tryAIMove
                       ,makeMove: makeMove
-                      ,performAction: performAction
                       ,isGameOver: isGameOver
                       ,mustPass: mustPass
                       ,getFirstTileHandsAndDeck: getFirstTileHandsAndDeck
                       ,startGame: startGame
                       ,gameStarted: gameStarted
                       ,deckContents: deckContents
-                      ,startState: startState
-                      ,constructAction: constructAction
-                      ,processClick: processClick
-                      ,server: server
-                      ,main: main};
+                      ,startState: startState};
    return _elm.Game.values;
 };
