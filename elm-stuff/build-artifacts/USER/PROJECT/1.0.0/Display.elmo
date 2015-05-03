@@ -55,7 +55,7 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 112 and 118");
+         "between lines 116 and 122");
       }();
    });
    var pieceToImage = F2(function (piece,
@@ -80,7 +80,7 @@ Elm.Display.make = function (_elm) {
                case "Valkyrie":
                return "images/tile_1.jpg";}
             _U.badCase($moduleName,
-            "between lines 70 and 79");
+            "between lines 76 and 85");
          }();
          return A3($Graphics$Element.image,
          $Basics.round(tileSize),
@@ -106,7 +106,7 @@ Elm.Display.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 105 and 108");
+         "between lines 109 and 112");
       }();
    });
    var rulesRow = F2(function (piece,
@@ -141,6 +141,16 @@ Elm.Display.make = function (_elm) {
    var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
    var gameTypeChannel = $Signal.channel($GameTypes.HumanVsCpu);
    var clickChannel = $Signal.channel($GameTypes.None);
+   var transpGreen = A4($Color.rgba,
+   0,
+   255,
+   0,
+   0.5);
+   var transparent = A4($Color.rgba,
+   0,
+   0,
+   0,
+   0.0);
    var handTileSize = 100;
    var handPadding = 10;
    var renderHand = F2(function (player,
@@ -238,7 +248,7 @@ Elm.Display.make = function (_elm) {
          {case "_Tuple2":
             return _v11._1 - gameHeaderSize;}
          _U.badCase($moduleName,
-         "on line 51, column 37 to 60");
+         "on line 57, column 37 to 60");
       }();
    };
    var getTileSizeFromBoardSize = F2(function (boardSize,
@@ -249,25 +259,17 @@ Elm.Display.make = function (_elm) {
    boardSize,
    dims) {
       return function () {
-         var transpGreen = A4($Color.rgba,
-         0,
-         255,
-         0,
-         0.5);
-         var transparent = A4($Color.rgba,
-         0,
-         0,
-         0,
-         0.0);
          var tileSize = A2(getTileSizeFromBoardSize,
          boardSize,
          dims);
-         var size = $Basics.toFloat(boardSize) * tileSize;
-         var offset = tileSize / 2 - size / 2;
-         var shape = F3(function (x,
-         y,
-         color) {
+         var totalSize = $Basics.toFloat(boardSize) * tileSize;
+         var offset = tileSize / 2 - totalSize / 2;
+         var shape = F2(function (x,y) {
             return function () {
+               var color = A3($Board.isValidSquareToMove,
+               state,
+               {ctor: "_Tuple2",_0: x,_1: y},
+               boardSize) ? transpGreen : transparent;
                var pos = {ctor: "_Tuple2"
                          ,_0: tileSize * $Basics.toFloat(x) + offset
                          ,_1: tileSize * $Basics.toFloat(y) + offset};
@@ -287,13 +289,7 @@ Elm.Display.make = function (_elm) {
          function (x) {
             return A2($List.concatMap,
             function (y) {
-               return A3(shape,
-               x,
-               y,
-               A3($Board.isValidSquareToMove,
-               state,
-               {ctor: "_Tuple2",_0: x,_1: y},
-               boardSize) ? transpGreen : transparent);
+               return A2(shape,x,y);
             },
             _L.range(0,boardSize - 1));
          },
@@ -358,7 +354,7 @@ Elm.Display.make = function (_elm) {
                         ,_1: boardY};
               }();}
          _U.badCase($moduleName,
-         "between lines 58 and 65");
+         "between lines 64 and 71");
       }();
    });
    var render = F4(function (state,
@@ -372,7 +368,7 @@ Elm.Display.make = function (_elm) {
                {case "_Tuple2":
                   return $Text.leftAligned($Text.color(_v19._0)($Text.fromString(_v19._1)));}
                _U.badCase($moduleName,
-               "on line 213, column 49 to 99");
+               "on line 217, column 49 to 99");
             }();
          })($List.take(5)(state.log)));
          var deckSizeArea = $GameTypes.isOngoing(state) ? A3($Graphics$Element.container,
@@ -499,6 +495,8 @@ Elm.Display.make = function (_elm) {
                          ,gameHeaderSize: gameHeaderSize
                          ,handPadding: handPadding
                          ,handTileSize: handTileSize
+                         ,transparent: transparent
+                         ,transpGreen: transpGreen
                          ,clickChannel: clickChannel
                          ,gameTypeChannel: gameTypeChannel
                          ,playerNameChannel: playerNameChannel

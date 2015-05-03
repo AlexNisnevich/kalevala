@@ -94,13 +94,15 @@ drawGrid state boardSize dims =
       offset = tileSize / 2 - totalSize / 2
       shape x y = 
         let pos = (tileSize * (toFloat x) + offset, tileSize * (toFloat y) + offset)
-            color = if (isValidSquareToMove state (x, y) boardSize) then transpGreen else transparent)
+            color = if (isValidSquareToMove state (x, y) boardSize) then transpGreen else transparent
         in
           [ move pos (outlined (solid black) (square tileSize))
           , move pos (filled color (square tileSize))
           ]
   in
-    (concatMap (\x -> (concatMap (\y -> shape x y [0..(boardSize - 1)])) [0..(boardSize - 1)])
+    (concatMap (\x -> (concatMap (\y -> shape x y) 
+                                 [0..(boardSize - 1)])) 
+               [0..(boardSize - 1)])
 
 drawPiece : (Location, Piece) -> Float -> Form
 drawPiece ((x', y'), piece) tileSize =
