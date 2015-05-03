@@ -19,7 +19,8 @@ Elm.Game.make = function (_elm) {
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
-   $Player = Elm.Player.make(_elm);
+   $Player = Elm.Player.make(_elm),
+   $State = Elm.State.make(_elm);
    var startState = {_: {}
                     ,board: $Dict.empty
                     ,deck: _L.fromArray([])
@@ -96,7 +97,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Troll"));}
                _U.badCase($moduleName,
-               "on line 103, column 66 to 87");
+               "on line 94, column 66 to 87");
             }();
          },
          deckWithIndices)));
@@ -168,18 +169,6 @@ Elm.Game.make = function (_elm) {
          startState);
       }();
    });
-   var mustPass = function (state) {
-      return A2($Player.noTilesInHand,
-      state.turn,
-      state);
-   };
-   var isGameOver = function (state) {
-      return $GameTypes.isOngoing(state) && (A2($Player.noTilesInHand,
-      $GameTypes.Red,
-      state) && A2($Player.noTilesInHand,
-      $GameTypes.Blue,
-      state));
-   };
    var makeMove = F2(function (move,
    state) {
       return function () {
@@ -207,7 +196,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 71 and 74");
+            "between lines 72 and 75");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -300,7 +289,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 57 and 61");
+         "between lines 58 and 62");
       }();
    };
    var tryMove = F2(function (location,
@@ -321,7 +310,7 @@ Elm.Game.make = function (_elm) {
                        case "Remote":
                        return $Basics.identity;}
                     _U.badCase($moduleName,
-                    "between lines 44 and 48");
+                    "between lines 45 and 49");
                  }();
                  var hand = A2($Player.getHand,
                  state.turn,
@@ -344,7 +333,7 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 37 and 54");
+         "between lines 38 and 55");
       }();
    });
    var startGame = F4(function (gameType,
@@ -404,8 +393,8 @@ Elm.Game.make = function (_elm) {
    idx,
    state) {
       return _U.eq(state.turn,
-      player) && $GameTypes.isOngoing(state) ? _U.replace([["heldPiece"
-                                                           ,$Maybe.Just(idx)]],
+      player) && $State.isOngoing(state) ? _U.replace([["heldPiece"
+                                                       ,$Maybe.Just(idx)]],
       state) : state;
    });
    _elm.Game.values = {_op: _op
@@ -414,8 +403,6 @@ Elm.Game.make = function (_elm) {
                       ,tryMove: tryMove
                       ,tryAIMove: tryAIMove
                       ,makeMove: makeMove
-                      ,isGameOver: isGameOver
-                      ,mustPass: mustPass
                       ,getFirstTileHandsAndDeck: getFirstTileHandsAndDeck
                       ,startGame: startGame
                       ,gameStarted: gameStarted

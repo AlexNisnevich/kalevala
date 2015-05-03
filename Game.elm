@@ -8,6 +8,7 @@ import Maybe (Maybe (..), withDefault)
 
 import Helpers (..)
 import GameTypes (..)
+import State
 import Piece
 import Board
 import Player
@@ -17,7 +18,7 @@ import AI
    Returns the new state. -}
 tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
-  if (state.turn == player) && (isOngoing state)
+  if (state.turn == player) && (State.isOngoing state)
   then { state | heldPiece <- Just idx }
   else state
 
@@ -84,16 +85,6 @@ makeMove move state =
             , lastPlaced <- Just move.location
             , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta
             , log <- ((Player.toColor state.turn), logText) :: state.log }
-
-{- Does neither player have any tiles left in the given state? -}
-isGameOver : State -> Bool
-isGameOver state =
-  (isOngoing state) && (Player.noTilesInHand Red state) && (Player.noTilesInHand Blue state)
-
-{- Must the current player pass in the given state? -}
-mustPass : State -> Bool
-mustPass state =
-  Player.noTilesInHand state.turn state
 
 {- Given a deck, returns the starting center tile (which must not be a Troll),
    two 5-tile hands, and the remaining deck. -}

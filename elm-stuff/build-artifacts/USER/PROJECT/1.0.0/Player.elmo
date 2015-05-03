@@ -51,12 +51,6 @@ Elm.Player.make = function (_elm) {
       toString(player),
       state.players));
    });
-   var isPlayerTurn = function (state) {
-      return $GameTypes.isOngoing(state) && _U.eq(A2(getType,
-      state.turn,
-      state),
-      $GameTypes.Human);
-   };
    var getHand = F2(function (player,
    state) {
       return A2($Maybe.withDefault,
@@ -100,7 +94,6 @@ Elm.Player.make = function (_elm) {
                         ,getType: getType
                         ,getHand: getHand
                         ,noTilesInHand: noTilesInHand
-                        ,isPlayerTurn: isPlayerTurn
                         ,random: random};
    return _elm.Player.values;
 };

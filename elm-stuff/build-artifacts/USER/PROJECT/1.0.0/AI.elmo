@@ -40,7 +40,7 @@ Elm.AI.make = function (_elm) {
             xs);
          },
          xs);
-         var validLocationsByPiece = function (piece) {
+         var validLocsByPiece = function (piece) {
             return A2($List.filter,
             function (loc) {
                return A2($Board.isValidMove,
@@ -87,7 +87,7 @@ Elm.AI.make = function (_elm) {
                };
                return A2($List.map,
                moveWithScore,
-               validLocationsByPiece(piece));
+               validLocsByPiece(piece));
             }();
          },
          idxs);

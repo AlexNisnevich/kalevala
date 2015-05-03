@@ -17,6 +17,7 @@ import Text
 import Text (..)
 
 import GameTypes (..)
+import State
 import Piece
 import Board
 import Player
@@ -159,7 +160,7 @@ renderHand player state =
                             |> (\t -> if t == "Human" then "Player" else t)
                             |> String.toUpper
                             |> fromString
-                            |> (if state.turn == player && isOngoing state then bold else identity)
+                            |> (if state.turn == player && State.isOngoing state then bold else identity)
                             |> Text.color (Player.toColor player)
                             |> leftAligned
                             |> container 80 pieceSize middle
@@ -198,7 +199,7 @@ render state dims gameType playerName =
                              then field Graphics.Input.Field.defaultStyle (send playerNameChannel) "Your name" playerName
                              else container 150 40 middle <| centered <| Text.height 11 <| fromString <| remoteGameStatusText
       statusArea = if gameType == HumanVsHumanRemote then remoteGameStatusArea else Graphics.Element.empty
-      deckSizeArea = if isOngoing state
+      deckSizeArea = if State.isOngoing state
                      then container 70 40 middle <| centered <| Text.height 11 <| fromString <| "Deck: " ++ toString (length state.deck)
                      else Graphics.Element.empty
       controls = container rulesAreaWidth 40 middle <| flow right [ statusArea, gameTypeDropDown, startButton, deckSizeArea ]

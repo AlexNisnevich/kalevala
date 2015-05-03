@@ -6,6 +6,7 @@ import Maybe (Maybe (..), withDefault)
 import Dict
 
 import GameTypes (..)
+import State
 import Piece
 import Player
 
@@ -165,7 +166,7 @@ hasSamePieceAtOtherEnd (x,y) board dir =
 
 isValidSquareToMove : State -> Location -> Int -> Bool
 isValidSquareToMove state (x,y) size =
-  if Player.isPlayerTurn state
+  if State.isPlayerTurn state
   then
     case state.heldPiece of
       Just idx ->

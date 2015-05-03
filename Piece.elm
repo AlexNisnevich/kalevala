@@ -1,6 +1,6 @@
 module Piece where
 
-import GameTypes (..)
+import GameTypes (Piece (..))
 
 fromString : String -> Piece
 fromString str =

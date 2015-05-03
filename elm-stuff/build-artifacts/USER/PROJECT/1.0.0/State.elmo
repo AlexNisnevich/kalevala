@@ -1,0 +1,49 @@
+Elm.State = Elm.State || {};
+Elm.State.make = function (_elm) {
+   "use strict";
+   _elm.State = _elm.State || {};
+   if (_elm.State.values)
+   return _elm.State.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   _P = _N.Ports.make(_elm),
+   $moduleName = "State",
+   $Basics = Elm.Basics.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $Player = Elm.Player.make(_elm);
+   var mustPass = function (state) {
+      return A2($Player.noTilesInHand,
+      state.turn,
+      state);
+   };
+   var isOngoing = function (state) {
+      return function () {
+         var _v0 = state.gameState;
+         switch (_v0.ctor)
+         {case "Connected": return true;
+            case "Ongoing": return true;}
+         return false;
+      }();
+   };
+   var isGameOver = function (state) {
+      return isOngoing(state) && (A2($Player.noTilesInHand,
+      $GameTypes.Red,
+      state) && A2($Player.noTilesInHand,
+      $GameTypes.Blue,
+      state));
+   };
+   var isPlayerTurn = function (state) {
+      return isOngoing(state) && _U.eq(A2($Player.getType,
+      state.turn,
+      state),
+      $GameTypes.Human);
+   };
+   _elm.State.values = {_op: _op
+                       ,isOngoing: isOngoing
+                       ,isGameOver: isGameOver
+                       ,mustPass: mustPass
+                       ,isPlayerTurn: isPlayerTurn};
+   return _elm.State.values;
+};

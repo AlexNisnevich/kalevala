@@ -24,6 +24,7 @@ Elm.Display.make = function (_elm) {
    $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm),
    $Signal = Elm.Signal.make(_elm),
+   $State = Elm.State.make(_elm),
    $String = Elm.String.make(_elm),
    $Text = Elm.Text.make(_elm);
    var drawLastPlacedOutline = F2(function (state,
@@ -55,7 +56,7 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 117 and 123");
+         "between lines 118 and 124");
       }();
    });
    var pieceToImage = F3(function (piece,
@@ -81,7 +82,7 @@ Elm.Display.make = function (_elm) {
                case "Valkyrie":
                return "images/tile_1.jpg";}
             _U.badCase($moduleName,
-            "between lines 76 and 85");
+            "between lines 77 and 86");
          }();
          return A3($Graphics$Element.image,
          $Basics.round(tileSize),
@@ -114,7 +115,7 @@ Elm.Display.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 109 and 113");
+         "between lines 110 and 114");
       }();
    });
    var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
@@ -194,7 +195,7 @@ Elm.Display.make = function (_elm) {
          80,
          pieceSize,
          $Graphics$Element.middle)($Text.leftAligned($Text.color($Player.toColor(player))((_U.eq(state.turn,
-         player) && $GameTypes.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(function (t) {
+         player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(function (t) {
             return _U.eq(t,
             "Human") ? "Player" : t;
          }($Basics.toString(playerType))))))));
@@ -228,7 +229,7 @@ Elm.Display.make = function (_elm) {
          {case "_Tuple2":
             return _v11._1 - gameHeaderSize;}
          _U.badCase($moduleName,
-         "on line 57, column 37 to 60");
+         "on line 58, column 37 to 60");
       }();
    };
    var getTileSizeFromBoardSize = F2(function (boardSize,
@@ -335,7 +336,7 @@ Elm.Display.make = function (_elm) {
                         ,_1: boardY};
               }();}
          _U.badCase($moduleName,
-         "between lines 64 and 71");
+         "between lines 65 and 72");
       }();
    });
    var render = F4(function (state,
@@ -349,10 +350,10 @@ Elm.Display.make = function (_elm) {
                {case "_Tuple2":
                   return $Text.leftAligned($Text.color(_v19._0)($Text.fromString(_v19._1)));}
                _U.badCase($moduleName,
-               "on line 207, column 49 to 99");
+               "on line 208, column 49 to 99");
             }();
          })($List.take(5)(state.log)));
-         var deckSizeArea = $GameTypes.isOngoing(state) ? A3($Graphics$Element.container,
+         var deckSizeArea = $State.isOngoing(state) ? A3($Graphics$Element.container,
          70,
          40,
          $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(A2($Basics._op["++"],

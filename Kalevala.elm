@@ -14,6 +14,7 @@ import Window
 
 import Helpers (..)
 import GameTypes (..)
+import State (isGameOver, mustPass)
 import Display
 import Game
 import Player
@@ -36,8 +37,8 @@ performAction action state =
           NoAction -> state
           ParseError e -> state
   in
-    if | Game.isGameOver newState -> { newState | gameState <- GameOver }
-       | Game.mustPass newState -> Game.pass newState
+    if | isGameOver newState -> { newState | gameState <- GameOver }
+       | mustPass newState -> Game.pass newState
        | otherwise -> newState
 
 {- Turn a ClickEvent into an Action -}

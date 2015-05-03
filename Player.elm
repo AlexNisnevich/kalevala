@@ -6,7 +6,7 @@ import Dict
 import List
 import Maybe (..)
 
-import GameTypes (..)
+import GameTypes (Player (..), PlayerType (..), State)
 import Helpers (..)
 import Random (Seed, float, generate)
 
@@ -45,10 +45,6 @@ getHand player state =
 noTilesInHand : Player -> State -> Bool
 noTilesInHand player state =
   List.isEmpty (getHand player state)
-
-isPlayerTurn : State -> Bool
-isPlayerTurn state =
-  (isOngoing state) && ((getType state.turn state) == Human)
 
 random : Seed -> Player
 random seed =

@@ -74,13 +74,3 @@ type ClickEvent = Start
                 | PieceInHand Player Int
                 | PassButton
                 | None
-
--- TODO: This doesn't belong here, but it needs to be used by both Voluspa.elm and Display.elm
--- and we need to avoid circular dependencies (it used to be in Voluspa.elm). Maybe we need a State.elm or something?
-{- Is the game ongoing in the given state? -}
-isOngoing : State -> Bool
-isOngoing state =
-  case state.gameState of
-    Ongoing -> True
-    Connected opponentName -> True
-    _ -> False

@@ -16,7 +16,8 @@ Elm.Board.make = function (_elm) {
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
-   $Player = Elm.Player.make(_elm);
+   $Player = Elm.Player.make(_elm),
+   $State = Elm.State.make(_elm);
    var isAdjacent = F2(function (_v0,
    _v1) {
       return function () {
@@ -31,10 +32,10 @@ Elm.Board.make = function (_elm) {
                       _v1._0) && _U.eq($Basics.abs(_v0._1 - _v1._1),
                       1);}
                  _U.badCase($moduleName,
-                 "on line 64, column 4 to 70");
+                 "on line 65, column 4 to 70");
               }();}
          _U.badCase($moduleName,
-         "on line 64, column 4 to 70");
+         "on line 65, column 4 to 70");
       }();
    });
    var adjacentTiles = F2(function (_v8,
@@ -52,7 +53,7 @@ Elm.Board.make = function (_elm) {
               },
               $Dict.keys(board));}
          _U.badCase($moduleName,
-         "on line 68, column 3 to 58");
+         "on line 69, column 3 to 58");
       }();
    });
    var findRightward = F2(function (_v12,
@@ -74,7 +75,7 @@ Elm.Board.make = function (_elm) {
               ,_1: _v12._1},
               board)) : _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 52 and 54");
+         "between lines 53 and 55");
       }();
    });
    var findLeftward = F2(function (_v16,
@@ -96,7 +97,7 @@ Elm.Board.make = function (_elm) {
               ,_1: _v16._1},
               board)) : _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 46 and 48");
+         "between lines 47 and 49");
       }();
    });
    var findRow = F2(function (_v20,
@@ -116,7 +117,7 @@ Elm.Board.make = function (_elm) {
               ,_1: _v20._1},
               board));}
          _U.badCase($moduleName,
-         "on line 60, column 24 to 83");
+         "on line 61, column 24 to 83");
       }();
    });
    var findBelow = F2(function (_v24,
@@ -138,7 +139,7 @@ Elm.Board.make = function (_elm) {
               ,_1: _v24._1 + 1},
               board)) : _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 40 and 42");
+         "between lines 41 and 43");
       }();
    });
    var findAbove = F2(function (_v28,
@@ -160,7 +161,7 @@ Elm.Board.make = function (_elm) {
               ,_1: _v28._1 - 1},
               board)) : _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 34 and 36");
+         "between lines 35 and 37");
       }();
    });
    var findColumn = F2(function (_v32,
@@ -180,7 +181,7 @@ Elm.Board.make = function (_elm) {
               ,_1: _v32._1 + 1},
               board));}
          _U.badCase($moduleName,
-         "on line 57, column 27 to 79");
+         "on line 58, column 27 to 79");
       }();
    });
    var pieceAt = F2(function (loc,
@@ -234,7 +235,7 @@ Elm.Board.make = function (_elm) {
       return function () {
          switch (_v36.ctor)
          {case "_Tuple2":
-            return $Player.isPlayerTurn(state) ? function () {
+            return $State.isPlayerTurn(state) ? function () {
                  var _v40 = state.heldPiece;
                  switch (_v40.ctor)
                  {case "Just":
@@ -257,10 +258,10 @@ Elm.Board.make = function (_elm) {
                       }();
                     case "Nothing": return false;}
                  _U.badCase($moduleName,
-                 "between lines 170 and 178");
+                 "between lines 171 and 179");
               }() : false;}
          _U.badCase($moduleName,
-         "between lines 168 and 178");
+         "between lines 169 and 179");
       }();
    });
    var getDisplayedTileValue = F2(function (_v42,
@@ -310,7 +311,7 @@ Elm.Board.make = function (_elm) {
                  }() : $Basics.toString($Piece.baseValue(piece));
               }();}
          _U.badCase($moduleName,
-         "between lines 133 and 146");
+         "between lines 134 and 147");
       }();
    });
    var hasSamePieceAtOtherEnd = F3(function (_v46,
@@ -377,11 +378,11 @@ Elm.Board.make = function (_elm) {
                        case "Vertical":
                        return samePieceBelow || samePieceAbove;}
                     _U.badCase($moduleName,
-                    "between lines 162 and 164");
+                    "between lines 163 and 165");
                  }();
               }();}
          _U.badCase($moduleName,
-         "between lines 151 and 164");
+         "between lines 152 and 165");
       }();
    });
    var getTileValue = F4(function (_v51,
@@ -419,7 +420,7 @@ Elm.Board.make = function (_elm) {
                           case "Vertical":
                           return findColumn;}
                        _U.badCase($moduleName,
-                       "between lines 114 and 115");
+                       "between lines 115 and 116");
                     }(),
                     {ctor: "_Tuple2"
                     ,_0: _v51._0
@@ -450,7 +451,7 @@ Elm.Board.make = function (_elm) {
                  $GameTypes.Loki)) ? 0 : $Piece.baseValue(piece);
               }();}
          _U.badCase($moduleName,
-         "between lines 109 and 127");
+         "between lines 110 and 128");
       }();
    });
    var getBoardSize = function (board) {
