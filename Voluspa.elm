@@ -10,6 +10,7 @@ import List (..)
 import Maybe (Maybe (..), withDefault)
 import Mouse
 import Random (Seed, initialSeed)
+import Signal
 import Signal (..)
 import Time
 import Window
@@ -284,5 +285,6 @@ main =
     responseAction = Debug.watch "deserialized" <~ (decode <~ response)
 
     state = foldp performAction startState (merge action responseAction)
+
   in
     Display.render <~ state ~ Window.dimensions ~ (subscribe Display.gameTypeChannel) ~ (subscribe Display.playerNameChannel)

@@ -11398,7 +11398,7 @@ Elm.Voluspa.make = function (_elm) {
                  seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 242 and 249");
+            "between lines 243 and 250");
          }();
       }();
    });
@@ -11448,7 +11448,7 @@ Elm.Voluspa.make = function (_elm) {
                   return $Basics.not(_U.eq(_v3._1,
                     "Troll"));}
                _U.badCase($moduleName,
-               "on line 138, column 66 to 87");
+               "on line 139, column 66 to 87");
             }();
          },
          deckWithIndices)));
@@ -11559,7 +11559,7 @@ Elm.Voluspa.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 87 and 90");
+            "between lines 88 and 91");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -11652,7 +11652,7 @@ Elm.Voluspa.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 73 and 77");
+         "between lines 74 and 78");
       }();
    };
    var tryMove = F2(function (location,
@@ -11673,7 +11673,7 @@ Elm.Voluspa.make = function (_elm) {
                        case "Remote":
                        return $Basics.identity;}
                     _U.badCase($moduleName,
-                    "between lines 60 and 64");
+                    "between lines 61 and 65");
                  }();
                  var hand = A2($Player.getHand,
                  state.turn,
@@ -11696,7 +11696,7 @@ Elm.Voluspa.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 53 and 70");
+         "between lines 54 and 71");
       }();
    });
    var startGame = F4(function (gameType,
@@ -11802,7 +11802,7 @@ Elm.Voluspa.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 109 and 118");
+            "between lines 110 and 119");
          }();
          var p = $Player.color(state.turn);
          return isGameOver(newState) ? _U.replace([["gameState"
@@ -11828,7 +11828,7 @@ Elm.Voluspa.make = function (_elm) {
             {case "_Tuple2":
                return _v28._0;}
             _U.badCase($moduleName,
-            "on line 280, column 35 to 36");
+            "on line 281, column 35 to 36");
          }();
       },
       A3($Signal.keepIf,
@@ -11839,7 +11839,7 @@ Elm.Voluspa.make = function (_elm) {
                return _U.eq(_v32._1,
                  $GameTypes.HumanVsHumanRemote);}
             _U.badCase($moduleName,
-            "on line 280, column 60 to 83");
+            "on line 281, column 60 to 83");
          }();
       },
       {ctor: "_Tuple2"
@@ -11856,7 +11856,7 @@ Elm.Voluspa.make = function (_elm) {
                return $GameTypes.ParseError(_v36._0);
                case "Ok": return _v36._0;}
             _U.badCase($moduleName,
-            "between lines 274 and 277");
+            "between lines 275 and 278");
          }();
       };
       var encode = function (action) {
