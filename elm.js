@@ -2592,7 +2592,7 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 110 and 116");
+         "between lines 124 and 130");
       }();
    });
    var pieceToImage = F3(function (piece,
@@ -2645,7 +2645,7 @@ Elm.Display.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 102 and 106");
+         "between lines 101 and 105");
       }();
    });
    var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
@@ -2669,7 +2669,7 @@ Elm.Display.make = function (_elm) {
          var hiddenPiece = A3($Graphics$Element.image,
          $Basics.round(handTileSize),
          $Basics.round(handTileSize),
-         "images/tile_back.jpg");
+         "images/100/back1.png");
          var pieceSize = $Basics.round(handTileSize) + handPadding;
          var pieceImage = function (pieceStr) {
             return pieceToImage($Piece.fromString(pieceStr));
@@ -2777,6 +2777,52 @@ Elm.Display.make = function (_elm) {
          var offset = tileSize / 2 - totalSize / 2;
          var shape = F2(function (x,y) {
             return function () {
+               var imgSize = _U.cmp(tileSize,
+               75) > 0 ? 100 : 50;
+               var tile = A2($Basics._op["++"],
+               "images/",
+               A2($Basics._op["++"],
+               $Basics.toString(imgSize),
+               A2($Basics._op["++"],
+               "/board",
+               A2($Basics._op["++"],
+               $Basics.toString(A2($Basics._op["%"],
+               Math.pow(x,2) + 7 * y,
+               6)),
+               ".png"))));
+               var pos = {ctor: "_Tuple2"
+                         ,_0: tileSize * $Basics.toFloat(x) + offset
+                         ,_1: tileSize * $Basics.toFloat(y) + offset};
+               return A2($Graphics$Collage.move,
+               pos,
+               $Graphics$Collage.toForm(A3($Graphics$Element.image,
+               $Basics.round(tileSize),
+               $Basics.round(tileSize),
+               tile)));
+            }();
+         });
+         return A2($List.concatMap,
+         function (x) {
+            return A2($List.map,
+            function (y) {
+               return A2(shape,x,y);
+            },
+            _L.range(0,boardSize - 1));
+         },
+         _L.range(0,boardSize - 1));
+      }();
+   });
+   var drawAvailableOverlay = F3(function (state,
+   boardSize,
+   dims) {
+      return function () {
+         var tileSize = A2(getTileSizeFromBoardSize,
+         boardSize,
+         dims);
+         var totalSize = $Basics.toFloat(boardSize) * tileSize;
+         var offset = tileSize / 2 - totalSize / 2;
+         var shape = F2(function (x,y) {
+            return function () {
                var color = A3($Board.isValidSquareToMove,
                state,
                {ctor: "_Tuple2",_0: x,_1: y},
@@ -2784,21 +2830,16 @@ Elm.Display.make = function (_elm) {
                var pos = {ctor: "_Tuple2"
                          ,_0: tileSize * $Basics.toFloat(x) + offset
                          ,_1: tileSize * $Basics.toFloat(y) + offset};
-               return _L.fromArray([A2($Graphics$Collage.move,
-                                   pos,
-                                   A2($Graphics$Collage.outlined,
-                                   $Graphics$Collage.solid($Color.black),
-                                   $Graphics$Collage.square(tileSize)))
-                                   ,A2($Graphics$Collage.move,
-                                   pos,
-                                   A2($Graphics$Collage.filled,
-                                   color,
-                                   $Graphics$Collage.square(tileSize)))]);
+               return A2($Graphics$Collage.move,
+               pos,
+               A2($Graphics$Collage.filled,
+               color,
+               $Graphics$Collage.square(tileSize)));
             }();
          });
          return A2($List.concatMap,
          function (x) {
-            return A2($List.concatMap,
+            return A2($List.map,
             function (y) {
                return A2(shape,x,y);
             },
@@ -2811,6 +2852,10 @@ Elm.Display.make = function (_elm) {
    boardSize,
    dims) {
       return function () {
+         var overlay = A3(drawAvailableOverlay,
+         state,
+         boardSize,
+         dims);
          var grid = A3(drawGrid,
          state,
          boardSize,
@@ -2834,10 +2879,12 @@ Elm.Display.make = function (_elm) {
          size,
          size,
          A2($Basics._op["++"],
+         grid,
+         A2($Basics._op["++"],
          pieces,
          A2($Basics._op["++"],
-         grid,
-         outline)));
+         overlay,
+         outline))));
          return A2($Graphics$Input.clickable,
          A2($Signal.send,
          clickChannel,
@@ -2880,7 +2927,7 @@ Elm.Display.make = function (_elm) {
                {case "_Tuple2":
                   return $Text.leftAligned($Text.color(_v18._0)($Text.fromString(_v18._1)));}
                _U.badCase($moduleName,
-               "on line 200, column 49 to 99");
+               "on line 215, column 49 to 99");
             }();
          })($List.take(5)(state.log)));
          var deckSizeArea = $State.isOngoing(state) ? A3($Graphics$Element.container,
@@ -3018,6 +3065,7 @@ Elm.Display.make = function (_elm) {
                          ,pieceToImage: pieceToImage
                          ,drawGrid: drawGrid
                          ,drawPiece: drawPiece
+                         ,drawAvailableOverlay: drawAvailableOverlay
                          ,drawLastPlacedOutline: drawLastPlacedOutline
                          ,renderBoard: renderBoard
                          ,renderHand: renderHand
