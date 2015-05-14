@@ -29,10 +29,10 @@ toString piece =
 toDisplayString : Piece -> String
 toDisplayString piece =
   case piece of
-    Vainamoinen -> "Väinämöinen"
+    Vainamoinen -> "V&auml;in&auml;m&ouml;inen"
     Ukko -> "Ukko"
     Kullervo -> "Kullervo"
-    Kaarme -> "Käärme"
+    Kaarme -> "K&auml;&auml;rme"
     Joukahainen -> "Joukahainen"
     SeppoIlmarinen -> "Seppo Ilmarinen"
     Louhi -> "Louhi"

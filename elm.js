@@ -10780,7 +10780,8 @@ Elm.Piece.make = function (_elm) {
          switch (piece.ctor)
          {case "Joukahainen":
             return "Joukahainen";
-            case "Kaarme": return "Käärme";
+            case "Kaarme":
+            return "K&auml;&auml;rme";
             case "Kullervo":
             return "Kullervo";
             case "Lemminkainen":
@@ -10790,7 +10791,7 @@ Elm.Piece.make = function (_elm) {
             return "Seppo Ilmarinen";
             case "Ukko": return "Ukko";
             case "Vainamoinen":
-            return "Väinämöinen";}
+            return "V&auml;in&auml;m&ouml;inen";}
          _U.badCase($moduleName,
          "between lines 31 and 39");
       }();
