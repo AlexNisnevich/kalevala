@@ -87,13 +87,12 @@ drawGrid state boardSize dims =
       offset = tileSize / 2 - totalSize / 2
       shape x y = 
         let pos = (tileSize * (toFloat x) + offset, tileSize * (toFloat y) + offset)
-            color = if (Board.isValidSquareToMove state (x, y) boardSize) then transpGreen else transparent
+            imgSize = if tileSize > 75 then 100 else 50
+            tile = "images/" ++ toString imgSize ++ "/board" ++ toString ((x ^ 2 + 7 * y) % 6) ++ ".png"
         in
-          [ move pos (outlined (solid black) (square tileSize))
-          , move pos (filled color (square tileSize))
-          ]
+          move pos (toForm (image (round tileSize) (round tileSize) tile))
   in
-    (concatMap (\x -> (concatMap (\y -> shape x y) 
+    (concatMap (\x -> (map (\y -> shape x y) 
                                  [0..(boardSize - 1)])) 
                [0..(boardSize - 1)])
 
@@ -104,6 +103,21 @@ drawPiece ((x', y'), piece) board tileSize =
       value = Board.getDisplayedTileValue (x',y') board
   in
     move (x, y) (toForm (pieceToImage piece value tileSize))
+
+drawAvailableOverlay : State -> Int -> WindowDims -> List Form
+drawAvailableOverlay state boardSize dims =
+  let tileSize = getTileSizeFromBoardSize boardSize dims
+      totalSize = (toFloat boardSize) * tileSize
+      offset = tileSize / 2 - totalSize / 2
+      shape x y = 
+        let pos = (tileSize * (toFloat x) + offset, tileSize * (toFloat y) + offset)
+            color = if (Board.isValidSquareToMove state (x, y) boardSize) then transpGreen else transparent
+        in
+          move pos (filled color (square tileSize))
+  in
+    (concatMap (\x -> (map (\y -> shape x y) 
+                                 [0..(boardSize - 1)])) 
+               [0..(boardSize - 1)])
 
 drawLastPlacedOutline : State -> Float -> List Form
 drawLastPlacedOutline state tileSize =
@@ -121,10 +135,11 @@ renderBoard state boardSize dims =
       size = boardSize * (round tileSize) + 1
 
       grid = drawGrid state boardSize dims
+      overlay = drawAvailableOverlay state boardSize dims
       pieces = map (\p -> drawPiece p state.board tileSize) (Dict.toList state.board)
       outline = drawLastPlacedOutline state tileSize
 
-      board = collage size size (pieces ++ grid ++ outline)
+      board = collage size size (grid ++ pieces ++ overlay ++ outline)
   in
     clickable (send clickChannel BoardClick) board
 
@@ -143,7 +158,7 @@ renderHand player state =
       playerHand = if isEmpty hand && state.gameState == Ongoing
                    then [button (send clickChannel PassButton) "Pass" |> container 100 100 middle]
                    else indexedMap makePiece hand
-      hiddenPiece = image (round handTileSize) (round handTileSize) "images/tile_back.jpg"
+      hiddenPiece = image (round handTileSize) (round handTileSize) "images/100/back1.png"
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
       handContents = if playerType == Human
                      then playerHand
