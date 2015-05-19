@@ -24,9 +24,17 @@ Elm.Display.make = function (_elm) {
    $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $State = Elm.State.make(_elm),
-   $String = Elm.String.make(_elm),
-   $Text = Elm.Text.make(_elm);
+   $State = Elm.State.make(_elm);
+   var renderRightArea = function (state) {
+      return $Graphics$Element.color($Color.blue)(A2($Graphics$Element.spacer,
+      395,
+      282));
+   };
+   var renderScoreArea = function (state) {
+      return $Graphics$Element.color($Color.red)(A2($Graphics$Element.spacer,
+      90,
+      305));
+   };
    var drawLastPlacedOutline = F2(function (state,
    tileSize) {
       return function () {
@@ -56,7 +64,7 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 124 and 130");
+         "between lines 121 and 127");
       }();
    });
    var pieceToImage = F3(function (piece,
@@ -109,11 +117,10 @@ Elm.Display.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 101 and 105");
+         "between lines 98 and 102");
       }();
    });
    var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
-   var gameTypeChannel = $Signal.channel($GameTypes.HumanVsCpu);
    var clickChannel = $Signal.channel($GameTypes.None);
    var transpGreen = A4($Color.rgba,
    0,
@@ -133,8 +140,14 @@ Elm.Display.make = function (_elm) {
          var hiddenPiece = A3($Graphics$Element.image,
          $Basics.round(handTileSize),
          $Basics.round(handTileSize),
-         "images/100/back1.png");
+         "images/100/back2.png");
          var pieceSize = $Basics.round(handTileSize) + handPadding;
+         var dummyHand = A2($List.repeat,
+         5,
+         A3($Graphics$Element.container,
+         pieceSize,
+         pieceSize,
+         $Graphics$Element.middle)(hiddenPiece));
          var pieceImage = function (pieceStr) {
             return pieceToImage($Piece.fromString(pieceStr));
          };
@@ -183,47 +196,63 @@ Elm.Display.make = function (_elm) {
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
-         var handContents = _U.eq(playerType,
+         var handContents = $State.isNotStarted(state) ? dummyHand : _U.eq(playerType,
          $GameTypes.Human) ? playerHand : cpuHand;
-         var handText = A3($Graphics$Element.container,
-         80,
-         pieceSize,
-         $Graphics$Element.middle)($Text.leftAligned($Text.color($Player.toColor(player))((_U.eq(state.turn,
-         player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(function (t) {
-            return _U.eq(t,
-            "Human") ? "Player" : t;
-         }($Basics.toString(playerType))))))));
-         var score = A3($Graphics$Element.container,
-         25,
-         pieceSize,
-         $Graphics$Element.midLeft)($Text.asText($Maybe.withDefault(0)(A2($Dict.get,
-         p,
-         state.score))));
-         var delta = A3($Graphics$Element.container,
-         20,
-         pieceSize,
-         $Graphics$Element.midLeft)($Text.leftAligned($Text.height(9)($Text.fromString($Maybe.withDefault("")(A2($Dict.get,
-         p,
-         state.delta))))));
          return A2($Graphics$Element.flow,
          $Graphics$Element.right,
-         A2($Basics._op["++"],
-         _L.fromArray([handText]),
-         A2($Basics._op["++"],
-         _L.fromArray([score]),
-         A2($Basics._op["++"],
-         _L.fromArray([delta]),
-         handContents))));
+         handContents);
       }();
    });
-   var gameHeaderSize = 100;
+   var renderSidebar = function (state) {
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.down,
+      _L.fromArray([A3($Graphics$Element.image,
+                   582,
+                   82,
+                   "images/100/kalevala.png")
+                   ,A2($Graphics$Element.flow,
+                   $Graphics$Element.right,
+                   _L.fromArray([A2($Graphics$Element.spacer,
+                                12,
+                                1)
+                                ,A2($Graphics$Element.flow,
+                                $Graphics$Element.down,
+                                _L.fromArray([A2(renderHand,
+                                             $GameTypes.Red,
+                                             state)
+                                             ,A2($Graphics$Element.spacer,
+                                             1,
+                                             16)
+                                             ,A2($Graphics$Element.flow,
+                                             $Graphics$Element.right,
+                                             _L.fromArray([A2($Graphics$Element.spacer,
+                                                          10,
+                                                          1)
+                                                          ,renderScoreArea(state)
+                                                          ,A2($Graphics$Element.spacer,
+                                                          25,
+                                                          1)
+                                                          ,A2($Graphics$Element.flow,
+                                                          $Graphics$Element.down,
+                                                          _L.fromArray([A2($Graphics$Element.spacer,
+                                                                       1,
+                                                                       8)
+                                                                       ,renderRightArea(state)]))]))
+                                             ,A2($Graphics$Element.spacer,
+                                             1,
+                                             16)
+                                             ,A2(renderHand,
+                                             $GameTypes.Blue,
+                                             state)]))]))]));
+   };
+   var gameMargin = 15;
    var getTotalBoardSize = function (_v10) {
       return function () {
          switch (_v10.ctor)
          {case "_Tuple2":
-            return _v10._1 - gameHeaderSize;}
+            return _v10._1 - 2 * gameMargin;}
          _U.badCase($moduleName,
-         "on line 58, column 37 to 60");
+         "on line 55, column 37 to 61");
       }();
    };
    var getTileSizeFromBoardSize = F2(function (boardSize,
@@ -356,6 +385,38 @@ Elm.Display.make = function (_elm) {
          board);
       }();
    });
+   var renderGameArea = F3(function (state,
+   dims,
+   playerName) {
+      return function () {
+         var boardSize = $Board.getBoardSize(state.board);
+         return A2($Graphics$Element.flow,
+         $Graphics$Element.right,
+         _L.fromArray([A3(renderBoard,
+                      state,
+                      boardSize,
+                      dims)
+                      ,A2($Graphics$Element.spacer,
+                      16,
+                      1)
+                      ,renderSidebar(state)
+                      ,A2($Graphics$Input.button,
+                      A2($Signal.send,
+                      clickChannel,
+                      $GameTypes.StartSinglePlayer),
+                      "Single Player")
+                      ,A2($Graphics$Input.button,
+                      A2($Signal.send,
+                      clickChannel,
+                      $GameTypes.StartTwoPlayerOnline),
+                      "2 Player - Online")
+                      ,A2($Graphics$Input.button,
+                      A2($Signal.send,
+                      clickChannel,
+                      $GameTypes.StartTwoPlayerHotseat),
+                      "2 Player - Hotseat")]));
+      }();
+   });
    var mouseToBoardPosition = F3(function (_v14,
    state,
    dims) {
@@ -368,160 +429,43 @@ Elm.Display.make = function (_elm) {
                  boardSize,
                  dims));
                  var offset = boardSize / 2 | 0;
-                 var y = _v14._1 - gameHeaderSize;
+                 var y = _v14._1 - gameMargin;
                  var boardY = 0 - ((y / tileSize | 0) - offset);
-                 var x = _v14._0;
+                 var x = _v14._0 - gameMargin;
                  var boardX = (x / tileSize | 0) - offset;
                  return {ctor: "_Tuple2"
                         ,_0: boardX
                         ,_1: boardY};
               }();}
          _U.badCase($moduleName,
-         "between lines 65 and 72");
+         "between lines 62 and 69");
       }();
    });
-   var render = F4(function (state,
+   var render = F3(function (state,
    dims,
-   gameType,
    playerName) {
-      return function () {
-         var logArea = $Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v18) {
-            return function () {
-               switch (_v18.ctor)
-               {case "_Tuple2":
-                  return $Text.leftAligned($Text.color(_v18._0)($Text.fromString(_v18._1)));}
-               _U.badCase($moduleName,
-               "on line 215, column 49 to 99");
-            }();
-         })($List.take(5)(state.log)));
-         var deckSizeArea = $State.isOngoing(state) ? A3($Graphics$Element.container,
-         70,
-         40,
-         $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(A2($Basics._op["++"],
-         "Deck: ",
-         $Basics.toString($List.length(state.deck))))))) : $Graphics$Element.empty;
-         var remoteGameStatusText = function () {
-            var _v22 = state.gameState;
-            switch (_v22.ctor)
-            {case "Connected":
-               return A2($Basics._op["++"],
-                 "Connected to ",
-                 A2($Basics._op["++"],
-                 _v22._0,
-                 " "));
-               case "Disconnected":
-               return "Opponent disconnected ";
-               case "WaitingForPlayers":
-               return "Waiting for opponent ... ";}
-            return "";
-         }();
-         var remoteGameStatusArea = _U.eq(state.gameState,
-         $GameTypes.NotStarted) ? A4($Graphics$Input$Field.field,
-         $Graphics$Input$Field.defaultStyle,
-         $Signal.send(playerNameChannel),
-         "Your name",
-         playerName) : A3($Graphics$Element.container,
-         150,
-         40,
-         $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(remoteGameStatusText))));
-         var statusArea = _U.eq(gameType,
-         $GameTypes.HumanVsHumanRemote) ? remoteGameStatusArea : $Graphics$Element.empty;
-         var gameTypeDropDown = A2($Graphics$Element.size,
-         180,
-         40)(A2($Graphics$Input.dropDown,
-         $Signal.send(gameTypeChannel),
-         _L.fromArray([{ctor: "_Tuple2"
-                       ,_0: "Player vs AI"
-                       ,_1: $GameTypes.HumanVsCpu}
-                      ,{ctor: "_Tuple2"
-                       ,_0: "Player vs Player (hotseat)"
-                       ,_1: $GameTypes.HumanVsHumanLocal}
-                      ,{ctor: "_Tuple2"
-                       ,_0: "Player vs Player (online)"
-                       ,_1: $GameTypes.HumanVsHumanRemote}])));
-         var startButton = A2($Graphics$Input.button,
-         A2($Signal.send,
-         clickChannel,
-         $GameTypes.Start),
-         "New game");
-         var rulesAreaWidth = 650;
-         var controls = A3($Graphics$Element.container,
-         rulesAreaWidth,
-         40,
-         $Graphics$Element.middle)(A2($Graphics$Element.flow,
-         $Graphics$Element.right,
-         _L.fromArray([statusArea
-                      ,gameTypeDropDown
-                      ,startButton
-                      ,deckSizeArea])));
-         var rightArea = A2($Graphics$Element.flow,
-         $Graphics$Element.down,
-         _L.fromArray([logArea
-                      ,controls]));
-         var withSpacing = F2(function (padding,
-         elt) {
-            return A2($Graphics$Element.beside,
-            A2($Graphics$Element.spacer,
-            padding,
-            padding),
-            elt);
-         });
-         var totalBoardSize = getTotalBoardSize(dims);
-         var handGap = totalBoardSize - 2 * $Basics.round(handTileSize) - handPadding * 2;
-         var boardSize = $Board.getBoardSize(state.board);
-         var tileSize = A2(getTileSizeFromBoardSize,
-         boardSize,
-         dims);
-         return A2($Graphics$Element.flow,
-         $Graphics$Element.down,
-         _L.fromArray([A3($Graphics$Element.size,
-                      totalBoardSize,
-                      gameHeaderSize,
-                      $Text.centered(A2($Text.height,
-                      50,
-                      A2($Text.typeface,
-                      _L.fromArray(["Rock Salt"
-                                   ,"cursive"]),
-                      $Text.fromString("Kalevala")))))
-                      ,A2($Graphics$Element.flow,
-                      $Graphics$Element.right,
-                      _L.fromArray([A3(renderBoard,
-                                   state,
-                                   boardSize,
-                                   dims)
-                                   ,A2($Graphics$Element.flow,
-                                   $Graphics$Element.down,
-                                   _L.fromArray([A2(renderHand,
-                                                $GameTypes.Red,
-                                                state)
-                                                ,A2($Graphics$Element.spacer,
-                                                1,
-                                                5)
-                                                ,A2(withSpacing,
-                                                10,
-                                                $Graphics$Element.color($Color.gray)(A2(withSpacing,
-                                                10,
-                                                A4($Graphics$Element.container,
-                                                rulesAreaWidth,
-                                                handGap - 10,
-                                                $Graphics$Element.midLeft,
-                                                rightArea))))
-                                                ,A2($Graphics$Element.spacer,
-                                                1,
-                                                5)
-                                                ,A2(renderHand,
-                                                $GameTypes.Blue,
-                                                state)]))]))]));
-      }();
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.down,
+      _L.fromArray([A2($Graphics$Element.spacer,
+                   1,
+                   gameMargin)
+                   ,A2($Graphics$Element.flow,
+                   $Graphics$Element.right,
+                   _L.fromArray([A2($Graphics$Element.spacer,
+                                gameMargin,
+                                1)
+                                ,A3(renderGameArea,
+                                state,
+                                dims,
+                                playerName)]))]));
    });
    _elm.Display.values = {_op: _op
-                         ,gameHeaderSize: gameHeaderSize
+                         ,gameMargin: gameMargin
                          ,handPadding: handPadding
                          ,handTileSize: handTileSize
                          ,transparent: transparent
                          ,transpGreen: transpGreen
                          ,clickChannel: clickChannel
-                         ,gameTypeChannel: gameTypeChannel
                          ,playerNameChannel: playerNameChannel
                          ,getTotalBoardSize: getTotalBoardSize
                          ,getTileSizeFromBoardSize: getTileSizeFromBoardSize
@@ -533,6 +477,10 @@ Elm.Display.make = function (_elm) {
                          ,drawLastPlacedOutline: drawLastPlacedOutline
                          ,renderBoard: renderBoard
                          ,renderHand: renderHand
+                         ,renderScoreArea: renderScoreArea
+                         ,renderRightArea: renderRightArea
+                         ,renderSidebar: renderSidebar
+                         ,renderGameArea: renderGameArea
                          ,render: render};
    return _elm.Display.values;
 };

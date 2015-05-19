@@ -13,8 +13,8 @@ import Random (Seed, float, generate)
 toColor : Player -> Color
 toColor player =
   case player of
-    Red -> Color.red
-    Blue -> Color.blue
+    Red -> Color.rgb 217 33 32
+    Blue -> Color.rgb 70 131 193
 
 fromString : String -> Player
 fromString str =

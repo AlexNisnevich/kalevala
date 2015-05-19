@@ -18,10 +18,20 @@ Elm.State.make = function (_elm) {
       state.turn,
       state);
    };
-   var isOngoing = function (state) {
+   var isNotStarted = function (state) {
       return function () {
          var _v0 = state.gameState;
          switch (_v0.ctor)
+         {case "NotStarted": return true;
+            case "WaitingForPlayers":
+            return true;}
+         return false;
+      }();
+   };
+   var isOngoing = function (state) {
+      return function () {
+         var _v1 = state.gameState;
+         switch (_v1.ctor)
          {case "Connected": return true;
             case "Ongoing": return true;}
          return false;
@@ -42,6 +52,7 @@ Elm.State.make = function (_elm) {
    };
    _elm.State.values = {_op: _op
                        ,isOngoing: isOngoing
+                       ,isNotStarted: isNotStarted
                        ,isGameOver: isGameOver
                        ,mustPass: mustPass
                        ,isPlayerTurn: isPlayerTurn};

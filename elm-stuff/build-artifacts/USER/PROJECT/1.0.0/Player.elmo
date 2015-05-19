@@ -80,8 +80,15 @@ Elm.Player.make = function (_elm) {
       return function () {
          switch (player.ctor)
          {case "Blue":
-            return $Color.blue;
-            case "Red": return $Color.red;}
+            return A3($Color.rgb,
+              70,
+              131,
+              193);
+            case "Red":
+            return A3($Color.rgb,
+              217,
+              33,
+              32);}
          _U.badCase($moduleName,
          "between lines 15 and 17");
       }();

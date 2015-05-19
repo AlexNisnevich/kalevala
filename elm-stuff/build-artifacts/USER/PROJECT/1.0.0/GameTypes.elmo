@@ -22,7 +22,9 @@ Elm.GameTypes.make = function (_elm) {
              ,_1: b};
    });
    var BoardClick = {ctor: "BoardClick"};
-   var Start = {ctor: "Start"};
+   var StartTwoPlayerHotseat = {ctor: "StartTwoPlayerHotseat"};
+   var StartTwoPlayerOnline = {ctor: "StartTwoPlayerOnline"};
+   var StartSinglePlayer = {ctor: "StartSinglePlayer"};
    var ParseError = function (a) {
       return {ctor: "ParseError"
              ,_0: a};
@@ -168,7 +170,9 @@ Elm.GameTypes.make = function (_elm) {
                            ,OpponentDisconnected: OpponentDisconnected
                            ,NoAction: NoAction
                            ,ParseError: ParseError
-                           ,Start: Start
+                           ,StartSinglePlayer: StartSinglePlayer
+                           ,StartTwoPlayerOnline: StartTwoPlayerOnline
+                           ,StartTwoPlayerHotseat: StartTwoPlayerHotseat
                            ,BoardClick: BoardClick
                            ,PieceInHand: PieceInHand
                            ,PassButton: PassButton

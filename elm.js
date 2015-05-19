@@ -2560,9 +2560,17 @@ Elm.Display.make = function (_elm) {
    $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm),
    $Signal = Elm.Signal.make(_elm),
-   $State = Elm.State.make(_elm),
-   $String = Elm.String.make(_elm),
-   $Text = Elm.Text.make(_elm);
+   $State = Elm.State.make(_elm);
+   var renderRightArea = function (state) {
+      return $Graphics$Element.color($Color.blue)(A2($Graphics$Element.spacer,
+      395,
+      282));
+   };
+   var renderScoreArea = function (state) {
+      return $Graphics$Element.color($Color.red)(A2($Graphics$Element.spacer,
+      90,
+      305));
+   };
    var drawLastPlacedOutline = F2(function (state,
    tileSize) {
       return function () {
@@ -2592,7 +2600,7 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 124 and 130");
+         "between lines 121 and 127");
       }();
    });
    var pieceToImage = F3(function (piece,
@@ -2645,11 +2653,10 @@ Elm.Display.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 101 and 105");
+         "between lines 98 and 102");
       }();
    });
    var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
-   var gameTypeChannel = $Signal.channel($GameTypes.HumanVsCpu);
    var clickChannel = $Signal.channel($GameTypes.None);
    var transpGreen = A4($Color.rgba,
    0,
@@ -2669,8 +2676,14 @@ Elm.Display.make = function (_elm) {
          var hiddenPiece = A3($Graphics$Element.image,
          $Basics.round(handTileSize),
          $Basics.round(handTileSize),
-         "images/100/back1.png");
+         "images/100/back2.png");
          var pieceSize = $Basics.round(handTileSize) + handPadding;
+         var dummyHand = A2($List.repeat,
+         5,
+         A3($Graphics$Element.container,
+         pieceSize,
+         pieceSize,
+         $Graphics$Element.middle)(hiddenPiece));
          var pieceImage = function (pieceStr) {
             return pieceToImage($Piece.fromString(pieceStr));
          };
@@ -2719,47 +2732,63 @@ Elm.Display.make = function (_elm) {
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
-         var handContents = _U.eq(playerType,
+         var handContents = $State.isNotStarted(state) ? dummyHand : _U.eq(playerType,
          $GameTypes.Human) ? playerHand : cpuHand;
-         var handText = A3($Graphics$Element.container,
-         80,
-         pieceSize,
-         $Graphics$Element.middle)($Text.leftAligned($Text.color($Player.toColor(player))((_U.eq(state.turn,
-         player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(function (t) {
-            return _U.eq(t,
-            "Human") ? "Player" : t;
-         }($Basics.toString(playerType))))))));
-         var score = A3($Graphics$Element.container,
-         25,
-         pieceSize,
-         $Graphics$Element.midLeft)($Text.asText($Maybe.withDefault(0)(A2($Dict.get,
-         p,
-         state.score))));
-         var delta = A3($Graphics$Element.container,
-         20,
-         pieceSize,
-         $Graphics$Element.midLeft)($Text.leftAligned($Text.height(9)($Text.fromString($Maybe.withDefault("")(A2($Dict.get,
-         p,
-         state.delta))))));
          return A2($Graphics$Element.flow,
          $Graphics$Element.right,
-         A2($Basics._op["++"],
-         _L.fromArray([handText]),
-         A2($Basics._op["++"],
-         _L.fromArray([score]),
-         A2($Basics._op["++"],
-         _L.fromArray([delta]),
-         handContents))));
+         handContents);
       }();
    });
-   var gameHeaderSize = 100;
+   var renderSidebar = function (state) {
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.down,
+      _L.fromArray([A3($Graphics$Element.image,
+                   582,
+                   82,
+                   "images/100/kalevala.png")
+                   ,A2($Graphics$Element.flow,
+                   $Graphics$Element.right,
+                   _L.fromArray([A2($Graphics$Element.spacer,
+                                12,
+                                1)
+                                ,A2($Graphics$Element.flow,
+                                $Graphics$Element.down,
+                                _L.fromArray([A2(renderHand,
+                                             $GameTypes.Red,
+                                             state)
+                                             ,A2($Graphics$Element.spacer,
+                                             1,
+                                             16)
+                                             ,A2($Graphics$Element.flow,
+                                             $Graphics$Element.right,
+                                             _L.fromArray([A2($Graphics$Element.spacer,
+                                                          10,
+                                                          1)
+                                                          ,renderScoreArea(state)
+                                                          ,A2($Graphics$Element.spacer,
+                                                          25,
+                                                          1)
+                                                          ,A2($Graphics$Element.flow,
+                                                          $Graphics$Element.down,
+                                                          _L.fromArray([A2($Graphics$Element.spacer,
+                                                                       1,
+                                                                       8)
+                                                                       ,renderRightArea(state)]))]))
+                                             ,A2($Graphics$Element.spacer,
+                                             1,
+                                             16)
+                                             ,A2(renderHand,
+                                             $GameTypes.Blue,
+                                             state)]))]))]));
+   };
+   var gameMargin = 15;
    var getTotalBoardSize = function (_v10) {
       return function () {
          switch (_v10.ctor)
          {case "_Tuple2":
-            return _v10._1 - gameHeaderSize;}
+            return _v10._1 - 2 * gameMargin;}
          _U.badCase($moduleName,
-         "on line 58, column 37 to 60");
+         "on line 55, column 37 to 61");
       }();
    };
    var getTileSizeFromBoardSize = F2(function (boardSize,
@@ -2892,6 +2921,38 @@ Elm.Display.make = function (_elm) {
          board);
       }();
    });
+   var renderGameArea = F3(function (state,
+   dims,
+   playerName) {
+      return function () {
+         var boardSize = $Board.getBoardSize(state.board);
+         return A2($Graphics$Element.flow,
+         $Graphics$Element.right,
+         _L.fromArray([A3(renderBoard,
+                      state,
+                      boardSize,
+                      dims)
+                      ,A2($Graphics$Element.spacer,
+                      16,
+                      1)
+                      ,renderSidebar(state)
+                      ,A2($Graphics$Input.button,
+                      A2($Signal.send,
+                      clickChannel,
+                      $GameTypes.StartSinglePlayer),
+                      "Single Player")
+                      ,A2($Graphics$Input.button,
+                      A2($Signal.send,
+                      clickChannel,
+                      $GameTypes.StartTwoPlayerOnline),
+                      "2 Player - Online")
+                      ,A2($Graphics$Input.button,
+                      A2($Signal.send,
+                      clickChannel,
+                      $GameTypes.StartTwoPlayerHotseat),
+                      "2 Player - Hotseat")]));
+      }();
+   });
    var mouseToBoardPosition = F3(function (_v14,
    state,
    dims) {
@@ -2904,160 +2965,43 @@ Elm.Display.make = function (_elm) {
                  boardSize,
                  dims));
                  var offset = boardSize / 2 | 0;
-                 var y = _v14._1 - gameHeaderSize;
+                 var y = _v14._1 - gameMargin;
                  var boardY = 0 - ((y / tileSize | 0) - offset);
-                 var x = _v14._0;
+                 var x = _v14._0 - gameMargin;
                  var boardX = (x / tileSize | 0) - offset;
                  return {ctor: "_Tuple2"
                         ,_0: boardX
                         ,_1: boardY};
               }();}
          _U.badCase($moduleName,
-         "between lines 65 and 72");
+         "between lines 62 and 69");
       }();
    });
-   var render = F4(function (state,
+   var render = F3(function (state,
    dims,
-   gameType,
    playerName) {
-      return function () {
-         var logArea = $Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v18) {
-            return function () {
-               switch (_v18.ctor)
-               {case "_Tuple2":
-                  return $Text.leftAligned($Text.color(_v18._0)($Text.fromString(_v18._1)));}
-               _U.badCase($moduleName,
-               "on line 215, column 49 to 99");
-            }();
-         })($List.take(5)(state.log)));
-         var deckSizeArea = $State.isOngoing(state) ? A3($Graphics$Element.container,
-         70,
-         40,
-         $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(A2($Basics._op["++"],
-         "Deck: ",
-         $Basics.toString($List.length(state.deck))))))) : $Graphics$Element.empty;
-         var remoteGameStatusText = function () {
-            var _v22 = state.gameState;
-            switch (_v22.ctor)
-            {case "Connected":
-               return A2($Basics._op["++"],
-                 "Connected to ",
-                 A2($Basics._op["++"],
-                 _v22._0,
-                 " "));
-               case "Disconnected":
-               return "Opponent disconnected ";
-               case "WaitingForPlayers":
-               return "Waiting for opponent ... ";}
-            return "";
-         }();
-         var remoteGameStatusArea = _U.eq(state.gameState,
-         $GameTypes.NotStarted) ? A4($Graphics$Input$Field.field,
-         $Graphics$Input$Field.defaultStyle,
-         $Signal.send(playerNameChannel),
-         "Your name",
-         playerName) : A3($Graphics$Element.container,
-         150,
-         40,
-         $Graphics$Element.middle)($Text.centered($Text.height(11)($Text.fromString(remoteGameStatusText))));
-         var statusArea = _U.eq(gameType,
-         $GameTypes.HumanVsHumanRemote) ? remoteGameStatusArea : $Graphics$Element.empty;
-         var gameTypeDropDown = A2($Graphics$Element.size,
-         180,
-         40)(A2($Graphics$Input.dropDown,
-         $Signal.send(gameTypeChannel),
-         _L.fromArray([{ctor: "_Tuple2"
-                       ,_0: "Player vs AI"
-                       ,_1: $GameTypes.HumanVsCpu}
-                      ,{ctor: "_Tuple2"
-                       ,_0: "Player vs Player (hotseat)"
-                       ,_1: $GameTypes.HumanVsHumanLocal}
-                      ,{ctor: "_Tuple2"
-                       ,_0: "Player vs Player (online)"
-                       ,_1: $GameTypes.HumanVsHumanRemote}])));
-         var startButton = A2($Graphics$Input.button,
-         A2($Signal.send,
-         clickChannel,
-         $GameTypes.Start),
-         "New game");
-         var rulesAreaWidth = 650;
-         var controls = A3($Graphics$Element.container,
-         rulesAreaWidth,
-         40,
-         $Graphics$Element.middle)(A2($Graphics$Element.flow,
-         $Graphics$Element.right,
-         _L.fromArray([statusArea
-                      ,gameTypeDropDown
-                      ,startButton
-                      ,deckSizeArea])));
-         var rightArea = A2($Graphics$Element.flow,
-         $Graphics$Element.down,
-         _L.fromArray([logArea
-                      ,controls]));
-         var withSpacing = F2(function (padding,
-         elt) {
-            return A2($Graphics$Element.beside,
-            A2($Graphics$Element.spacer,
-            padding,
-            padding),
-            elt);
-         });
-         var totalBoardSize = getTotalBoardSize(dims);
-         var handGap = totalBoardSize - 2 * $Basics.round(handTileSize) - handPadding * 2;
-         var boardSize = $Board.getBoardSize(state.board);
-         var tileSize = A2(getTileSizeFromBoardSize,
-         boardSize,
-         dims);
-         return A2($Graphics$Element.flow,
-         $Graphics$Element.down,
-         _L.fromArray([A3($Graphics$Element.size,
-                      totalBoardSize,
-                      gameHeaderSize,
-                      $Text.centered(A2($Text.height,
-                      50,
-                      A2($Text.typeface,
-                      _L.fromArray(["Rock Salt"
-                                   ,"cursive"]),
-                      $Text.fromString("Kalevala")))))
-                      ,A2($Graphics$Element.flow,
-                      $Graphics$Element.right,
-                      _L.fromArray([A3(renderBoard,
-                                   state,
-                                   boardSize,
-                                   dims)
-                                   ,A2($Graphics$Element.flow,
-                                   $Graphics$Element.down,
-                                   _L.fromArray([A2(renderHand,
-                                                $GameTypes.Red,
-                                                state)
-                                                ,A2($Graphics$Element.spacer,
-                                                1,
-                                                5)
-                                                ,A2(withSpacing,
-                                                10,
-                                                $Graphics$Element.color($Color.gray)(A2(withSpacing,
-                                                10,
-                                                A4($Graphics$Element.container,
-                                                rulesAreaWidth,
-                                                handGap - 10,
-                                                $Graphics$Element.midLeft,
-                                                rightArea))))
-                                                ,A2($Graphics$Element.spacer,
-                                                1,
-                                                5)
-                                                ,A2(renderHand,
-                                                $GameTypes.Blue,
-                                                state)]))]))]));
-      }();
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.down,
+      _L.fromArray([A2($Graphics$Element.spacer,
+                   1,
+                   gameMargin)
+                   ,A2($Graphics$Element.flow,
+                   $Graphics$Element.right,
+                   _L.fromArray([A2($Graphics$Element.spacer,
+                                gameMargin,
+                                1)
+                                ,A3(renderGameArea,
+                                state,
+                                dims,
+                                playerName)]))]));
    });
    _elm.Display.values = {_op: _op
-                         ,gameHeaderSize: gameHeaderSize
+                         ,gameMargin: gameMargin
                          ,handPadding: handPadding
                          ,handTileSize: handTileSize
                          ,transparent: transparent
                          ,transpGreen: transpGreen
                          ,clickChannel: clickChannel
-                         ,gameTypeChannel: gameTypeChannel
                          ,playerNameChannel: playerNameChannel
                          ,getTotalBoardSize: getTotalBoardSize
                          ,getTileSizeFromBoardSize: getTileSizeFromBoardSize
@@ -3069,6 +3013,10 @@ Elm.Display.make = function (_elm) {
                          ,drawLastPlacedOutline: drawLastPlacedOutline
                          ,renderBoard: renderBoard
                          ,renderHand: renderHand
+                         ,renderScoreArea: renderScoreArea
+                         ,renderRightArea: renderRightArea
+                         ,renderSidebar: renderSidebar
+                         ,renderGameArea: renderGameArea
                          ,render: render};
    return _elm.Display.values;
 };
@@ -3508,7 +3456,9 @@ Elm.GameTypes.make = function (_elm) {
              ,_1: b};
    });
    var BoardClick = {ctor: "BoardClick"};
-   var Start = {ctor: "Start"};
+   var StartTwoPlayerHotseat = {ctor: "StartTwoPlayerHotseat"};
+   var StartTwoPlayerOnline = {ctor: "StartTwoPlayerOnline"};
+   var StartSinglePlayer = {ctor: "StartSinglePlayer"};
    var ParseError = function (a) {
       return {ctor: "ParseError"
              ,_0: a};
@@ -3654,7 +3604,9 @@ Elm.GameTypes.make = function (_elm) {
                            ,OpponentDisconnected: OpponentDisconnected
                            ,NoAction: NoAction
                            ,ParseError: ParseError
-                           ,Start: Start
+                           ,StartSinglePlayer: StartSinglePlayer
+                           ,StartTwoPlayerOnline: StartTwoPlayerOnline
+                           ,StartTwoPlayerHotseat: StartTwoPlayerHotseat
                            ,BoardClick: BoardClick
                            ,PieceInHand: PieceInHand
                            ,PassButton: PassButton
@@ -4973,13 +4925,15 @@ Elm.Kalevala.make = function (_elm) {
    $WebSocket = Elm.WebSocket.make(_elm),
    $Window = Elm.Window.make(_elm);
    var server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000";
-   var constructAction = F6(function (clickType,
+   var constructAction = F5(function (clickType,
    seed,
    mousePos,
    dims,
-   gameType,
    playerName) {
       return function () {
+         var deck = A2($Helpers.shuffle,
+         $Game.deckContents,
+         seed);
          var click = A2($Debug.watch,
          "clickInput.signal",
          clickType);
@@ -5000,23 +4954,32 @@ Elm.Kalevala.make = function (_elm) {
                return A2($GameTypes.PickUpPiece,
                  clickType._0,
                  clickType._1);
-               case "Start":
+               case "StartSinglePlayer":
                return A4($GameTypes.StartGame,
-                 gameType,
-                 A2($Helpers.shuffle,
-                 $Game.deckContents,
-                 seed),
+                 $GameTypes.HumanVsCpu,
+                 deck,
+                 $Player.random(seed),
+                 playerName.string);
+               case "StartTwoPlayerHotseat":
+               return A4($GameTypes.StartGame,
+                 $GameTypes.HumanVsHumanLocal,
+                 deck,
+                 $Player.random(seed),
+                 playerName.string);
+               case "StartTwoPlayerOnline":
+               return A4($GameTypes.StartGame,
+                 $GameTypes.HumanVsHumanRemote,
+                 deck,
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 51 and 58");
+            "between lines 55 and 64");
          }();
       }();
    });
    var processClick = function (signal) {
       return function () {
          var sampledPlayerName = $Signal.sampleOn(signal)($Signal.subscribe($Display.playerNameChannel));
-         var sampledGameType = $Signal.sampleOn(signal)($Signal.subscribe($Display.gameTypeChannel));
          var sampledMouse = A2($Signal.sampleOn,
          signal,
          $Mouse.position);
@@ -5029,14 +4992,12 @@ Elm.Kalevala.make = function (_elm) {
          A2($Signal._op["~"],
          A2($Signal._op["~"],
          A2($Signal._op["~"],
-         A2($Signal._op["~"],
          A2($Signal._op["<~"],
          constructAction,
          signal),
          seedSignal),
          sampledMouse),
          $Window.dimensions),
-         sampledGameType),
          sampledPlayerName);
       }();
    };
@@ -5080,13 +5041,14 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 30 and 39");
+            "between lines 33 and 42");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]],
          newState) : $State.mustPass(newState) ? $Game.pass(newState) : newState;
       }();
    });
+   var gameTypeChannel = $Signal.channel($GameTypes.HumanVsCpu);
    var main = function () {
       var action = processClick($Signal.subscribe($Display.clickChannel));
       var actionWithGameType = A2($Signal._op["~"],
@@ -5097,7 +5059,7 @@ Elm.Kalevala.make = function (_elm) {
                 ,_1: t};
       }),
       action),
-      $Signal.subscribe($Display.gameTypeChannel));
+      $Signal.subscribe(gameTypeChannel));
       var actionForRemote = A2($Signal._op["<~"],
       function (_v17) {
          return function () {
@@ -5105,7 +5067,7 @@ Elm.Kalevala.make = function (_elm) {
             {case "_Tuple2":
                return _v17._0;}
             _U.badCase($moduleName,
-            "on line 89, column 35 to 36");
+            "on line 94, column 35 to 36");
          }();
       },
       A3($Signal.keepIf,
@@ -5116,7 +5078,7 @@ Elm.Kalevala.make = function (_elm) {
                return _U.eq(_v21._1,
                  $GameTypes.HumanVsHumanRemote);}
             _U.badCase($moduleName,
-            "on line 89, column 60 to 83");
+            "on line 94, column 60 to 83");
          }();
       },
       {ctor: "_Tuple2"
@@ -5133,7 +5095,7 @@ Elm.Kalevala.make = function (_elm) {
                return $GameTypes.ParseError(_v25._0);
                case "Ok": return _v25._0;}
             _U.badCase($moduleName,
-            "between lines 83 and 86");
+            "between lines 88 and 91");
          }();
       };
       var encode = function (action) {
@@ -5164,15 +5126,14 @@ Elm.Kalevala.make = function (_elm) {
       responseAction));
       return A2($Signal._op["~"],
       A2($Signal._op["~"],
-      A2($Signal._op["~"],
       A2($Signal._op["<~"],
       $Display.render,
       state),
       $Window.dimensions),
-      $Signal.subscribe($Display.gameTypeChannel)),
       $Signal.subscribe($Display.playerNameChannel));
    }();
    _elm.Kalevala.values = {_op: _op
+                          ,gameTypeChannel: gameTypeChannel
                           ,performAction: performAction
                           ,constructAction: constructAction
                           ,processClick: processClick
@@ -10928,8 +10889,15 @@ Elm.Player.make = function (_elm) {
       return function () {
          switch (player.ctor)
          {case "Blue":
-            return $Color.blue;
-            case "Red": return $Color.red;}
+            return A3($Color.rgb,
+              70,
+              131,
+              193);
+            case "Red":
+            return A3($Color.rgb,
+              217,
+              33,
+              32);}
          _U.badCase($moduleName,
          "between lines 15 and 17");
       }();
@@ -11686,10 +11654,20 @@ Elm.State.make = function (_elm) {
       state.turn,
       state);
    };
-   var isOngoing = function (state) {
+   var isNotStarted = function (state) {
       return function () {
          var _v0 = state.gameState;
          switch (_v0.ctor)
+         {case "NotStarted": return true;
+            case "WaitingForPlayers":
+            return true;}
+         return false;
+      }();
+   };
+   var isOngoing = function (state) {
+      return function () {
+         var _v1 = state.gameState;
+         switch (_v1.ctor)
          {case "Connected": return true;
             case "Ongoing": return true;}
          return false;
@@ -11710,6 +11688,7 @@ Elm.State.make = function (_elm) {
    };
    _elm.State.values = {_op: _op
                        ,isOngoing: isOngoing
+                       ,isNotStarted: isNotStarted
                        ,isGameOver: isGameOver
                        ,mustPass: mustPass
                        ,isPlayerTurn: isPlayerTurn};

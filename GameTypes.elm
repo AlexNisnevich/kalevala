@@ -69,7 +69,9 @@ type Action = PickUpPiece Player Int
             | NoAction
             | ParseError String
 
-type ClickEvent = Start
+type ClickEvent = StartSinglePlayer
+                | StartTwoPlayerOnline
+                | StartTwoPlayerHotseat
                 | BoardClick
                 | PieceInHand Player Int
                 | PassButton

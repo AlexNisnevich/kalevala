@@ -26,8 +26,8 @@ import Debug
 
 -- Constants
 
-gameHeaderSize : Int
-gameHeaderSize = 100
+gameMargin : Int
+gameMargin = 15
 
 handPadding : Int
 handPadding = 10
@@ -46,24 +46,21 @@ transpGreen = rgba 0 255 0 0.5
 clickChannel : Channel ClickEvent
 clickChannel = channel None
 
-gameTypeChannel : Channel GameType
-gameTypeChannel = channel HumanVsCpu
-
 playerNameChannel : Channel Content
 playerNameChannel = channel noContent
 
 -- Helpers
 
 getTotalBoardSize : WindowDims -> Int
-getTotalBoardSize (width, height) = height - gameHeaderSize
+getTotalBoardSize (width, height) = height - (2 * gameMargin)
 
 getTileSizeFromBoardSize : Int -> WindowDims -> Float
 getTileSizeFromBoardSize boardSize dims = toFloat (getTotalBoardSize dims // boardSize)
 
 mouseToBoardPosition: MousePos -> State -> WindowDims -> Location
 mouseToBoardPosition (x', y') state dims =
-  let x = x'
-      y = (y' - gameHeaderSize)
+  let x = x' - gameMargin
+      y = y' - gameMargin
       boardSize = Board.getBoardSize state.board
       tileSize = round <| getTileSizeFromBoardSize boardSize dims
       offset = boardSize // 2
@@ -155,10 +152,81 @@ renderHand player state =
                                   |> container pieceSize pieceSize middle
                                   |> Graphics.Element.color (if isPieceHeld idx then (Player.toColor state.turn) else white)
                                   |> clickable (send clickChannel (PieceInHand player idx))
+      hiddenPiece = image (round handTileSize) (round handTileSize) "images/100/back2.png"
+
       playerHand = if isEmpty hand && state.gameState == Ongoing
                    then [button (send clickChannel PassButton) "Pass" |> container 100 100 middle]
                    else indexedMap makePiece hand
-      hiddenPiece = image (round handTileSize) (round handTileSize) "images/100/back1.png"
+      cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
+      dummyHand = repeat 5 (hiddenPiece |> container pieceSize pieceSize middle)
+
+      handContents = if | State.isNotStarted state -> dummyHand
+                        | playerType == Human      -> playerHand
+                        | otherwise                -> cpuHand
+  in
+    flow right handContents
+
+renderScoreArea : State -> Element
+renderScoreArea state = Graphics.Element.color red <| spacer 90 305
+
+renderRightArea : State -> Element
+renderRightArea state = Graphics.Element.color blue <| spacer 395 282
+
+renderSidebar : State -> Element
+renderSidebar state = 
+  flow down [ image 582 82 "images/100/kalevala.png"
+            , flow right [ spacer 12 1
+                         , flow down [ renderHand Red state
+                                     , spacer 1 16
+                                     , flow right [ spacer 10 1
+                                                  , renderScoreArea state
+                                                  , spacer 25 1
+                                                  , flow down [ spacer 1 8
+                                                              , renderRightArea state
+                                                              ]
+                                                  ]
+                                     , spacer 1 16
+                                     , renderHand Blue state
+                                     ]
+                         ]
+            ]
+
+renderGameArea : State -> WindowDims -> Content -> Element
+renderGameArea state dims playerName = 
+  let boardSize = Board.getBoardSize state.board
+  in flow right [ renderBoard state boardSize dims
+                , spacer 16 1
+                , renderSidebar state
+                , button (send clickChannel StartSinglePlayer) "Single Player"
+                , button (send clickChannel StartTwoPlayerOnline) "2 Player - Online"
+                , button (send clickChannel StartTwoPlayerHotseat) "2 Player - Hotseat"
+                ]
+
+render : State -> WindowDims -> Content -> Element
+render state dims playerName =
+  flow down [ spacer 1 gameMargin
+            , flow right [ spacer gameMargin 1
+                         , renderGameArea state dims playerName 
+                         ]
+            ]
+
+{--
+renderHand : Player -> State -> Element
+renderHand player state =
+  let p = Player.toString player
+      playerType = withDefault Human (Dict.get p state.players)
+      hand = Player.getHand player state
+      isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
+      pieceImage pieceStr = pieceToImage <| Piece.fromString pieceStr
+      pieceSize = (round handTileSize) + handPadding
+      makePiece idx pieceStr = pieceImage pieceStr (toString <| Piece.baseValue <| Piece.fromString pieceStr) handTileSize
+                                  |> container pieceSize pieceSize middle
+                                  |> Graphics.Element.color (if isPieceHeld idx then (Player.toColor state.turn) else white)
+                                  |> clickable (send clickChannel (PieceInHand player idx))
+      playerHand = if isEmpty hand && state.gameState == Ongoing
+                   then [button (send clickChannel PassButton) "Pass" |> container 100 100 middle]
+                   else indexedMap makePiece hand
+      hiddenPiece = image (round handTileSize) (round handTileSize) "images/100/back2.png"
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
       handContents = if playerType == Human
                      then playerHand
@@ -181,7 +249,9 @@ renderHand player state =
                                      |> container 20 pieceSize midLeft
   in
     flow right ([handText] ++ [score] ++ [delta] ++ handContents)
+--}
 
+{--
 render : State -> WindowDims -> GameType -> Content -> Element
 render state dims gameType playerName =
   let boardSize = Board.getBoardSize state.board
@@ -229,3 +299,4 @@ render state dims gameType playerName =
                                ]
                    ]
       ]
+--}

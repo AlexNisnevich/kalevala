@@ -23,6 +23,9 @@ import Deserialize
 
 import Debug
 
+gameTypeChannel : Channel GameType
+gameTypeChannel = channel HumanVsCpu
+
 {- Perform an action on the current state and return the resulting state. -}
 performAction : Action -> State -> State
 performAction action state =
@@ -42,14 +45,17 @@ performAction action state =
        | otherwise -> newState
 
 {- Turn a ClickEvent into an Action -}
-constructAction : ClickEvent -> Seed -> MousePos -> WindowDims -> GameType -> Content -> Action
-constructAction clickType seed mousePos dims gameType playerName =
+constructAction : ClickEvent -> Seed -> MousePos -> WindowDims -> Content -> Action
+constructAction clickType seed mousePos dims playerName =
   let
     pos = Debug.watch "Mouse.position" mousePos
     click = Debug.watch "clickInput.signal" clickType
+    deck = shuffle Game.deckContents seed
   in
     case clickType of
-      Start -> StartGame gameType (shuffle Game.deckContents seed) (Player.random seed) playerName.string
+      StartSinglePlayer -> StartGame HumanVsCpu deck (Player.random seed) playerName.string
+      StartTwoPlayerOnline -> StartGame HumanVsHumanRemote deck (Player.random seed) playerName.string
+      StartTwoPlayerHotseat -> StartGame HumanVsHumanLocal deck (Player.random seed) playerName.string
       BoardClick -> PlacePiece mousePos dims
       PieceInHand player idx -> PickUpPiece player idx
       PassButton -> Pass
@@ -60,10 +66,9 @@ processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let seedSignal = (initialSeed << round << fst) <~ Time.timestamp signal
       sampledMouse = sampleOn signal Mouse.position
-      sampledGameType = sampleOn signal <| subscribe Display.gameTypeChannel
       sampledPlayerName = sampleOn signal <| subscribe Display.playerNameChannel
   in
-    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ sampledGameType ~ sampledPlayerName
+    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ sampledPlayerName
 
 {- Path to a Voluspa game server 
    (see https://github.com/neunenak/voluspa-server) -}
@@ -85,7 +90,7 @@ main =
 
     action = processClick (subscribe Display.clickChannel)
 
-    actionWithGameType = (\a t -> (a, t)) <~ action ~ (subscribe Display.gameTypeChannel)
+    actionWithGameType = (\a t -> (a, t)) <~ action ~ (subscribe gameTypeChannel)
     actionForRemote = (\(a, t) -> a) <~ keepIf (\(a, t) -> t == HumanVsHumanRemote) (NoAction, HumanVsCpu) actionWithGameType
 
     request = Debug.watch "request" <~ (encode <~ actionForRemote)
@@ -95,4 +100,4 @@ main =
     state = foldp performAction Game.startState (merge action responseAction)
 
   in
-    Display.render <~ state ~ Window.dimensions ~ (subscribe Display.gameTypeChannel) ~ (subscribe Display.playerNameChannel)
+    Display.render <~ state ~ Window.dimensions ~ (subscribe Display.playerNameChannel)

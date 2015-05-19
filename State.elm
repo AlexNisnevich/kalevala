@@ -11,6 +11,13 @@ isOngoing state =
     Connected opponentName -> True
     _ -> False
 
+isNotStarted : State -> Bool
+isNotStarted state =
+  case state.gameState of
+    NotStarted -> True
+    WaitingForPlayers -> True
+    _ -> False
+
 {- Does neither player have any tiles left in the given state? -}
 isGameOver : State -> Bool
 isGameOver state =
