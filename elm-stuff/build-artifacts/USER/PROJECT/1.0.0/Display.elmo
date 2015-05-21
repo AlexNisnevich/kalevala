@@ -51,36 +51,37 @@ Elm.Display.make = function (_elm) {
          }($Basics.toString(playerType)))))));
       }();
    });
-   var withMargin = F2(function (_v0,
+   var withBorder = F3(function (_v0,
+   color,
    elt) {
       return function () {
          switch (_v0.ctor)
          {case "_Tuple2":
             return A2($Graphics$Element.flow,
               $Graphics$Element.down,
-              _L.fromArray([A2($Graphics$Element.spacer,
-                           1,
-                           _v0._1)
+              _L.fromArray([$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
+                           $Graphics$Element.widthOf(elt) + _v0._0 * 2,
+                           _v0._1))
                            ,A2($Graphics$Element.flow,
                            $Graphics$Element.right,
-                           _L.fromArray([A2($Graphics$Element.spacer,
+                           _L.fromArray([$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
                                         _v0._0,
-                                        1)
+                                        $Graphics$Element.heightOf(elt)))
                                         ,elt
-                                        ,A2($Graphics$Element.spacer,
+                                        ,$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
                                         _v0._0,
-                                        1)]))
-                           ,A2($Graphics$Element.spacer,
-                           1,
-                           _v0._1)]));}
+                                        $Graphics$Element.heightOf(elt)))]))
+                           ,$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
+                           $Graphics$Element.widthOf(elt) + _v0._0 * 2,
+                           _v0._1))]));}
          _U.badCase($moduleName,
-         "between lines 226 and 232");
+         "between lines 258 and 264");
       }();
    });
-   var renderRightArea = function (state) {
-      return $Graphics$Element.color($Color.blue)(A2($Graphics$Element.spacer,
-      395,
-      282));
+   var renderPieceDescription = function (state) {
+      return A2($Graphics$Element.spacer,
+      1,
+      1);
    };
    var renderDeck = function (state) {
       return function () {
@@ -99,41 +100,6 @@ Elm.Display.make = function (_elm) {
                       20,
                       $Graphics$Element.midBottom)($Text.centered($Text.height(14)($Text.fromString(deckSizeStr))))]));
       }();
-   };
-   var renderScoreArea = function (state) {
-      return A2($Graphics$Element.flow,
-      $Graphics$Element.down,
-      _L.fromArray([A3($Graphics$Element.container,
-                   85,
-                   30,
-                   $Graphics$Element.middle)($Text.centered(A2(playerHandText,
-                   $GameTypes.Red,
-                   state)))
-                   ,withMargin({ctor: "_Tuple2"
-                               ,_0: 1
-                               ,_1: 6})(A3($Graphics$Element.container,
-                   85,
-                   40,
-                   $Graphics$Element.middle)($Text.centered(A2(playerScoreText,
-                   $GameTypes.Red,
-                   state))))
-                   ,withMargin({ctor: "_Tuple2"
-                               ,_0: 1
-                               ,_1: 14})(renderDeck(state))
-                   ,withMargin({ctor: "_Tuple2"
-                               ,_0: 1
-                               ,_1: 6})(A3($Graphics$Element.container,
-                   85,
-                   40,
-                   $Graphics$Element.middle)($Text.centered(A2(playerScoreText,
-                   $GameTypes.Blue,
-                   state))))
-                   ,A3($Graphics$Element.container,
-                   85,
-                   30,
-                   $Graphics$Element.middle)($Text.centered(A2(playerHandText,
-                   $GameTypes.Blue,
-                   state)))]));
    };
    var drawLastPlacedOutline = F2(function (state,
    tileSize) {
@@ -232,6 +198,147 @@ Elm.Display.make = function (_elm) {
    0,
    0,
    0.0);
+   var withMargin = F2(function (_v14,
+   elt) {
+      return function () {
+         switch (_v14.ctor)
+         {case "_Tuple2":
+            return A3(withBorder,
+              {ctor: "_Tuple2"
+              ,_0: _v14._0
+              ,_1: _v14._1},
+              transparent,
+              elt);}
+         _U.badCase($moduleName,
+         "on line 254, column 25 to 58");
+      }();
+   });
+   var renderScoreArea = function (state) {
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.down,
+      _L.fromArray([A3($Graphics$Element.container,
+                   85,
+                   30,
+                   $Graphics$Element.middle)($Text.centered(A2(playerHandText,
+                   $GameTypes.Red,
+                   state)))
+                   ,withMargin({ctor: "_Tuple2"
+                               ,_0: 1
+                               ,_1: 6})(A3($Graphics$Element.container,
+                   85,
+                   40,
+                   $Graphics$Element.middle)($Text.centered(A2(playerScoreText,
+                   $GameTypes.Red,
+                   state))))
+                   ,withMargin({ctor: "_Tuple2"
+                               ,_0: 1
+                               ,_1: 14})(renderDeck(state))
+                   ,withMargin({ctor: "_Tuple2"
+                               ,_0: 1
+                               ,_1: 6})(A3($Graphics$Element.container,
+                   85,
+                   40,
+                   $Graphics$Element.middle)($Text.centered(A2(playerScoreText,
+                   $GameTypes.Blue,
+                   state))))
+                   ,A3($Graphics$Element.container,
+                   85,
+                   30,
+                   $Graphics$Element.middle)($Text.centered(A2(playerHandText,
+                   $GameTypes.Blue,
+                   state)))]));
+   };
+   var renderMenu = withMargin({ctor: "_Tuple2"
+                               ,_0: 95
+                               ,_1: 35})(A2($Graphics$Element.flow,
+   $Graphics$Element.down,
+   _L.fromArray([withMargin({ctor: "_Tuple2"
+                            ,_0: 1
+                            ,_1: 3})(A4($Graphics$Input.customButton,
+                A2($Signal.send,
+                clickChannel,
+                $GameTypes.StartSinglePlayer),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/buttonSinglePlayer.png"),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/buttonSinglePlayer.png"),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/buttonSinglePlayer.png")))
+                ,withMargin({ctor: "_Tuple2"
+                            ,_0: 1
+                            ,_1: 3})(A4($Graphics$Input.customButton,
+                A2($Signal.send,
+                clickChannel,
+                $GameTypes.StartTwoPlayerOnline),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/button2PlayerOnline.png"),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/button2PlayerOnline.png"),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/button2PlayerOnline.png")))
+                ,withMargin({ctor: "_Tuple2"
+                            ,_0: 1
+                            ,_1: 3})(A4($Graphics$Input.customButton,
+                A2($Signal.send,
+                clickChannel,
+                $GameTypes.StartTwoPlayerHotseat),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/button2PlayerHotseat.png"),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/button2PlayerHotseat.png"),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/button2PlayerHotseat.png")))
+                ,withMargin({ctor: "_Tuple2"
+                            ,_0: 1
+                            ,_1: 3})(A3($Graphics$Element.image,
+                208,
+                48,
+                "images/buttonViewRules.png"))])));
+   var renderLog = function (state) {
+      return withMargin({ctor: "_Tuple2"
+                        ,_0: 10
+                        ,_1: 10})(A3($Graphics$Element.container,
+      380,
+      262,
+      $Graphics$Element.topLeft)($Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v18) {
+         return function () {
+            switch (_v18.ctor)
+            {case "_Tuple2":
+               return $Text.leftAligned($Text.color(_v18._0)($Text.fromString(_v18._1)));}
+            _U.badCase($moduleName,
+            "on line 214, column 45 to 95");
+         }();
+      })($List.take(5)(state.log)))));
+   };
+   var renderRightArea = function (state) {
+      return function () {
+         var content = $State.isNotStarted(state) ? renderMenu : renderLog(state);
+         return A2(withBorder,
+         {ctor: "_Tuple2",_0: 2,_1: 2},
+         $Color.darkGrey)(A3($Graphics$Element.container,
+         400,
+         282,
+         $Graphics$Element.middle)(content));
+      }();
+   };
    var handTileSize = 100;
    var handPadding = 10;
    var renderHand = F2(function (player,
@@ -330,11 +437,11 @@ Elm.Display.make = function (_elm) {
                                 state)])))]));
    };
    var gameMargin = 15;
-   var getTotalBoardSize = function (_v14) {
+   var getTotalBoardSize = function (_v22) {
       return function () {
-         switch (_v14.ctor)
+         switch (_v22.ctor)
          {case "_Tuple2":
-            return _v14._1 - 2 * gameMargin;}
+            return _v22._1 - 2 * gameMargin;}
          _U.badCase($moduleName,
          "on line 56, column 37 to 61");
       }();
@@ -483,29 +590,14 @@ Elm.Display.make = function (_elm) {
                       ,A2($Graphics$Element.spacer,
                       16,
                       1)
-                      ,renderSidebar(state)
-                      ,A2($Graphics$Input.button,
-                      A2($Signal.send,
-                      clickChannel,
-                      $GameTypes.StartSinglePlayer),
-                      "Single Player")
-                      ,A2($Graphics$Input.button,
-                      A2($Signal.send,
-                      clickChannel,
-                      $GameTypes.StartTwoPlayerOnline),
-                      "2 Player - Online")
-                      ,A2($Graphics$Input.button,
-                      A2($Signal.send,
-                      clickChannel,
-                      $GameTypes.StartTwoPlayerHotseat),
-                      "2 Player - Hotseat")]));
+                      ,renderSidebar(state)]));
       }();
    });
-   var mouseToBoardPosition = F3(function (_v18,
+   var mouseToBoardPosition = F3(function (_v26,
    state,
    dims) {
       return function () {
-         switch (_v18.ctor)
+         switch (_v26.ctor)
          {case "_Tuple2":
             return function () {
                  var boardSize = $Board.getBoardSize(state.board);
@@ -513,9 +605,9 @@ Elm.Display.make = function (_elm) {
                  boardSize,
                  dims));
                  var offset = boardSize / 2 | 0;
-                 var y = _v18._1 - gameMargin;
+                 var y = _v26._1 - gameMargin;
                  var boardY = 0 - ((y / tileSize | 0) - offset);
-                 var x = _v18._0 - gameMargin;
+                 var x = _v26._0 - gameMargin;
                  var boardX = (x / tileSize | 0) - offset;
                  return {ctor: "_Tuple2"
                         ,_0: boardX
@@ -555,11 +647,15 @@ Elm.Display.make = function (_elm) {
                          ,renderHand: renderHand
                          ,renderDeck: renderDeck
                          ,renderScoreArea: renderScoreArea
+                         ,renderMenu: renderMenu
+                         ,renderLog: renderLog
+                         ,renderPieceDescription: renderPieceDescription
                          ,renderRightArea: renderRightArea
                          ,renderSidebar: renderSidebar
                          ,renderGameArea: renderGameArea
                          ,render: render
                          ,withMargin: withMargin
+                         ,withBorder: withBorder
                          ,playerHandText: playerHandText
                          ,playerScoreText: playerScoreText};
    return _elm.Display.values;

@@ -191,8 +191,40 @@ renderScoreArea state =
             , playerHandText Blue state |> centered |> container 85 30 middle
             ]
 
+renderMenu : Element
+renderMenu =
+  flow down [ customButton (send clickChannel StartSinglePlayer) 
+                (image 208 48 "images/buttonSinglePlayer.png")
+                (image 208 48 "images/buttonSinglePlayer.png")
+                (image 208 48 "images/buttonSinglePlayer.png") |> withMargin (1, 3)
+            , customButton (send clickChannel StartTwoPlayerOnline) 
+                (image 208 48 "images/button2PlayerOnline.png")
+                (image 208 48 "images/button2PlayerOnline.png")
+                (image 208 48 "images/button2PlayerOnline.png") |> withMargin (1, 3)
+            , customButton (send clickChannel StartTwoPlayerHotseat) 
+                (image 208 48 "images/button2PlayerHotseat.png")
+                (image 208 48 "images/button2PlayerHotseat.png")
+                (image 208 48 "images/button2PlayerHotseat.png") |> withMargin (1, 3)
+            , image 208 48 "images/buttonViewRules.png" |> withMargin (1, 3)
+            ] |> withMargin (95, 35)
+
+renderLog : State -> Element
+renderLog state =
+  state.log |> take 5
+            |> (List.map (\(color, text) -> leftAligned <| Text.color color <| fromString text))
+            |> flow down
+            |> container 380 262 topLeft
+            |> withMargin (10, 10)
+
+renderPieceDescription : State -> Element
+renderPieceDescription state = spacer 1 1
+
 renderRightArea : State -> Element
-renderRightArea state = Graphics.Element.color blue <| spacer 395 282
+renderRightArea state = 
+  let content = if | State.isNotStarted state -> renderMenu
+                   | otherwise -> renderLog state
+  in 
+    content |> container 400 282 middle |> withBorder (2, 2) darkGrey
 
 renderSidebar : State -> Element
 renderSidebar state = 
@@ -212,9 +244,6 @@ renderGameArea state dims playerName =
   in flow right [ renderBoard state boardSize dims
                 , spacer 16 1
                 , renderSidebar state
-                , button (send clickChannel StartSinglePlayer) "Single Player"
-                , button (send clickChannel StartTwoPlayerOnline) "2 Player - Online"
-                , button (send clickChannel StartTwoPlayerHotseat) "2 Player - Hotseat"
                 ]
 
 render : State -> WindowDims -> Content -> Element
@@ -222,13 +251,16 @@ render state dims playerName =
   withMargin (gameMargin, gameMargin) <| renderGameArea state dims playerName
 
 withMargin : (Int, Int) -> Element -> Element
-withMargin (x, y) elt =
-  flow down [ spacer 1 y
-            , flow right [ spacer x 1
+withMargin (x, y) elt = withBorder (x, y) transparent elt
+
+withBorder : (Int, Int) -> Color -> Element -> Element
+withBorder (x, y) color elt =
+  flow down [ spacer (widthOf elt + x * 2) y |> Graphics.Element.color color
+            , flow right [ spacer x (heightOf elt) |> Graphics.Element.color color
                          , elt
-                         , spacer x 1
+                         , spacer x (heightOf elt) |> Graphics.Element.color color
                          ]
-            , spacer 1 y 
+            , spacer (widthOf elt + x * 2) y |> Graphics.Element.color color
             ]
 
 playerHandText : Player -> State -> Text

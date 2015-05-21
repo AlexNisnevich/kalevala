@@ -36,7 +36,7 @@ Elm.Piece.make = function (_elm) {
             case "Kullervo":
             return "Kullervo";
             case "Lemminkainen":
-            return "Lemminkäinen";
+            return "Lemmink&auml;inen";
             case "Louhi": return "Louhi";
             case "SeppoIlmarinen":
             return "Seppo Ilmarinen";

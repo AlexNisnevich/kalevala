@@ -36,7 +36,7 @@ toDisplayString piece =
     Joukahainen -> "Joukahainen"
     SeppoIlmarinen -> "Seppo Ilmarinen"
     Louhi -> "Louhi"
-    Lemminkainen -> "Lemminkäinen"
+    Lemminkainen -> "Lemmink&auml;inen"
 
 baseValue : Piece -> Int
 baseValue piece =
