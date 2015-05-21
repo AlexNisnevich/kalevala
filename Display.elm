@@ -21,6 +21,7 @@ import State
 import Piece
 import Board
 import Player
+import Game
 
 import Debug
 
@@ -166,8 +167,29 @@ renderHand player state =
   in
     flow right handContents
 
+renderDeck : State -> Element
+renderDeck state =
+  let deckSize = if | State.isNotStarted state -> length Game.deckContents
+                    | State.isOngoing state    -> length state.deck
+                    | otherwise                -> 0
+      deckSizeStr = "Deck: " ++ toString deckSize
+  in 
+    flow down [ image 85 85 "images/100/deck.png"
+              , deckSizeStr |> fromString
+                            |> Text.height 14
+                            |> centered
+                            |> container 85 20 midBottom
+              ]
+
 renderScoreArea : State -> Element
-renderScoreArea state = Graphics.Element.color red <| spacer 90 305
+renderScoreArea state = 
+  --Graphics.Element.color red <| spacer 90 305
+  flow down [ playerHandText Red state |> centered |> container 85 30 middle
+            , playerScoreText Red state |> centered |> container 85 40 middle |> withMargin (1, 6)
+            , renderDeck state |> withMargin (1, 14)
+            , playerScoreText Blue state |> centered |> container 85 40 middle |> withMargin (1, 6)
+            , playerHandText Blue state |> centered |> container 85 30 middle
+            ]
 
 renderRightArea : State -> Element
 renderRightArea state = Graphics.Element.color blue <| spacer 395 282
@@ -175,20 +197,13 @@ renderRightArea state = Graphics.Element.color blue <| spacer 395 282
 renderSidebar : State -> Element
 renderSidebar state = 
   flow down [ image 582 82 "images/100/kalevala.png"
-            , flow right [ spacer 12 1
-                         , flow down [ renderHand Red state
-                                     , spacer 1 16
-                                     , flow right [ spacer 10 1
-                                                  , renderScoreArea state
-                                                  , spacer 25 1
-                                                  , flow down [ spacer 1 8
-                                                              , renderRightArea state
-                                                              ]
-                                                  ]
-                                     , spacer 1 16
-                                     , renderHand Blue state
-                                     ]
-                         ]
+            , withMargin (12, 11) <|
+                flow down [ renderHand Red state
+                          , flow right [ withMargin (16, 11) <| renderScoreArea state
+                                       , withMargin (13, 19) <| renderRightArea state
+                                       ]
+                          , renderHand Blue state
+                          ]
             ]
 
 renderGameArea : State -> WindowDims -> Content -> Element
@@ -204,52 +219,40 @@ renderGameArea state dims playerName =
 
 render : State -> WindowDims -> Content -> Element
 render state dims playerName =
-  flow down [ spacer 1 gameMargin
-            , flow right [ spacer gameMargin 1
-                         , renderGameArea state dims playerName 
+  withMargin (gameMargin, gameMargin) <| renderGameArea state dims playerName
+
+withMargin : (Int, Int) -> Element -> Element
+withMargin (x, y) elt =
+  flow down [ spacer 1 y
+            , flow right [ spacer x 1
+                         , elt
+                         , spacer x 1
                          ]
+            , spacer 1 y 
             ]
 
-{--
-renderHand : Player -> State -> Element
-renderHand player state =
+playerHandText : Player -> State -> Text
+playerHandText player state =
   let p = Player.toString player
       playerType = withDefault Human (Dict.get p state.players)
-      hand = Player.getHand player state
-      isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
-      pieceImage pieceStr = pieceToImage <| Piece.fromString pieceStr
-      pieceSize = (round handTileSize) + handPadding
-      makePiece idx pieceStr = pieceImage pieceStr (toString <| Piece.baseValue <| Piece.fromString pieceStr) handTileSize
-                                  |> container pieceSize pieceSize middle
-                                  |> Graphics.Element.color (if isPieceHeld idx then (Player.toColor state.turn) else white)
-                                  |> clickable (send clickChannel (PieceInHand player idx))
-      playerHand = if isEmpty hand && state.gameState == Ongoing
-                   then [button (send clickChannel PassButton) "Pass" |> container 100 100 middle]
-                   else indexedMap makePiece hand
-      hiddenPiece = image (round handTileSize) (round handTileSize) "images/100/back2.png"
-      cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
-      handContents = if playerType == Human
-                     then playerHand
-                     else cpuHand
-      handText = playerType |> toString
-                            |> (\t -> if t == "Human" then "Player" else t)
-                            |> String.toUpper
-                            |> fromString
-                            |> (if state.turn == player && State.isOngoing state then bold else identity)
-                            |> Text.color (Player.toColor player)
-                            |> leftAligned
-                            |> container 80 pieceSize middle
-      score = Dict.get p state.score |> withDefault 0
-                                     |> asText
-                                     |> container 25 pieceSize midLeft
-      delta = Dict.get p state.delta |> withDefault ""
-                                     |> fromString
-                                     |> Text.height 9
-                                     |> leftAligned
-                                     |> container 20 pieceSize midLeft
+  in 
+    playerType |> toString
+               |> (\t -> if t == "Human" then "Player" else t)
+               |> String.toUpper
+               |> fromString
+               |> (if state.turn == player && State.isOngoing state then bold else identity)
+               |> Text.color (Player.toColor player)
+               |> Text.height 20
+
+playerScoreText : Player -> State -> Text
+playerScoreText player state =
+  let p = Player.toString player
   in
-    flow right ([handText] ++ [score] ++ [delta] ++ handContents)
---}
+    Dict.get p state.score |> withDefault 0
+                           |> toString
+                           |> fromString
+                           |> Text.color (Player.toColor player)
+                           |> Text.height 40
 
 {--
 render : State -> WindowDims -> GameType -> Content -> Element
