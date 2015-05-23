@@ -1,13 +1,11 @@
 module Game where
 
-import Dict
-import Dict (Dict)
-import List
-import List (..)
-import Maybe (Maybe (..), withDefault)
+import Dict exposing (Dict)
+import List exposing (..)
+import Maybe exposing ( withDefault)
 
-import Helpers (..)
-import GameTypes (..)
+import Helpers exposing (..)
+import GameTypes exposing (..)
 import State
 import Piece
 import Board
@@ -38,7 +36,7 @@ tryMove location state =
   case state.heldPiece of
     Just idx ->
       let hand = Player.getHand state.turn state
-          pieceStr = head <| drop idx hand
+          pieceStr = hand !! idx
           piece = Piece.fromString pieceStr
           move = { piece = piece, idx = idx, location = location }
           nextPlayerType = Player.getType (Player.next state.turn) state
@@ -91,8 +89,8 @@ makeMove move state =
 getFirstTileHandsAndDeck : Deck -> (Piece, Hands, Deck)
 getFirstTileHandsAndDeck deck =
   let deckWithIndices = List.map2 (,) [0..(List.length deck - 1)] deck
-      idxFirstNonKullervo = fst <| head <| filter (\(idx, piece) -> not (piece == "Kullervo")) deckWithIndices
-      firstTile = Piece.fromString (deck !! idxFirstNonKullervo)
+      (idxFirstNonKullervo, pieceFirstNonKullervo) = headU <| filter (\(idx, piece) -> not (piece == "Kullervo")) deckWithIndices
+      firstTile = Piece.fromString pieceFirstNonKullervo
       deckMinusFirstTile = without idxFirstNonKullervo deck
       redHand = take 5 deckMinusFirstTile
       blueHand = take 5 (drop 5 deckMinusFirstTile)

@@ -8,7 +8,6 @@ Elm.Kalevala.make = function (_elm) {
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
    $moduleName = "Kalevala",
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
@@ -29,7 +28,6 @@ Elm.Kalevala.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $State = Elm.State.make(_elm),
    $Time = Elm.Time.make(_elm),
-   $WebSocket = Elm.WebSocket.make(_elm),
    $Window = Elm.Window.make(_elm);
    var server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000";
    var constructAction = F6(function (clickType,
@@ -74,8 +72,8 @@ Elm.Kalevala.make = function (_elm) {
    });
    var processClick = function (signal) {
       return function () {
-         var sampledPlayerName = $Signal.sampleOn(signal)($Signal.subscribe($Display.playerNameChannel));
-         var sampledGameType = $Signal.sampleOn(signal)($Signal.subscribe($Display.gameTypeChannel));
+         var sampledPlayerName = $Signal.sampleOn(signal)($Display.playerNameMailbox.signal);
+         var sampledGameType = $Signal.sampleOn(signal)($Display.gameTypeMailbox.signal);
          var sampledMouse = A2($Signal.sampleOn,
          signal,
          $Mouse.position);
@@ -147,50 +145,20 @@ Elm.Kalevala.make = function (_elm) {
       }();
    });
    var main = function () {
-      var action = processClick($Signal.subscribe($Display.clickChannel));
-      var actionWithGameType = A2($Signal._op["~"],
-      A2($Signal._op["<~"],
-      F2(function (a,t) {
-         return {ctor: "_Tuple2"
-                ,_0: a
-                ,_1: t};
-      }),
-      action),
-      $Signal.subscribe($Display.gameTypeChannel));
-      var actionForRemote = A2($Signal._op["<~"],
-      function (_v17) {
-         return function () {
-            switch (_v17.ctor)
-            {case "_Tuple2":
-               return _v17._0;}
-            _U.badCase($moduleName,
-            "on line 89, column 35 to 36");
-         }();
-      },
-      A3($Signal.keepIf,
-      function (_v21) {
-         return function () {
-            switch (_v21.ctor)
-            {case "_Tuple2":
-               return _U.eq(_v21._1,
-                 $GameTypes.HumanVsHumanRemote);}
-            _U.badCase($moduleName,
-            "on line 89, column 60 to 83");
-         }();
-      },
-      {ctor: "_Tuple2"
-      ,_0: $GameTypes.NoAction
-      ,_1: $GameTypes.HumanVsCpu},
-      actionWithGameType));
+      var action = processClick($Display.clickMailbox.signal);
+      var state = A3($Signal.foldp,
+      performAction,
+      $Game.startState,
+      action);
       var decode = function (actionJson) {
          return function () {
-            var _v25 = A2($Json$Decode.decodeString,
+            var _v17 = A2($Json$Decode.decodeString,
             $Deserialize.action,
             actionJson);
-            switch (_v25.ctor)
+            switch (_v17.ctor)
             {case "Err":
-               return $GameTypes.ParseError(_v25._0);
-               case "Ok": return _v25._0;}
+               return $GameTypes.ParseError(_v17._0);
+               case "Ok": return _v17._0;}
             _U.badCase($moduleName,
             "between lines 83 and 86");
          }();
@@ -200,27 +168,6 @@ Elm.Kalevala.make = function (_elm) {
          0,
          $Serialize.action(action));
       };
-      var request = A2($Signal._op["<~"],
-      $Debug.watch("request"),
-      A2($Signal._op["<~"],
-      encode,
-      actionForRemote));
-      var response = A2($Signal._op["<~"],
-      $Debug.watch("response"),
-      A2($WebSocket.connect,
-      server,
-      request));
-      var responseAction = A2($Signal._op["<~"],
-      $Debug.watch("deserialized"),
-      A2($Signal._op["<~"],
-      decode,
-      response));
-      var state = A3($Signal.foldp,
-      performAction,
-      $Game.startState,
-      A2($Signal.merge,
-      action,
-      responseAction));
       return A2($Signal._op["~"],
       A2($Signal._op["~"],
       A2($Signal._op["~"],
@@ -228,8 +175,8 @@ Elm.Kalevala.make = function (_elm) {
       $Display.render,
       state),
       $Window.dimensions),
-      $Signal.subscribe($Display.gameTypeChannel)),
-      $Signal.subscribe($Display.playerNameChannel));
+      $Display.gameTypeMailbox.signal),
+      $Display.playerNameMailbox.signal);
    }();
    _elm.Kalevala.values = {_op: _op
                           ,performAction: performAction

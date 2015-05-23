@@ -1,16 +1,13 @@
 module AI where
 
-import List
-import List (..)
 import Dict
+import List exposing (..)
 
-import Helpers (..)
-import GameTypes (..)
+import Helpers exposing (..)
+import GameTypes exposing (..)
 import Piece
 import Player
 import Board
-
-import Debug
 
 getMove : State -> Maybe Move
 getMove state =
@@ -34,6 +31,6 @@ getMove state =
                                         map moveWithScore (validLocsByPiece piece)) idxs
         (bestMove, _) = sortBy snd validMoves |> reverse
                                             --|> Debug.watch "best moves"
-                                              |> head
+                                              |> headU
     in
       Just bestMove

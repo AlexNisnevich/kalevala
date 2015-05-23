@@ -1,10 +1,21 @@
 module Helpers where
 
-import List (..)
-import Random (..)
+import List exposing (..)
+import Random exposing (..)
+
+getOrFail : Maybe a -> a
+getOrFail maybe =
+  case maybe of
+    Just something -> something
+
+{-- Unsafe list methods --}
+headU l = getOrFail <| head l
+tailU l = getOrFail <| tail l
+maximumU l = getOrFail <| maximum l
+minimumU l = getOrFail <| minimum l
 
 (!!) : List a -> Int -> a
-(!!) list idx = head (drop idx list)
+(!!) list idx = getOrFail <| head (drop idx list)
 infixl 4 !!
 
 without : Int -> List a -> List a
