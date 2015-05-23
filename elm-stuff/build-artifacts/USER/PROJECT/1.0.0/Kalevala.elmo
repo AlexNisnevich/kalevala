@@ -8,10 +8,10 @@ Elm.Kalevala.make = function (_elm) {
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
    $moduleName = "Kalevala",
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Deprecated$WebSocket = Elm.Deprecated.WebSocket.make(_elm),
    $Deserialize = Elm.Deserialize.make(_elm),
    $Display = Elm.Display.make(_elm),
    $Game = Elm.Game.make(_elm),
@@ -29,7 +29,6 @@ Elm.Kalevala.make = function (_elm) {
    $Signal = Elm.Signal.make(_elm),
    $State = Elm.State.make(_elm),
    $Time = Elm.Time.make(_elm),
-   $WebSocket = Elm.WebSocket.make(_elm),
    $Window = Elm.Window.make(_elm);
    var server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000";
    var constructAction = F6(function (clickType,
@@ -68,14 +67,14 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 51 and 58");
+            "between lines 52 and 59");
          }();
       }();
    });
    var processClick = function (signal) {
       return function () {
-         var sampledPlayerName = $Signal.sampleOn(signal)($Signal.subscribe($Display.playerNameChannel));
-         var sampledGameType = $Signal.sampleOn(signal)($Signal.subscribe($Display.gameTypeChannel));
+         var sampledPlayerName = $Signal.sampleOn(signal)($Display.playerNameMailbox.signal);
+         var sampledGameType = $Signal.sampleOn(signal)($Display.gameTypeMailbox.signal);
          var sampledMouse = A2($Signal.sampleOn,
          signal,
          $Mouse.position);
@@ -139,7 +138,7 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 30 and 39");
+            "between lines 31 and 40");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]],
@@ -147,7 +146,7 @@ Elm.Kalevala.make = function (_elm) {
       }();
    });
    var main = function () {
-      var action = processClick($Signal.subscribe($Display.clickChannel));
+      var action = processClick($Display.clickMailbox.signal);
       var actionWithGameType = A2($Signal._op["~"],
       A2($Signal._op["<~"],
       F2(function (a,t) {
@@ -156,7 +155,7 @@ Elm.Kalevala.make = function (_elm) {
                 ,_1: t};
       }),
       action),
-      $Signal.subscribe($Display.gameTypeChannel));
+      $Display.gameTypeMailbox.signal);
       var actionForRemote = A2($Signal._op["<~"],
       function (_v17) {
          return function () {
@@ -164,10 +163,10 @@ Elm.Kalevala.make = function (_elm) {
             {case "_Tuple2":
                return _v17._0;}
             _U.badCase($moduleName,
-            "on line 89, column 35 to 36");
+            "on line 90, column 35 to 36");
          }();
       },
-      A3($Signal.keepIf,
+      A3($Signal.filter,
       function (_v21) {
          return function () {
             switch (_v21.ctor)
@@ -175,7 +174,7 @@ Elm.Kalevala.make = function (_elm) {
                return _U.eq(_v21._1,
                  $GameTypes.HumanVsHumanRemote);}
             _U.badCase($moduleName,
-            "on line 89, column 60 to 83");
+            "on line 90, column 60 to 83");
          }();
       },
       {ctor: "_Tuple2"
@@ -192,7 +191,7 @@ Elm.Kalevala.make = function (_elm) {
                return $GameTypes.ParseError(_v25._0);
                case "Ok": return _v25._0;}
             _U.badCase($moduleName,
-            "between lines 83 and 86");
+            "between lines 84 and 87");
          }();
       };
       var encode = function (action) {
@@ -207,7 +206,7 @@ Elm.Kalevala.make = function (_elm) {
       actionForRemote));
       var response = A2($Signal._op["<~"],
       $Debug.watch("response"),
-      A2($WebSocket.connect,
+      A2($Deprecated$WebSocket.connect,
       server,
       request));
       var responseAction = A2($Signal._op["<~"],
@@ -228,8 +227,8 @@ Elm.Kalevala.make = function (_elm) {
       $Display.render,
       state),
       $Window.dimensions),
-      $Signal.subscribe($Display.gameTypeChannel)),
-      $Signal.subscribe($Display.playerNameChannel));
+      $Display.gameTypeMailbox.signal),
+      $Display.playerNameMailbox.signal);
    }();
    _elm.Kalevala.values = {_op: _op
                           ,performAction: performAction

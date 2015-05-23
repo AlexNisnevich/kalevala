@@ -8,7 +8,6 @@ Elm.Game.make = function (_elm) {
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
    $moduleName = "Game",
    $AI = Elm.AI.make(_elm),
    $Basics = Elm.Basics.make(_elm),
@@ -89,7 +88,7 @@ Elm.Game.make = function (_elm) {
          _L.range(0,
          $List.length(deck) - 1),
          deck);
-         var idxFirstNonKullervo = $Basics.fst($List.head(A2($List.filter,
+         var $ = $Helpers.headU(A2($List.filter,
          function (_v0) {
             return function () {
                switch (_v0.ctor)
@@ -97,13 +96,13 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 94, column 69 to 93");
+               "on line 92, column 88 to 112");
             }();
          },
-         deckWithIndices)));
-         var firstTile = $Piece.fromString(A2($Helpers._op["!!"],
-         deck,
-         idxFirstNonKullervo));
+         deckWithIndices)),
+         idxFirstNonKullervo = $._0,
+         pieceFirstNonKullervo = $._1;
+         var firstTile = $Piece.fromString(pieceFirstNonKullervo);
          var deckMinusFirstTile = A2($Helpers.without,
          idxFirstNonKullervo,
          deck);
@@ -196,7 +195,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 72 and 75");
+            "between lines 70 and 73");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -289,7 +288,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 58 and 62");
+         "between lines 56 and 60");
       }();
    };
    var tryMove = F2(function (location,
@@ -310,14 +309,14 @@ Elm.Game.make = function (_elm) {
                        case "Remote":
                        return $Basics.identity;}
                     _U.badCase($moduleName,
-                    "between lines 45 and 49");
+                    "between lines 43 and 47");
                  }();
                  var hand = A2($Player.getHand,
                  state.turn,
                  state);
-                 var pieceStr = $List.head(A2($List.drop,
-                 _v8._0,
-                 hand));
+                 var pieceStr = A2($Helpers._op["!!"],
+                 hand,
+                 _v8._0);
                  var piece = $Piece.fromString(pieceStr);
                  var move = {_: {}
                             ,idx: _v8._0
@@ -333,7 +332,7 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 38 and 55");
+         "between lines 36 and 53");
       }();
    });
    var startGame = F4(function (gameType,

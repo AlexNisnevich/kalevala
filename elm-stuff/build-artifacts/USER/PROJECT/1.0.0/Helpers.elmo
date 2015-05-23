@@ -8,10 +8,10 @@ Elm.Helpers.make = function (_elm) {
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
    $moduleName = "Helpers",
    $Basics = Elm.Basics.make(_elm),
    $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
    $Random = Elm.Random.make(_elm);
    var replaceAtIndex = F3(function (i,
    elt,
@@ -44,9 +44,20 @@ Elm.Helpers.make = function (_elm) {
          after);
       }();
    });
+   var getOrFail = function (maybe) {
+      return function () {
+         switch (maybe.ctor)
+         {case "Just": return maybe._0;}
+         _U.badCase($moduleName,
+         "between lines 8 and 11");
+      }();
+   };
+   var headU = function (l) {
+      return getOrFail($List.head(l));
+   };
    _op["!!"] = F2(function (list,
    idx) {
-      return $List.head(A2($List.drop,
+      return headU(A2($List.drop,
       idx,
       list));
    });
@@ -70,7 +81,21 @@ Elm.Helpers.make = function (_elm) {
          newSeed));
       }();
    });
+   var tailU = function (l) {
+      return getOrFail($List.tail(l));
+   };
+   var maximumU = function (l) {
+      return getOrFail($List.maximum(l));
+   };
+   var minimumU = function (l) {
+      return getOrFail($List.minimum(l));
+   };
    _elm.Helpers.values = {_op: _op
+                         ,getOrFail: getOrFail
+                         ,headU: headU
+                         ,tailU: tailU
+                         ,maximumU: maximumU
+                         ,minimumU: minimumU
                          ,without: without
                          ,replaceAtIndex: replaceAtIndex
                          ,shuffle: shuffle};

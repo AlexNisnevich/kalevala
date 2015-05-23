@@ -1,14 +1,13 @@
 module Player where
 
 import Color
-import Color (Color)
+import Color exposing (Color)
 import Dict
-import List
-import Maybe (..)
+import Maybe exposing (withDefault)
 
-import GameTypes (Player (..), PlayerType (..), State)
-import Helpers (..)
-import Random (Seed, float, generate)
+import GameTypes exposing (Player (..), PlayerType (..), State)
+import Helpers exposing (..)
+import Random exposing (float, generate)
 
 toColor : Player -> Color
 toColor player =
@@ -46,7 +45,7 @@ noTilesInHand : Player -> State -> Bool
 noTilesInHand player state =
   List.isEmpty (getHand player state)
 
-random : Seed -> Player
+random : Random.Seed -> Player
 random seed =
   if fst (generate (float 0 1) seed) > 0.5
   then Red
