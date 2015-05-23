@@ -10,5 +10,6 @@
     "dependencies": {
         "elm-lang/core": "2.0.0 <= v < 3.0.0"
     },
-    "elm-version": "0.15.0 <= v < 3.0.0"
+    "elm-version": "0.15.0 <= v < 3.0.0",
+    "native-modules": true
 }

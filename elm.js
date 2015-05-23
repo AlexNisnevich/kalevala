@@ -1464,6 +1464,26 @@ Elm.Debug.make = function (_elm) {
                        ,trace: trace};
    return _elm.Debug.values;
 };
+Elm.Deprecated = Elm.Deprecated || {};
+Elm.Deprecated.WebSocket = Elm.Deprecated.WebSocket || {};
+Elm.Deprecated.WebSocket.make = function (_elm) {
+   "use strict";
+   _elm.Deprecated = _elm.Deprecated || {};
+   _elm.Deprecated.WebSocket = _elm.Deprecated.WebSocket || {};
+   if (_elm.Deprecated.WebSocket.values)
+   return _elm.Deprecated.WebSocket.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Deprecated.WebSocket",
+   $Native$WebSocket = Elm.Native.WebSocket.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var connect = $Native$WebSocket.connect;
+   _elm.Deprecated.WebSocket.values = {_op: _op
+                                      ,connect: connect};
+   return _elm.Deprecated.WebSocket.values;
+};
 Elm.Deserialize = Elm.Deserialize || {};
 Elm.Deserialize.make = function (_elm) {
    "use strict";
@@ -4764,20 +4784,11 @@ Elm.Helpers.make = function (_elm) {
    var headU = function (l) {
       return getOrFail($List.head(l));
    };
-   var tailU = function (l) {
-      return getOrFail($List.tail(l));
-   };
-   var maximumU = function (l) {
-      return getOrFail($List.maximum(l));
-   };
-   var minimumU = function (l) {
-      return getOrFail($List.minimum(l));
-   };
    _op["!!"] = F2(function (list,
    idx) {
-      return getOrFail($List.head(A2($List.drop,
+      return headU(A2($List.drop,
       idx,
-      list)));
+      list));
    });
    var shuffle = F2(function (list,
    seed) {
@@ -4799,6 +4810,15 @@ Elm.Helpers.make = function (_elm) {
          newSeed));
       }();
    });
+   var tailU = function (l) {
+      return getOrFail($List.tail(l));
+   };
+   var maximumU = function (l) {
+      return getOrFail($List.maximum(l));
+   };
+   var minimumU = function (l) {
+      return getOrFail($List.minimum(l));
+   };
    _elm.Helpers.values = {_op: _op
                          ,getOrFail: getOrFail
                          ,headU: headU
@@ -4971,6 +4991,7 @@ Elm.Kalevala.make = function (_elm) {
    $moduleName = "Kalevala",
    $Basics = Elm.Basics.make(_elm),
    $Debug = Elm.Debug.make(_elm),
+   $Deprecated$WebSocket = Elm.Deprecated.WebSocket.make(_elm),
    $Deserialize = Elm.Deserialize.make(_elm),
    $Display = Elm.Display.make(_elm),
    $Game = Elm.Game.make(_elm),
@@ -5026,7 +5047,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 51 and 58");
+            "between lines 52 and 59");
          }();
       }();
    });
@@ -5097,7 +5118,7 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 30 and 39");
+            "between lines 31 and 40");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]],
@@ -5106,21 +5127,51 @@ Elm.Kalevala.make = function (_elm) {
    });
    var main = function () {
       var action = processClick($Display.clickMailbox.signal);
-      var state = A3($Signal.foldp,
-      performAction,
-      $Game.startState,
-      action);
+      var actionWithGameType = A2($Signal._op["~"],
+      A2($Signal._op["<~"],
+      F2(function (a,t) {
+         return {ctor: "_Tuple2"
+                ,_0: a
+                ,_1: t};
+      }),
+      action),
+      $Display.gameTypeMailbox.signal);
+      var actionForRemote = A2($Signal._op["<~"],
+      function (_v17) {
+         return function () {
+            switch (_v17.ctor)
+            {case "_Tuple2":
+               return _v17._0;}
+            _U.badCase($moduleName,
+            "on line 90, column 35 to 36");
+         }();
+      },
+      A3($Signal.filter,
+      function (_v21) {
+         return function () {
+            switch (_v21.ctor)
+            {case "_Tuple2":
+               return _U.eq(_v21._1,
+                 $GameTypes.HumanVsHumanRemote);}
+            _U.badCase($moduleName,
+            "on line 90, column 60 to 83");
+         }();
+      },
+      {ctor: "_Tuple2"
+      ,_0: $GameTypes.NoAction
+      ,_1: $GameTypes.HumanVsCpu},
+      actionWithGameType));
       var decode = function (actionJson) {
          return function () {
-            var _v17 = A2($Json$Decode.decodeString,
+            var _v25 = A2($Json$Decode.decodeString,
             $Deserialize.action,
             actionJson);
-            switch (_v17.ctor)
+            switch (_v25.ctor)
             {case "Err":
-               return $GameTypes.ParseError(_v17._0);
-               case "Ok": return _v17._0;}
+               return $GameTypes.ParseError(_v25._0);
+               case "Ok": return _v25._0;}
             _U.badCase($moduleName,
-            "between lines 83 and 86");
+            "between lines 84 and 87");
          }();
       };
       var encode = function (action) {
@@ -5128,6 +5179,27 @@ Elm.Kalevala.make = function (_elm) {
          0,
          $Serialize.action(action));
       };
+      var request = A2($Signal._op["<~"],
+      $Debug.watch("request"),
+      A2($Signal._op["<~"],
+      encode,
+      actionForRemote));
+      var response = A2($Signal._op["<~"],
+      $Debug.watch("response"),
+      A2($Deprecated$WebSocket.connect,
+      server,
+      request));
+      var responseAction = A2($Signal._op["<~"],
+      $Debug.watch("deserialized"),
+      A2($Signal._op["<~"],
+      decode,
+      response));
+      var state = A3($Signal.foldp,
+      performAction,
+      $Game.startState,
+      A2($Signal.merge,
+      action,
+      responseAction));
       return A2($Signal._op["~"],
       A2($Signal._op["~"],
       A2($Signal._op["~"],
@@ -12343,6 +12415,42 @@ Elm.Native.Utils.make = function(localRuntime) {
 	};
 };
 
+Elm.Native.WebSocket = {};
+Elm.Native.WebSocket.make = function(elm) {
+
+  elm.Native = elm.Native || {};
+  elm.Native.WebSocket = elm.Native.WebSocket || {};
+  if (elm.Native.WebSocket.values) return elm.Native.WebSocket.values;
+
+  var Signal = Elm.Signal.make(elm);
+  var List = Elm.Native.List.make(elm);
+
+  function open(url, outgoing) {
+    var incoming = Signal.constant("");
+    var ws = new WebSocket(url);
+
+    var pending = [];
+    var ready = false;
+    
+    ws.onopen = function(e) {
+      var len = pending.length;
+      for (var i = 0; i < len; ++i) { ws.send(pending[i]); }
+      ready = true;
+    };
+    ws.onmessage = function(event) {
+      elm.notify(incoming.id, event.data);
+    };
+    
+    function send(msg) {
+      ready ? ws.send(msg) : pending.push(msg);
+    }
+    
+    function take1(x,y) { return x }
+    return A3(Signal.map2, F2(take1), incoming, A2(Signal.map, send, outgoing));
+  }
+
+  return elm.Native.WebSocket.values = { connect: F2(open) };
+};
 Elm.Native = Elm.Native || {};
 Elm.Native.Window = {};
 Elm.Native.Window.make = function(localRuntime) {

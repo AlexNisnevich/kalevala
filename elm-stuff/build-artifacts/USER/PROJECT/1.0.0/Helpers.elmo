@@ -55,20 +55,11 @@ Elm.Helpers.make = function (_elm) {
    var headU = function (l) {
       return getOrFail($List.head(l));
    };
-   var tailU = function (l) {
-      return getOrFail($List.tail(l));
-   };
-   var maximumU = function (l) {
-      return getOrFail($List.maximum(l));
-   };
-   var minimumU = function (l) {
-      return getOrFail($List.minimum(l));
-   };
    _op["!!"] = F2(function (list,
    idx) {
-      return getOrFail($List.head(A2($List.drop,
+      return headU(A2($List.drop,
       idx,
-      list)));
+      list));
    });
    var shuffle = F2(function (list,
    seed) {
@@ -90,6 +81,15 @@ Elm.Helpers.make = function (_elm) {
          newSeed));
       }();
    });
+   var tailU = function (l) {
+      return getOrFail($List.tail(l));
+   };
+   var maximumU = function (l) {
+      return getOrFail($List.maximum(l));
+   };
+   var minimumU = function (l) {
+      return getOrFail($List.minimum(l));
+   };
    _elm.Helpers.values = {_op: _op
                          ,getOrFail: getOrFail
                          ,headU: headU

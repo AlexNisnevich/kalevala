@@ -15,7 +15,7 @@ maximumU l = getOrFail <| maximum l
 minimumU l = getOrFail <| minimum l
 
 (!!) : List a -> Int -> a
-(!!) list idx = getOrFail <| head (drop idx list)
+(!!) list idx = headU (drop idx list)
 infixl 4 !!
 
 without : Int -> List a -> List a

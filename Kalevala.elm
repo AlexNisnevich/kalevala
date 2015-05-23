@@ -9,8 +9,9 @@ import Mouse
 import Random
 import Signal exposing (..)
 import Time
---import WebSocket
 import Window
+
+import Deprecated.WebSocket as WebSocket
 
 import Helpers exposing (..)
 import GameTypes exposing (..)
@@ -85,7 +86,6 @@ main =
 
     action = processClick clickMailbox.signal
 
-    {--
     actionWithGameType = (\a t -> (a, t)) <~ action ~ gameTypeMailbox.signal
     actionForRemote = (\(a, t) -> a) <~ filter (\(a, t) -> t == HumanVsHumanRemote) (NoAction, HumanVsCpu) actionWithGameType
 
@@ -94,9 +94,5 @@ main =
     responseAction = Debug.watch "deserialized" <~ (decode <~ response)
 
     state = foldp performAction Game.startState (merge action responseAction)
-    --}
-
-    state = foldp performAction Game.startState action
-
   in
     render <~ state ~ Window.dimensions ~ gameTypeMailbox.signal ~ playerNameMailbox.signal
