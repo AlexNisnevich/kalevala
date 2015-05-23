@@ -12,7 +12,8 @@ Elm.Helpers.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Random = Elm.Random.make(_elm);
+   $Random = Elm.Random.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
    var replaceAtIndex = F3(function (i,
    elt,
    arr) {
@@ -44,12 +45,36 @@ Elm.Helpers.make = function (_elm) {
          after);
       }();
    });
+   var tuple = F2(function (a,b) {
+      return {ctor: "_Tuple2"
+             ,_0: a
+             ,_1: b};
+   });
+   var filterOn = F3(function (inputSignal,
+   conditionSignal,
+   $default) {
+      return function () {
+         var joinedSignal = A3($Signal.map2,
+         tuple,
+         inputSignal,
+         conditionSignal);
+         var filteredSignal = A3($Signal.filter,
+         $Basics.snd,
+         {ctor: "_Tuple2"
+         ,_0: $default
+         ,_1: false},
+         joinedSignal);
+         return A2($Signal.map,
+         $Basics.fst,
+         filteredSignal);
+      }();
+   });
    var getOrFail = function (maybe) {
       return function () {
          switch (maybe.ctor)
          {case "Just": return maybe._0;}
          _U.badCase($moduleName,
-         "between lines 8 and 11");
+         "between lines 9 and 12");
       }();
    };
    var headU = function (l) {
@@ -96,8 +121,10 @@ Elm.Helpers.make = function (_elm) {
                          ,tailU: tailU
                          ,maximumU: maximumU
                          ,minimumU: minimumU
+                         ,tuple: tuple
                          ,without: without
                          ,replaceAtIndex: replaceAtIndex
-                         ,shuffle: shuffle};
+                         ,shuffle: shuffle
+                         ,filterOn: filterOn};
    return _elm.Helpers.values;
 };

@@ -4869,7 +4869,8 @@ Elm.Helpers.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Random = Elm.Random.make(_elm);
+   $Random = Elm.Random.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
    var replaceAtIndex = F3(function (i,
    elt,
    arr) {
@@ -4901,12 +4902,36 @@ Elm.Helpers.make = function (_elm) {
          after);
       }();
    });
+   var tuple = F2(function (a,b) {
+      return {ctor: "_Tuple2"
+             ,_0: a
+             ,_1: b};
+   });
+   var filterOn = F3(function (inputSignal,
+   conditionSignal,
+   $default) {
+      return function () {
+         var joinedSignal = A3($Signal.map2,
+         tuple,
+         inputSignal,
+         conditionSignal);
+         var filteredSignal = A3($Signal.filter,
+         $Basics.snd,
+         {ctor: "_Tuple2"
+         ,_0: $default
+         ,_1: false},
+         joinedSignal);
+         return A2($Signal.map,
+         $Basics.fst,
+         filteredSignal);
+      }();
+   });
    var getOrFail = function (maybe) {
       return function () {
          switch (maybe.ctor)
          {case "Just": return maybe._0;}
          _U.badCase($moduleName,
-         "between lines 8 and 11");
+         "between lines 9 and 12");
       }();
    };
    var headU = function (l) {
@@ -4953,9 +4978,11 @@ Elm.Helpers.make = function (_elm) {
                          ,tailU: tailU
                          ,maximumU: maximumU
                          ,minimumU: minimumU
+                         ,tuple: tuple
                          ,without: without
                          ,replaceAtIndex: replaceAtIndex
-                         ,shuffle: shuffle};
+                         ,shuffle: shuffle
+                         ,filterOn: filterOn};
    return _elm.Helpers.values;
 };
 Elm.Json = Elm.Json || {};
@@ -5138,6 +5165,24 @@ Elm.Kalevala.make = function (_elm) {
    $State = Elm.State.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Window = Elm.Window.make(_elm);
+   var decode = function (actionJson) {
+      return function () {
+         var _v0 = A2($Json$Decode.decodeString,
+         $Deserialize.action,
+         actionJson);
+         switch (_v0.ctor)
+         {case "Err":
+            return $GameTypes.ParseError(_v0._0);
+            case "Ok": return _v0._0;}
+         _U.badCase($moduleName,
+         "between lines 87 and 96");
+      }();
+   };
+   var encode = function (action) {
+      return A2($Json$Encode.encode,
+      0,
+      $Serialize.action(action));
+   };
    var server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000";
    var constructAction = F5(function (clickType,
    seed,
@@ -5187,7 +5232,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 56 and 65");
+            "between lines 57 and 66");
          }();
       }();
    });
@@ -5255,68 +5300,20 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 34 and 43");
+            "between lines 35 and 44");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]],
          newState) : $State.mustPass(newState) ? $Game.pass(newState) : newState;
       }();
    });
-   var gameTypeMailbox = $Signal.mailbox($GameTypes.HumanVsCpu);
+   var remoteMailbox = $Signal.mailbox(false);
    var main = function () {
       var action = processClick($Display.clickMailbox.signal);
-      var actionWithGameType = A2($Signal._op["~"],
-      A2($Signal._op["<~"],
-      F2(function (a,t) {
-         return {ctor: "_Tuple2"
-                ,_0: a
-                ,_1: t};
-      }),
-      action),
-      gameTypeMailbox.signal);
-      var actionForRemote = A2($Signal._op["<~"],
-      function (_v17) {
-         return function () {
-            switch (_v17.ctor)
-            {case "_Tuple2":
-               return _v17._0;}
-            _U.badCase($moduleName,
-            "on line 95, column 35 to 36");
-         }();
-      },
-      A3($Signal.filter,
-      function (_v21) {
-         return function () {
-            switch (_v21.ctor)
-            {case "_Tuple2":
-               return _U.eq(_v21._1,
-                 $GameTypes.HumanVsHumanRemote);}
-            _U.badCase($moduleName,
-            "on line 95, column 60 to 83");
-         }();
-      },
-      {ctor: "_Tuple2"
-      ,_0: $GameTypes.NoAction
-      ,_1: $GameTypes.HumanVsCpu},
-      actionWithGameType));
-      var decode = function (actionJson) {
-         return function () {
-            var _v25 = A2($Json$Decode.decodeString,
-            $Deserialize.action,
-            actionJson);
-            switch (_v25.ctor)
-            {case "Err":
-               return $GameTypes.ParseError(_v25._0);
-               case "Ok": return _v25._0;}
-            _U.badCase($moduleName,
-            "between lines 89 and 92");
-         }();
-      };
-      var encode = function (action) {
-         return A2($Json$Encode.encode,
-         0,
-         $Serialize.action(action));
-      };
+      var actionForRemote = A3($Helpers.filterOn,
+      action,
+      remoteMailbox.signal,
+      $GameTypes.NoAction);
       var request = A2($Signal._op["<~"],
       $Debug.watch("request"),
       A2($Signal._op["<~"],
@@ -5347,11 +5344,13 @@ Elm.Kalevala.make = function (_elm) {
       $Display.playerNameMailbox.signal);
    }();
    _elm.Kalevala.values = {_op: _op
-                          ,gameTypeMailbox: gameTypeMailbox
+                          ,remoteMailbox: remoteMailbox
                           ,performAction: performAction
                           ,constructAction: constructAction
                           ,processClick: processClick
                           ,server: server
+                          ,encode: encode
+                          ,decode: decode
                           ,main: main};
    return _elm.Kalevala.values;
 };

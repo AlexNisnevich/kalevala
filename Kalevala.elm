@@ -24,8 +24,9 @@ import Deserialize
 
 import Debug
 
-gameTypeMailbox : Mailbox GameType
-gameTypeMailbox = mailbox HumanVsCpu
+{- A mailbox whose signal is True iff the game being played is a remote one. -}
+remoteMailbox : Mailbox Bool
+remoteMailbox = mailbox False
 
 {- Perform an action on the current state and return the resulting state. -}
 performAction : Action -> State -> State
@@ -76,6 +77,17 @@ processClick signal =
 server : String
 server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000"
 
+{- Encodes an Action as a JSON string -}
+encode : Action -> String
+encode action = Json.Encode.encode 0 (Serialize.action action)
+
+{- Decodes an Action from a JSON string -}
+decode : String -> Action
+decode actionJson =
+  case Json.Decode.decodeString Deserialize.action actionJson of
+    Ok action -> action
+    Err e -> ParseError e
+
 {- The main game loop. 
    The state is folded over time over a stream of Actions, coming from the client and from the server (for an online game.)
    Actions from the client are constructed by processing a signal of ClickEvents from clickMailbox.
@@ -85,14 +97,8 @@ server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000"
 main : Signal Element
 main =
   let
-    encode action = Json.Encode.encode 0 (Serialize.action action)
-    decode actionJson = case Json.Decode.decodeString Deserialize.action actionJson of Ok action -> action
-                                                                                       Err e -> ParseError e
-
     action = processClick clickMailbox.signal
-
-    actionWithGameType = (\a t -> (a, t)) <~ action ~ gameTypeMailbox.signal
-    actionForRemote = (\(a, t) -> a) <~ filter (\(a, t) -> t == HumanVsHumanRemote) (NoAction, HumanVsCpu) actionWithGameType
+    actionForRemote = filterOn action remoteMailbox.signal NoAction
 
     request = Debug.watch "request" <~ (encode <~ actionForRemote)
     response = Debug.watch "response" <~ WebSocket.connect server request
