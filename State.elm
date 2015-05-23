@@ -1,6 +1,6 @@
 module State where
 
-import GameTypes (State, GameState (..), Player (..), PlayerType (..))
+import GameTypes exposing (..)
 import Player
 
 {- Is the game ongoing in the given state? -}

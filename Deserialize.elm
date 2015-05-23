@@ -1,10 +1,10 @@
 module Deserialize where
 
 import Dict
-import Json.Decode (..)
+import Json.Decode exposing (..)
 
-import Helpers (..)
-import GameTypes (..)
+import Helpers exposing (..)
+import GameTypes exposing (..)
 import Player
 
 action : Decoder Action

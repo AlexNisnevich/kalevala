@@ -1,22 +1,18 @@
 module Display where
 
-import Color (..)
+import Color exposing (..)
 import Dict
-import Graphics.Collage (..)
-import Graphics.Element
-import Graphics.Element (..)
-import Graphics.Input (..)
-import Graphics.Input.Field
-import Graphics.Input.Field (..)
-import List
-import List (..)
-import Maybe (Maybe (..), withDefault)
-import Signal (Channel, channel, send)
+import Graphics.Collage exposing (..)
+import Graphics.Element exposing (..)
+import Graphics.Input exposing (..)
+import Graphics.Input.Field exposing (..)
+import List exposing (..)
+import Maybe exposing (withDefault)
+import Signal exposing (Mailbox, mailbox, message)
 import String
-import Text
-import Text (..)
+import Text exposing (..)
 
-import GameTypes (..)
+import GameTypes exposing (..)
 import State
 import Piece
 import Board
@@ -42,13 +38,13 @@ transparent = rgba 0 0 0 0.0
 transpGreen : Color
 transpGreen = rgba 0 255 0 0.5
 
--- Channels
+-- Mailboxes
 
-clickChannel : Channel ClickEvent
-clickChannel = channel None
+clickMailbox : Mailbox ClickEvent
+clickMailbox = mailbox None
 
-playerNameChannel : Channel Content
-playerNameChannel = channel noContent
+playerNameMailbox : Mailbox Content
+playerNameMailbox = mailbox noContent
 
 -- Helpers
 
@@ -139,7 +135,7 @@ renderBoard state boardSize dims =
 
       board = collage size size (grid ++ pieces ++ overlay ++ outline)
   in
-    clickable (send clickChannel BoardClick) board
+    clickable (message clickMailbox.address BoardClick) board
 
 renderHand : Player -> State -> Element
 renderHand player state =
@@ -152,11 +148,11 @@ renderHand player state =
       makePiece idx pieceStr = pieceImage pieceStr (toString <| Piece.baseValue <| Piece.fromString pieceStr) handTileSize
                                   |> container pieceSize pieceSize middle
                                   |> Graphics.Element.color (if isPieceHeld idx then (Player.toColor state.turn) else white)
-                                  |> clickable (send clickChannel (PieceInHand player idx))
+                                  |> clickable (message clickMailbox.address (PieceInHand player idx))
       hiddenPiece = image (round handTileSize) (round handTileSize) "images/100/back2.png"
 
       playerHand = if isEmpty hand && state.gameState == Ongoing
-                   then [button (send clickChannel PassButton) "Pass" |> container 100 100 middle]
+                   then [button (message clickMailbox.address PassButton) "Pass" |> container 100 100 middle]
                    else indexedMap makePiece hand
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
       dummyHand = repeat 5 (hiddenPiece |> container pieceSize pieceSize middle)
@@ -193,15 +189,15 @@ renderScoreArea state =
 
 renderMenu : Element
 renderMenu =
-  flow down [ customButton (send clickChannel StartSinglePlayer) 
+  flow down [ customButton (message clickMailbox.address StartSinglePlayer) 
                 (image 208 48 "images/buttonSinglePlayer.png")
                 (image 208 48 "images/buttonSinglePlayer.png")
                 (image 208 48 "images/buttonSinglePlayer.png") |> withMargin (1, 3)
-            , customButton (send clickChannel StartTwoPlayerOnline) 
+            , customButton (message clickMailbox.address StartTwoPlayerOnline) 
                 (image 208 48 "images/button2PlayerOnline.png")
                 (image 208 48 "images/button2PlayerOnline.png")
                 (image 208 48 "images/button2PlayerOnline.png") |> withMargin (1, 3)
-            , customButton (send clickChannel StartTwoPlayerHotseat) 
+            , customButton (message clickMailbox.address StartTwoPlayerHotseat) 
                 (image 208 48 "images/button2PlayerHotseat.png")
                 (image 208 48 "images/button2PlayerHotseat.png")
                 (image 208 48 "images/button2PlayerHotseat.png") |> withMargin (1, 3)
@@ -295,8 +291,8 @@ render state dims gameType playerName =
       handGap = totalBoardSize - 2 * (round handTileSize) - (handPadding * 2)
       withSpacing padding elt = spacer padding padding `beside` elt
       rulesAreaWidth = 650
-      startButton = button (send clickChannel Start) "New game"
-      gameTypeDropDown = dropDown (send gameTypeChannel)
+      startButton = button (message clickMailbox.address Start) "New game"
+      gameTypeDropDown = dropDown (message gameTypeMailbox.address)
                             [ ("Player vs AI", HumanVsCpu)
                             , ("Player vs Player (hotseat)" , HumanVsHumanLocal)
                             , ("Player vs Player (online)" , HumanVsHumanRemote)
@@ -308,7 +304,7 @@ render state dims gameType playerName =
                                Disconnected -> "Opponent disconnected "
                                _ -> ""
       remoteGameStatusArea = if state.gameState == NotStarted
-                             then field Graphics.Input.Field.defaultStyle (send playerNameChannel) "Your name" playerName
+                             then field Graphics.Input.Field.defaultStyle (message playerNameMailbox.address) "Your name" playerName
                              else container 150 40 middle <| centered <| Text.height 11 <| fromString <| remoteGameStatusText
       statusArea = if gameType == HumanVsHumanRemote then remoteGameStatusArea else Graphics.Element.empty
       deckSizeArea = if State.isOngoing state

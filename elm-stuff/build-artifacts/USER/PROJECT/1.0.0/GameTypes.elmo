@@ -8,7 +8,6 @@ Elm.GameTypes.make = function (_elm) {
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
    $moduleName = "GameTypes",
    $Color = Elm.Color.make(_elm),
    $Dict = Elm.Dict.make(_elm),

@@ -8,7 +8,6 @@ Elm.Display.make = function (_elm) {
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
    $moduleName = "Display",
    $Basics = Elm.Basics.make(_elm),
    $Board = Elm.Board.make(_elm),
@@ -75,7 +74,7 @@ Elm.Display.make = function (_elm) {
                            $Graphics$Element.widthOf(elt) + _v0._0 * 2,
                            _v0._1))]));}
          _U.badCase($moduleName,
-         "between lines 258 and 264");
+         "between lines 254 and 260");
       }();
    });
    var renderPieceDescription = function (state) {
@@ -98,7 +97,7 @@ Elm.Display.make = function (_elm) {
                       ,A3($Graphics$Element.container,
                       85,
                       20,
-                      $Graphics$Element.midBottom)($Text.centered($Text.height(14)($Text.fromString(deckSizeStr))))]));
+                      $Graphics$Element.midBottom)($Graphics$Element.centered($Text.height(14)($Text.fromString(deckSizeStr))))]));
       }();
    };
    var drawLastPlacedOutline = F2(function (state,
@@ -130,7 +129,7 @@ Elm.Display.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 122 and 128");
+         "between lines 118 and 124");
       }();
    });
    var pieceToImage = F3(function (piece,
@@ -183,11 +182,11 @@ Elm.Display.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 99 and 103");
+         "between lines 95 and 99");
       }();
    });
-   var playerNameChannel = $Signal.channel($Graphics$Input$Field.noContent);
-   var clickChannel = $Signal.channel($GameTypes.None);
+   var playerNameMailbox = $Signal.mailbox($Graphics$Input$Field.noContent);
+   var clickMailbox = $Signal.mailbox($GameTypes.None);
    var transpGreen = A4($Color.rgba,
    0,
    255,
@@ -210,7 +209,7 @@ Elm.Display.make = function (_elm) {
               transparent,
               elt);}
          _U.badCase($moduleName,
-         "on line 254, column 25 to 58");
+         "on line 250, column 25 to 58");
       }();
    });
    var renderScoreArea = function (state) {
@@ -219,7 +218,7 @@ Elm.Display.make = function (_elm) {
       _L.fromArray([A3($Graphics$Element.container,
                    85,
                    30,
-                   $Graphics$Element.middle)($Text.centered(A2(playerHandText,
+                   $Graphics$Element.middle)($Graphics$Element.centered(A2(playerHandText,
                    $GameTypes.Red,
                    state)))
                    ,withMargin({ctor: "_Tuple2"
@@ -227,7 +226,7 @@ Elm.Display.make = function (_elm) {
                                ,_1: 6})(A3($Graphics$Element.container,
                    85,
                    40,
-                   $Graphics$Element.middle)($Text.centered(A2(playerScoreText,
+                   $Graphics$Element.middle)($Graphics$Element.centered(A2(playerScoreText,
                    $GameTypes.Red,
                    state))))
                    ,withMargin({ctor: "_Tuple2"
@@ -238,13 +237,13 @@ Elm.Display.make = function (_elm) {
                                ,_1: 6})(A3($Graphics$Element.container,
                    85,
                    40,
-                   $Graphics$Element.middle)($Text.centered(A2(playerScoreText,
+                   $Graphics$Element.middle)($Graphics$Element.centered(A2(playerScoreText,
                    $GameTypes.Blue,
                    state))))
                    ,A3($Graphics$Element.container,
                    85,
                    30,
-                   $Graphics$Element.middle)($Text.centered(A2(playerHandText,
+                   $Graphics$Element.middle)($Graphics$Element.centered(A2(playerHandText,
                    $GameTypes.Blue,
                    state)))]));
    };
@@ -255,8 +254,8 @@ Elm.Display.make = function (_elm) {
    _L.fromArray([withMargin({ctor: "_Tuple2"
                             ,_0: 1
                             ,_1: 3})(A4($Graphics$Input.customButton,
-                A2($Signal.send,
-                clickChannel,
+                A2($Signal.message,
+                clickMailbox.address,
                 $GameTypes.StartSinglePlayer),
                 A3($Graphics$Element.image,
                 208,
@@ -273,8 +272,8 @@ Elm.Display.make = function (_elm) {
                 ,withMargin({ctor: "_Tuple2"
                             ,_0: 1
                             ,_1: 3})(A4($Graphics$Input.customButton,
-                A2($Signal.send,
-                clickChannel,
+                A2($Signal.message,
+                clickMailbox.address,
                 $GameTypes.StartTwoPlayerOnline),
                 A3($Graphics$Element.image,
                 208,
@@ -291,8 +290,8 @@ Elm.Display.make = function (_elm) {
                 ,withMargin({ctor: "_Tuple2"
                             ,_0: 1
                             ,_1: 3})(A4($Graphics$Input.customButton,
-                A2($Signal.send,
-                clickChannel,
+                A2($Signal.message,
+                clickMailbox.address,
                 $GameTypes.StartTwoPlayerHotseat),
                 A3($Graphics$Element.image,
                 208,
@@ -322,9 +321,9 @@ Elm.Display.make = function (_elm) {
          return function () {
             switch (_v18.ctor)
             {case "_Tuple2":
-               return $Text.leftAligned($Text.color(_v18._0)($Text.fromString(_v18._1)));}
+               return $Graphics$Element.leftAligned($Text.color(_v18._0)($Text.fromString(_v18._1)));}
             _U.badCase($moduleName,
-            "on line 214, column 45 to 95");
+            "on line 210, column 45 to 95");
          }();
       })($List.take(5)(state.log)))));
    };
@@ -365,8 +364,8 @@ Elm.Display.make = function (_elm) {
          };
          var makePiece = F2(function (idx,
          pieceStr) {
-            return $Graphics$Input.clickable(A2($Signal.send,
-            clickChannel,
+            return $Graphics$Input.clickable(A2($Signal.message,
+            clickMailbox.address,
             A2($GameTypes.PieceInHand,
             player,
             idx)))($Graphics$Element.color(isPieceHeld(idx) ? $Player.toColor(state.turn) : $Color.white)(A3($Graphics$Element.container,
@@ -385,8 +384,8 @@ Elm.Display.make = function (_elm) {
          100,
          100,
          $Graphics$Element.middle)(A2($Graphics$Input.button,
-         A2($Signal.send,
-         clickChannel,
+         A2($Signal.message,
+         clickMailbox.address,
          $GameTypes.PassButton),
          "Pass"))]) : A2($List.indexedMap,
          makePiece,
@@ -443,7 +442,7 @@ Elm.Display.make = function (_elm) {
          {case "_Tuple2":
             return _v22._1 - 2 * gameMargin;}
          _U.badCase($moduleName,
-         "on line 56, column 37 to 61");
+         "on line 52, column 37 to 61");
       }();
    };
    var getTileSizeFromBoardSize = F2(function (boardSize,
@@ -570,8 +569,8 @@ Elm.Display.make = function (_elm) {
          overlay,
          outline))));
          return A2($Graphics$Input.clickable,
-         A2($Signal.send,
-         clickChannel,
+         A2($Signal.message,
+         clickMailbox.address,
          $GameTypes.BoardClick),
          board);
       }();
@@ -614,7 +613,7 @@ Elm.Display.make = function (_elm) {
                         ,_1: boardY};
               }();}
          _U.badCase($moduleName,
-         "between lines 63 and 70");
+         "between lines 59 and 66");
       }();
    });
    var render = F3(function (state,
@@ -633,8 +632,8 @@ Elm.Display.make = function (_elm) {
                          ,handTileSize: handTileSize
                          ,transparent: transparent
                          ,transpGreen: transpGreen
-                         ,clickChannel: clickChannel
-                         ,playerNameChannel: playerNameChannel
+                         ,clickMailbox: clickMailbox
+                         ,playerNameMailbox: playerNameMailbox
                          ,getTotalBoardSize: getTotalBoardSize
                          ,getTileSizeFromBoardSize: getTileSizeFromBoardSize
                          ,mouseToBoardPosition: mouseToBoardPosition

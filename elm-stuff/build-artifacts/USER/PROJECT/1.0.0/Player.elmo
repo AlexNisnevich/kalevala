@@ -8,7 +8,6 @@ Elm.Player.make = function (_elm) {
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
    $moduleName = "Player",
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
@@ -31,7 +30,7 @@ Elm.Player.make = function (_elm) {
             case "Red":
             return $GameTypes.Blue;}
          _U.badCase($moduleName,
-         "between lines 33 and 35");
+         "between lines 32 and 34");
       }();
    };
    var toString = function (player) {
@@ -40,7 +39,7 @@ Elm.Player.make = function (_elm) {
          {case "Blue": return "blue";
             case "Red": return "red";}
          _U.badCase($moduleName,
-         "between lines 27 and 29");
+         "between lines 26 and 28");
       }();
    };
    var getType = F2(function (player,
@@ -73,7 +72,7 @@ Elm.Player.make = function (_elm) {
             case "red":
             return $GameTypes.Red;}
          _U.badCase($moduleName,
-         "between lines 21 and 23");
+         "between lines 20 and 22");
       }();
    };
    var toColor = function (player) {
@@ -90,7 +89,7 @@ Elm.Player.make = function (_elm) {
               33,
               32);}
          _U.badCase($moduleName,
-         "between lines 15 and 17");
+         "between lines 14 and 16");
       }();
    };
    _elm.Player.values = {_op: _op

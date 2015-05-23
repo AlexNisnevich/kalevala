@@ -8,7 +8,6 @@ Elm.AI.make = function (_elm) {
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
    $moduleName = "AI",
    $Basics = Elm.Basics.make(_elm),
    $Board = Elm.Board.make(_elm),
@@ -91,14 +90,14 @@ Elm.AI.make = function (_elm) {
             }();
          },
          idxs);
-         var _ = $List.head($List.reverse(A2($List.sortBy,
+         var _ = $Helpers.headU($List.reverse(A2($List.sortBy,
          $Basics.snd,
          validMoves)));
          var bestMove = function () {
             switch (_.ctor)
             {case "_Tuple2": return _._0;}
             _U.badCase($moduleName,
-            "between lines 35 and 37");
+            "between lines 32 and 34");
          }();
          return $Maybe.Just(bestMove);
       }();

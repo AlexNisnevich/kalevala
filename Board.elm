@@ -1,11 +1,11 @@
 module Board where
 
-import List
-import List (..)
-import Maybe (Maybe (..), withDefault)
 import Dict
+import List exposing (..)
+import Maybe exposing (withDefault)
 
-import GameTypes (..)
+import Helpers exposing (..)
+import GameTypes exposing (..)
 import State
 import Piece
 import Player
@@ -21,8 +21,8 @@ getBoardSize board =
     let locations = Dict.keys board
         xs = map fst locations
         ys = map snd locations
-        maxX = max (maximum xs) (abs <| minimum xs)
-        maxY = max (maximum ys) (abs <| minimum ys)
+        maxX = max (maximumU xs) (abs <| minimumU xs)
+        maxY = max (maximumU ys) (abs <| minimumU ys)
         distFromCenter = (max maxX maxY) + 2
     in
       (distFromCenter * 2) + 1
@@ -92,14 +92,14 @@ scoreMove move board =
   let column = findColumn move.location board
       columnSize = List.length column + 1
       columnScores = map (\loc -> getTileValue loc Vertical move board) column
-      columnHighScore = if isEmpty column then 0 else maximum columnScores
+      columnHighScore = if isEmpty column then 0 else maximumU columnScores
       tileScoreInColumn = getTileValue move.location Vertical move board
       columnPoints = if (tileScoreInColumn > columnHighScore && columnSize >= 2) then columnSize else 0
 
       row = findRow move.location board
       rowSize = List.length row + 1
       rowScores = map (\loc -> getTileValue loc Horizontal move board) row
-      rowHighScore = if isEmpty row then 0 else maximum rowScores
+      rowHighScore = if isEmpty row then 0 else maximumU rowScores
       tileScoreInRow = getTileValue move.location Horizontal move board
       rowPoints = if (tileScoreInRow > rowHighScore && rowSize >= 2) then rowSize else 0
   in
@@ -149,7 +149,7 @@ getDisplayedTileValue (x,y) board =
 -- is this piece at one end of a line with the same kind of piece at the other end? (used by Louhi)
 hasSamePieceAtOtherEnd : Location -> Board -> Direction -> Bool
 hasSamePieceAtOtherEnd (x,y) board dir =
-  let last list = head <| reverse list
+  let last list = headU <| reverse list
       samePieces pos1 pos2 = pieceAt pos1 board == pieceAt pos2 board
       above = findAbove (x,y-1) board
       below = findBelow (x,y+1) board
@@ -171,7 +171,7 @@ isValidSquareToMove state (x,y) size =
     case state.heldPiece of
       Just idx ->
         let hand = Player.getHand state.turn state
-            piece = Piece.fromString <| head <| drop idx hand
+            piece = Piece.fromString <| headU <| drop idx hand
             location = (x - (size // 2), y - (size // 2))
         in
           isValidMove { piece = piece, idx = idx, location = location } state.board

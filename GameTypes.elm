@@ -1,9 +1,8 @@
 module GameTypes where
 
-import Color (Color)
+import Color exposing (Color)
 import Dict
-import Dict (Dict)
-import Random (Seed)
+import Dict exposing (Dict)
 
 type GameType = HumanVsCpu
               | HumanVsHumanLocal

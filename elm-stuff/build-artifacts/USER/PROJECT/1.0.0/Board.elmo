@@ -8,11 +8,11 @@ Elm.Board.make = function (_elm) {
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   _P = _N.Ports.make(_elm),
    $moduleName = "Board",
    $Basics = Elm.Basics.make(_elm),
    $Dict = Elm.Dict.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
+   $Helpers = Elm.Helpers.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
@@ -246,7 +246,7 @@ Elm.Board.make = function (_elm) {
                          var hand = A2($Player.getHand,
                          state.turn,
                          state);
-                         var piece = $Piece.fromString($List.head(A2($List.drop,
+                         var piece = $Piece.fromString($Helpers.headU(A2($List.drop,
                          _v40._0,
                          hand)));
                          return A2(isValidMove,
@@ -349,7 +349,7 @@ Elm.Board.make = function (_elm) {
                     A2(pieceAt,pos2,board));
                  });
                  var last = function (list) {
-                    return $List.head($List.reverse(list));
+                    return $Helpers.headU($List.reverse(list));
                  };
                  var samePieceBelow = $List.isEmpty(above) && ($Basics.not($List.isEmpty(below)) && A2(samePieces,
                  last(below),
@@ -461,14 +461,14 @@ Elm.Board.make = function (_elm) {
          $Basics.fst,
          locations);
          var maxX = A2($Basics.max,
-         $List.maximum(xs),
-         $Basics.abs($List.minimum(xs)));
+         $Helpers.maximumU(xs),
+         $Basics.abs($Helpers.minimumU(xs)));
          var ys = A2($List.map,
          $Basics.snd,
          locations);
          var maxY = A2($Basics.max,
-         $List.maximum(ys),
-         $Basics.abs($List.minimum(ys)));
+         $Helpers.maximumU(ys),
+         $Basics.abs($Helpers.minimumU(ys)));
          var distFromCenter = A2($Basics.max,
          maxX,
          maxY) + 2;
@@ -498,7 +498,7 @@ Elm.Board.make = function (_elm) {
             board);
          },
          row);
-         var rowHighScore = $List.isEmpty(row) ? 0 : $List.maximum(rowScores);
+         var rowHighScore = $List.isEmpty(row) ? 0 : $Helpers.maximumU(rowScores);
          var rowPoints = _U.cmp(tileScoreInRow,
          rowHighScore) > 0 && _U.cmp(rowSize,
          2) > -1 ? rowSize : 0;
@@ -520,7 +520,7 @@ Elm.Board.make = function (_elm) {
             board);
          },
          column);
-         var columnHighScore = $List.isEmpty(column) ? 0 : $List.maximum(columnScores);
+         var columnHighScore = $List.isEmpty(column) ? 0 : $Helpers.maximumU(columnScores);
          var columnPoints = _U.cmp(tileScoreInColumn,
          columnHighScore) > 0 && _U.cmp(columnSize,
          2) > -1 ? columnSize : 0;
