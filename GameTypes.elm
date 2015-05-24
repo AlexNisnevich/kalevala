@@ -62,6 +62,7 @@ type alias WindowDims = (Int, Int)
 type Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
             | StartGame GameType Deck Player String
+            | MoveToRemoteGameMenu
             | GameStarted Deck Player Player String -- represents a StartGame message sent from the server
             | Pass
             | OpponentDisconnected
@@ -69,6 +70,7 @@ type Action = PickUpPiece Player Int
             | ParseError String
 
 type ClickEvent = StartSinglePlayer
+                | StartRemoteGameButton
                 | StartTwoPlayerOnline
                 | StartTwoPlayerHotseat
                 | BoardClick

@@ -1,0 +1,216 @@
+Elm.Display = Elm.Display || {};
+Elm.Display.Board = Elm.Display.Board || {};
+Elm.Display.Board.make = function (_elm) {
+   "use strict";
+   _elm.Display = _elm.Display || {};
+   _elm.Display.Board = _elm.Display.Board || {};
+   if (_elm.Display.Board.values)
+   return _elm.Display.Board.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Display.Board",
+   $Basics = Elm.Basics.make(_elm),
+   $Board = Elm.Board.make(_elm),
+   $Display$Constants = Elm.Display.Constants.make(_elm),
+   $Display$Helpers = Elm.Display.Helpers.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Player = Elm.Player.make(_elm);
+   var drawLastPlacedOutline = F2(function (state,
+   tileSize) {
+      return function () {
+         var _v0 = state.lastPlaced;
+         switch (_v0.ctor)
+         {case "Just":
+            switch (_v0._0.ctor)
+              {case "_Tuple2":
+                 return function () {
+                      var lastPlacedColor = $Player.toColor($Player.next(state.turn));
+                      var thick = function (c) {
+                         return _U.replace([["color"
+                                            ,c]
+                                           ,["width",4]],
+                         $Graphics$Collage.defaultLine);
+                      };
+                      var lastPlacedOutline = A2($Graphics$Collage.move,
+                      {ctor: "_Tuple2"
+                      ,_0: tileSize * $Basics.toFloat(_v0._0._0)
+                      ,_1: tileSize * $Basics.toFloat(_v0._0._1)},
+                      A2($Graphics$Collage.outlined,
+                      thick(lastPlacedColor),
+                      $Graphics$Collage.square(tileSize + 4)));
+                      return _L.fromArray([lastPlacedOutline]);
+                   }();}
+              break;
+            case "Nothing":
+            return _L.fromArray([]);}
+         _U.badCase($moduleName,
+         "between lines 86 and 92");
+      }();
+   });
+   var drawPiece = F3(function (_v4,
+   board,
+   tileSize) {
+      return function () {
+         switch (_v4.ctor)
+         {case "_Tuple2":
+            switch (_v4._0.ctor)
+              {case "_Tuple2":
+                 return function () {
+                      var value = A2($Board.getDisplayedTileValue,
+                      {ctor: "_Tuple2"
+                      ,_0: _v4._0._0
+                      ,_1: _v4._0._1},
+                      board);
+                      var y = $Basics.toFloat(_v4._0._1) * tileSize;
+                      var x = $Basics.toFloat(_v4._0._0) * tileSize;
+                      return A2($Graphics$Collage.move,
+                      {ctor: "_Tuple2",_0: x,_1: y},
+                      $Graphics$Collage.toForm(A3($Display$Helpers.pieceToImage,
+                      _v4._1,
+                      value,
+                      tileSize)));
+                   }();}
+              break;}
+         _U.badCase($moduleName,
+         "between lines 63 and 67");
+      }();
+   });
+   var getBoardSize = function (state) {
+      return $Board.getBoardSize(state.board);
+   };
+   var getTotalBoardSize = function (_v10) {
+      return function () {
+         switch (_v10.ctor)
+         {case "_Tuple2":
+            return _v10._1 - 2 * $Display$Constants.gameMargin;}
+         _U.badCase($moduleName,
+         "on line 26, column 37 to 61");
+      }();
+   };
+   var getTileSizeFromBoardSize = F2(function (boardSize,
+   dims) {
+      return $Basics.toFloat(getTotalBoardSize(dims) / boardSize | 0);
+   });
+   var mouseToBoardPosition = F3(function (_v14,
+   state,
+   dims) {
+      return function () {
+         switch (_v14.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var boardSize = $Board.getBoardSize(state.board);
+                 var tileSize = $Basics.round(A2(getTileSizeFromBoardSize,
+                 boardSize,
+                 dims));
+                 var offset = boardSize / 2 | 0;
+                 var y = _v14._1 - $Display$Constants.gameMargin;
+                 var boardY = 0 - ((y / tileSize | 0) - offset);
+                 var x = _v14._0 - $Display$Constants.gameMargin;
+                 var boardX = (x / tileSize | 0) - offset;
+                 return {ctor: "_Tuple2"
+                        ,_0: boardX
+                        ,_1: boardY};
+              }();}
+         _U.badCase($moduleName,
+         "between lines 36 and 43");
+      }();
+   });
+   var drawGrid = F3(function (state,
+   boardSize,
+   dims) {
+      return function () {
+         var tileSize = A2(getTileSizeFromBoardSize,
+         boardSize,
+         dims);
+         var totalSize = $Basics.toFloat(boardSize) * tileSize;
+         var offset = tileSize / 2 - totalSize / 2;
+         var shape = F2(function (x,y) {
+            return function () {
+               var imgSize = _U.cmp(tileSize,
+               75) > 0 ? 100 : 50;
+               var tile = A2($Basics._op["++"],
+               "images/",
+               A2($Basics._op["++"],
+               $Basics.toString(imgSize),
+               A2($Basics._op["++"],
+               "/board",
+               A2($Basics._op["++"],
+               $Basics.toString(A2($Basics._op["%"],
+               Math.pow(x,2) + 7 * y,
+               6)),
+               ".png"))));
+               var pos = {ctor: "_Tuple2"
+                         ,_0: tileSize * $Basics.toFloat(x) + offset
+                         ,_1: tileSize * $Basics.toFloat(y) + offset};
+               return A2($Graphics$Collage.move,
+               pos,
+               $Graphics$Collage.toForm(A3($Graphics$Element.image,
+               $Basics.round(tileSize),
+               $Basics.round(tileSize),
+               tile)));
+            }();
+         });
+         return A2($List.concatMap,
+         function (x) {
+            return A2($List.map,
+            function (y) {
+               return A2(shape,x,y);
+            },
+            _L.range(0,boardSize - 1));
+         },
+         _L.range(0,boardSize - 1));
+      }();
+   });
+   var drawAvailableOverlay = F3(function (state,
+   boardSize,
+   dims) {
+      return function () {
+         var tileSize = A2(getTileSizeFromBoardSize,
+         boardSize,
+         dims);
+         var totalSize = $Basics.toFloat(boardSize) * tileSize;
+         var offset = tileSize / 2 - totalSize / 2;
+         var shape = F2(function (x,y) {
+            return function () {
+               var color = A3($Board.isValidSquareToMove,
+               state,
+               {ctor: "_Tuple2",_0: x,_1: y},
+               boardSize) ? $Display$Constants.transpGreen : $Display$Constants.transparent;
+               var pos = {ctor: "_Tuple2"
+                         ,_0: tileSize * $Basics.toFloat(x) + offset
+                         ,_1: tileSize * $Basics.toFloat(y) + offset};
+               return A2($Graphics$Collage.move,
+               pos,
+               A2($Graphics$Collage.filled,
+               color,
+               $Graphics$Collage.square(tileSize)));
+            }();
+         });
+         return A2($List.concatMap,
+         function (x) {
+            return A2($List.map,
+            function (y) {
+               return A2(shape,x,y);
+            },
+            _L.range(0,boardSize - 1));
+         },
+         _L.range(0,boardSize - 1));
+      }();
+   });
+   _elm.Display.Board.values = {_op: _op
+                               ,getTotalBoardSize: getTotalBoardSize
+                               ,getTileSizeFromBoardSize: getTileSizeFromBoardSize
+                               ,getBoardSize: getBoardSize
+                               ,mouseToBoardPosition: mouseToBoardPosition
+                               ,drawGrid: drawGrid
+                               ,drawPiece: drawPiece
+                               ,drawAvailableOverlay: drawAvailableOverlay
+                               ,drawLastPlacedOutline: drawLastPlacedOutline};
+   return _elm.Display.Board.values;
+};

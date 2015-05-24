@@ -1,5 +1,6 @@
 module Game where
 
+import Color
 import Dict exposing (Dict)
 import List exposing (..)
 import Maybe exposing ( withDefault)
@@ -94,7 +95,7 @@ getFirstTileHandsAndDeck deck =
       deckMinusFirstTile = without idxFirstNonKullervo deck
       redHand = take 5 deckMinusFirstTile
       blueHand = take 5 (drop 5 deckMinusFirstTile)
-      hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
+      hands = Dict.fromList [("Red", redHand), ("Blue", blueHand)]
       remainder = drop 10 deckMinusFirstTile
   in
     (firstTile, hands, remainder)
@@ -137,8 +138,8 @@ startGame gameType deck player playerName =
    Returns the state corresponding to the start of the game. -}
 gameStarted : Deck -> Player -> Player -> String -> State
 gameStarted deck startPlayer localPlayer opponentName =
-  let players = Dict.fromList [ ("red", if localPlayer == Red then Human else Remote)
-                              , ("blue", if localPlayer == Blue then Human else Remote)
+  let players = Dict.fromList [ ("Red", if localPlayer == Red then Human else Remote)
+                              , ("Blue", if localPlayer == Blue then Human else Remote)
                               ]
       playerNames = Dict.fromList [ (Player.toString localPlayer, "You")
                                   , (Player.toString <| Player.next localPlayer, opponentName)
@@ -152,7 +153,8 @@ gameStarted deck startPlayer localPlayer opponentName =
                  , hands <- hands
                  , deck <- remainder
                  , board <- Dict.singleton (0, 0) firstTile
-                 , turn <- startPlayer}
+                 , turn <- startPlayer
+                 , log <- [(Color.grey, "Connected to " ++ opponentName)] }
 
 {- The cards in a Voluspa deck -}
 deckContents : List String
@@ -173,15 +175,15 @@ startState : State
 startState =
   { gameType = HumanVsCpu
   , gameState = NotStarted
-  , players = Dict.fromList [("red", Human), ("blue", Cpu)]
-  , playerNames = Dict.fromList [("red", "Player"), ("blue", "CPU")]
+  , players = Dict.fromList [("Red", Human), ("Blue", Cpu)]
+  , playerNames = Dict.fromList [("Red", "Player"), ("Blue", "CPU")]
   , turn = Red
   , board = Dict.empty
-  , score = Dict.fromList [("red", 0), ("blue", 0)]
+  , score = Dict.fromList [("Red", 0), ("Blue", 0)]
   , deck = []
-  , hands = Dict.fromList [("red", []), ("blue", [])]
+  , hands = Dict.fromList [("Red", []), ("Blue", [])]
   , heldPiece = Nothing
   , lastPlaced = Nothing
-  , delta = Dict.fromList [("red", ""), ("blue", "")]
+  , delta = Dict.fromList [("Red", ""), ("Blue", "")]
   , log = []
   }

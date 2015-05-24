@@ -23,6 +23,7 @@ Elm.GameTypes.make = function (_elm) {
    var BoardClick = {ctor: "BoardClick"};
    var StartTwoPlayerHotseat = {ctor: "StartTwoPlayerHotseat"};
    var StartTwoPlayerOnline = {ctor: "StartTwoPlayerOnline"};
+   var StartRemoteGameButton = {ctor: "StartRemoteGameButton"};
    var StartSinglePlayer = {ctor: "StartSinglePlayer"};
    var ParseError = function (a) {
       return {ctor: "ParseError"
@@ -41,6 +42,7 @@ Elm.GameTypes.make = function (_elm) {
              ,_2: c
              ,_3: d};
    });
+   var MoveToRemoteGameMenu = {ctor: "MoveToRemoteGameMenu"};
    var StartGame = F4(function (a,
    b,
    c,
@@ -164,12 +166,14 @@ Elm.GameTypes.make = function (_elm) {
                            ,PickUpPiece: PickUpPiece
                            ,PlacePiece: PlacePiece
                            ,StartGame: StartGame
+                           ,MoveToRemoteGameMenu: MoveToRemoteGameMenu
                            ,GameStarted: GameStarted
                            ,Pass: Pass
                            ,OpponentDisconnected: OpponentDisconnected
                            ,NoAction: NoAction
                            ,ParseError: ParseError
                            ,StartSinglePlayer: StartSinglePlayer
+                           ,StartRemoteGameButton: StartRemoteGameButton
                            ,StartTwoPlayerOnline: StartTwoPlayerOnline
                            ,StartTwoPlayerHotseat: StartTwoPlayerHotseat
                            ,BoardClick: BoardClick

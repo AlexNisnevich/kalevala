@@ -12,10 +12,19 @@ Elm.State.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
    $Player = Elm.Player.make(_elm);
-   var mustPass = function (state) {
-      return A2($Player.noTilesInHand,
-      state.turn,
-      state);
+   var isConnectingToRemoteGame = function (state) {
+      return _U.eq(state.gameState,
+      $GameTypes.WaitingForPlayers);
+   };
+   var isSettingUpRemoteGame = function (state) {
+      return _U.eq(state.gameState,
+      $GameTypes.NotStarted) && _U.eq(state.gameType,
+      $GameTypes.HumanVsHumanRemote);
+   };
+   var isAtMainMenu = function (state) {
+      return _U.eq(state.gameState,
+      $GameTypes.NotStarted) && !_U.eq(state.gameType,
+      $GameTypes.HumanVsHumanRemote);
    };
    var isNotStarted = function (state) {
       return function () {
@@ -43,6 +52,11 @@ Elm.State.make = function (_elm) {
       $GameTypes.Blue,
       state));
    };
+   var mustPass = function (state) {
+      return isOngoing(state) && A2($Player.noTilesInHand,
+      state.turn,
+      state);
+   };
    var isPlayerTurn = function (state) {
       return isOngoing(state) && _U.eq(A2($Player.getType,
       state.turn,
@@ -52,6 +66,9 @@ Elm.State.make = function (_elm) {
    _elm.State.values = {_op: _op
                        ,isOngoing: isOngoing
                        ,isNotStarted: isNotStarted
+                       ,isAtMainMenu: isAtMainMenu
+                       ,isSettingUpRemoteGame: isSettingUpRemoteGame
+                       ,isConnectingToRemoteGame: isConnectingToRemoteGame
                        ,isGameOver: isGameOver
                        ,mustPass: mustPass
                        ,isPlayerTurn: isPlayerTurn};

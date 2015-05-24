@@ -18,14 +18,16 @@ toColor player =
 fromString : String -> Player
 fromString str =
   case str of
+    "Red" -> Red
     "red" -> Red
+    "Blue" -> Blue
     "blue" -> Blue
 
 toString : Player -> String
 toString player =
   case player of
-    Red -> "red"
-    Blue -> "blue"
+    Red -> "Red"
+    Blue -> "Blue"
 
 next : Player -> Player
 next player =

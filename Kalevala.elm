@@ -17,6 +17,7 @@ import Helpers exposing (..)
 import GameTypes exposing (..)
 import State exposing (isGameOver, mustPass)
 import Display exposing (..)
+import Display.Board exposing (mouseToBoardPosition)
 import Game
 import Player
 import Serialize
@@ -24,9 +25,16 @@ import Deserialize
 
 import Debug
 
-{- A mailbox whose signal is True iff the game being played is a remote one. -}
-remoteMailbox : Mailbox Bool
-remoteMailbox = mailbox False
+isRemoteSignal : Signal Bool
+isRemoteSignal = 
+  let getIsRemoteFromClickSignal event = 
+    case event of
+    StartSinglePlayer -> Just False
+    StartTwoPlayerHotseat -> Just False
+    StartTwoPlayerOnline -> Just True
+    otherwise -> Nothing
+  in
+    filterMap getIsRemoteFromClickSignal False clickMailbox.signal
 
 {- Perform an action on the current state and return the resulting state. -}
 performAction : Action -> State -> State
@@ -38,6 +46,7 @@ performAction action state =
           StartGame gameType deck player playerName -> Game.startGame gameType deck player playerName
           GameStarted deck startPlayer localPlayer opponentName -> Game.gameStarted deck startPlayer localPlayer opponentName
           Pass -> { state | turn <- Player.next state.turn }
+          MoveToRemoteGameMenu -> { state | gameType <- HumanVsHumanRemote, gameState <- NotStarted }
           OpponentDisconnected -> { state | gameState <- Disconnected }
           NoAction -> state
           ParseError e -> state
@@ -56,6 +65,7 @@ constructAction clickType seed mousePos dims playerName =
   in
     case clickType of
       StartSinglePlayer -> StartGame HumanVsCpu deck (Player.random seed) playerName.string
+      StartRemoteGameButton -> MoveToRemoteGameMenu
       StartTwoPlayerOnline -> StartGame HumanVsHumanRemote deck (Player.random seed) playerName.string
       StartTwoPlayerHotseat -> StartGame HumanVsHumanLocal deck (Player.random seed) playerName.string
       BoardClick -> PlacePiece mousePos dims
@@ -98,7 +108,7 @@ main : Signal Element
 main =
   let
     action = processClick clickMailbox.signal
-    actionForRemote = filterOn action remoteMailbox.signal NoAction
+    actionForRemote = filterOn action isRemoteSignal NoAction
 
     request = Debug.watch "request" <~ (encode <~ actionForRemote)
     response = Debug.watch "response" <~ WebSocket.connect server request

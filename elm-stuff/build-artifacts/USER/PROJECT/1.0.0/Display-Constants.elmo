@@ -1,0 +1,35 @@
+Elm.Display = Elm.Display || {};
+Elm.Display.Constants = Elm.Display.Constants || {};
+Elm.Display.Constants.make = function (_elm) {
+   "use strict";
+   _elm.Display = _elm.Display || {};
+   _elm.Display.Constants = _elm.Display.Constants || {};
+   if (_elm.Display.Constants.values)
+   return _elm.Display.Constants.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Display.Constants",
+   $Color = Elm.Color.make(_elm);
+   var transpGreen = A4($Color.rgba,
+   0,
+   255,
+   0,
+   0.5);
+   var transparent = A4($Color.rgba,
+   0,
+   0,
+   0,
+   0.0);
+   var handTileSize = 100;
+   var handPadding = 10;
+   var gameMargin = 15;
+   _elm.Display.Constants.values = {_op: _op
+                                   ,gameMargin: gameMargin
+                                   ,handPadding: handPadding
+                                   ,handTileSize: handTileSize
+                                   ,transparent: transparent
+                                   ,transpGreen: transpGreen};
+   return _elm.Display.Constants.values;
+};

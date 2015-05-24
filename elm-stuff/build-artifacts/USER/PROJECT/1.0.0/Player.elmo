@@ -30,16 +30,16 @@ Elm.Player.make = function (_elm) {
             case "Red":
             return $GameTypes.Blue;}
          _U.badCase($moduleName,
-         "between lines 32 and 34");
+         "between lines 34 and 36");
       }();
    };
    var toString = function (player) {
       return function () {
          switch (player.ctor)
-         {case "Blue": return "blue";
-            case "Red": return "red";}
+         {case "Blue": return "Blue";
+            case "Red": return "Red";}
          _U.badCase($moduleName,
-         "between lines 26 and 28");
+         "between lines 28 and 30");
       }();
    };
    var getType = F2(function (player,
@@ -67,12 +67,16 @@ Elm.Player.make = function (_elm) {
    var fromString = function (str) {
       return function () {
          switch (str)
-         {case "blue":
+         {case "Blue":
+            return $GameTypes.Blue;
+            case "Red":
+            return $GameTypes.Red;
+            case "blue":
             return $GameTypes.Blue;
             case "red":
             return $GameTypes.Red;}
          _U.badCase($moduleName,
-         "between lines 20 and 22");
+         "between lines 20 and 24");
       }();
    };
    var toColor = function (player) {

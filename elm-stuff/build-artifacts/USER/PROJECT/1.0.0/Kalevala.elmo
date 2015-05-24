@@ -14,6 +14,7 @@ Elm.Kalevala.make = function (_elm) {
    $Deprecated$WebSocket = Elm.Deprecated.WebSocket.make(_elm),
    $Deserialize = Elm.Deserialize.make(_elm),
    $Display = Elm.Display.make(_elm),
+   $Display$Board = Elm.Display.Board.make(_elm),
    $Game = Elm.Game.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
@@ -21,6 +22,7 @@ Elm.Kalevala.make = function (_elm) {
    $Helpers = Elm.Helpers.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $Json$Encode = Elm.Json.Encode.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
    $Player = Elm.Player.make(_elm),
    $Random = Elm.Random.make(_elm),
@@ -40,7 +42,7 @@ Elm.Kalevala.make = function (_elm) {
             return $GameTypes.ParseError(_v0._0);
             case "Ok": return _v0._0;}
          _U.badCase($moduleName,
-         "between lines 87 and 96");
+         "between lines 97 and 106");
       }();
    };
    var encode = function (action) {
@@ -78,6 +80,8 @@ Elm.Kalevala.make = function (_elm) {
                return A2($GameTypes.PickUpPiece,
                  clickType._0,
                  clickType._1);
+               case "StartRemoteGameButton":
+               return $GameTypes.MoveToRemoteGameMenu;
                case "StartSinglePlayer":
                return A4($GameTypes.StartGame,
                  $GameTypes.HumanVsCpu,
@@ -97,7 +101,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 57 and 66");
+            "between lines 66 and 76");
          }();
       }();
    });
@@ -136,6 +140,12 @@ Elm.Kalevala.make = function (_elm) {
                  action._1,
                  action._2,
                  action._3);
+               case "MoveToRemoteGameMenu":
+               return _U.replace([["gameType"
+                                  ,$GameTypes.HumanVsHumanRemote]
+                                 ,["gameState"
+                                  ,$GameTypes.NotStarted]],
+                 state);
                case "NoAction": return state;
                case "OpponentDisconnected":
                return _U.replace([["gameState"
@@ -153,7 +163,7 @@ Elm.Kalevala.make = function (_elm) {
                  state);
                case "PlacePiece":
                return A2($Game.tryMove,
-                 A3($Display.mouseToBoardPosition,
+                 A3($Display$Board.mouseToBoardPosition,
                  action._0,
                  state,
                  action._1),
@@ -165,19 +175,36 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 35 and 44");
+            "between lines 43 and 53");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]],
          newState) : $State.mustPass(newState) ? $Game.pass(newState) : newState;
       }();
    });
-   var remoteMailbox = $Signal.mailbox(false);
+   var isRemoteSignal = function () {
+      var getIsRemoteFromClickSignal = function (event) {
+         return function () {
+            switch (event.ctor)
+            {case "StartSinglePlayer":
+               return $Maybe.Just(false);
+               case "StartTwoPlayerHotseat":
+               return $Maybe.Just(false);
+               case "StartTwoPlayerOnline":
+               return $Maybe.Just(true);}
+            return $Maybe.Nothing;
+         }();
+      };
+      return A3($Signal.filterMap,
+      getIsRemoteFromClickSignal,
+      false,
+      $Display.clickMailbox.signal);
+   }();
    var main = function () {
       var action = processClick($Display.clickMailbox.signal);
       var actionForRemote = A3($Helpers.filterOn,
       action,
-      remoteMailbox.signal,
+      isRemoteSignal,
       $GameTypes.NoAction);
       var request = A2($Signal._op["<~"],
       $Debug.watch("request"),
@@ -209,7 +236,7 @@ Elm.Kalevala.make = function (_elm) {
       $Display.playerNameMailbox.signal);
    }();
    _elm.Kalevala.values = {_op: _op
-                          ,remoteMailbox: remoteMailbox
+                          ,isRemoteSignal: isRemoteSignal
                           ,performAction: performAction
                           ,constructAction: constructAction
                           ,processClick: processClick

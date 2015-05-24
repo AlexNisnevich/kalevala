@@ -3,13 +3,14 @@ module Helpers where
 import List exposing (..)
 import Random exposing (..)
 import Signal
+import Graphics.Element exposing (..)
 
 getOrFail : Maybe a -> a
 getOrFail maybe =
   case maybe of
     Just something -> something
 
-{-- Unsafe list methods --}
+{- Unsafe list methods -}
 headU l = getOrFail <| head l
 tailU l = getOrFail <| tail l
 maximumU l = getOrFail <| maximum l
