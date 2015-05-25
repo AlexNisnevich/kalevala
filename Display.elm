@@ -141,7 +141,7 @@ renderDeck state =
   let deckSize = if | State.isNotStarted state -> length Game.deckContents
                     | State.isOngoing state    -> length state.deck
                     | otherwise                -> 0
-      deckSizeStr = "Deck: " ++ toString deckSize
+      deckSizeStr = "Deck : " ++ toString deckSize
   in 
     flow down [ image 85 85 "images/100/deck.png"
               , deckSizeStr |> fromString

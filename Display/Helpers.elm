@@ -34,7 +34,7 @@ withBorder (x, y) color elt =
 
 pieceToImage: Piece -> String -> Float -> Element
 pieceToImage piece value tileSize =
-  let imgSize = if tileSize > 75 then 100 else 50
+  let imgSize = if tileSize > 50 then 100 else 50
       imgPath = "images/" ++ toString imgSize ++ "/" ++ Piece.toString piece ++ "-" ++ value ++ ".png"
   in
     image (round tileSize) (round tileSize) imgPath

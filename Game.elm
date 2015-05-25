@@ -71,9 +71,9 @@ makeMove move state =
       newHand = case existingTile of
         Just piece -> if move.piece == SeppoIlmarinen then (replaceAtIndex move.idx (Piece.toString piece) hand) else handWithDrawnTile
         Nothing -> handWithDrawnTile
-      logText = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " placed a " ++ 
+      logText = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " placed " ++ 
                   Piece.toDisplayString move.piece ++ " for " ++ toString delta ++ " points" ++ 
-                  " (total: " ++ toString newScore ++ ")"
+                  " (total : " ++ toString newScore ++ ")"
   in
     { state | turn <- Player.next state.turn
             , board <- newBoard
@@ -127,7 +127,8 @@ startGame gameType deck player playerName =
                                 , hands <- hands
                                 , deck <- remainder
                                 , board <- Dict.singleton (0, 0) firstTile
-                                , turn <- player}
+                                , turn <- player
+                                , log <- [(Color.grey, "Game started!")] }
   in
     -- if first player is Cpu, make their move
     if Player.getType state.turn state == Cpu

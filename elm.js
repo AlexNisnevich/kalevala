@@ -2623,7 +2623,7 @@ Elm.Display.make = function (_elm) {
       return function () {
          var deckSize = $State.isNotStarted(state) ? $List.length($Game.deckContents) : $State.isOngoing(state) ? $List.length(state.deck) : 0;
          var deckSizeStr = A2($Basics._op["++"],
-         "Deck: ",
+         "Deck : ",
          $Basics.toString(deckSize));
          return A2($Graphics$Element.flow,
          $Graphics$Element.down,
@@ -3253,7 +3253,7 @@ Elm.Display.Helpers.make = function (_elm) {
    tileSize) {
       return function () {
          var imgSize = _U.cmp(tileSize,
-         75) > 0 ? 100 : 50;
+         50) > 0 ? 100 : 50;
          var imgPath = A2($Basics._op["++"],
          "images/",
          A2($Basics._op["++"],
@@ -3543,7 +3543,7 @@ Elm.Game.make = function (_elm) {
          $Player.toString(state.turn),
          state.playerNames)),
          A2($Basics._op["++"],
-         " placed a ",
+         " placed ",
          A2($Basics._op["++"],
          $Piece.toDisplayString(move.piece),
          A2($Basics._op["++"],
@@ -3553,7 +3553,7 @@ Elm.Game.make = function (_elm) {
          A2($Basics._op["++"],
          " points",
          A2($Basics._op["++"],
-         " (total: ",
+         " (total : ",
          A2($Basics._op["++"],
          $Basics.toString(newScore),
          ")"))))))));
@@ -3710,7 +3710,11 @@ Elm.Game.make = function (_elm) {
                                    ,A2($Dict.singleton,
                                    {ctor: "_Tuple2",_0: 0,_1: 0},
                                    firstTile)]
-                                  ,["turn",player]],
+                                  ,["turn",player]
+                                  ,["log"
+                                   ,_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: $Color.grey
+                                                  ,_1: "Game started!"}])]],
          startState);
          return _U.eq(A2($Player.getType,
          state.turn,

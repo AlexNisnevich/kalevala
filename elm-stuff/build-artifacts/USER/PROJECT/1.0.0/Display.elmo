@@ -56,7 +56,7 @@ Elm.Display.make = function (_elm) {
       return function () {
          var deckSize = $State.isNotStarted(state) ? $List.length($Game.deckContents) : $State.isOngoing(state) ? $List.length(state.deck) : 0;
          var deckSizeStr = A2($Basics._op["++"],
-         "Deck: ",
+         "Deck : ",
          $Basics.toString(deckSize));
          return A2($Graphics$Element.flow,
          $Graphics$Element.down,

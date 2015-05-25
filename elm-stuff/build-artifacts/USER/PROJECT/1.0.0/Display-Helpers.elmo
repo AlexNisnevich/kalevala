@@ -22,7 +22,7 @@ Elm.Display.Helpers.make = function (_elm) {
    tileSize) {
       return function () {
          var imgSize = _U.cmp(tileSize,
-         75) > 0 ? 100 : 50;
+         50) > 0 ? 100 : 50;
          var imgPath = A2($Basics._op["++"],
          "images/",
          A2($Basics._op["++"],
