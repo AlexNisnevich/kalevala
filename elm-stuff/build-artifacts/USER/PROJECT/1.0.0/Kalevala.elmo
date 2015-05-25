@@ -32,17 +32,35 @@ Elm.Kalevala.make = function (_elm) {
    $State = Elm.State.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Window = Elm.Window.make(_elm);
+   var getCpuResponse = F2(function (playerAction,
+   delayTime) {
+      return function () {
+         var processCpuResponse = function (a) {
+            return function () {
+               switch (a.ctor)
+               {case "PlacePiece":
+                  return $GameTypes.CpuAction;}
+               return $GameTypes.NoAction;
+            }();
+         };
+         return A2($Time.delay,
+         delayTime,
+         A2($Signal._op["<~"],
+         processCpuResponse,
+         playerAction));
+      }();
+   });
    var decode = function (actionJson) {
       return function () {
-         var _v0 = A2($Json$Decode.decodeString,
+         var _v3 = A2($Json$Decode.decodeString,
          $Deserialize.action,
          actionJson);
-         switch (_v0.ctor)
+         switch (_v3.ctor)
          {case "Err":
-            return $GameTypes.ParseError(_v0._0);
-            case "Ok": return _v0._0;}
+            return $GameTypes.ParseError(_v3._0);
+            case "Ok": return _v3._0;}
          _U.badCase($moduleName,
-         "between lines 97 and 106");
+         "between lines 98 and 100");
       }();
    };
    var encode = function (action) {
@@ -101,7 +119,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 66 and 76");
+            "between lines 67 and 77");
          }();
       }();
    });
@@ -134,7 +152,9 @@ Elm.Kalevala.make = function (_elm) {
       return function () {
          var newState = function () {
             switch (action.ctor)
-            {case "GameStarted":
+            {case "CpuAction":
+               return $Game.tryAIMove(state);
+               case "GameStarted":
                return A4($Game.gameStarted,
                  action._0,
                  action._1,
@@ -175,7 +195,7 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 43 and 53");
+            "between lines 43 and 54");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]],
@@ -200,33 +220,41 @@ Elm.Kalevala.make = function (_elm) {
       false,
       $Display.clickMailbox.signal);
    }();
+   var getRemoteResponse = function (playerAction) {
+      return function () {
+         var actionForRemote = A3($Helpers.filterOn,
+         playerAction,
+         isRemoteSignal,
+         $GameTypes.NoAction);
+         var request = A2($Signal._op["<~"],
+         $Debug.watch("request"),
+         A2($Signal._op["<~"],
+         encode,
+         actionForRemote));
+         var response = A2($Signal._op["<~"],
+         $Debug.watch("response"),
+         A2($Deprecated$WebSocket.connect,
+         server,
+         request));
+         return A2($Signal._op["<~"],
+         $Debug.watch("deserialized"),
+         A2($Signal._op["<~"],
+         decode,
+         response));
+      }();
+   };
    var main = function () {
-      var action = processClick($Display.clickMailbox.signal);
-      var actionForRemote = A3($Helpers.filterOn,
-      action,
-      isRemoteSignal,
-      $GameTypes.NoAction);
-      var request = A2($Signal._op["<~"],
-      $Debug.watch("request"),
-      A2($Signal._op["<~"],
-      encode,
-      actionForRemote));
-      var response = A2($Signal._op["<~"],
-      $Debug.watch("response"),
-      A2($Deprecated$WebSocket.connect,
-      server,
-      request));
-      var responseAction = A2($Signal._op["<~"],
-      $Debug.watch("deserialized"),
-      A2($Signal._op["<~"],
-      decode,
-      response));
+      var playerAction = processClick($Display.clickMailbox.signal);
+      var remoteAction = getRemoteResponse(playerAction);
+      var cpuAction = A2(getCpuResponse,
+      playerAction,
+      $Time.second);
       var state = A3($Signal.foldp,
       performAction,
       $Game.startState,
-      A2($Signal.merge,
-      action,
-      responseAction));
+      $Signal.mergeMany(_L.fromArray([playerAction
+                                     ,remoteAction
+                                     ,cpuAction])));
       return A2($Signal._op["~"],
       A2($Signal._op["~"],
       A2($Signal._op["<~"],
@@ -243,6 +271,8 @@ Elm.Kalevala.make = function (_elm) {
                           ,server: server
                           ,encode: encode
                           ,decode: decode
+                          ,getRemoteResponse: getRemoteResponse
+                          ,getCpuResponse: getCpuResponse
                           ,main: main};
    return _elm.Kalevala.values;
 };

@@ -3500,7 +3500,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 97, column 88 to 112");
+               "on line 98, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -3605,7 +3605,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 75 and 78");
+            "between lines 76 and 79");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -3673,6 +3673,40 @@ Elm.Game.make = function (_elm) {
          state);
       }();
    });
+   var tryMove = F2(function (location,
+   state) {
+      return function () {
+         var _v6 = state.heldPiece;
+         switch (_v6.ctor)
+         {case "Just":
+            return function () {
+                 var nextPlayerType = A2($Player.getType,
+                 $Player.next(state.turn),
+                 state);
+                 var hand = A2($Player.getHand,
+                 state.turn,
+                 state);
+                 var pieceStr = A2($Helpers._op["!!"],
+                 hand,
+                 _v6._0);
+                 var piece = $Piece.fromString(pieceStr);
+                 var move = {_: {}
+                            ,idx: _v6._0
+                            ,location: location
+                            ,piece: piece};
+                 return A2($Board.isValidMove,
+                 move,
+                 state.board) ? A2(makeMove,
+                 move,
+                 state) : _U.replace([["heldPiece"
+                                      ,$Maybe.Nothing]],
+                 state);
+              }();
+            case "Nothing": return state;}
+         _U.badCase($moduleName,
+         "between lines 41 and 56");
+      }();
+   });
    var pass = function (state) {
       return function () {
          var p = $Player.toString(state.turn);
@@ -3687,64 +3721,23 @@ Elm.Game.make = function (_elm) {
       }();
    };
    var tryAIMove = function (state) {
-      return function () {
-         var _v6 = $AI.getMove(state);
-         switch (_v6.ctor)
+      return _U.eq(A2($Player.getType,
+      state.turn,
+      state),
+      $GameTypes.Cpu) ? function () {
+         var _v8 = $AI.getMove(state);
+         switch (_v8.ctor)
          {case "Just": return A2(tryMove,
-              _v6._0.location,
+              _v8._0.location,
               _U.replace([["heldPiece"
-                          ,$Maybe.Just(_v6._0.idx)]],
+                          ,$Maybe.Just(_v8._0.idx)]],
               state));
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 61 and 65");
-      }();
+         "between lines 61 and 64");
+      }() : state;
    };
-   var tryMove = F2(function (location,
-   state) {
-      return function () {
-         var _v8 = state.heldPiece;
-         switch (_v8.ctor)
-         {case "Just":
-            return function () {
-                 var nextPlayerType = A2($Player.getType,
-                 $Player.next(state.turn),
-                 state);
-                 var nextAction = function () {
-                    switch (nextPlayerType.ctor)
-                    {case "Cpu": return tryAIMove;
-                       case "Human":
-                       return $Basics.identity;
-                       case "Remote":
-                       return $Basics.identity;}
-                    _U.badCase($moduleName,
-                    "between lines 48 and 52");
-                 }();
-                 var hand = A2($Player.getHand,
-                 state.turn,
-                 state);
-                 var pieceStr = A2($Helpers._op["!!"],
-                 hand,
-                 _v8._0);
-                 var piece = $Piece.fromString(pieceStr);
-                 var move = {_: {}
-                            ,idx: _v8._0
-                            ,location: location
-                            ,piece: piece};
-                 return A2($Board.isValidMove,
-                 move,
-                 state.board) ? nextAction(A2(makeMove,
-                 move,
-                 state)) : _U.replace([["heldPiece"
-                                       ,$Maybe.Nothing]],
-                 state);
-              }();
-            case "Nothing": return state;}
-         _U.badCase($moduleName,
-         "between lines 41 and 58");
-      }();
-   });
    var startGame = F4(function (gameType,
    deck,
    player,
@@ -3858,6 +3851,7 @@ Elm.GameTypes.make = function (_elm) {
              ,_0: a};
    };
    var NoAction = {ctor: "NoAction"};
+   var CpuAction = {ctor: "CpuAction"};
    var OpponentDisconnected = {ctor: "OpponentDisconnected"};
    var Pass = {ctor: "Pass"};
    var GameStarted = F4(function (a,
@@ -3998,6 +3992,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,GameStarted: GameStarted
                            ,Pass: Pass
                            ,OpponentDisconnected: OpponentDisconnected
+                           ,CpuAction: CpuAction
                            ,NoAction: NoAction
                            ,ParseError: ParseError
                            ,StartSinglePlayer: StartSinglePlayer
@@ -5360,17 +5355,35 @@ Elm.Kalevala.make = function (_elm) {
    $State = Elm.State.make(_elm),
    $Time = Elm.Time.make(_elm),
    $Window = Elm.Window.make(_elm);
+   var getCpuResponse = F2(function (playerAction,
+   delayTime) {
+      return function () {
+         var processCpuResponse = function (a) {
+            return function () {
+               switch (a.ctor)
+               {case "PlacePiece":
+                  return $GameTypes.CpuAction;}
+               return $GameTypes.NoAction;
+            }();
+         };
+         return A2($Time.delay,
+         delayTime,
+         A2($Signal._op["<~"],
+         processCpuResponse,
+         playerAction));
+      }();
+   });
    var decode = function (actionJson) {
       return function () {
-         var _v0 = A2($Json$Decode.decodeString,
+         var _v3 = A2($Json$Decode.decodeString,
          $Deserialize.action,
          actionJson);
-         switch (_v0.ctor)
+         switch (_v3.ctor)
          {case "Err":
-            return $GameTypes.ParseError(_v0._0);
-            case "Ok": return _v0._0;}
+            return $GameTypes.ParseError(_v3._0);
+            case "Ok": return _v3._0;}
          _U.badCase($moduleName,
-         "between lines 97 and 106");
+         "between lines 98 and 100");
       }();
    };
    var encode = function (action) {
@@ -5429,7 +5442,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 66 and 76");
+            "between lines 67 and 77");
          }();
       }();
    });
@@ -5462,7 +5475,9 @@ Elm.Kalevala.make = function (_elm) {
       return function () {
          var newState = function () {
             switch (action.ctor)
-            {case "GameStarted":
+            {case "CpuAction":
+               return $Game.tryAIMove(state);
+               case "GameStarted":
                return A4($Game.gameStarted,
                  action._0,
                  action._1,
@@ -5503,7 +5518,7 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 43 and 53");
+            "between lines 43 and 54");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]],
@@ -5528,33 +5543,41 @@ Elm.Kalevala.make = function (_elm) {
       false,
       $Display.clickMailbox.signal);
    }();
+   var getRemoteResponse = function (playerAction) {
+      return function () {
+         var actionForRemote = A3($Helpers.filterOn,
+         playerAction,
+         isRemoteSignal,
+         $GameTypes.NoAction);
+         var request = A2($Signal._op["<~"],
+         $Debug.watch("request"),
+         A2($Signal._op["<~"],
+         encode,
+         actionForRemote));
+         var response = A2($Signal._op["<~"],
+         $Debug.watch("response"),
+         A2($Deprecated$WebSocket.connect,
+         server,
+         request));
+         return A2($Signal._op["<~"],
+         $Debug.watch("deserialized"),
+         A2($Signal._op["<~"],
+         decode,
+         response));
+      }();
+   };
    var main = function () {
-      var action = processClick($Display.clickMailbox.signal);
-      var actionForRemote = A3($Helpers.filterOn,
-      action,
-      isRemoteSignal,
-      $GameTypes.NoAction);
-      var request = A2($Signal._op["<~"],
-      $Debug.watch("request"),
-      A2($Signal._op["<~"],
-      encode,
-      actionForRemote));
-      var response = A2($Signal._op["<~"],
-      $Debug.watch("response"),
-      A2($Deprecated$WebSocket.connect,
-      server,
-      request));
-      var responseAction = A2($Signal._op["<~"],
-      $Debug.watch("deserialized"),
-      A2($Signal._op["<~"],
-      decode,
-      response));
+      var playerAction = processClick($Display.clickMailbox.signal);
+      var remoteAction = getRemoteResponse(playerAction);
+      var cpuAction = A2(getCpuResponse,
+      playerAction,
+      $Time.second);
       var state = A3($Signal.foldp,
       performAction,
       $Game.startState,
-      A2($Signal.merge,
-      action,
-      responseAction));
+      $Signal.mergeMany(_L.fromArray([playerAction
+                                     ,remoteAction
+                                     ,cpuAction])));
       return A2($Signal._op["~"],
       A2($Signal._op["~"],
       A2($Signal._op["<~"],
@@ -5571,6 +5594,8 @@ Elm.Kalevala.make = function (_elm) {
                           ,server: server
                           ,encode: encode
                           ,decode: decode
+                          ,getRemoteResponse: getRemoteResponse
+                          ,getCpuResponse: getCpuResponse
                           ,main: main};
    return _elm.Kalevala.values;
 };

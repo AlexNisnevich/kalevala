@@ -66,6 +66,7 @@ type Action = PickUpPiece Player Int
             | GameStarted Deck Player Player String -- represents a StartGame message sent from the server
             | Pass
             | OpponentDisconnected
+            | CpuAction
             | NoAction
             | ParseError String
 

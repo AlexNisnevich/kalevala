@@ -45,12 +45,10 @@ tryMove location state =
           piece = Piece.fromString pieceStr
           move = { piece = piece, idx = idx, location = location }
           nextPlayerType = Player.getType (Player.next state.turn) state
-          nextAction = case nextPlayerType of
-                         Human -> identity
-                         Remote -> identity
-                         Cpu -> tryAIMove
       in
-        if (Board.isValidMove move state.board) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
+        if Board.isValidMove move state.board
+        then makeMove move state
+        else { state | heldPiece <- Nothing }
     Nothing -> state
 
 {- Try to make a move for the AI player. 
@@ -58,9 +56,12 @@ tryMove location state =
    Returns the new state. -}
 tryAIMove : State -> State
 tryAIMove state =
-  case AI.getMove state of
-    Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
-    Nothing -> pass state
+  if Player.getType state.turn state == Cpu
+  then
+    case AI.getMove state of
+      Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
+      Nothing -> pass state
+  else state
 
 {- Make the given move. Returns the new state. -}
 makeMove : Move -> State -> State

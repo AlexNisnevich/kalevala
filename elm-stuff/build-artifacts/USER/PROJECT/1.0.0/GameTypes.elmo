@@ -30,6 +30,7 @@ Elm.GameTypes.make = function (_elm) {
              ,_0: a};
    };
    var NoAction = {ctor: "NoAction"};
+   var CpuAction = {ctor: "CpuAction"};
    var OpponentDisconnected = {ctor: "OpponentDisconnected"};
    var Pass = {ctor: "Pass"};
    var GameStarted = F4(function (a,
@@ -170,6 +171,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,GameStarted: GameStarted
                            ,Pass: Pass
                            ,OpponentDisconnected: OpponentDisconnected
+                           ,CpuAction: CpuAction
                            ,NoAction: NoAction
                            ,ParseError: ParseError
                            ,StartSinglePlayer: StartSinglePlayer

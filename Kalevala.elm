@@ -8,7 +8,7 @@ import Json.Encode
 import Mouse
 import Random
 import Signal exposing (..)
-import Time
+import Time exposing (Time)
 import Window
 
 import Deprecated.WebSocket as WebSocket
@@ -48,6 +48,7 @@ performAction action state =
           Pass -> { state | turn <- Player.next state.turn }
           MoveToRemoteGameMenu -> { state | gameType <- HumanVsHumanRemote, gameState <- NotStarted }
           OpponentDisconnected -> { state | gameState <- Disconnected }
+          CpuAction -> Game.tryAIMove state
           NoAction -> state
           ParseError e -> state
   in
@@ -98,6 +99,23 @@ decode actionJson =
     Ok action -> action
     Err e -> ParseError e
 
+getRemoteResponse : Signal Action -> Signal Action
+getRemoteResponse playerAction =
+  let actionForRemote = filterOn playerAction isRemoteSignal NoAction
+      request = Debug.watch "request" <~ (encode <~ actionForRemote)
+      response = Debug.watch "response" <~ WebSocket.connect server request
+  in
+    Debug.watch "deserialized" <~ (decode <~ response)
+
+getCpuResponse : Signal Action -> Time -> Signal Action
+getCpuResponse playerAction delayTime =
+  let processCpuResponse a =
+    case a of
+      PlacePiece mp wd -> CpuAction
+      otherwise -> NoAction
+  in
+    Time.delay delayTime (processCpuResponse <~ playerAction)
+
 {- The main game loop. 
    The state is folded over time over a stream of Actions, coming from the client and from the server (for an online game.)
    Actions from the client are constructed by processing a signal of ClickEvents from clickMailbox.
@@ -107,13 +125,10 @@ decode actionJson =
 main : Signal Element
 main =
   let
-    action = processClick clickMailbox.signal
-    actionForRemote = filterOn action isRemoteSignal NoAction
+    playerAction = processClick clickMailbox.signal
+    remoteAction = getRemoteResponse playerAction
+    cpuAction = getCpuResponse playerAction Time.second
 
-    request = Debug.watch "request" <~ (encode <~ actionForRemote)
-    response = Debug.watch "response" <~ WebSocket.connect server request
-    responseAction = Debug.watch "deserialized" <~ (decode <~ response)
-
-    state = foldp performAction Game.startState (merge action responseAction)
+    state = foldp performAction Game.startState (mergeMany [playerAction, remoteAction, cpuAction])
   in
     render <~ state ~ Window.dimensions ~ playerNameMailbox.signal
