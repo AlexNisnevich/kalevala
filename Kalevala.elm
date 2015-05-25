@@ -1,5 +1,6 @@
 module Kalevala where
 
+import Color
 import Dict
 import Graphics.Element exposing (Element)
 import Graphics.Input.Field as Field
@@ -46,13 +47,14 @@ performAction action state =
           StartGame gameType deck player playerName -> Game.startGame gameType deck player playerName
           GameStarted deck startPlayer localPlayer opponentName -> Game.gameStarted deck startPlayer localPlayer opponentName
           Pass -> { state | turn <- Player.next state.turn }
+          MoveToMainMenu -> Game.startState
           MoveToRemoteGameMenu -> { state | gameType <- HumanVsHumanRemote, gameState <- NotStarted }
           OpponentDisconnected -> { state | gameState <- Disconnected }
           CpuAction -> Game.tryAIMove state
           NoAction -> state
           ParseError e -> state
   in
-    if | isGameOver newState -> { newState | gameState <- GameOver }
+    if | isGameOver newState -> { newState | gameState <- GameOver, log <- (Color.darkGrey, "Game over!") :: newState.log }
        | mustPass newState -> Game.pass newState
        | otherwise -> newState
 
@@ -66,12 +68,13 @@ constructAction clickType seed mousePos dims playerName =
   in
     case clickType of
       StartSinglePlayer -> StartGame HumanVsCpu deck (Player.random seed) playerName.string
-      StartRemoteGameButton -> MoveToRemoteGameMenu
       StartTwoPlayerOnline -> StartGame HumanVsHumanRemote deck (Player.random seed) playerName.string
       StartTwoPlayerHotseat -> StartGame HumanVsHumanLocal deck (Player.random seed) playerName.string
       BoardClick -> PlacePiece mousePos dims
       PieceInHand player idx -> PickUpPiece player idx
       PassButton -> Pass
+      MainMenuButton -> MoveToMainMenu
+      StartRemoteGameButton -> MoveToRemoteGameMenu
       None -> NoAction
 
 {- Turn a signal of ClickEvents into a signal of Actions -}

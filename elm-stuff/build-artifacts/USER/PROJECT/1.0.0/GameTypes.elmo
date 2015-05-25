@@ -13,6 +13,7 @@ Elm.GameTypes.make = function (_elm) {
    $Dict = Elm.Dict.make(_elm),
    $Maybe = Elm.Maybe.make(_elm);
    var None = {ctor: "None"};
+   var MainMenuButton = {ctor: "MainMenuButton"};
    var PassButton = {ctor: "PassButton"};
    var PieceInHand = F2(function (a,
    b) {
@@ -44,6 +45,7 @@ Elm.GameTypes.make = function (_elm) {
              ,_3: d};
    });
    var MoveToRemoteGameMenu = {ctor: "MoveToRemoteGameMenu"};
+   var MoveToMainMenu = {ctor: "MoveToMainMenu"};
    var StartGame = F4(function (a,
    b,
    c,
@@ -167,6 +169,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,PickUpPiece: PickUpPiece
                            ,PlacePiece: PlacePiece
                            ,StartGame: StartGame
+                           ,MoveToMainMenu: MoveToMainMenu
                            ,MoveToRemoteGameMenu: MoveToRemoteGameMenu
                            ,GameStarted: GameStarted
                            ,Pass: Pass
@@ -181,6 +184,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,BoardClick: BoardClick
                            ,PieceInHand: PieceInHand
                            ,PassButton: PassButton
+                           ,MainMenuButton: MainMenuButton
                            ,None: None};
    return _elm.GameTypes.values;
 };

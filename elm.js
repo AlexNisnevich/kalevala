@@ -2638,22 +2638,6 @@ Elm.Display.make = function (_elm) {
                    80,
                    $Graphics$Element.topLeft)($Graphics$Element.width(360)($Graphics$Element.leftAligned($Text.height(18)($Text.fromString($Piece.rulesText(piece)))))))]));
    };
-   var renderLog = function (state) {
-      return $Display$Helpers.withMargin({ctor: "_Tuple2"
-                                         ,_0: 10
-                                         ,_1: 10})(A3($Graphics$Element.container,
-      380,
-      262,
-      $Graphics$Element.topLeft)($Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v0) {
-         return function () {
-            switch (_v0.ctor)
-            {case "_Tuple2":
-               return $Graphics$Element.leftAligned($Text.color(_v0._0)($Text.fromString(_v0._1)));}
-            _U.badCase($moduleName,
-            "on line 189, column 44 to 94");
-         }();
-      })($List.take(5)(state.log)))));
-   };
    var renderDeck = function (state) {
       return function () {
          var deckSize = $State.isNotStarted(state) ? $List.length($Game.deckContents) : $State.isOngoing(state) ? $List.length(state.deck) : 0;
@@ -2909,6 +2893,35 @@ Elm.Display.make = function (_elm) {
                 208,
                 48,
                 "images/buttonViewRules.png"))])));
+   var renderLog = function (state) {
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.down,
+      _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                ,_0: 10
+                                                ,_1: 10})(A3($Graphics$Element.container,
+                   380,
+                   220,
+                   $Graphics$Element.topLeft)($Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v0) {
+                      return function () {
+                         switch (_v0.ctor)
+                         {case "_Tuple2":
+                            return $Graphics$Element.leftAligned($Text.color(_v0._0)($Text.fromString(_v0._1)));}
+                         _U.badCase($moduleName,
+                         "on line 189, column 56 to 106");
+                      }();
+                   })($List.take(5)(state.log)))))
+                   ,_U.eq(state.gameState,
+                   $GameTypes.GameOver) ? A3($Graphics$Element.container,
+                   380,
+                   40,
+                   $Graphics$Element.middle)(A2($Graphics$Input.button,
+                   A2($Signal.message,
+                   clickMailbox.address,
+                   $GameTypes.MainMenuButton),
+                   "Main Menu")) : A2($Graphics$Element.spacer,
+                   380,
+                   40)]));
+   };
    var renderRemoteSetupMenu = function (playerName) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
@@ -3834,6 +3847,7 @@ Elm.GameTypes.make = function (_elm) {
    $Dict = Elm.Dict.make(_elm),
    $Maybe = Elm.Maybe.make(_elm);
    var None = {ctor: "None"};
+   var MainMenuButton = {ctor: "MainMenuButton"};
    var PassButton = {ctor: "PassButton"};
    var PieceInHand = F2(function (a,
    b) {
@@ -3865,6 +3879,7 @@ Elm.GameTypes.make = function (_elm) {
              ,_3: d};
    });
    var MoveToRemoteGameMenu = {ctor: "MoveToRemoteGameMenu"};
+   var MoveToMainMenu = {ctor: "MoveToMainMenu"};
    var StartGame = F4(function (a,
    b,
    c,
@@ -3988,6 +4003,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,PickUpPiece: PickUpPiece
                            ,PlacePiece: PlacePiece
                            ,StartGame: StartGame
+                           ,MoveToMainMenu: MoveToMainMenu
                            ,MoveToRemoteGameMenu: MoveToRemoteGameMenu
                            ,GameStarted: GameStarted
                            ,Pass: Pass
@@ -4002,6 +4018,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,BoardClick: BoardClick
                            ,PieceInHand: PieceInHand
                            ,PassButton: PassButton
+                           ,MainMenuButton: MainMenuButton
                            ,None: None};
    return _elm.GameTypes.values;
 };
@@ -5333,6 +5350,7 @@ Elm.Kalevala.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Kalevala",
    $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Deprecated$WebSocket = Elm.Deprecated.WebSocket.make(_elm),
    $Deserialize = Elm.Deserialize.make(_elm),
@@ -5345,6 +5363,7 @@ Elm.Kalevala.make = function (_elm) {
    $Helpers = Elm.Helpers.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $Json$Encode = Elm.Json.Encode.make(_elm),
+   $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
    $Player = Elm.Player.make(_elm),
@@ -5383,7 +5402,7 @@ Elm.Kalevala.make = function (_elm) {
             return $GameTypes.ParseError(_v3._0);
             case "Ok": return _v3._0;}
          _U.badCase($moduleName,
-         "between lines 98 and 100");
+         "between lines 101 and 103");
       }();
    };
    var encode = function (action) {
@@ -5413,6 +5432,8 @@ Elm.Kalevala.make = function (_elm) {
                return A2($GameTypes.PlacePiece,
                  mousePos,
                  dims);
+               case "MainMenuButton":
+               return $GameTypes.MoveToMainMenu;
                case "None":
                return $GameTypes.NoAction;
                case "PassButton":
@@ -5442,7 +5463,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 67 and 77");
+            "between lines 69 and 80");
          }();
       }();
    });
@@ -5483,6 +5504,8 @@ Elm.Kalevala.make = function (_elm) {
                  action._1,
                  action._2,
                  action._3);
+               case "MoveToMainMenu":
+               return $Game.startState;
                case "MoveToRemoteGameMenu":
                return _U.replace([["gameType"
                                   ,$GameTypes.HumanVsHumanRemote]
@@ -5518,10 +5541,16 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 43 and 54");
+            "between lines 44 and 56");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
-                                                          ,$GameTypes.GameOver]],
+                                                          ,$GameTypes.GameOver]
+                                                         ,["log"
+                                                          ,A2($List._op["::"],
+                                                          {ctor: "_Tuple2"
+                                                          ,_0: $Color.darkGrey
+                                                          ,_1: "Game over!"},
+                                                          newState.log)]],
          newState) : $State.mustPass(newState) ? $Game.pass(newState) : newState;
       }();
    });

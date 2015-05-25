@@ -71,22 +71,6 @@ Elm.Display.make = function (_elm) {
                    80,
                    $Graphics$Element.topLeft)($Graphics$Element.width(360)($Graphics$Element.leftAligned($Text.height(18)($Text.fromString($Piece.rulesText(piece)))))))]));
    };
-   var renderLog = function (state) {
-      return $Display$Helpers.withMargin({ctor: "_Tuple2"
-                                         ,_0: 10
-                                         ,_1: 10})(A3($Graphics$Element.container,
-      380,
-      262,
-      $Graphics$Element.topLeft)($Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v0) {
-         return function () {
-            switch (_v0.ctor)
-            {case "_Tuple2":
-               return $Graphics$Element.leftAligned($Text.color(_v0._0)($Text.fromString(_v0._1)));}
-            _U.badCase($moduleName,
-            "on line 189, column 44 to 94");
-         }();
-      })($List.take(5)(state.log)))));
-   };
    var renderDeck = function (state) {
       return function () {
          var deckSize = $State.isNotStarted(state) ? $List.length($Game.deckContents) : $State.isOngoing(state) ? $List.length(state.deck) : 0;
@@ -342,6 +326,35 @@ Elm.Display.make = function (_elm) {
                 208,
                 48,
                 "images/buttonViewRules.png"))])));
+   var renderLog = function (state) {
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.down,
+      _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                ,_0: 10
+                                                ,_1: 10})(A3($Graphics$Element.container,
+                   380,
+                   220,
+                   $Graphics$Element.topLeft)($Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v0) {
+                      return function () {
+                         switch (_v0.ctor)
+                         {case "_Tuple2":
+                            return $Graphics$Element.leftAligned($Text.color(_v0._0)($Text.fromString(_v0._1)));}
+                         _U.badCase($moduleName,
+                         "on line 189, column 56 to 106");
+                      }();
+                   })($List.take(5)(state.log)))))
+                   ,_U.eq(state.gameState,
+                   $GameTypes.GameOver) ? A3($Graphics$Element.container,
+                   380,
+                   40,
+                   $Graphics$Element.middle)(A2($Graphics$Input.button,
+                   A2($Signal.message,
+                   clickMailbox.address,
+                   $GameTypes.MainMenuButton),
+                   "Main Menu")) : A2($Graphics$Element.spacer,
+                   380,
+                   40)]));
+   };
    var renderRemoteSetupMenu = function (playerName) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
