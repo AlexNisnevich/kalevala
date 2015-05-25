@@ -39,8 +39,8 @@ render state dims playerName =
 renderGameArea : State -> WindowDims -> Content -> Element
 renderGameArea state dims playerName = 
   flow right [ renderBoard state dims
-             , spacer 16 1
-             , renderSidebar state playerName
+             , spacer gameMargin 1
+             , renderSidebar state dims playerName
              ]
 
 {- Board -}
@@ -62,16 +62,20 @@ renderBoard state dims =
 
 {- Sidebar -}
 
-renderSidebar : State -> Content -> Element
-renderSidebar state playerName = 
-  flow down [ image 582 82 "images/100/kalevala.png"
-            , flow down [ renderHand Red state
-                        , flow right [ renderScoreArea state |> withMargin (16, 11)
-                                     , renderRightArea state playerName |> withMargin (13, 19)
-                                     ]
-                        , renderHand Blue state
-                        ] |> withMargin (12, 11)
-            ]
+renderSidebar : State -> WindowDims -> Content -> Element
+renderSidebar state (w, h) playerName =
+  let sidebarInnerPaddingHeight = (Board.getTotalBoardSize (w, h) - minSidebarHeight) // 2
+  in
+    flow down [ image sidebarWidth 82 "images/100/kalevala.png"
+              , flow down [ renderHand Red state
+                          , spacer 1 sidebarInnerPaddingHeight
+                          , flow right [ renderScoreArea state |> withMargin (16, 11)
+                                       , renderRightArea state playerName |> withMargin (13, 19)
+                                       ]
+                          , spacer 1 sidebarInnerPaddingHeight
+                          , renderHand Blue state
+                          ] |> withMargin (12, 11)
+              ]
 
 {- Sidebar/Hand -}
 
@@ -105,7 +109,6 @@ renderHand player state =
 
 renderScoreArea : State -> Element
 renderScoreArea state = 
-  --Element.color red <| spacer 90 305
   flow down [ playerHandText Red state |> centered |> container 85 30 middle
             , playerScoreText Red state |> centered |> container 85 40 middle |> withMargin (1, 6)
             , renderDeck state |> withMargin (1, 14)

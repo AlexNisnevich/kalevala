@@ -24,9 +24,13 @@ Elm.Display.Constants.make = function (_elm) {
    0.0);
    var handTileSize = 100;
    var handPadding = 10;
-   var gameMargin = 15;
+   var minSidebarHeight = 644;
+   var sidebarWidth = 582;
+   var gameMargin = 16;
    _elm.Display.Constants.values = {_op: _op
                                    ,gameMargin: gameMargin
+                                   ,sidebarWidth: sidebarWidth
+                                   ,minSidebarHeight: minSidebarHeight
                                    ,handPadding: handPadding
                                    ,handTileSize: handTileSize
                                    ,transparent: transparent

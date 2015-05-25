@@ -50,7 +50,7 @@ Elm.Display.Board.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 86 and 92");
+         "between lines 90 and 96");
       }();
    });
    var drawPiece = F3(function (_v4,
@@ -78,7 +78,7 @@ Elm.Display.Board.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 63 and 67");
+         "between lines 67 and 71");
       }();
    });
    var getBoardSize = function (state) {
@@ -88,9 +88,17 @@ Elm.Display.Board.make = function (_elm) {
       return function () {
          switch (_v10.ctor)
          {case "_Tuple2":
-            return _v10._1 - 2 * $Display$Constants.gameMargin;}
+            return function () {
+                 var availableHeight = _v10._1 - 2 * $Display$Constants.gameMargin;
+                 var availableWidth = _v10._0 - $Display$Constants.sidebarWidth - 3 * $Display$Constants.gameMargin;
+                 return A2($Basics.max,
+                 A2($Basics.min,
+                 availableHeight,
+                 availableWidth),
+                 $Display$Constants.minSidebarHeight);
+              }();}
          _U.badCase($moduleName,
-         "on line 26, column 37 to 61");
+         "between lines 27 and 30");
       }();
    };
    var getTileSizeFromBoardSize = F2(function (boardSize,
@@ -118,7 +126,7 @@ Elm.Display.Board.make = function (_elm) {
                         ,_1: boardY};
               }();}
          _U.badCase($moduleName,
-         "between lines 36 and 43");
+         "between lines 40 and 47");
       }();
    });
    var drawGrid = F3(function (state,

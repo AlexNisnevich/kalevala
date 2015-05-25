@@ -2615,7 +2615,7 @@ Elm.Display.make = function (_elm) {
             {case "_Tuple2":
                return $Graphics$Element.leftAligned($Text.color(_v0._0)($Text.fromString(_v0._1)));}
             _U.badCase($moduleName,
-            "on line 184, column 44 to 94");
+            "on line 187, column 44 to 94");
          }();
       })($List.take(5)(state.log)))));
    };
@@ -2904,34 +2904,52 @@ Elm.Display.make = function (_elm) {
          $Graphics$Element.middle)(content));
       }();
    });
-   var renderSidebar = F2(function (state,
+   var renderSidebar = F3(function (state,
+   _v4,
    playerName) {
-      return A2($Graphics$Element.flow,
-      $Graphics$Element.down,
-      _L.fromArray([A3($Graphics$Element.image,
-                   582,
-                   82,
-                   "images/100/kalevala.png")
-                   ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                ,_0: 12
-                                                ,_1: 11})(A2($Graphics$Element.flow,
-                   $Graphics$Element.down,
-                   _L.fromArray([A2(renderHand,
-                                $GameTypes.Red,
-                                state)
-                                ,A2($Graphics$Element.flow,
-                                $Graphics$Element.right,
-                                _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                                          ,_0: 16
-                                                                          ,_1: 11})(renderScoreArea(state))
-                                             ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                                          ,_0: 13
-                                                                          ,_1: 19})(A2(renderRightArea,
-                                             state,
-                                             playerName))]))
-                                ,A2(renderHand,
-                                $GameTypes.Blue,
-                                state)])))]));
+      return function () {
+         switch (_v4.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var sidebarInnerPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
+                                                                                   ,_0: _v4._0
+                                                                                   ,_1: _v4._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
+                 return A2($Graphics$Element.flow,
+                 $Graphics$Element.down,
+                 _L.fromArray([A3($Graphics$Element.image,
+                              $Display$Constants.sidebarWidth,
+                              82,
+                              "images/100/kalevala.png")
+                              ,$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                           ,_0: 12
+                                                           ,_1: 11})(A2($Graphics$Element.flow,
+                              $Graphics$Element.down,
+                              _L.fromArray([A2(renderHand,
+                                           $GameTypes.Red,
+                                           state)
+                                           ,A2($Graphics$Element.spacer,
+                                           1,
+                                           sidebarInnerPaddingHeight)
+                                           ,A2($Graphics$Element.flow,
+                                           $Graphics$Element.right,
+                                           _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                                                     ,_0: 16
+                                                                                     ,_1: 11})(renderScoreArea(state))
+                                                        ,$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                                                     ,_0: 13
+                                                                                     ,_1: 19})(A2(renderRightArea,
+                                                        state,
+                                                        playerName))]))
+                                           ,A2($Graphics$Element.spacer,
+                                           1,
+                                           sidebarInnerPaddingHeight)
+                                           ,A2(renderHand,
+                                           $GameTypes.Blue,
+                                           state)])))]));
+              }();}
+         _U.badCase($moduleName,
+         "between lines 67 and 78");
+      }();
    });
    var renderGameArea = F3(function (state,
    dims,
@@ -2942,10 +2960,11 @@ Elm.Display.make = function (_elm) {
                    state,
                    dims)
                    ,A2($Graphics$Element.spacer,
-                   16,
+                   $Display$Constants.gameMargin,
                    1)
-                   ,A2(renderSidebar,
+                   ,A3(renderSidebar,
                    state,
+                   dims,
                    playerName)]));
    });
    var render = F3(function (state,
@@ -3030,7 +3049,7 @@ Elm.Display.Board.make = function (_elm) {
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 86 and 92");
+         "between lines 90 and 96");
       }();
    });
    var drawPiece = F3(function (_v4,
@@ -3058,7 +3077,7 @@ Elm.Display.Board.make = function (_elm) {
                    }();}
               break;}
          _U.badCase($moduleName,
-         "between lines 63 and 67");
+         "between lines 67 and 71");
       }();
    });
    var getBoardSize = function (state) {
@@ -3068,9 +3087,17 @@ Elm.Display.Board.make = function (_elm) {
       return function () {
          switch (_v10.ctor)
          {case "_Tuple2":
-            return _v10._1 - 2 * $Display$Constants.gameMargin;}
+            return function () {
+                 var availableHeight = _v10._1 - 2 * $Display$Constants.gameMargin;
+                 var availableWidth = _v10._0 - $Display$Constants.sidebarWidth - 3 * $Display$Constants.gameMargin;
+                 return A2($Basics.max,
+                 A2($Basics.min,
+                 availableHeight,
+                 availableWidth),
+                 $Display$Constants.minSidebarHeight);
+              }();}
          _U.badCase($moduleName,
-         "on line 26, column 37 to 61");
+         "between lines 27 and 30");
       }();
    };
    var getTileSizeFromBoardSize = F2(function (boardSize,
@@ -3098,7 +3125,7 @@ Elm.Display.Board.make = function (_elm) {
                         ,_1: boardY};
               }();}
          _U.badCase($moduleName,
-         "between lines 36 and 43");
+         "between lines 40 and 47");
       }();
    });
    var drawGrid = F3(function (state,
@@ -3220,9 +3247,13 @@ Elm.Display.Constants.make = function (_elm) {
    0.0);
    var handTileSize = 100;
    var handPadding = 10;
-   var gameMargin = 15;
+   var minSidebarHeight = 644;
+   var sidebarWidth = 582;
+   var gameMargin = 16;
    _elm.Display.Constants.values = {_op: _op
                                    ,gameMargin: gameMargin
+                                   ,sidebarWidth: sidebarWidth
+                                   ,minSidebarHeight: minSidebarHeight
                                    ,handPadding: handPadding
                                    ,handTileSize: handTileSize
                                    ,transparent: transparent

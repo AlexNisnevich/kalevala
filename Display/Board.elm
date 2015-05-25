@@ -23,7 +23,11 @@ import Display.Constants exposing (..)
 import Display.Helpers exposing (..)
 
 getTotalBoardSize : WindowDims -> Int
-getTotalBoardSize (width, height) = height - (2 * gameMargin)
+getTotalBoardSize (width, height) =
+  let availableWidth = width - sidebarWidth - 3 * gameMargin
+      availableHeight = height - 2 * gameMargin
+  in
+    (max (min availableHeight availableWidth) minSidebarHeight)
 
 getTileSizeFromBoardSize : Int -> WindowDims -> Float
 getTileSizeFromBoardSize boardSize dims = toFloat (getTotalBoardSize dims // boardSize)

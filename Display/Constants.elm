@@ -3,7 +3,13 @@ module Display.Constants where
 import Color exposing (Color)
 
 gameMargin : Int
-gameMargin = 15
+gameMargin = 16
+
+sidebarWidth : Int
+sidebarWidth = 582
+
+minSidebarHeight : Int
+minSidebarHeight = 644
 
 handPadding : Int
 handPadding = 10
