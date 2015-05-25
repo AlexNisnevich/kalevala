@@ -11,7 +11,30 @@ Elm.State.make = function (_elm) {
    $moduleName = "State",
    $Basics = Elm.Basics.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
+   $Helpers = Elm.Helpers.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm);
+   var pieceHeld = function (state) {
+      return function () {
+         var _v0 = state.heldPiece;
+         switch (_v0.ctor)
+         {case "Just":
+            return function () {
+                 var hand = A2($Player.getHand,
+                 state.turn,
+                 state);
+                 var pieceStr = A2($Helpers._op["!!"],
+                 hand,
+                 _v0._0);
+                 return $Maybe.Just($Piece.fromString(pieceStr));
+              }();
+            case "Nothing":
+            return $Maybe.Nothing;}
+         _U.badCase($moduleName,
+         "between lines 52 and 58");
+      }();
+   };
    var isConnectingToRemoteGame = function (state) {
       return _U.eq(state.gameState,
       $GameTypes.WaitingForPlayers);
@@ -28,8 +51,8 @@ Elm.State.make = function (_elm) {
    };
    var isNotStarted = function (state) {
       return function () {
-         var _v0 = state.gameState;
-         switch (_v0.ctor)
+         var _v2 = state.gameState;
+         switch (_v2.ctor)
          {case "NotStarted": return true;
             case "WaitingForPlayers":
             return true;}
@@ -38,8 +61,8 @@ Elm.State.make = function (_elm) {
    };
    var isOngoing = function (state) {
       return function () {
-         var _v1 = state.gameState;
-         switch (_v1.ctor)
+         var _v3 = state.gameState;
+         switch (_v3.ctor)
          {case "Connected": return true;
             case "Ongoing": return true;}
          return false;
@@ -71,6 +94,7 @@ Elm.State.make = function (_elm) {
                        ,isConnectingToRemoteGame: isConnectingToRemoteGame
                        ,isGameOver: isGameOver
                        ,mustPass: mustPass
-                       ,isPlayerTurn: isPlayerTurn};
+                       ,isPlayerTurn: isPlayerTurn
+                       ,pieceHeld: pieceHeld};
    return _elm.State.values;
 };

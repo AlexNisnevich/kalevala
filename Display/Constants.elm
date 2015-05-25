@@ -1,24 +1,15 @@
 module Display.Constants where
 
-import Color exposing (Color)
+import Color
 
-gameMargin : Int
 gameMargin = 16
-
-sidebarWidth : Int
 sidebarWidth = 582
-
-minSidebarHeight : Int
-minSidebarHeight = 644
-
-handPadding : Int
+sidebarImageHeight = 82
+sidebarRightAreaHeight = 282
 handPadding = 10
-
-handTileSize : Float
 handTileSize = 100
 
-transparent : Color
-transparent = Color.rgba 0 0 0 0.0
+minSidebarHeight = 2 * (handPadding + handTileSize) + sidebarImageHeight + sidebarRightAreaHeight + 2 * 11 + 2 * 19 
 
-transpGreen : Color
+transparent = Color.rgba 0 0 0 0.0
 transpGreen = Color.rgba 0 255 0 0.5

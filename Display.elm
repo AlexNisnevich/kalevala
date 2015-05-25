@@ -66,7 +66,7 @@ renderSidebar : State -> WindowDims -> Content -> Element
 renderSidebar state (w, h) playerName =
   let sidebarInnerPaddingHeight = (Board.getTotalBoardSize (w, h) - minSidebarHeight) // 2
   in
-    flow down [ image sidebarWidth 82 "images/100/kalevala.png"
+    flow down [ image sidebarWidth sidebarImageHeight "images/100/kalevala.png"
               , flow down [ renderHand Red state
                           , spacer 1 sidebarInnerPaddingHeight
                           , flow right [ renderScoreArea state |> withMargin (16, 11)
@@ -86,12 +86,12 @@ renderHand player state =
       hand = Player.getHand player state
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
       pieceImage pieceStr = pieceToImage <| Piece.fromString pieceStr
-      pieceSize = (round handTileSize) + handPadding
-      makePiece idx pieceStr = pieceImage pieceStr (toString <| Piece.baseValue <| Piece.fromString pieceStr) handTileSize
+      pieceSize = handTileSize + handPadding
+      makePiece idx pieceStr = pieceImage pieceStr (toString <| Piece.baseValue <| Piece.fromString pieceStr) (toFloat handTileSize)
                                   |> container pieceSize pieceSize middle
                                   |> Element.color (if isPieceHeld idx then (Player.toColor state.turn) else white)
                                   |> clickable (message clickMailbox.address (PieceInHand player idx))
-      hiddenPiece = image (round handTileSize) (round handTileSize) "images/100/back2.png"
+      hiddenPiece = image handTileSize handTileSize "images/100/back2.png"
 
       playerHand = if isEmpty hand && state.gameState == Ongoing
                    then [button (message clickMailbox.address PassButton) "Pass" |> container 100 100 middle]
@@ -160,9 +160,11 @@ renderRightArea state playerName =
   let content = if | State.isAtMainMenu state -> renderMenu
                    | State.isSettingUpRemoteGame state -> renderRemoteSetupMenu playerName
                    | State.isConnectingToRemoteGame state -> renderRemoteConnecting
-                   | otherwise -> renderLog state
+                   | otherwise -> case State.pieceHeld state of
+                                    Just piece -> renderPieceDescription piece
+                                    Nothing -> renderLog state
   in 
-    content |> container 400 282 middle |> withBorder (2, 2) darkGrey
+    content |> container 400 sidebarRightAreaHeight middle |> withBorder (2, 2) darkGrey
 
 renderMenu : Element
 renderMenu =
@@ -189,8 +191,15 @@ renderLog state =
             |> container 380 262 topLeft
             |> withMargin (10, 10)
 
-renderPieceDescription : State -> Element
-renderPieceDescription state = Element.empty
+renderPieceDescription : Piece -> Element
+renderPieceDescription piece = 
+  flow down [ spacer 1 10
+            , flow down [ Piece.toDisplayString piece |> fromString |> Text.height 40 |> leftAligned |> width 370 |> withMargin (5, 1)
+                        , Piece.flavorText piece |> fromString |> Text.height 16 |> leftAligned |> width 320 |> withMargin (30, 1)
+                        ] |> container 380 154 topLeft
+            , collage 380 50 [ traced {defaultLine | width <- 2, color <- darkGrey} <| segment (-170.0, 0.0) (170.0, 0.0) ]
+            , Piece.rulesText piece |> fromString |> Text.height 18 |> leftAligned |> width 360 |> container 360 80 topLeft |> withMargin (10, 1)
+            ]
 
 renderRemoteSetupMenu : Content -> Element
 renderRemoteSetupMenu playerName = 
@@ -201,53 +210,3 @@ renderRemoteSetupMenu playerName =
 
 renderRemoteConnecting : Element
 renderRemoteConnecting = fromString "Waiting for opponent ..." |> centered |> container 300 30 middle
-
-{--
-render : State -> WindowDims -> GameType -> Content -> Element
-render state dims gameType playerName =
-  let boardSize = Board.getBoardSize state.board
-      totalBoardSize = getTotalBoardSize dims
-      tileSize = getTileSizeFromBoardSize boardSize dims
-      handGap = totalBoardSize - 2 * (round handTileSize) - (handPadding * 2)
-      withSpacing padding elt = spacer padding padding `beside` elt
-      rulesAreaWidth = 650
-      startButton = button (message clickMailbox.address Start) "New game"
-      gameTypeDropDown = dropDown (message gameTypeMailbox.address)
-                            [ ("Player vs AI", HumanVsCpu)
-                            , ("Player vs Player (hotseat)" , HumanVsHumanLocal)
-                            , ("Player vs Player (online)" , HumanVsHumanRemote)
-                            ]
-                         |> size 180 40
-      remoteGameStatusText = case state.gameState of
-                               WaitingForPlayers -> "Waiting for opponent ... "
-                               Connected opponentName -> "Connected to " ++ opponentName ++ " "
-                               Disconnected -> "Opponent disconnected "
-                               _ -> ""
-      remoteGameStatusArea = if state.gameState == NotStarted
-                             then field Graphics.Input.Field.defaultStyle (message playerNameMailbox.address) "Your name" playerName
-                             else container 150 40 middle <| centered <| Text.height 11 <| fromString <| remoteGameStatusText
-      statusArea = if gameType == HumanVsHumanRemote then remoteGameStatusArea else Element.empty
-      deckSizeArea = if State.isOngoing state
-                     then container 70 40 middle <| centered <| Text.height 11 <| fromString <| "Deck: " ++ toString (length state.deck)
-                     else Element.empty
-      controls = container rulesAreaWidth 40 middle <| flow right [ statusArea, gameTypeDropDown, startButton, deckSizeArea ]
-      logArea = state.log
-                |> take 5
-                |> (List.map (\(color, text) -> leftAligned <| Text.color color <| fromString text))
-                |> flow down
-      rightArea = flow down [ logArea
-                            , controls
-                            ]
-  in
-    flow down
-      [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (fromString "Kalevala"))))
-      , flow right [ renderBoard state boardSize dims
-                   , flow down [ renderHand Red state
-                               , spacer 1 5
-                               , withSpacing 10 (withSpacing 10 (container rulesAreaWidth (handGap - 10) midLeft rightArea) |> Element.color gray)
-                               , spacer 1 5
-                               , renderHand Blue state
-                               ]
-                   ]
-      ]
---}

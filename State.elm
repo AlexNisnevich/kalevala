@@ -1,6 +1,8 @@
 module State where
 
 import GameTypes exposing (..)
+import Helpers exposing (..)
+import Piece
 import Player
 
 {- Is the game ongoing in the given state? -}
@@ -44,3 +46,13 @@ mustPass state =
 isPlayerTurn : State -> Bool
 isPlayerTurn state =
   (isOngoing state) && ((Player.getType state.turn state) == Human)
+
+pieceHeld : State -> Maybe Piece
+pieceHeld state =
+  case state.heldPiece of
+    Just idx ->
+      let hand = Player.getHand state.turn state
+          pieceStr = hand !! idx
+      in
+        Just (Piece.fromString pieceStr)
+    Nothing -> Nothing

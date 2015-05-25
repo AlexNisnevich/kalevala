@@ -97,7 +97,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 93, column 88 to 112");
+               "on line 97, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -168,7 +168,7 @@ Elm.Game.make = function (_elm) {
                            ,["turn",startPlayer]
                            ,["log"
                             ,_L.fromArray([{ctor: "_Tuple2"
-                                           ,_0: $Color.grey
+                                           ,_0: $Color.darkGrey
                                            ,_1: A2($Basics._op["++"],
                                            "Connected to ",
                                            opponentName)}])]],
@@ -202,7 +202,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 71 and 74");
+            "between lines 75 and 78");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -295,7 +295,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 57 and 61");
+         "between lines 61 and 65");
       }();
    };
    var tryMove = F2(function (location,
@@ -316,7 +316,7 @@ Elm.Game.make = function (_elm) {
                        case "Remote":
                        return $Basics.identity;}
                     _U.badCase($moduleName,
-                    "between lines 44 and 48");
+                    "between lines 48 and 52");
                  }();
                  var hand = A2($Player.getHand,
                  state.turn,
@@ -339,7 +339,7 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 37 and 54");
+         "between lines 41 and 58");
       }();
    });
    var startGame = F4(function (gameType,
@@ -390,7 +390,7 @@ Elm.Game.make = function (_elm) {
                                   ,["turn",player]
                                   ,["log"
                                    ,_L.fromArray([{ctor: "_Tuple2"
-                                                  ,_0: $Color.grey
+                                                  ,_0: $Color.darkGrey
                                                   ,_1: "Game started!"}])]],
          startState);
          return _U.eq(A2($Player.getType,
@@ -403,8 +403,11 @@ Elm.Game.make = function (_elm) {
    idx,
    state) {
       return _U.eq(state.turn,
-      player) && $State.isOngoing(state) ? _U.replace([["heldPiece"
-                                                       ,$Maybe.Just(idx)]],
+      player) && $State.isOngoing(state) ? _U.eq(state.heldPiece,
+      $Maybe.Just(idx)) ? _U.replace([["heldPiece"
+                                      ,$Maybe.Nothing]],
+      state) : _U.replace([["heldPiece"
+                           ,$Maybe.Just(idx)]],
       state) : state;
    });
    _elm.Game.values = {_op: _op

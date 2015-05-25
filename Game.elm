@@ -13,12 +13,16 @@ import Board
 import Player
 import AI
 
-{- Pick up a piece if it's the given player's turn, otherwise pick up nothing. 
+{- Pick up a piece if it's the given player's turn, otherwise pick up nothing.
+   If the piece is already picked up, put it down.
    Returns the new state. -}
 tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
   if (state.turn == player) && (State.isOngoing state)
-  then { state | heldPiece <- Just idx }
+  then 
+    if state.heldPiece == Just idx
+    then { state | heldPiece <- Nothing }
+    else {state | heldPiece <- Just idx }
   else state
 
 {- Pass the current player's turn. Returns the new state. -}
@@ -128,7 +132,7 @@ startGame gameType deck player playerName =
                                 , deck <- remainder
                                 , board <- Dict.singleton (0, 0) firstTile
                                 , turn <- player
-                                , log <- [(Color.grey, "Game started!")] }
+                                , log <- [(Color.darkGrey, "Game started!")] }
   in
     -- if first player is Cpu, make their move
     if Player.getType state.turn state == Cpu
@@ -155,7 +159,7 @@ gameStarted deck startPlayer localPlayer opponentName =
                  , deck <- remainder
                  , board <- Dict.singleton (0, 0) firstTile
                  , turn <- startPlayer
-                 , log <- [(Color.grey, "Connected to " ++ opponentName)] }
+                 , log <- [(Color.darkGrey, "Connected to " ++ opponentName)] }
 
 {- The cards in a Voluspa deck -}
 deckContents : List String

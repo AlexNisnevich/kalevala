@@ -4,10 +4,10 @@ import Color
 import Color exposing (Color)
 import Dict
 import Maybe exposing (withDefault)
-
-import GameTypes exposing (Player (..), PlayerType (..), State)
-import Helpers exposing (..)
 import Random exposing (float, generate)
+
+import GameTypes exposing (..)
+import Helpers exposing (..)
 
 toColor : Player -> Color
 toColor player =

@@ -33,8 +33,43 @@ Elm.Display.make = function (_elm) {
    300,
    30,
    $Graphics$Element.middle)($Graphics$Element.centered($Text.fromString("Waiting for opponent ...")));
-   var renderPieceDescription = function (state) {
-      return $Graphics$Element.empty;
+   var renderPieceDescription = function (piece) {
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.down,
+      _L.fromArray([A2($Graphics$Element.spacer,
+                   1,
+                   10)
+                   ,A3($Graphics$Element.container,
+                   380,
+                   154,
+                   $Graphics$Element.topLeft)(A2($Graphics$Element.flow,
+                   $Graphics$Element.down,
+                   _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                             ,_0: 5
+                                                             ,_1: 1})($Graphics$Element.width(370)($Graphics$Element.leftAligned($Text.height(40)($Text.fromString($Piece.toDisplayString(piece))))))
+                                ,$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                             ,_0: 30
+                                                             ,_1: 1})($Graphics$Element.width(320)($Graphics$Element.leftAligned($Text.height(16)($Text.fromString($Piece.flavorText(piece))))))])))
+                   ,A3($Graphics$Collage.collage,
+                   380,
+                   50,
+                   _L.fromArray([$Graphics$Collage.traced(_U.replace([["width"
+                                                                      ,2]
+                                                                     ,["color"
+                                                                      ,$Color.darkGrey]],
+                   $Graphics$Collage.defaultLine))(A2($Graphics$Collage.segment,
+                   {ctor: "_Tuple2"
+                   ,_0: -170.0
+                   ,_1: 0.0},
+                   {ctor: "_Tuple2"
+                   ,_0: 170.0
+                   ,_1: 0.0}))]))
+                   ,$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                ,_0: 10
+                                                ,_1: 1})(A3($Graphics$Element.container,
+                   360,
+                   80,
+                   $Graphics$Element.topLeft)($Graphics$Element.width(360)($Graphics$Element.leftAligned($Text.height(18)($Text.fromString($Piece.rulesText(piece)))))))]));
    };
    var renderLog = function (state) {
       return $Display$Helpers.withMargin({ctor: "_Tuple2"
@@ -48,7 +83,7 @@ Elm.Display.make = function (_elm) {
             {case "_Tuple2":
                return $Graphics$Element.leftAligned($Text.color(_v0._0)($Text.fromString(_v0._1)));}
             _U.badCase($moduleName,
-            "on line 187, column 44 to 94");
+            "on line 189, column 44 to 94");
          }();
       })($List.take(5)(state.log)))));
    };
@@ -178,10 +213,10 @@ Elm.Display.make = function (_elm) {
    state) {
       return function () {
          var hiddenPiece = A3($Graphics$Element.image,
-         $Basics.round($Display$Constants.handTileSize),
-         $Basics.round($Display$Constants.handTileSize),
+         $Display$Constants.handTileSize,
+         $Display$Constants.handTileSize,
          "images/100/back2.png");
-         var pieceSize = $Basics.round($Display$Constants.handTileSize) + $Display$Constants.handPadding;
+         var pieceSize = $Display$Constants.handTileSize + $Display$Constants.handPadding;
          var dummyHand = A2($List.repeat,
          5,
          A3($Graphics$Element.container,
@@ -208,7 +243,7 @@ Elm.Display.make = function (_elm) {
             $Graphics$Element.middle)(A3(pieceImage,
             pieceStr,
             $Basics.toString($Piece.baseValue($Piece.fromString(pieceStr))),
-            $Display$Constants.handTileSize))));
+            $Basics.toFloat($Display$Constants.handTileSize)))));
          });
          var hand = A2($Player.getHand,
          player,
@@ -328,30 +363,39 @@ Elm.Display.make = function (_elm) {
    var renderRightArea = F2(function (state,
    playerName) {
       return function () {
-         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : $State.isConnectingToRemoteGame(state) ? renderRemoteConnecting : renderLog(state);
+         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : $State.isConnectingToRemoteGame(state) ? renderRemoteConnecting : function () {
+            var _v4 = $State.pieceHeld(state);
+            switch (_v4.ctor)
+            {case "Just":
+               return renderPieceDescription(_v4._0);
+               case "Nothing":
+               return renderLog(state);}
+            _U.badCase($moduleName,
+            "between lines 163 and 166");
+         }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
          $Color.darkGrey)(A3($Graphics$Element.container,
          400,
-         282,
+         $Display$Constants.sidebarRightAreaHeight,
          $Graphics$Element.middle)(content));
       }();
    });
    var renderSidebar = F3(function (state,
-   _v4,
+   _v6,
    playerName) {
       return function () {
-         switch (_v4.ctor)
+         switch (_v6.ctor)
          {case "_Tuple2":
             return function () {
                  var sidebarInnerPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
-                                                                                   ,_0: _v4._0
-                                                                                   ,_1: _v4._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
+                                                                                   ,_0: _v6._0
+                                                                                   ,_1: _v6._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
                  return A2($Graphics$Element.flow,
                  $Graphics$Element.down,
                  _L.fromArray([A3($Graphics$Element.image,
                               $Display$Constants.sidebarWidth,
-                              82,
+                              $Display$Constants.sidebarImageHeight,
                               "images/100/kalevala.png")
                               ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                                            ,_0: 12

@@ -2600,8 +2600,43 @@ Elm.Display.make = function (_elm) {
    300,
    30,
    $Graphics$Element.middle)($Graphics$Element.centered($Text.fromString("Waiting for opponent ...")));
-   var renderPieceDescription = function (state) {
-      return $Graphics$Element.empty;
+   var renderPieceDescription = function (piece) {
+      return A2($Graphics$Element.flow,
+      $Graphics$Element.down,
+      _L.fromArray([A2($Graphics$Element.spacer,
+                   1,
+                   10)
+                   ,A3($Graphics$Element.container,
+                   380,
+                   154,
+                   $Graphics$Element.topLeft)(A2($Graphics$Element.flow,
+                   $Graphics$Element.down,
+                   _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                             ,_0: 5
+                                                             ,_1: 1})($Graphics$Element.width(370)($Graphics$Element.leftAligned($Text.height(40)($Text.fromString($Piece.toDisplayString(piece))))))
+                                ,$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                             ,_0: 30
+                                                             ,_1: 1})($Graphics$Element.width(320)($Graphics$Element.leftAligned($Text.height(16)($Text.fromString($Piece.flavorText(piece))))))])))
+                   ,A3($Graphics$Collage.collage,
+                   380,
+                   50,
+                   _L.fromArray([$Graphics$Collage.traced(_U.replace([["width"
+                                                                      ,2]
+                                                                     ,["color"
+                                                                      ,$Color.darkGrey]],
+                   $Graphics$Collage.defaultLine))(A2($Graphics$Collage.segment,
+                   {ctor: "_Tuple2"
+                   ,_0: -170.0
+                   ,_1: 0.0},
+                   {ctor: "_Tuple2"
+                   ,_0: 170.0
+                   ,_1: 0.0}))]))
+                   ,$Display$Helpers.withMargin({ctor: "_Tuple2"
+                                                ,_0: 10
+                                                ,_1: 1})(A3($Graphics$Element.container,
+                   360,
+                   80,
+                   $Graphics$Element.topLeft)($Graphics$Element.width(360)($Graphics$Element.leftAligned($Text.height(18)($Text.fromString($Piece.rulesText(piece)))))))]));
    };
    var renderLog = function (state) {
       return $Display$Helpers.withMargin({ctor: "_Tuple2"
@@ -2615,7 +2650,7 @@ Elm.Display.make = function (_elm) {
             {case "_Tuple2":
                return $Graphics$Element.leftAligned($Text.color(_v0._0)($Text.fromString(_v0._1)));}
             _U.badCase($moduleName,
-            "on line 187, column 44 to 94");
+            "on line 189, column 44 to 94");
          }();
       })($List.take(5)(state.log)))));
    };
@@ -2745,10 +2780,10 @@ Elm.Display.make = function (_elm) {
    state) {
       return function () {
          var hiddenPiece = A3($Graphics$Element.image,
-         $Basics.round($Display$Constants.handTileSize),
-         $Basics.round($Display$Constants.handTileSize),
+         $Display$Constants.handTileSize,
+         $Display$Constants.handTileSize,
          "images/100/back2.png");
-         var pieceSize = $Basics.round($Display$Constants.handTileSize) + $Display$Constants.handPadding;
+         var pieceSize = $Display$Constants.handTileSize + $Display$Constants.handPadding;
          var dummyHand = A2($List.repeat,
          5,
          A3($Graphics$Element.container,
@@ -2775,7 +2810,7 @@ Elm.Display.make = function (_elm) {
             $Graphics$Element.middle)(A3(pieceImage,
             pieceStr,
             $Basics.toString($Piece.baseValue($Piece.fromString(pieceStr))),
-            $Display$Constants.handTileSize))));
+            $Basics.toFloat($Display$Constants.handTileSize)))));
          });
          var hand = A2($Player.getHand,
          player,
@@ -2895,30 +2930,39 @@ Elm.Display.make = function (_elm) {
    var renderRightArea = F2(function (state,
    playerName) {
       return function () {
-         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : $State.isConnectingToRemoteGame(state) ? renderRemoteConnecting : renderLog(state);
+         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : $State.isConnectingToRemoteGame(state) ? renderRemoteConnecting : function () {
+            var _v4 = $State.pieceHeld(state);
+            switch (_v4.ctor)
+            {case "Just":
+               return renderPieceDescription(_v4._0);
+               case "Nothing":
+               return renderLog(state);}
+            _U.badCase($moduleName,
+            "between lines 163 and 166");
+         }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
          $Color.darkGrey)(A3($Graphics$Element.container,
          400,
-         282,
+         $Display$Constants.sidebarRightAreaHeight,
          $Graphics$Element.middle)(content));
       }();
    });
    var renderSidebar = F3(function (state,
-   _v4,
+   _v6,
    playerName) {
       return function () {
-         switch (_v4.ctor)
+         switch (_v6.ctor)
          {case "_Tuple2":
             return function () {
                  var sidebarInnerPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
-                                                                                   ,_0: _v4._0
-                                                                                   ,_1: _v4._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
+                                                                                   ,_0: _v6._0
+                                                                                   ,_1: _v6._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
                  return A2($Graphics$Element.flow,
                  $Graphics$Element.down,
                  _L.fromArray([A3($Graphics$Element.image,
                               $Display$Constants.sidebarWidth,
-                              82,
+                              $Display$Constants.sidebarImageHeight,
                               "images/100/kalevala.png")
                               ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                                            ,_0: 12
@@ -3234,6 +3278,7 @@ Elm.Display.Constants.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "Display.Constants",
+   $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm);
    var transpGreen = A4($Color.rgba,
    0,
@@ -3247,15 +3292,19 @@ Elm.Display.Constants.make = function (_elm) {
    0.0);
    var handTileSize = 100;
    var handPadding = 10;
-   var minSidebarHeight = 644;
+   var sidebarRightAreaHeight = 282;
+   var sidebarImageHeight = 82;
+   var minSidebarHeight = 2 * (handPadding + handTileSize) + sidebarImageHeight + sidebarRightAreaHeight + 2 * 11 + 2 * 19;
    var sidebarWidth = 582;
    var gameMargin = 16;
    _elm.Display.Constants.values = {_op: _op
                                    ,gameMargin: gameMargin
                                    ,sidebarWidth: sidebarWidth
-                                   ,minSidebarHeight: minSidebarHeight
+                                   ,sidebarImageHeight: sidebarImageHeight
+                                   ,sidebarRightAreaHeight: sidebarRightAreaHeight
                                    ,handPadding: handPadding
                                    ,handTileSize: handTileSize
+                                   ,minSidebarHeight: minSidebarHeight
                                    ,transparent: transparent
                                    ,transpGreen: transpGreen};
    return _elm.Display.Constants.values;
@@ -3451,7 +3500,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 93, column 88 to 112");
+               "on line 97, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -3522,7 +3571,7 @@ Elm.Game.make = function (_elm) {
                            ,["turn",startPlayer]
                            ,["log"
                             ,_L.fromArray([{ctor: "_Tuple2"
-                                           ,_0: $Color.grey
+                                           ,_0: $Color.darkGrey
                                            ,_1: A2($Basics._op["++"],
                                            "Connected to ",
                                            opponentName)}])]],
@@ -3556,7 +3605,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 71 and 74");
+            "between lines 75 and 78");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -3649,7 +3698,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 57 and 61");
+         "between lines 61 and 65");
       }();
    };
    var tryMove = F2(function (location,
@@ -3670,7 +3719,7 @@ Elm.Game.make = function (_elm) {
                        case "Remote":
                        return $Basics.identity;}
                     _U.badCase($moduleName,
-                    "between lines 44 and 48");
+                    "between lines 48 and 52");
                  }();
                  var hand = A2($Player.getHand,
                  state.turn,
@@ -3693,7 +3742,7 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 37 and 54");
+         "between lines 41 and 58");
       }();
    });
    var startGame = F4(function (gameType,
@@ -3744,7 +3793,7 @@ Elm.Game.make = function (_elm) {
                                   ,["turn",player]
                                   ,["log"
                                    ,_L.fromArray([{ctor: "_Tuple2"
-                                                  ,_0: $Color.grey
+                                                  ,_0: $Color.darkGrey
                                                   ,_1: "Game started!"}])]],
          startState);
          return _U.eq(A2($Player.getType,
@@ -3757,8 +3806,11 @@ Elm.Game.make = function (_elm) {
    idx,
    state) {
       return _U.eq(state.turn,
-      player) && $State.isOngoing(state) ? _U.replace([["heldPiece"
-                                                       ,$Maybe.Just(idx)]],
+      player) && $State.isOngoing(state) ? _U.eq(state.heldPiece,
+      $Maybe.Just(idx)) ? _U.replace([["heldPiece"
+                                      ,$Maybe.Nothing]],
+      state) : _U.replace([["heldPiece"
+                           ,$Maybe.Just(idx)]],
       state) : state;
    });
    _elm.Game.values = {_op: _op
@@ -12836,6 +12888,52 @@ Elm.Piece.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Piece",
    $GameTypes = Elm.GameTypes.make(_elm);
+   var rulesText = function (piece) {
+      return function () {
+         switch (piece.ctor)
+         {case "Joukahainen":
+            return "4 - Value is the sum of all Joukahainen tiles in the same row or column.";
+            case "Kaarme":
+            return "5 - May be placed on top of other tiles (except other K&auml;&auml;rmes).";
+            case "Kullervo":
+            return "6 - Only other Kullervos may be placed next to this tile.";
+            case "Lemminkainen":
+            return "1 - All adjacent tiles (except other Lemmink&auml;inens) have value 0.";
+            case "Louhi":
+            return "2 - Automatically scores when there are Louhis on both ends of a line.";
+            case "SeppoIlmarinen":
+            return "3 - You may exchange it with any tile on the table (except other Seppo Ilmarinens).";
+            case "Ukko":
+            return "7 - No special rules.";
+            case "Vainamoinen":
+            return "8 - No special rules.";}
+         _U.badCase($moduleName,
+         "between lines 67 and 75");
+      }();
+   };
+   var flavorText = function (piece) {
+      return function () {
+         switch (piece.ctor)
+         {case "Joukahainen":
+            return "After losing a singing contest, Joukahainen pledged his sister Aino to V&auml;in&auml;m&ouml;inen, but she drowned herself rather than marry him.";
+            case "Kaarme":
+            return "Plowing a field of poisonous snakes (K&auml;&auml;rmes) was the first task that Seppo Ilmarinen had to perform to marry Louhi\'s daughter.";
+            case "Kullervo":
+            return "Kullervo grew up thinking his family was dead, amongst people who hated him and whom he did not trust, knowing that they were his people\'s murderers.";
+            case "Lemminkainen":
+            return "After Lemmink&auml;inen drowned in the underworld, his mother sewed his body together and restored him to life with ointment from Ukko\'s halls.";
+            case "Louhi":
+            return "Louhi was a powerful witch with the ability to change shape, and the main opponent of V&auml;in&auml;m&ouml;inen in the battle for the magical artifact Sampo.";
+            case "SeppoIlmarinen":
+            return "Seppo Ilmarinen was immortal and capable of creating practically anything, but unlucky in love.";
+            case "Ukko":
+            return "Ukko, the god of the sky, created lightning with his hammer Ukonvasara and caused thunderstorms by driving his chariot through the skies.";
+            case "Vainamoinen":
+            return "V&auml;in&auml;m&ouml;inen, the central character of the Kalevala, was a shamanistic hero with a magical power of song and music.";}
+         _U.badCase($moduleName,
+         "between lines 55 and 63");
+      }();
+   };
    var baseValue = function (piece) {
       return function () {
          switch (piece.ctor)
@@ -12919,7 +13017,9 @@ Elm.Piece.make = function (_elm) {
                        ,fromString: fromString
                        ,toString: toString
                        ,toDisplayString: toDisplayString
-                       ,baseValue: baseValue};
+                       ,baseValue: baseValue
+                       ,flavorText: flavorText
+                       ,rulesText: rulesText};
    return _elm.Piece.values;
 };
 Elm.Player = Elm.Player || {};
@@ -13806,7 +13906,30 @@ Elm.State.make = function (_elm) {
    $moduleName = "State",
    $Basics = Elm.Basics.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
+   $Helpers = Elm.Helpers.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm);
+   var pieceHeld = function (state) {
+      return function () {
+         var _v0 = state.heldPiece;
+         switch (_v0.ctor)
+         {case "Just":
+            return function () {
+                 var hand = A2($Player.getHand,
+                 state.turn,
+                 state);
+                 var pieceStr = A2($Helpers._op["!!"],
+                 hand,
+                 _v0._0);
+                 return $Maybe.Just($Piece.fromString(pieceStr));
+              }();
+            case "Nothing":
+            return $Maybe.Nothing;}
+         _U.badCase($moduleName,
+         "between lines 52 and 58");
+      }();
+   };
    var isConnectingToRemoteGame = function (state) {
       return _U.eq(state.gameState,
       $GameTypes.WaitingForPlayers);
@@ -13823,8 +13946,8 @@ Elm.State.make = function (_elm) {
    };
    var isNotStarted = function (state) {
       return function () {
-         var _v0 = state.gameState;
-         switch (_v0.ctor)
+         var _v2 = state.gameState;
+         switch (_v2.ctor)
          {case "NotStarted": return true;
             case "WaitingForPlayers":
             return true;}
@@ -13833,8 +13956,8 @@ Elm.State.make = function (_elm) {
    };
    var isOngoing = function (state) {
       return function () {
-         var _v1 = state.gameState;
-         switch (_v1.ctor)
+         var _v3 = state.gameState;
+         switch (_v3.ctor)
          {case "Connected": return true;
             case "Ongoing": return true;}
          return false;
@@ -13866,7 +13989,8 @@ Elm.State.make = function (_elm) {
                        ,isConnectingToRemoteGame: isConnectingToRemoteGame
                        ,isGameOver: isGameOver
                        ,mustPass: mustPass
-                       ,isPlayerTurn: isPlayerTurn};
+                       ,isPlayerTurn: isPlayerTurn
+                       ,pieceHeld: pieceHeld};
    return _elm.State.values;
 };
 Elm.String = Elm.String || {};

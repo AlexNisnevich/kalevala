@@ -11,6 +11,7 @@ Elm.Display.Constants.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "Display.Constants",
+   $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm);
    var transpGreen = A4($Color.rgba,
    0,
@@ -24,15 +25,19 @@ Elm.Display.Constants.make = function (_elm) {
    0.0);
    var handTileSize = 100;
    var handPadding = 10;
-   var minSidebarHeight = 644;
+   var sidebarRightAreaHeight = 282;
+   var sidebarImageHeight = 82;
+   var minSidebarHeight = 2 * (handPadding + handTileSize) + sidebarImageHeight + sidebarRightAreaHeight + 2 * 11 + 2 * 19;
    var sidebarWidth = 582;
    var gameMargin = 16;
    _elm.Display.Constants.values = {_op: _op
                                    ,gameMargin: gameMargin
                                    ,sidebarWidth: sidebarWidth
-                                   ,minSidebarHeight: minSidebarHeight
+                                   ,sidebarImageHeight: sidebarImageHeight
+                                   ,sidebarRightAreaHeight: sidebarRightAreaHeight
                                    ,handPadding: handPadding
                                    ,handTileSize: handTileSize
+                                   ,minSidebarHeight: minSidebarHeight
                                    ,transparent: transparent
                                    ,transpGreen: transpGreen};
    return _elm.Display.Constants.values;
