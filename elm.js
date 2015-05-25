@@ -2608,7 +2608,7 @@ Elm.Display.make = function (_elm) {
                    10)
                    ,A3($Graphics$Element.container,
                    380,
-                   154,
+                   158,
                    $Graphics$Element.topLeft)(A2($Graphics$Element.flow,
                    $Graphics$Element.down,
                    _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
@@ -2619,7 +2619,7 @@ Elm.Display.make = function (_elm) {
                                                              ,_1: 1})($Graphics$Element.width(320)($Graphics$Element.leftAligned($Text.height(16)($Text.fromString($Piece.flavorText(piece))))))])))
                    ,A3($Graphics$Collage.collage,
                    380,
-                   50,
+                   46,
                    _L.fromArray([$Graphics$Collage.traced(_U.replace([["width"
                                                                       ,2]
                                                                      ,["color"
@@ -12969,17 +12969,17 @@ Elm.Piece.make = function (_elm) {
       return function () {
          switch (piece.ctor)
          {case "Joukahainen":
-            return "After losing a singing contest, Joukahainen pledged his sister Aino to V&auml;in&auml;m&ouml;inen, but she drowned herself rather than marry him.";
+            return "After losing a contest, the arrogant archer Joukahainen pledged his sister Aino to V&auml;in&auml;m&ouml;inen, but she drowned herself rather than marry him.";
             case "Kaarme":
-            return "Plowing a field of poisonous snakes (K&auml;&auml;rmes) was the first task that Seppo Ilmarinen had to perform to marry Louhi\'s daughter.";
+            return "Plowing a field of poisonous snakes (k&auml;&auml;rmeit&auml;) was the first task that Seppo Ilmarinen had to perform to marry Louhi\'s daughter.";
             case "Kullervo":
-            return "Kullervo grew up thinking his family was dead, amongst people who hated him and whom he did not trust, knowing that they were his people\'s murderers.";
+            return "Kullervo grew up thinking his family was dead, amongst his people\'s murderers, and killed himself after unknowingly seducing his sister.";
             case "Lemminkainen":
             return "After Lemmink&auml;inen drowned in the underworld, his mother sewed his body together and restored him to life with ointment from Ukko\'s halls.";
             case "Louhi":
             return "Louhi was a powerful witch with the ability to change shape, and the main opponent of V&auml;in&auml;m&ouml;inen in the battle for the magical artifact Sampo.";
             case "SeppoIlmarinen":
-            return "Seppo Ilmarinen was immortal and capable of creating practically anything, but unlucky in love.";
+            return "Seppo Ilmarinen, the Eternal Hammerer, was an immortal blacksmith who was capable of creating practically anything, but unlucky in love.";
             case "Ukko":
             return "Ukko, the god of the sky, created lightning with his hammer Ukonvasara and caused thunderstorms by driving his chariot through the skies.";
             case "Vainamoinen":

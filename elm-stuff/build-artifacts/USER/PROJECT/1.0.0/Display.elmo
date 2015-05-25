@@ -41,7 +41,7 @@ Elm.Display.make = function (_elm) {
                    10)
                    ,A3($Graphics$Element.container,
                    380,
-                   154,
+                   158,
                    $Graphics$Element.topLeft)(A2($Graphics$Element.flow,
                    $Graphics$Element.down,
                    _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
@@ -52,7 +52,7 @@ Elm.Display.make = function (_elm) {
                                                              ,_1: 1})($Graphics$Element.width(320)($Graphics$Element.leftAligned($Text.height(16)($Text.fromString($Piece.flavorText(piece))))))])))
                    ,A3($Graphics$Collage.collage,
                    380,
-                   50,
+                   46,
                    _L.fromArray([$Graphics$Collage.traced(_U.replace([["width"
                                                                       ,2]
                                                                      ,["color"
