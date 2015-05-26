@@ -20,7 +20,7 @@ add str color log = (color, str) :: log
 
 display : (Int, Int) -> Log -> Element
 display (width, height) log =
-  let widthMinusSidebar = width - 20
+  let widthMinusSidebar = width - 16
       entryToElt (color, text) = fromString text |> Text.color color |> leftAligned |> Element.width widthMinusSidebar
       fullLog = map entryToElt log |> flow down |> Element.width width
   in

@@ -114,7 +114,10 @@ getFirstTileHandsAndDeck deck =
 startGame : GameType -> Deck -> Player -> String -> State
 startGame gameType deck player playerName =
   let players = Dict.fromList [ (Player.toString player, Human)
-                              , (Player.toString <| Player.next player, if gameType == HumanVsCpu then Cpu else Human)
+                              , (Player.toString <| Player.next player, case gameType of
+                                                                          HumanVsCpu -> Cpu
+                                                                          HumanVsHumanLocal -> Human
+                                                                          HumanVsHumanRemote -> Remote)
                               ]
       playerNames = Dict.fromList [ (Player.toString player, if gameType == HumanVsCpu then "You" else Player.toString player)
                                   , (Player.toString <| Player.next player, if gameType == HumanVsCpu then "CPU" else Player.toString <| Player.next player)

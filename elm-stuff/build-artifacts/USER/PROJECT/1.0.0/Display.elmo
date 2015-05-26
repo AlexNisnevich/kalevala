@@ -99,29 +99,52 @@ Elm.Display.make = function (_elm) {
          state.score))))));
       }();
    });
-   var playerHandText = F2(function (player,
-   state) {
+   var playerHandText = F3(function (player,
+   state,
+   playerName) {
       return function () {
          var p = $Player.toString(player);
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
+         var text = function () {
+            var _v0 = state.gameType;
+            switch (_v0.ctor)
+            {case "HumanVsCpu":
+               return function () {
+                    switch (playerType.ctor)
+                    {case "Cpu": return "CPU";
+                       case "Human": return "Player";}
+                    _U.badCase($moduleName,
+                    "between lines 125 and 128");
+                 }();
+               case "HumanVsHumanLocal":
+               return $Basics.toString(player);
+               case "HumanVsHumanRemote":
+               return function () {
+                    switch (playerType.ctor)
+                    {case "Human":
+                       return playerName.string;}
+                    return "?";
+                 }();}
+            _U.badCase($moduleName,
+            "between lines 124 and 132");
+         }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
-         player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(function (t) {
-            return _U.eq(t,
-            "Human") ? "Player" : t;
-         }($Basics.toString(playerType)))))));
+         player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(text)))));
       }();
    });
-   var renderScoreArea = function (state) {
+   var renderScoreArea = F2(function (state,
+   playerName) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
       _L.fromArray([A3($Graphics$Element.container,
                    85,
                    30,
-                   $Graphics$Element.middle)($Graphics$Element.centered(A2(playerHandText,
+                   $Graphics$Element.middle)($Graphics$Element.centered(A3(playerHandText,
                    $GameTypes.Red,
-                   state)))
+                   state,
+                   playerName)))
                    ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                                 ,_0: 1
                                                 ,_1: 6})(A3($Graphics$Element.container,
@@ -144,10 +167,11 @@ Elm.Display.make = function (_elm) {
                    ,A3($Graphics$Element.container,
                    85,
                    30,
-                   $Graphics$Element.middle)($Graphics$Element.centered(A2(playerHandText,
+                   $Graphics$Element.middle)($Graphics$Element.centered(A3(playerHandText,
                    $GameTypes.Blue,
-                   state)))]));
-   };
+                   state,
+                   playerName)))]));
+   });
    var playerNameMailbox = $Signal.mailbox($Graphics$Input$Field.noContent);
    var clickMailbox = $Signal.mailbox($GameTypes.None);
    var renderBoard = F2(function (state,
@@ -331,11 +355,11 @@ Elm.Display.make = function (_elm) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
       _L.fromArray([A3($Graphics$Element.container,
-                   380,
+                   390,
                    220,
                    $Graphics$Element.midTop)(A2($Log.display,
                    {ctor: "_Tuple2"
-                   ,_0: 380
+                   ,_0: 390
                    ,_1: 168},
                    state.log))
                    ,_U.eq(state.gameState,
@@ -372,14 +396,14 @@ Elm.Display.make = function (_elm) {
    playerName) {
       return function () {
          var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : $State.isConnectingToRemoteGame(state) ? renderRemoteConnecting : function () {
-            var _v0 = $State.pieceHeld(state);
-            switch (_v0.ctor)
+            var _v3 = $State.pieceHeld(state);
+            switch (_v3.ctor)
             {case "Just":
-               return renderPieceDescription(_v0._0);
+               return renderPieceDescription(_v3._0);
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
-            "between lines 164 and 167");
+            "between lines 170 and 173");
          }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
@@ -390,15 +414,15 @@ Elm.Display.make = function (_elm) {
       }();
    });
    var renderSidebar = F3(function (state,
-   _v2,
+   _v5,
    playerName) {
       return function () {
-         switch (_v2.ctor)
+         switch (_v5.ctor)
          {case "_Tuple2":
             return function () {
                  var sidebarInnerPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
-                                                                                   ,_0: _v2._0
-                                                                                   ,_1: _v2._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
+                                                                                   ,_0: _v5._0
+                                                                                   ,_1: _v5._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
                  return A2($Graphics$Element.flow,
                  $Graphics$Element.down,
                  _L.fromArray([A3($Graphics$Element.image,
@@ -419,7 +443,9 @@ Elm.Display.make = function (_elm) {
                                            $Graphics$Element.right,
                                            _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
                                                                                      ,_0: 16
-                                                                                     ,_1: 11})(renderScoreArea(state))
+                                                                                     ,_1: 11})(A2(renderScoreArea,
+                                                        state,
+                                                        playerName))
                                                         ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                                                                      ,_0: 13
                                                                                      ,_1: 19})(A2(renderRightArea,

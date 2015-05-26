@@ -21,7 +21,7 @@ Elm.Log.make = function (_elm) {
          switch (_v0.ctor)
          {case "_Tuple2":
             return function () {
-                 var widthMinusSidebar = _v0._0 - 20;
+                 var widthMinusSidebar = _v0._0 - 16;
                  var entryToElt = function (_v4) {
                     return function () {
                        switch (_v4.ctor)

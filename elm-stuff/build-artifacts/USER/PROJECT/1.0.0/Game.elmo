@@ -357,8 +357,17 @@ Elm.Game.make = function (_elm) {
                                                     ,_1: $GameTypes.Human}
                                                    ,{ctor: "_Tuple2"
                                                     ,_0: $Player.toString($Player.next(player))
-                                                    ,_1: _U.eq(gameType,
-                                                    $GameTypes.HumanVsCpu) ? $GameTypes.Cpu : $GameTypes.Human}]));
+                                                    ,_1: function () {
+                                                       switch (gameType.ctor)
+                                                       {case "HumanVsCpu":
+                                                          return $GameTypes.Cpu;
+                                                          case "HumanVsHumanLocal":
+                                                          return $GameTypes.Human;
+                                                          case "HumanVsHumanRemote":
+                                                          return $GameTypes.Remote;}
+                                                       _U.badCase($moduleName,
+                                                       "between lines 117 and 120");
+                                                    }()}]));
          var state = _U.eq(gameType,
          $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"
                                                       ,gameType]

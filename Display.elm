@@ -70,7 +70,7 @@ renderSidebar state (w, h) playerName =
     flow down [ image sidebarWidth sidebarImageHeight "images/100/kalevala.png"
               , flow down [ renderHand Red state
                           , spacer 1 sidebarInnerPaddingHeight
-                          , flow right [ renderScoreArea state |> withMargin (16, 11)
+                          , flow right [ renderScoreArea state playerName |> withMargin (16, 11)
                                        , renderRightArea state playerName |> withMargin (13, 19)
                                        ]
                           , spacer 1 sidebarInnerPaddingHeight
@@ -108,27 +108,33 @@ renderHand player state =
 
 {- Sidebar/ScoreArea -}
 
-renderScoreArea : State -> Element
-renderScoreArea state = 
-  flow down [ playerHandText Red state |> centered |> container 85 30 middle
+renderScoreArea : State -> Content -> Element
+renderScoreArea state playerName = 
+  flow down [ playerHandText Red state playerName |> centered |> container 85 30 middle
             , playerScoreText Red state |> centered |> container 85 40 middle |> withMargin (1, 6)
             , renderDeck state |> withMargin (1, 14)
             , playerScoreText Blue state |> centered |> container 85 40 middle |> withMargin (1, 6)
-            , playerHandText Blue state |> centered |> container 85 30 middle
+            , playerHandText Blue state playerName |> centered |> container 85 30 middle
             ]
 
-playerHandText : Player -> State -> Text
-playerHandText player state =
+playerHandText : Player -> State -> Content -> Text
+playerHandText player state playerName =
   let p = Player.toString player
       playerType = withDefault Human (Dict.get p state.players)
+      text = case state.gameType of
+               HumanVsCpu -> case playerType of
+                               Human -> "Player"
+                               Cpu -> "CPU"
+               HumanVsHumanLocal -> toString player
+               HumanVsHumanRemote -> case playerType of
+                               Human -> playerName.string
+                               otherwise -> "?"
   in 
-    playerType |> toString
-               |> (\t -> if t == "Human" then "Player" else t)
-               |> String.toUpper
-               |> fromString
-               |> (if state.turn == player && State.isOngoing state then bold else identity)
-               |> Text.color (Player.toColor player)
-               |> Text.height 20
+    text |> String.toUpper
+         |> fromString
+         |> (if state.turn == player && State.isOngoing state then bold else identity)
+         |> Text.color (Player.toColor player)
+         |> Text.height 20
 
 playerScoreText : Player -> State -> Text
 playerScoreText player state =
@@ -186,7 +192,7 @@ renderMenu =
 
 renderLog : State -> Element
 renderLog state =
-  flow down [ Log.display (380, 168) state.log |> container 380 220 midTop
+  flow down [ Log.display (390, 168) state.log |> container 390 220 midTop
             , if state.gameState == GameOver
               then button (message clickMailbox.address MainMenuButton) "Main Menu" |> container 380 40 middle
               else spacer 380 40
