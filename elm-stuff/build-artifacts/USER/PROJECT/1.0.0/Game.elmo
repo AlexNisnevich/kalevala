@@ -17,6 +17,7 @@ Elm.Game.make = function (_elm) {
    $GameTypes = Elm.GameTypes.make(_elm),
    $Helpers = Elm.Helpers.make(_elm),
    $List = Elm.List.make(_elm),
+   $Log = Elm.Log.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm),
@@ -40,7 +41,7 @@ Elm.Game.make = function (_elm) {
                                                          ,_1: _L.fromArray([])}]))
                     ,heldPiece: $Maybe.Nothing
                     ,lastPlaced: $Maybe.Nothing
-                    ,log: _L.fromArray([])
+                    ,log: $Log.empty
                     ,playerNames: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                                ,_0: "Red"
                                                                ,_1: "Player"}
@@ -97,7 +98,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 98, column 88 to 112");
+               "on line 99, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -167,11 +168,11 @@ Elm.Game.make = function (_elm) {
                             firstTile)]
                            ,["turn",startPlayer]
                            ,["log"
-                            ,_L.fromArray([{ctor: "_Tuple2"
-                                           ,_0: $Color.darkGrey
-                                           ,_1: A2($Basics._op["++"],
-                                           "Connected to ",
-                                           opponentName)}])]],
+                            ,A2($Log.singleton,
+                            A2($Basics._op["++"],
+                            "Connected to ",
+                            opponentName),
+                            $Color.darkGrey)]],
          startState);
       }();
    });
@@ -202,7 +203,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 76 and 79");
+            "between lines 77 and 80");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -262,10 +263,9 @@ Elm.Game.make = function (_elm) {
                             ")")),
                             state.delta)]
                            ,["log"
-                            ,A2($List._op["::"],
-                            {ctor: "_Tuple2"
-                            ,_0: $Player.toColor(state.turn)
-                            ,_1: logText},
+                            ,A3($Log.add,
+                            logText,
+                            $Player.toColor(state.turn),
                             state.log)]],
          state);
       }();
@@ -301,7 +301,7 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 41 and 56");
+         "between lines 42 and 57");
       }();
    });
    var pass = function (state) {
@@ -332,7 +332,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 61 and 64");
+         "between lines 62 and 65");
       }() : state;
    };
    var startGame = F4(function (gameType,
@@ -382,9 +382,9 @@ Elm.Game.make = function (_elm) {
                                    firstTile)]
                                   ,["turn",player]
                                   ,["log"
-                                   ,_L.fromArray([{ctor: "_Tuple2"
-                                                  ,_0: $Color.darkGrey
-                                                  ,_1: "Game started!"}])]],
+                                   ,A2($Log.singleton,
+                                   "Game started!",
+                                   $Color.darkGrey)]],
          startState);
          return _U.eq(A2($Player.getType,
          state.turn,

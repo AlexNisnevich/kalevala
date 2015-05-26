@@ -3,10 +3,11 @@ module Game where
 import Color
 import Dict exposing (Dict)
 import List exposing (..)
-import Maybe exposing ( withDefault)
+import Maybe exposing (withDefault)
 
 import Helpers exposing (..)
 import GameTypes exposing (..)
+import Log
 import State
 import Piece
 import Board
@@ -88,7 +89,7 @@ makeMove move state =
             , heldPiece <- Nothing
             , lastPlaced <- Just move.location
             , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta
-            , log <- ((Player.toColor state.turn), logText) :: state.log }
+            , log <- Log.add logText (Player.toColor state.turn) state.log }
 
 {- Given a deck, returns the starting center tile (which must not be a Kullervo),
    two 5-tile hands, and the remaining deck. -}
@@ -133,7 +134,7 @@ startGame gameType deck player playerName =
                                 , deck <- remainder
                                 , board <- Dict.singleton (0, 0) firstTile
                                 , turn <- player
-                                , log <- [(Color.darkGrey, "Game started!")] }
+                                , log <- Log.singleton "Game started!" Color.darkGrey }
   in
     -- if first player is Cpu, make their move
     if Player.getType state.turn state == Cpu
@@ -160,7 +161,7 @@ gameStarted deck startPlayer localPlayer opponentName =
                  , deck <- remainder
                  , board <- Dict.singleton (0, 0) firstTile
                  , turn <- startPlayer
-                 , log <- [(Color.darkGrey, "Connected to " ++ opponentName)] }
+                 , log <- Log.singleton ("Connected to " ++ opponentName) Color.darkGrey }
 
 {- The cards in a Voluspa deck -}
 deckContents : List String
@@ -191,5 +192,5 @@ startState =
   , heldPiece = Nothing
   , lastPlaced = Nothing
   , delta = Dict.fromList [("Red", ""), ("Blue", "")]
-  , log = []
+  , log = Log.empty
   }

@@ -23,7 +23,7 @@ Elm.Kalevala.make = function (_elm) {
    $Helpers = Elm.Helpers.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $Json$Encode = Elm.Json.Encode.make(_elm),
-   $List = Elm.List.make(_elm),
+   $Log = Elm.Log.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),
    $Player = Elm.Player.make(_elm),
@@ -62,7 +62,7 @@ Elm.Kalevala.make = function (_elm) {
             return $GameTypes.ParseError(_v3._0);
             case "Ok": return _v3._0;}
          _U.badCase($moduleName,
-         "between lines 101 and 103");
+         "between lines 103 and 105");
       }();
    };
    var encode = function (action) {
@@ -123,7 +123,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 69 and 80");
+            "between lines 71 and 82");
          }();
       }();
    });
@@ -201,15 +201,14 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 44 and 56");
+            "between lines 45 and 57");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]
                                                          ,["log"
-                                                          ,A2($List._op["::"],
-                                                          {ctor: "_Tuple2"
-                                                          ,_0: $Color.darkGrey
-                                                          ,_1: "Game over!"},
+                                                          ,A3($Log.add,
+                                                          "Game over!",
+                                                          $Color.darkGrey,
                                                           newState.log)]],
          newState) : $State.mustPass(newState) ? $Game.pass(newState) : newState;
       }();

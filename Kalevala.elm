@@ -16,6 +16,7 @@ import Deprecated.WebSocket as WebSocket
 
 import Helpers exposing (..)
 import GameTypes exposing (..)
+import Log
 import State exposing (isGameOver, mustPass)
 import Display exposing (..)
 import Display.Board exposing (mouseToBoardPosition)
@@ -54,7 +55,8 @@ performAction action state =
           NoAction -> state
           ParseError e -> state
   in
-    if | isGameOver newState -> { newState | gameState <- GameOver, log <- (Color.darkGrey, "Game over!") :: newState.log }
+    if | isGameOver newState -> { newState | gameState <- GameOver
+                                           , log <- Log.add "Game over!" Color.darkGrey newState.log }
        | mustPass newState -> Game.pass newState
        | otherwise -> newState
 

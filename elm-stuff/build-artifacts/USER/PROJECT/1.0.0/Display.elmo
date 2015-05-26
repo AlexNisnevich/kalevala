@@ -22,6 +22,7 @@ Elm.Display.make = function (_elm) {
    $Graphics$Input = Elm.Graphics.Input.make(_elm),
    $Graphics$Input$Field = Elm.Graphics.Input.Field.make(_elm),
    $List = Elm.List.make(_elm),
+   $Log = Elm.Log.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm),
@@ -329,20 +330,14 @@ Elm.Display.make = function (_elm) {
    var renderLog = function (state) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
-      _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                ,_0: 10
-                                                ,_1: 10})(A3($Graphics$Element.container,
+      _L.fromArray([A3($Graphics$Element.container,
                    380,
                    220,
-                   $Graphics$Element.topLeft)($Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v0) {
-                      return function () {
-                         switch (_v0.ctor)
-                         {case "_Tuple2":
-                            return $Graphics$Element.leftAligned($Text.color(_v0._0)($Text.fromString(_v0._1)));}
-                         _U.badCase($moduleName,
-                         "on line 189, column 56 to 106");
-                      }();
-                   })($List.take(5)(state.log)))))
+                   $Graphics$Element.midTop)(A2($Log.display,
+                   {ctor: "_Tuple2"
+                   ,_0: 380
+                   ,_1: 90},
+                   state.log))
                    ,_U.eq(state.gameState,
                    $GameTypes.GameOver) ? A3($Graphics$Element.container,
                    380,
@@ -377,14 +372,14 @@ Elm.Display.make = function (_elm) {
    playerName) {
       return function () {
          var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : $State.isConnectingToRemoteGame(state) ? renderRemoteConnecting : function () {
-            var _v4 = $State.pieceHeld(state);
-            switch (_v4.ctor)
+            var _v0 = $State.pieceHeld(state);
+            switch (_v0.ctor)
             {case "Just":
-               return renderPieceDescription(_v4._0);
+               return renderPieceDescription(_v0._0);
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
-            "between lines 163 and 166");
+            "between lines 164 and 167");
          }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
@@ -395,15 +390,15 @@ Elm.Display.make = function (_elm) {
       }();
    });
    var renderSidebar = F3(function (state,
-   _v6,
+   _v2,
    playerName) {
       return function () {
-         switch (_v6.ctor)
+         switch (_v2.ctor)
          {case "_Tuple2":
             return function () {
                  var sidebarInnerPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
-                                                                                   ,_0: _v6._0
-                                                                                   ,_1: _v6._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
+                                                                                   ,_0: _v2._0
+                                                                                   ,_1: _v2._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
                  return A2($Graphics$Element.flow,
                  $Graphics$Element.down,
                  _L.fromArray([A3($Graphics$Element.image,
@@ -438,7 +433,7 @@ Elm.Display.make = function (_elm) {
                                            state)])))]));
               }();}
          _U.badCase($moduleName,
-         "between lines 67 and 78");
+         "between lines 68 and 79");
       }();
    });
    var renderGameArea = F3(function (state,

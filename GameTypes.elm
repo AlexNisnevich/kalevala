@@ -1,8 +1,9 @@
 module GameTypes where
 
-import Color exposing (Color)
 import Dict
 import Dict exposing (Dict)
+
+import Log exposing (Log)
 
 type GameType = HumanVsCpu
               | HumanVsHumanLocal
@@ -43,7 +44,7 @@ type alias State = {
   heldPiece : Maybe Int,
   lastPlaced : Maybe Location,
   delta : Dict String String,
-  log : List (Color, String)
+  log : Log
 }
 
 type Piece = Vainamoinen

@@ -13,6 +13,7 @@ import String
 import Text exposing (..)
 
 import GameTypes exposing (..)
+import Log
 import State
 import Piece
 import Player
@@ -185,11 +186,7 @@ renderMenu =
 
 renderLog : State -> Element
 renderLog state =
-  flow down [ state.log |> take 5
-                        |> List.map (\(color, text) -> leftAligned <| Text.color color <| fromString text)
-                        |> flow down
-                        |> container 380 220 topLeft
-                        |> withMargin (10, 10)
+  flow down [ Log.display (380, 90) state.log |> container 380 220 midTop
             , if state.gameState == GameOver
               then button (message clickMailbox.address MainMenuButton) "Main Menu" |> container 380 40 middle
               else spacer 380 40

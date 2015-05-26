@@ -1,0 +1,41 @@
+Elm.Decorate = Elm.Decorate || {};
+Elm.Decorate.make = function (_elm) {
+   "use strict";
+   _elm.Decorate = _elm.Decorate || {};
+   if (_elm.Decorate.values)
+   return _elm.Decorate.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Decorate",
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $Html$Attributes = Elm.Html.Attributes.make(_elm);
+   var decorate = F2(function (_v0,
+   elt) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var height = $Graphics$Element.heightOf(elt);
+                 var width = $Graphics$Element.widthOf(elt);
+                 var html = $Html.fromElement(elt);
+                 var htmlWithStyle = A2($Html.div,
+                 _L.fromArray([A2($Html$Attributes.attribute,
+                 _v0._0,
+                 _v0._1)]),
+                 _L.fromArray([html]));
+                 return A3($Html.toElement,
+                 width,
+                 height,
+                 htmlWithStyle);
+              }();}
+         _U.badCase($moduleName,
+         "between lines 11 and 16");
+      }();
+   });
+   _elm.Decorate.values = {_op: _op
+                          ,decorate: decorate};
+   return _elm.Decorate.values;
+};
