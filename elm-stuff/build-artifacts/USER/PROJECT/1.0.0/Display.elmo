@@ -336,7 +336,7 @@ Elm.Display.make = function (_elm) {
                    $Graphics$Element.midTop)(A2($Log.display,
                    {ctor: "_Tuple2"
                    ,_0: 380
-                   ,_1: 90},
+                   ,_1: 168},
                    state.log))
                    ,_U.eq(state.gameState,
                    $GameTypes.GameOver) ? A3($Graphics$Element.container,

@@ -186,7 +186,7 @@ renderMenu =
 
 renderLog : State -> Element
 renderLog state =
-  flow down [ Log.display (380, 150) state.log |> container 380 220 midTop
+  flow down [ Log.display (380, 168) state.log |> container 380 220 midTop
             , if state.gameState == GameOver
               then button (message clickMailbox.address MainMenuButton) "Main Menu" |> container 380 40 middle
               else spacer 380 40

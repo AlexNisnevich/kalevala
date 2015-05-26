@@ -2944,7 +2944,7 @@ Elm.Display.make = function (_elm) {
                    $Graphics$Element.midTop)(A2($Log.display,
                    {ctor: "_Tuple2"
                    ,_0: 380
-                   ,_1: 90},
+                   ,_1: 168},
                    state.log))
                    ,_U.eq(state.gameState,
                    $GameTypes.GameOver) ? A3($Graphics$Element.container,
@@ -6891,22 +6891,26 @@ Elm.Log.make = function (_elm) {
          switch (_v0.ctor)
          {case "_Tuple2":
             return function () {
-                 var fullLog = $Graphics$Element.flow($Graphics$Element.down)($List.map(function (_v4) {
+                 var widthMinusSidebar = _v0._0 - 20;
+                 var entryToElt = function (_v4) {
                     return function () {
                        switch (_v4.ctor)
                        {case "_Tuple2":
-                          return $Graphics$Element.width(_v0._0)($Graphics$Element.leftAligned($Text.color(_v4._0)($Text.fromString(_v4._1))));}
+                          return $Graphics$Element.width(widthMinusSidebar)($Graphics$Element.leftAligned($Text.color(_v4._0)($Text.fromString(_v4._1))));}
                        _U.badCase($moduleName,
-                       "on line 23, column 40 to 94");
+                       "on line 24, column 34 to 119");
                     }();
-                 })(log));
+                 };
+                 var fullLog = $Graphics$Element.width(_v0._0)($Graphics$Element.flow($Graphics$Element.down)(A2($List.map,
+                 entryToElt,
+                 log)));
                  return _U.cmp($Graphics$Element.heightOf(fullLog),
                  _v0._1) > 0 ? $Decorate.decorate({ctor: "_Tuple2"
                                                   ,_0: "style"
                                                   ,_1: "overflow-y: scroll; overflow-x: hidden;"})($Graphics$Element.height(_v0._1)(fullLog)) : fullLog;
               }();}
          _U.badCase($moduleName,
-         "between lines 23 and 29");
+         "between lines 23 and 30");
       }();
    });
    var add = F3(function (str,

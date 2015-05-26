@@ -19,11 +19,12 @@ add : String -> Color -> Log -> Log
 add str color log = (color, str) :: log
 
 display : (Int, Int) -> Log -> Element
-display (w, h) log =
-  let fullLog = log |> map (\(c, t) -> fromString t |> Text.color c |> leftAligned |> width w )
-                    |> flow down
+display (width, height) log =
+  let widthMinusSidebar = width - 20
+      entryToElt (color, text) = fromString text |> Text.color color |> leftAligned |> Element.width widthMinusSidebar
+      fullLog = map entryToElt log |> flow down |> Element.width width
   in
-    if Element.heightOf fullLog > h
-    then fullLog |> Element.height h
+    if Element.heightOf fullLog > height
+    then fullLog |> Element.height height
                  |> decorate ("style", "overflow-y: scroll; overflow-x: hidden;")
     else fullLog
