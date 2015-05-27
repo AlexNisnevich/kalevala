@@ -57,7 +57,7 @@ renderBoard state dims =
       pieces = map (\p -> Board.drawPiece p state.board tileSize) (Dict.toList state.board)
       outline = Board.drawLastPlacedOutline state tileSize
 
-      board = collage size size (grid ++ pieces ++ overlay ++ outline)
+      board = collage size size (grid ++ pieces ++ outline ++ overlay)
   in
     clickable (message clickMailbox.address BoardClick) board
 

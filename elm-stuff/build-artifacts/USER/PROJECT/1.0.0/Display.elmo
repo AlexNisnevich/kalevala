@@ -214,8 +214,8 @@ Elm.Display.make = function (_elm) {
          A2($Basics._op["++"],
          pieces,
          A2($Basics._op["++"],
-         overlay,
-         outline))));
+         outline,
+         overlay))));
          return A2($Graphics$Input.clickable,
          A2($Signal.message,
          clickMailbox.address,
