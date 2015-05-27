@@ -67,7 +67,7 @@ renderSidebar : State -> WindowDims -> Content -> Element
 renderSidebar state (w, h) playerName =
   let sidebarInnerPaddingHeight = (Board.getTotalBoardSize (w, h) - minSidebarHeight) // 2
   in
-    flow down [ image sidebarWidth sidebarImageHeight "images/100/kalevala.png"
+    flow down [ image sidebarWidth sidebarImageHeight "images/Other/Kalevala.png"
               , flow down [ renderHand Red state
                           , spacer 1 sidebarInnerPaddingHeight
                           , flow right [ renderScoreArea state playerName |> withMargin (16, 11)
@@ -88,17 +88,20 @@ renderHand player state =
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
       pieceImage pieceStr = pieceToImage <| Piece.fromString pieceStr
       pieceSize = handTileSize + handPadding
+      hiddenPiece = image handTileSize handTileSize "images/100/Back.png"
+      placeholderPiece = image handTileSize handTileSize "images/100/No_Tile.png" 
+      
+      combineWith elt1 elt2 = flow inward [elt1, elt2]
       makePiece idx pieceStr = pieceImage pieceStr (toString <| Piece.baseValue <| Piece.fromString pieceStr) (toFloat handTileSize)
+                                  |> combineWith (if isPieceHeld idx 
+                                                  then (image handTileSize handTileSize ("images/100/"++(Player.toString state.turn)++"-H.png")) 
+                                                  else Element.empty)
                                   |> container pieceSize pieceSize middle
-                                  |> Element.color (if isPieceHeld idx then (Player.toColor state.turn) else white)
                                   |> clickable (message clickMailbox.address (PieceInHand player idx))
-      hiddenPiece = image handTileSize handTileSize "images/100/back2.png"
 
-      playerHand = if isEmpty hand && state.gameState == Ongoing
-                   then [button (message clickMailbox.address PassButton) "Pass" |> container 100 100 middle]
-                   else indexedMap makePiece hand
+      playerHand = indexedMap makePiece hand
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
-      dummyHand = repeat 5 (hiddenPiece |> container pieceSize pieceSize middle)
+      dummyHand = repeat 5 (placeholderPiece |> container pieceSize pieceSize middle)
 
       handContents = if | State.isNotStarted state -> dummyHand
                         | playerType == Human      -> playerHand
@@ -152,8 +155,13 @@ renderDeck state =
                     | State.isOngoing state    -> length state.deck
                     | otherwise                -> 0
       deckSizeStr = "Deck : " ++ toString deckSize
+      deckImage = if | deckSize == 0 -> "images/Other/Deck-0.png"
+                     | deckSize == 1 -> "images/Other/Deck-1.png"
+                     | deckSize == 2 -> "images/Other/Deck-2.png"
+                     | deckSize == 3 -> "images/Other/Deck-3.png"
+                     | otherwise     -> "images/Other/Deck-4.png"
   in 
-    flow down [ image 85 85 "images/100/deck.png"
+    flow down [ image 85 85 deckImage
               , deckSizeStr |> fromString
                             |> Text.height 14
                             |> centered
@@ -176,18 +184,21 @@ renderRightArea state playerName =
 renderMenu : Element
 renderMenu =
   flow down [ customButton (message clickMailbox.address StartSinglePlayer) 
-                (image 208 48 "images/buttonSinglePlayer.png")
-                (image 208 48 "images/buttonSinglePlayer.png")
-                (image 208 48 "images/buttonSinglePlayer.png") |> withMargin (1, 3)
+                (image 208 48 "images/Buttons/Single_Player.png")
+                (image 208 48 "images/Buttons/Single_Player-H.png")
+                (image 208 48 "images/Buttons/Single_Player-H.png") |> withMargin (1, 3)
             , customButton (message clickMailbox.address StartRemoteGameButton) 
-                (image 208 48 "images/button2PlayerOnline.png")
-                (image 208 48 "images/button2PlayerOnline.png")
-                (image 208 48 "images/button2PlayerOnline.png") |> withMargin (1, 3)
+                (image 208 48 "images/Buttons/2P_Online.png")
+                (image 208 48 "images/Buttons/2P_Online-H.png")
+                (image 208 48 "images/Buttons/2P_Online-H.png") |> withMargin (1, 3)
             , customButton (message clickMailbox.address StartTwoPlayerHotseat) 
-                (image 208 48 "images/button2PlayerHotseat.png")
-                (image 208 48 "images/button2PlayerHotseat.png")
-                (image 208 48 "images/button2PlayerHotseat.png") |> withMargin (1, 3)
-            , image 208 48 "images/buttonViewRules.png" |> withMargin (1, 3)
+                (image 208 48 "images/Buttons/2P_Hotseat.png")
+                (image 208 48 "images/Buttons/2P_Hotseat-H.png")
+                (image 208 48 "images/Buttons/2P_Hotseat-H.png") |> withMargin (1, 3)
+            , customButton (message clickMailbox.address None) 
+                (image 208 48 "images/Buttons/View_Rules.png")
+                (image 208 48 "images/Buttons/View_Rules-H.png")
+                (image 208 48 "images/Buttons/View_Rules-H.png") |> Element.link "rules.html" |> withMargin (1, 3)
             ] |> withMargin (95, 35)
 
 renderLog : State -> Element

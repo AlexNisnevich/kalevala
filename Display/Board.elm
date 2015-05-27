@@ -53,8 +53,8 @@ drawGrid state boardSize dims =
       offset = tileSize / 2 - totalSize / 2
       shape x y = 
         let pos = (tileSize * (toFloat x) + offset, tileSize * (toFloat y) + offset)
-            imgSize = if tileSize > 75 then 100 else 50
-            tile = "images/" ++ toString imgSize ++ "/board" ++ toString ((x ^ 2 + 7 * y) % 6) ++ ".png"
+            imgSize = if tileSize > 50 then 100 else 50
+            tile = "images/" ++ toString imgSize ++ "/Board-" ++ toString ((x ^ 2 + 7 * y) % 6) ++ ".png"
         in
           move pos (toForm (image (round tileSize) (round tileSize) tile))
   in
@@ -74,12 +74,16 @@ drawAvailableOverlay : State -> Int -> WindowDims -> List Form
 drawAvailableOverlay state boardSize dims =
   let tileSize = getTileSizeFromBoardSize boardSize dims
       totalSize = (toFloat boardSize) * tileSize
+      imgSize = if tileSize > 50 then 100 else 50
+      overlayImgPath = "images/" ++ (toString imgSize) ++ "/Green-H.png"
       offset = tileSize / 2 - totalSize / 2
       shape x y = 
         let pos = (tileSize * (toFloat x) + offset, tileSize * (toFloat y) + offset)
-            color = if (Board.isValidSquareToMove state (x, y) boardSize) then transpGreen else transparent
+            overlay = if Board.isValidSquareToMove state (x, y) boardSize
+                      then image (round tileSize) (round tileSize) overlayImgPath
+                      else Element.empty
         in
-          move pos (filled color (square tileSize))
+          move pos (toForm overlay)
   in
     (concatMap (\x -> (map (\y -> shape x y) 
                                  [0..(boardSize - 1)])) 
@@ -89,8 +93,9 @@ drawLastPlacedOutline : State -> Float -> List Form
 drawLastPlacedOutline state tileSize =
   case state.lastPlaced of
     Just (x, y) ->
-      let thick c = { defaultLine | color <- c, width <- 4}
-          lastPlacedColor = Player.toColor <| Player.next state.turn
-          lastPlacedOutline = move (tileSize * (toFloat x), tileSize * (toFloat y)) (outlined (thick lastPlacedColor) (square (tileSize + 4)))
+      let imgSize = if tileSize > 50 then 100 else 50
+          lastPlacedColorStr = Player.toString <| Player.next state.turn
+          lastPlacedOutlinePath = "images/" ++ (toString imgSize) ++ "/" ++ lastPlacedColorStr ++ "-H.png"
+          lastPlacedOutline = move (tileSize * (toFloat x), tileSize * (toFloat y)) (toForm (image tileSize tileSize lastPlacedOutlinePath))
       in [lastPlacedOutline]
     Nothing -> []

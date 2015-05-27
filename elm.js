@@ -2686,12 +2686,17 @@ Elm.Display.make = function (_elm) {
          var deckSizeStr = A2($Basics._op["++"],
          "Deck : ",
          $Basics.toString(deckSize));
+         var deckImage = _U.eq(deckSize,
+         0) ? "images/Other/Deck-0.png" : _U.eq(deckSize,
+         1) ? "images/Other/Deck-1.png" : _U.eq(deckSize,
+         2) ? "images/Other/Deck-2.png" : _U.eq(deckSize,
+         3) ? "images/Other/Deck-3.png" : "images/Other/Deck-4.png";
          return A2($Graphics$Element.flow,
          $Graphics$Element.down,
          _L.fromArray([A3($Graphics$Element.image,
                       85,
                       85,
-                      "images/100/deck.png")
+                      deckImage)
                       ,A3($Graphics$Element.container,
                       85,
                       20,
@@ -2724,7 +2729,7 @@ Elm.Display.make = function (_elm) {
                     {case "Cpu": return "CPU";
                        case "Human": return "Player";}
                     _U.badCase($moduleName,
-                    "between lines 125 and 128");
+                    "between lines 128 and 131");
                  }();
                case "HumanVsHumanLocal":
                return $Basics.toString(player);
@@ -2736,7 +2741,7 @@ Elm.Display.make = function (_elm) {
                     return "?";
                  }();}
             _U.badCase($moduleName,
-            "between lines 124 and 132");
+            "between lines 127 and 135");
          }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
          player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(text)))));
@@ -2829,17 +2834,27 @@ Elm.Display.make = function (_elm) {
    var renderHand = F2(function (player,
    state) {
       return function () {
+         var combineWith = F2(function (elt1,
+         elt2) {
+            return A2($Graphics$Element.flow,
+            $Graphics$Element.inward,
+            _L.fromArray([elt1,elt2]));
+         });
+         var placeholderPiece = A3($Graphics$Element.image,
+         $Display$Constants.handTileSize,
+         $Display$Constants.handTileSize,
+         "images/100/No_Tile.png");
          var hiddenPiece = A3($Graphics$Element.image,
          $Display$Constants.handTileSize,
          $Display$Constants.handTileSize,
-         "images/100/back2.png");
+         "images/100/Back.png");
          var pieceSize = $Display$Constants.handTileSize + $Display$Constants.handPadding;
          var dummyHand = A2($List.repeat,
          5,
          A3($Graphics$Element.container,
          pieceSize,
          pieceSize,
-         $Graphics$Element.middle)(hiddenPiece));
+         $Graphics$Element.middle)(placeholderPiece));
          var pieceImage = function (pieceStr) {
             return $Display$Helpers.pieceToImage($Piece.fromString(pieceStr));
          };
@@ -2854,10 +2869,17 @@ Elm.Display.make = function (_elm) {
             clickMailbox.address,
             A2($GameTypes.PieceInHand,
             player,
-            idx)))($Graphics$Element.color(isPieceHeld(idx) ? $Player.toColor(state.turn) : $Color.white)(A3($Graphics$Element.container,
+            idx)))(A3($Graphics$Element.container,
             pieceSize,
             pieceSize,
-            $Graphics$Element.middle)(A3(pieceImage,
+            $Graphics$Element.middle)(combineWith(isPieceHeld(idx) ? A3($Graphics$Element.image,
+            $Display$Constants.handTileSize,
+            $Display$Constants.handTileSize,
+            A2($Basics._op["++"],
+            "images/100/",
+            A2($Basics._op["++"],
+            $Player.toString(state.turn),
+            "-H.png"))) : $Graphics$Element.empty)(A3(pieceImage,
             pieceStr,
             $Basics.toString($Piece.baseValue($Piece.fromString(pieceStr))),
             $Basics.toFloat($Display$Constants.handTileSize)))));
@@ -2865,15 +2887,7 @@ Elm.Display.make = function (_elm) {
          var hand = A2($Player.getHand,
          player,
          state);
-         var playerHand = $List.isEmpty(hand) && _U.eq(state.gameState,
-         $GameTypes.Ongoing) ? _L.fromArray([A3($Graphics$Element.container,
-         100,
-         100,
-         $Graphics$Element.middle)(A2($Graphics$Input.button,
-         A2($Signal.message,
-         clickMailbox.address,
-         $GameTypes.PassButton),
-         "Pass"))]) : A2($List.indexedMap,
+         var playerHand = A2($List.indexedMap,
          makePiece,
          hand);
          var cpuHand = A2($List.map,
@@ -2908,15 +2922,15 @@ Elm.Display.make = function (_elm) {
                 A3($Graphics$Element.image,
                 208,
                 48,
-                "images/buttonSinglePlayer.png"),
+                "images/Buttons/Single_Player.png"),
                 A3($Graphics$Element.image,
                 208,
                 48,
-                "images/buttonSinglePlayer.png"),
+                "images/Buttons/Single_Player-H.png"),
                 A3($Graphics$Element.image,
                 208,
                 48,
-                "images/buttonSinglePlayer.png")))
+                "images/Buttons/Single_Player-H.png")))
                 ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                              ,_0: 1
                                              ,_1: 3})(A4($Graphics$Input.customButton,
@@ -2926,15 +2940,15 @@ Elm.Display.make = function (_elm) {
                 A3($Graphics$Element.image,
                 208,
                 48,
-                "images/button2PlayerOnline.png"),
+                "images/Buttons/2P_Online.png"),
                 A3($Graphics$Element.image,
                 208,
                 48,
-                "images/button2PlayerOnline.png"),
+                "images/Buttons/2P_Online-H.png"),
                 A3($Graphics$Element.image,
                 208,
                 48,
-                "images/button2PlayerOnline.png")))
+                "images/Buttons/2P_Online-H.png")))
                 ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                              ,_0: 1
                                              ,_1: 3})(A4($Graphics$Input.customButton,
@@ -2944,21 +2958,33 @@ Elm.Display.make = function (_elm) {
                 A3($Graphics$Element.image,
                 208,
                 48,
-                "images/button2PlayerHotseat.png"),
+                "images/Buttons/2P_Hotseat.png"),
                 A3($Graphics$Element.image,
                 208,
                 48,
-                "images/button2PlayerHotseat.png"),
+                "images/Buttons/2P_Hotseat-H.png"),
                 A3($Graphics$Element.image,
                 208,
                 48,
-                "images/button2PlayerHotseat.png")))
+                "images/Buttons/2P_Hotseat-H.png")))
                 ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                              ,_0: 1
-                                             ,_1: 3})(A3($Graphics$Element.image,
+                                             ,_1: 3})($Graphics$Element.link("rules.html")(A4($Graphics$Input.customButton,
+                A2($Signal.message,
+                clickMailbox.address,
+                $GameTypes.None),
+                A3($Graphics$Element.image,
                 208,
                 48,
-                "images/buttonViewRules.png"))])));
+                "images/Buttons/View_Rules.png"),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/Buttons/View_Rules-H.png"),
+                A3($Graphics$Element.image,
+                208,
+                48,
+                "images/Buttons/View_Rules-H.png"))))])));
    var renderLog = function (state) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
@@ -3011,7 +3037,7 @@ Elm.Display.make = function (_elm) {
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
-            "between lines 170 and 173");
+            "between lines 178 and 181");
          }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
@@ -3036,7 +3062,7 @@ Elm.Display.make = function (_elm) {
                  _L.fromArray([A3($Graphics$Element.image,
                               $Display$Constants.sidebarWidth,
                               $Display$Constants.sidebarImageHeight,
-                              "images/100/kalevala.png")
+                              "images/Other/Kalevala.png")
                               ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                                            ,_0: 12
                                                            ,_1: 11})(A2($Graphics$Element.flow,
@@ -3148,27 +3174,33 @@ Elm.Display.Board.make = function (_elm) {
             switch (_v0._0.ctor)
               {case "_Tuple2":
                  return function () {
-                      var lastPlacedColor = $Player.toColor($Player.next(state.turn));
-                      var thick = function (c) {
-                         return _U.replace([["color"
-                                            ,c]
-                                           ,["width",4]],
-                         $Graphics$Collage.defaultLine);
-                      };
+                      var lastPlacedColorStr = $Player.toString($Player.next(state.turn));
+                      var imgSize = _U.cmp(tileSize,
+                      50) > 0 ? 100 : 50;
+                      var lastPlacedOutlinePath = A2($Basics._op["++"],
+                      "images/",
+                      A2($Basics._op["++"],
+                      $Basics.toString(imgSize),
+                      A2($Basics._op["++"],
+                      "/",
+                      A2($Basics._op["++"],
+                      lastPlacedColorStr,
+                      "-H.png"))));
                       var lastPlacedOutline = A2($Graphics$Collage.move,
                       {ctor: "_Tuple2"
                       ,_0: tileSize * $Basics.toFloat(_v0._0._0)
                       ,_1: tileSize * $Basics.toFloat(_v0._0._1)},
-                      A2($Graphics$Collage.outlined,
-                      thick(lastPlacedColor),
-                      $Graphics$Collage.square(tileSize + 4)));
+                      $Graphics$Collage.toForm(A3($Graphics$Element.image,
+                      tileSize,
+                      tileSize,
+                      lastPlacedOutlinePath)));
                       return _L.fromArray([lastPlacedOutline]);
                    }();}
               break;
             case "Nothing":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 90 and 96");
+         "between lines 94 and 101");
       }();
    });
    var drawPiece = F3(function (_v4,
@@ -3259,13 +3291,13 @@ Elm.Display.Board.make = function (_elm) {
          var shape = F2(function (x,y) {
             return function () {
                var imgSize = _U.cmp(tileSize,
-               75) > 0 ? 100 : 50;
+               50) > 0 ? 100 : 50;
                var tile = A2($Basics._op["++"],
                "images/",
                A2($Basics._op["++"],
                $Basics.toString(imgSize),
                A2($Basics._op["++"],
-               "/board",
+               "/Board-",
                A2($Basics._op["++"],
                $Basics.toString(A2($Basics._op["%"],
                Math.pow(x,2) + 7 * y,
@@ -3301,21 +3333,29 @@ Elm.Display.Board.make = function (_elm) {
          boardSize,
          dims);
          var totalSize = $Basics.toFloat(boardSize) * tileSize;
+         var imgSize = _U.cmp(tileSize,
+         50) > 0 ? 100 : 50;
+         var overlayImgPath = A2($Basics._op["++"],
+         "images/",
+         A2($Basics._op["++"],
+         $Basics.toString(imgSize),
+         "/Green-H.png"));
          var offset = tileSize / 2 - totalSize / 2;
          var shape = F2(function (x,y) {
             return function () {
-               var color = A3($Board.isValidSquareToMove,
+               var overlay = A3($Board.isValidSquareToMove,
                state,
                {ctor: "_Tuple2",_0: x,_1: y},
-               boardSize) ? $Display$Constants.transpGreen : $Display$Constants.transparent;
+               boardSize) ? A3($Graphics$Element.image,
+               $Basics.round(tileSize),
+               $Basics.round(tileSize),
+               overlayImgPath) : $Graphics$Element.empty;
                var pos = {ctor: "_Tuple2"
                          ,_0: tileSize * $Basics.toFloat(x) + offset
                          ,_1: tileSize * $Basics.toFloat(y) + offset};
                return A2($Graphics$Collage.move,
                pos,
-               A2($Graphics$Collage.filled,
-               color,
-               $Graphics$Collage.square(tileSize)));
+               $Graphics$Collage.toForm(overlay));
             }();
          });
          return A2($List.concatMap,
