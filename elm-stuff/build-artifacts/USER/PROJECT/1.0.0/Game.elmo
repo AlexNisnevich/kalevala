@@ -25,12 +25,6 @@ Elm.Game.make = function (_elm) {
    var startState = {_: {}
                     ,board: $Dict.empty
                     ,deck: _L.fromArray([])
-                    ,delta: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "Red"
-                                                         ,_1: ""}
-                                                        ,{ctor: "_Tuple2"
-                                                         ,_0: "Blue"
-                                                         ,_1: ""}]))
                     ,gameState: $GameTypes.NotStarted
                     ,gameType: $GameTypes.HumanVsCpu
                     ,hands: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
@@ -41,6 +35,7 @@ Elm.Game.make = function (_elm) {
                                                          ,_1: _L.fromArray([])}]))
                     ,heldPiece: $Maybe.Nothing
                     ,lastPlaced: $Maybe.Nothing
+                    ,lastPlacedPlayer: $Maybe.Nothing
                     ,log: $Log.empty
                     ,playerNames: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                                ,_0: "Red"
@@ -98,7 +93,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 99, column 88 to 112");
+               "on line 98, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -202,7 +197,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 77 and 80");
+            "between lines 76 and 79");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -252,15 +247,8 @@ Elm.Game.make = function (_elm) {
                            ,["heldPiece",$Maybe.Nothing]
                            ,["lastPlaced"
                             ,$Maybe.Just(move.location)]
-                           ,["delta"
-                            ,A3($Dict.insert,
-                            p,
-                            A2($Basics._op["++"],
-                            "(+",
-                            A2($Basics._op["++"],
-                            $Basics.toString(delta),
-                            ")")),
-                            state.delta)]
+                           ,["lastPlacedPlayer"
+                            ,$Maybe.Just(state.turn)]
                            ,["log"
                             ,A3($Log.addPlayerMsg,
                             logText,
@@ -300,21 +288,16 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 42 and 57");
+         "between lines 41 and 56");
       }();
    });
    var pass = function (state) {
-      return function () {
-         var p = $Player.toString(state.turn);
-         return _U.replace([["turn"
-                            ,$Player.next(state.turn)]
-                           ,["delta"
-                            ,A3($Dict.insert,
-                            p,
-                            "(+0)",
-                            state.delta)]],
-         state);
-      }();
+      return _U.eq(A2($Player.getType,
+      state.turn,
+      state),
+      $GameTypes.Human) ? _U.replace([["turn"
+                                      ,$Player.next(state.turn)]],
+      state) : state;
    };
    var tryAIMove = function (state) {
       return _U.eq(A2($Player.getType,
@@ -331,7 +314,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 62 and 65");
+         "between lines 61 and 64");
       }() : state;
    };
    var startGame = F4(function (gameType,
@@ -365,7 +348,7 @@ Elm.Game.make = function (_elm) {
                                                           case "HumanVsHumanRemote":
                                                           return $GameTypes.Remote;}
                                                        _U.badCase($moduleName,
-                                                       "between lines 117 and 120");
+                                                       "between lines 116 and 119");
                                                     }()}]));
          var state = _U.eq(gameType,
          $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"

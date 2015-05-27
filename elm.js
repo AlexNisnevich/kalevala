@@ -2996,17 +2996,40 @@ Elm.Display.make = function (_elm) {
                    ,_0: 390
                    ,_1: 168},
                    state.log))
-                   ,_U.eq(state.gameState,
-                   $GameTypes.GameOver) ? A3($Graphics$Element.container,
-                   380,
-                   40,
-                   $Graphics$Element.middle)(A2($Graphics$Input.button,
-                   A2($Signal.message,
-                   clickMailbox.address,
-                   $GameTypes.MainMenuButton),
-                   "Main Menu")) : A2($Graphics$Element.spacer,
-                   380,
-                   40)]));
+                   ,A2($Graphics$Element.flow,
+                   $Graphics$Element.right,
+                   _L.fromArray([A4($Graphics$Input.customButton,
+                                A2($Signal.message,
+                                clickMailbox.address,
+                                $GameTypes.PassButton),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Pass_Turn.png"),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Pass_Turn-H.png"),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Pass_Turn-H.png"))
+                                ,A4($Graphics$Input.customButton,
+                                A2($Signal.message,
+                                clickMailbox.address,
+                                $GameTypes.MainMenuButton),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Quit_Game.png"),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Quit_Game-H.png"),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Quit_Game-H.png"))]))]));
    };
    var renderRemoteSetupMenu = function (playerName) {
       return A2($Graphics$Element.flow,
@@ -3202,61 +3225,66 @@ Elm.Display.Board.make = function (_elm) {
    var drawLastPlacedOutline = F2(function (state,
    tileSize) {
       return function () {
-         var _v0 = state.lastPlaced;
+         var _v0 = {ctor: "_Tuple2"
+                   ,_0: state.lastPlaced
+                   ,_1: state.lastPlacedPlayer};
          switch (_v0.ctor)
-         {case "Just":
+         {case "_Tuple2":
             switch (_v0._0.ctor)
-              {case "_Tuple2":
-                 return function () {
-                      var lastPlacedColorStr = $Player.toString($Player.next(state.turn));
-                      var imgSize = _U.cmp(tileSize,
-                      50) > 0 ? 100 : 50;
-                      var lastPlacedOutlinePath = A2($Basics._op["++"],
-                      "images/",
-                      A2($Basics._op["++"],
-                      $Basics.toString(imgSize),
-                      A2($Basics._op["++"],
-                      "/",
-                      A2($Basics._op["++"],
-                      lastPlacedColorStr,
-                      "-H.png"))));
-                      var lastPlacedOutline = A2($Graphics$Collage.move,
-                      {ctor: "_Tuple2"
-                      ,_0: tileSize * $Basics.toFloat(_v0._0._0)
-                      ,_1: tileSize * $Basics.toFloat(_v0._0._1)},
-                      $Graphics$Collage.toForm(A3($Graphics$Element.image,
-                      tileSize,
-                      tileSize,
-                      lastPlacedOutlinePath)));
-                      return _L.fromArray([lastPlacedOutline]);
-                   }();}
-              break;
-            case "Nothing":
-            return _L.fromArray([]);}
-         _U.badCase($moduleName,
-         "between lines 94 and 101");
+              {case "Just":
+                 switch (_v0._0._0.ctor)
+                   {case "_Tuple2":
+                      switch (_v0._1.ctor)
+                        {case "Just":
+                           return function () {
+                                var lastPlacedColorStr = $Player.toString(_v0._1._0);
+                                var imgSize = _U.cmp(tileSize,
+                                50) > 0 ? 100 : 50;
+                                var lastPlacedOutlinePath = A2($Basics._op["++"],
+                                "images/",
+                                A2($Basics._op["++"],
+                                $Basics.toString(imgSize),
+                                A2($Basics._op["++"],
+                                "/",
+                                A2($Basics._op["++"],
+                                lastPlacedColorStr,
+                                "-H.png"))));
+                                var lastPlacedOutline = A2($Graphics$Collage.move,
+                                {ctor: "_Tuple2"
+                                ,_0: tileSize * $Basics.toFloat(_v0._0._0._0)
+                                ,_1: tileSize * $Basics.toFloat(_v0._0._0._1)},
+                                $Graphics$Collage.toForm(A3($Graphics$Element.image,
+                                tileSize,
+                                tileSize,
+                                lastPlacedOutlinePath)));
+                                return _L.fromArray([lastPlacedOutline]);
+                             }();}
+                        break;}
+                   break;}
+              break;}
+         return _L.fromArray([]);
       }();
    });
-   var drawPiece = F3(function (_v4,
+   var drawPiece = F3(function (_v7,
    board,
    tileSize) {
       return function () {
-         switch (_v4.ctor)
+         switch (_v7.ctor)
          {case "_Tuple2":
-            switch (_v4._0.ctor)
+            switch (_v7._0.ctor)
               {case "_Tuple2":
                  return function () {
                       var value = A2($Board.getDisplayedTileValue,
                       {ctor: "_Tuple2"
-                      ,_0: _v4._0._0
-                      ,_1: _v4._0._1},
+                      ,_0: _v7._0._0
+                      ,_1: _v7._0._1},
                       board);
-                      var y = $Basics.toFloat(_v4._0._1) * tileSize;
-                      var x = $Basics.toFloat(_v4._0._0) * tileSize;
+                      var y = $Basics.toFloat(_v7._0._1) * tileSize;
+                      var x = $Basics.toFloat(_v7._0._0) * tileSize;
                       return A2($Graphics$Collage.move,
                       {ctor: "_Tuple2",_0: x,_1: y},
                       $Graphics$Collage.toForm(A3($Display$Helpers.pieceToImage,
-                      _v4._1,
+                      _v7._1,
                       value,
                       tileSize)));
                    }();}
@@ -3268,13 +3296,13 @@ Elm.Display.Board.make = function (_elm) {
    var getBoardSize = function (state) {
       return $Board.getBoardSize(state.board);
    };
-   var getTotalBoardSize = function (_v10) {
+   var getTotalBoardSize = function (_v13) {
       return function () {
-         switch (_v10.ctor)
+         switch (_v13.ctor)
          {case "_Tuple2":
             return function () {
-                 var availableHeight = _v10._1 - 2 * $Display$Constants.gameMargin;
-                 var availableWidth = _v10._0 - $Display$Constants.sidebarWidth - 3 * $Display$Constants.gameMargin;
+                 var availableHeight = _v13._1 - 2 * $Display$Constants.gameMargin;
+                 var availableWidth = _v13._0 - $Display$Constants.sidebarWidth - 3 * $Display$Constants.gameMargin;
                  return A2($Basics.max,
                  A2($Basics.min,
                  availableHeight,
@@ -3289,11 +3317,11 @@ Elm.Display.Board.make = function (_elm) {
    dims) {
       return $Basics.toFloat(getTotalBoardSize(dims) / boardSize | 0);
    });
-   var mouseToBoardPosition = F3(function (_v14,
+   var mouseToBoardPosition = F3(function (_v17,
    state,
    dims) {
       return function () {
-         switch (_v14.ctor)
+         switch (_v17.ctor)
          {case "_Tuple2":
             return function () {
                  var boardSize = $Board.getBoardSize(state.board);
@@ -3301,9 +3329,9 @@ Elm.Display.Board.make = function (_elm) {
                  boardSize,
                  dims));
                  var offset = boardSize / 2 | 0;
-                 var y = _v14._1 - $Display$Constants.gameMargin;
+                 var y = _v17._1 - $Display$Constants.gameMargin;
                  var boardY = 0 - ((y / tileSize | 0) - offset);
-                 var x = _v14._0 - $Display$Constants.gameMargin;
+                 var x = _v17._0 - $Display$Constants.gameMargin;
                  var boardX = (x / tileSize | 0) - offset;
                  return {ctor: "_Tuple2"
                         ,_0: boardX
@@ -3577,12 +3605,6 @@ Elm.Game.make = function (_elm) {
    var startState = {_: {}
                     ,board: $Dict.empty
                     ,deck: _L.fromArray([])
-                    ,delta: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "Red"
-                                                         ,_1: ""}
-                                                        ,{ctor: "_Tuple2"
-                                                         ,_0: "Blue"
-                                                         ,_1: ""}]))
                     ,gameState: $GameTypes.NotStarted
                     ,gameType: $GameTypes.HumanVsCpu
                     ,hands: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
@@ -3593,6 +3615,7 @@ Elm.Game.make = function (_elm) {
                                                          ,_1: _L.fromArray([])}]))
                     ,heldPiece: $Maybe.Nothing
                     ,lastPlaced: $Maybe.Nothing
+                    ,lastPlacedPlayer: $Maybe.Nothing
                     ,log: $Log.empty
                     ,playerNames: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
                                                                ,_0: "Red"
@@ -3650,7 +3673,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 99, column 88 to 112");
+               "on line 98, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -3754,7 +3777,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 77 and 80");
+            "between lines 76 and 79");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -3804,15 +3827,8 @@ Elm.Game.make = function (_elm) {
                            ,["heldPiece",$Maybe.Nothing]
                            ,["lastPlaced"
                             ,$Maybe.Just(move.location)]
-                           ,["delta"
-                            ,A3($Dict.insert,
-                            p,
-                            A2($Basics._op["++"],
-                            "(+",
-                            A2($Basics._op["++"],
-                            $Basics.toString(delta),
-                            ")")),
-                            state.delta)]
+                           ,["lastPlacedPlayer"
+                            ,$Maybe.Just(state.turn)]
                            ,["log"
                             ,A3($Log.addPlayerMsg,
                             logText,
@@ -3852,21 +3868,16 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 42 and 57");
+         "between lines 41 and 56");
       }();
    });
    var pass = function (state) {
-      return function () {
-         var p = $Player.toString(state.turn);
-         return _U.replace([["turn"
-                            ,$Player.next(state.turn)]
-                           ,["delta"
-                            ,A3($Dict.insert,
-                            p,
-                            "(+0)",
-                            state.delta)]],
-         state);
-      }();
+      return _U.eq(A2($Player.getType,
+      state.turn,
+      state),
+      $GameTypes.Human) ? _U.replace([["turn"
+                                      ,$Player.next(state.turn)]],
+      state) : state;
    };
    var tryAIMove = function (state) {
       return _U.eq(A2($Player.getType,
@@ -3883,7 +3894,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 62 and 65");
+         "between lines 61 and 64");
       }() : state;
    };
    var startGame = F4(function (gameType,
@@ -3917,7 +3928,7 @@ Elm.Game.make = function (_elm) {
                                                           case "HumanVsHumanRemote":
                                                           return $GameTypes.Remote;}
                                                        _U.badCase($moduleName,
-                                                       "between lines 117 and 120");
+                                                       "between lines 116 and 119");
                                                     }()}]));
          var state = _U.eq(gameType,
          $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"
@@ -4075,12 +4086,12 @@ Elm.GameTypes.make = function (_elm) {
                                           return {_: {}
                                                  ,board: f
                                                  ,deck: h
-                                                 ,delta: l
                                                  ,gameState: b
                                                  ,gameType: a
                                                  ,hands: i
                                                  ,heldPiece: j
                                                  ,lastPlaced: k
+                                                 ,lastPlacedPlayer: l
                                                  ,log: m
                                                  ,playerNames: d
                                                  ,players: c
@@ -6377,7 +6388,9 @@ Elm.Kalevala.make = function (_elm) {
          var processCpuResponse = function (a) {
             return function () {
                switch (a.ctor)
-               {case "PlacePiece":
+               {case "Pass":
+                  return $GameTypes.CpuAction;
+                  case "PlacePiece":
                   return $GameTypes.CpuAction;}
                return $GameTypes.NoAction;
             }();
@@ -16797,7 +16810,7 @@ Elm.Serialize.make = function (_elm) {
               _L.fromArray([_v0._0
                            ,_v0._1])));}
          _U.badCase($moduleName,
-         "on line 32, column 18 to 40");
+         "on line 34, column 18 to 40");
       }();
    };
    var player = function ($) {
@@ -16809,7 +16822,11 @@ Elm.Serialize.make = function (_elm) {
    var action = function (a) {
       return function () {
          switch (a.ctor)
-         {case "NoAction":
+         {case "MoveToMainMenu":
+            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                     ,_0: "action"
+                                                     ,_1: $Json$Encode.string("NoAction")}]));
+            case "NoAction":
             return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
                                                      ,_0: "action"
                                                      ,_1: $Json$Encode.string("NoAction")}]));
@@ -16851,7 +16868,7 @@ Elm.Serialize.make = function (_elm) {
                                                      ,_0: "playerName"
                                                      ,_1: $Json$Encode.string(a._3)}]));}
          _U.badCase($moduleName,
-         "between lines 13 and 23");
+         "between lines 13 and 25");
       }();
    };
    _elm.Serialize.values = {_op: _op

@@ -205,9 +205,15 @@ renderMenu =
 renderLog : State -> Element
 renderLog state =
   flow down [ Log.display (390, 168) state.log |> container 390 220 midTop
-            , if state.gameState == GameOver
-              then button (message clickMailbox.address MainMenuButton) "Main Menu" |> container 380 40 middle
-              else spacer 380 40
+            , flow right [ customButton (message clickMailbox.address PassButton) 
+                             (image 196 46 "images/Buttons/Pass_Turn.png")
+                             (image 196 46 "images/Buttons/Pass_Turn-H.png")
+                             (image 196 46 "images/Buttons/Pass_Turn-H.png")
+                         , customButton (message clickMailbox.address MainMenuButton) 
+                             (image 196 46 "images/Buttons/Quit_Game.png")
+                             (image 196 46 "images/Buttons/Quit_Game-H.png")
+                             (image 196 46 "images/Buttons/Quit_Game-H.png")
+                         ]
             ]
 
 renderPieceDescription : Piece -> Element

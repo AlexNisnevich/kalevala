@@ -117,6 +117,7 @@ getCpuResponse playerAction delayTime =
   let processCpuResponse a =
     case a of
       PlacePiece mp wd -> CpuAction
+      Pass -> CpuAction
       otherwise -> NoAction
   in
     Time.delay delayTime (processCpuResponse <~ playerAction)

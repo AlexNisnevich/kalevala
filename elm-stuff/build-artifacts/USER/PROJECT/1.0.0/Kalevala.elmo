@@ -39,7 +39,9 @@ Elm.Kalevala.make = function (_elm) {
          var processCpuResponse = function (a) {
             return function () {
                switch (a.ctor)
-               {case "PlacePiece":
+               {case "Pass":
+                  return $GameTypes.CpuAction;
+                  case "PlacePiece":
                   return $GameTypes.CpuAction;}
                return $GameTypes.NoAction;
             }();

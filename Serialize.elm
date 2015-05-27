@@ -21,6 +21,8 @@ action a =
       object [("action", string "Pass")]
     NoAction -> 
       object [("action", string "NoAction")]
+    MoveToMainMenu -> 
+      object [("action", string "NoAction")]
 
 deck : Deck -> Value
 deck = list << map string

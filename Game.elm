@@ -29,10 +29,9 @@ tryToPickUpPiece player idx state =
 {- Pass the current player's turn. Returns the new state. -}
 pass : State -> State
 pass state =
-  let p = Player.toString state.turn
-  in
-    { state | turn <- Player.next state.turn
-            , delta <- Dict.insert p "(+0)" state.delta }
+  if Player.getType state.turn state == Human
+  then { state | turn <- Player.next state.turn }
+  else state
 
 {- Move the currently held piece to the given location if possible. 
    Do nothing if there is no held piece or the move is invalid.
@@ -88,7 +87,7 @@ makeMove move state =
             , hands <- Dict.insert p newHand state.hands
             , heldPiece <- Nothing
             , lastPlaced <- Just move.location
-            , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta
+            , lastPlacedPlayer <- Just state.turn
             , log <- Log.addPlayerMsg logText state.turn state.log }
 
 {- Given a deck, returns the starting center tile (which must not be a Kullervo),
@@ -199,6 +198,6 @@ startState =
   , hands = Dict.fromList [("Red", []), ("Blue", [])]
   , heldPiece = Nothing
   , lastPlaced = Nothing
-  , delta = Dict.fromList [("Red", ""), ("Blue", "")]
+  , lastPlacedPlayer = Nothing
   , log = Log.empty
   }

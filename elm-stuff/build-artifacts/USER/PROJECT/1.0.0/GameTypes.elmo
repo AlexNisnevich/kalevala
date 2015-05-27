@@ -93,12 +93,12 @@ Elm.GameTypes.make = function (_elm) {
                                           return {_: {}
                                                  ,board: f
                                                  ,deck: h
-                                                 ,delta: l
                                                  ,gameState: b
                                                  ,gameType: a
                                                  ,hands: i
                                                  ,heldPiece: j
                                                  ,lastPlaced: k
+                                                 ,lastPlacedPlayer: l
                                                  ,log: m
                                                  ,playerNames: d
                                                  ,players: c

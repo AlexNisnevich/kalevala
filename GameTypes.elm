@@ -44,7 +44,7 @@ type alias State = {
   hands : Hands,
   heldPiece : Maybe Int,
   lastPlaced : Maybe Location,
-  delta : Dict String String,
+  lastPlacedPlayer : Maybe Player,
   log : Log
 }
 

@@ -91,11 +91,11 @@ drawAvailableOverlay state boardSize dims =
 
 drawLastPlacedOutline : State -> Float -> List Form
 drawLastPlacedOutline state tileSize =
-  case state.lastPlaced of
-    Just (x, y) ->
+  case (state.lastPlaced, state.lastPlacedPlayer) of
+    (Just (x, y), Just player) ->
       let imgSize = if tileSize > 50 then 100 else 50
-          lastPlacedColorStr = Player.toString <| Player.next state.turn
+          lastPlacedColorStr = Player.toString <| player
           lastPlacedOutlinePath = "images/" ++ (toString imgSize) ++ "/" ++ lastPlacedColorStr ++ "-H.png"
           lastPlacedOutline = move (tileSize * (toFloat x), tileSize * (toFloat y)) (toForm (image tileSize tileSize lastPlacedOutlinePath))
       in [lastPlacedOutline]
-    Nothing -> []
+    otherwise -> []
