@@ -1,9 +1,8 @@
 module GameTypes where
 
+import Color exposing (Color)
 import Dict
 import Dict exposing (Dict)
-
-import Log exposing (Log)
 
 type GameType = HumanVsCpu
               | HumanVsHumanLocal
@@ -30,6 +29,8 @@ type alias Board = Dict Location Piece
 type alias Score = Dict String Int
 type alias Deck = List String
 type alias Hands = Dict String (List String)
+
+type alias Log = List (Color, String)
 
 type alias State = {
   gameType : GameType,

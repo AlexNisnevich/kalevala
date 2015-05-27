@@ -2920,16 +2920,16 @@ Elm.Display.make = function (_elm) {
                 clickMailbox.address,
                 $GameTypes.StartSinglePlayer),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/Single_Player.png"),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/Single_Player-H.png"),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/Single_Player-H.png")))
                 ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                              ,_0: 1
@@ -2938,16 +2938,16 @@ Elm.Display.make = function (_elm) {
                 clickMailbox.address,
                 $GameTypes.StartRemoteGameButton),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/2P_Online.png"),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/2P_Online-H.png"),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/2P_Online-H.png")))
                 ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                              ,_0: 1
@@ -2956,16 +2956,16 @@ Elm.Display.make = function (_elm) {
                 clickMailbox.address,
                 $GameTypes.StartTwoPlayerHotseat),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/2P_Hotseat.png"),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/2P_Hotseat-H.png"),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/2P_Hotseat-H.png")))
                 ,$Display$Helpers.withMargin({ctor: "_Tuple2"
                                              ,_0: 1
@@ -2974,16 +2974,16 @@ Elm.Display.make = function (_elm) {
                 clickMailbox.address,
                 $GameTypes.None),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/View_Rules.png"),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/View_Rules-H.png"),
                 A3($Graphics$Element.image,
-                208,
-                48,
+                196,
+                46,
                 "images/Buttons/View_Rules-H.png"))))])));
    var renderLog = function (state) {
       return A2($Graphics$Element.flow,
@@ -3012,19 +3012,54 @@ Elm.Display.make = function (_elm) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
       _L.fromArray([A3($Graphics$Element.container,
-                   300,
-                   30,
-                   $Graphics$Element.middle)($Graphics$Element.centered($Text.fromString("Enter your name")))
-                   ,A4($Graphics$Input$Field.field,
+                   380,
+                   100,
+                   $Graphics$Element.midBottom)($Graphics$Element.centered($Text.fromString("Enter player name : ")))
+                   ,A2($Graphics$Element.spacer,
+                   1,
+                   20)
+                   ,A3($Graphics$Element.container,
+                   380,
+                   110,
+                   $Graphics$Element.midTop)(A4($Graphics$Input$Field.field,
                    $Graphics$Input$Field.defaultStyle,
                    $Signal.message(playerNameMailbox.address),
                    "Your name",
-                   playerName)
-                   ,A2($Graphics$Input.button,
-                   A2($Signal.message,
-                   clickMailbox.address,
-                   $GameTypes.StartTwoPlayerOnline),
-                   "Start")]));
+                   playerName))
+                   ,A2($Graphics$Element.flow,
+                   $Graphics$Element.right,
+                   _L.fromArray([A4($Graphics$Input.customButton,
+                                A2($Signal.message,
+                                clickMailbox.address,
+                                $GameTypes.MainMenuButton),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Back.png"),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Back-H.png"),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Back-H.png"))
+                                ,A4($Graphics$Input.customButton,
+                                A2($Signal.message,
+                                clickMailbox.address,
+                                $GameTypes.StartTwoPlayerOnline),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Confirm.png"),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Confirm-H.png"),
+                                A3($Graphics$Element.image,
+                                196,
+                                46,
+                                "images/Buttons/Confirm-H.png"))]))]));
    };
    var renderRightArea = F2(function (state,
    playerName) {
@@ -3781,9 +3816,9 @@ Elm.Game.make = function (_elm) {
                             ")")),
                             state.delta)]
                            ,["log"
-                            ,A3($Log.add,
+                            ,A3($Log.addPlayerMsg,
                             logText,
-                            $Player.toColor(state.turn),
+                            state.turn,
                             state.log)]],
          state);
       }();
@@ -3954,8 +3989,8 @@ Elm.GameTypes.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "GameTypes",
+   $Color = Elm.Color.make(_elm),
    $Dict = Elm.Dict.make(_elm),
-   $Log = Elm.Log.make(_elm),
    $Maybe = Elm.Maybe.make(_elm);
    var None = {ctor: "None"};
    var MainMenuButton = {ctor: "MainMenuButton"};
@@ -6311,7 +6346,6 @@ Elm.Kalevala.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Kalevala",
    $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Deprecated$WebSocket = Elm.Deprecated.WebSocket.make(_elm),
    $Deserialize = Elm.Deserialize.make(_elm),
@@ -6507,9 +6541,8 @@ Elm.Kalevala.make = function (_elm) {
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]
                                                          ,["log"
-                                                          ,A3($Log.add,
+                                                          ,A2($Log.addSystemMsg,
                                                           "Game over!",
-                                                          $Color.darkGrey,
                                                           newState.log)]],
          newState) : $State.mustPass(newState) ? $Game.pass(newState) : newState;
       }();
@@ -6957,8 +6990,10 @@ Elm.Log.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
    $Decorate = Elm.Decorate.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $List = Elm.List.make(_elm),
+   $Player = Elm.Player.make(_elm),
    $Text = Elm.Text.make(_elm);
    var display = F2(function (_v0,
    log) {
@@ -6973,7 +7008,7 @@ Elm.Log.make = function (_elm) {
                        {case "_Tuple2":
                           return $Graphics$Element.width(widthMinusSidebar)($Graphics$Element.leftAligned($Text.color(_v4._0)($Text.fromString(_v4._1))));}
                        _U.badCase($moduleName,
-                       "on line 24, column 34 to 119");
+                       "on line 29, column 34 to 119");
                     }();
                  };
                  var fullLog = $Graphics$Element.width(_v0._0)($Graphics$Element.flow($Graphics$Element.down)(A2($List.map,
@@ -6985,15 +7020,23 @@ Elm.Log.make = function (_elm) {
                                                   ,_1: "overflow-y: scroll; overflow-x: hidden;"})($Graphics$Element.height(_v0._1)(fullLog)) : fullLog;
               }();}
          _U.badCase($moduleName,
-         "between lines 23 and 30");
+         "between lines 28 and 35");
       }();
    });
-   var add = F3(function (str,
-   color,
+   var addSystemMsg = F2(function (str,
    log) {
       return A2($List._op["::"],
       {ctor: "_Tuple2"
-      ,_0: color
+      ,_0: $Color.darkGrey
+      ,_1: str},
+      log);
+   });
+   var addPlayerMsg = F3(function (str,
+   player,
+   log) {
+      return A2($List._op["::"],
+      {ctor: "_Tuple2"
+      ,_0: $Player.toColor(player)
       ,_1: str},
       log);
    });
@@ -7007,7 +7050,8 @@ Elm.Log.make = function (_elm) {
    _elm.Log.values = {_op: _op
                      ,empty: empty
                      ,singleton: singleton
-                     ,add: add
+                     ,addPlayerMsg: addPlayerMsg
+                     ,addSystemMsg: addSystemMsg
                      ,display: display};
    return _elm.Log.values;
 };

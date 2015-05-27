@@ -5,9 +5,9 @@ import Graphics.Element as Element exposing (..)
 import List exposing (..)
 import Text exposing (..)
 
+import GameTypes exposing (..)
 import Decorate exposing (decorate)
-
-type alias Log = List (Color, String)
+import Player
 
 empty : Log
 empty = []
@@ -15,8 +15,13 @@ empty = []
 singleton : String -> Color -> Log
 singleton str color = [(color, str)]
 
-add : String -> Color -> Log -> Log
-add str color log = (color, str) :: log
+addPlayerMsg : String -> Player -> Log -> Log
+addPlayerMsg str player log = 
+  (Player.toColor player, str) :: log
+
+addSystemMsg : String -> Log -> Log
+addSystemMsg str log = 
+  (Color.darkGrey, str) :: log
 
 display : (Int, Int) -> Log -> Element
 display (width, height) log =

@@ -184,21 +184,21 @@ renderRightArea state playerName =
 renderMenu : Element
 renderMenu =
   flow down [ customButton (message clickMailbox.address StartSinglePlayer) 
-                (image 208 48 "images/Buttons/Single_Player.png")
-                (image 208 48 "images/Buttons/Single_Player-H.png")
-                (image 208 48 "images/Buttons/Single_Player-H.png") |> withMargin (1, 3)
+                (image 196 46 "images/Buttons/Single_Player.png")
+                (image 196 46 "images/Buttons/Single_Player-H.png")
+                (image 196 46 "images/Buttons/Single_Player-H.png") |> withMargin (1, 3)
             , customButton (message clickMailbox.address StartRemoteGameButton) 
-                (image 208 48 "images/Buttons/2P_Online.png")
-                (image 208 48 "images/Buttons/2P_Online-H.png")
-                (image 208 48 "images/Buttons/2P_Online-H.png") |> withMargin (1, 3)
+                (image 196 46 "images/Buttons/2P_Online.png")
+                (image 196 46 "images/Buttons/2P_Online-H.png")
+                (image 196 46 "images/Buttons/2P_Online-H.png") |> withMargin (1, 3)
             , customButton (message clickMailbox.address StartTwoPlayerHotseat) 
-                (image 208 48 "images/Buttons/2P_Hotseat.png")
-                (image 208 48 "images/Buttons/2P_Hotseat-H.png")
-                (image 208 48 "images/Buttons/2P_Hotseat-H.png") |> withMargin (1, 3)
+                (image 196 46 "images/Buttons/2P_Hotseat.png")
+                (image 196 46 "images/Buttons/2P_Hotseat-H.png")
+                (image 196 46 "images/Buttons/2P_Hotseat-H.png") |> withMargin (1, 3)
             , customButton (message clickMailbox.address None) 
-                (image 208 48 "images/Buttons/View_Rules.png")
-                (image 208 48 "images/Buttons/View_Rules-H.png")
-                (image 208 48 "images/Buttons/View_Rules-H.png") |> Element.link "rules.html" |> withMargin (1, 3)
+                (image 196 46 "images/Buttons/View_Rules.png")
+                (image 196 46 "images/Buttons/View_Rules-H.png")
+                (image 196 46 "images/Buttons/View_Rules-H.png") |> Element.link "rules.html" |> withMargin (1, 3)
             ] |> withMargin (95, 35)
 
 renderLog : State -> Element
@@ -221,9 +221,19 @@ renderPieceDescription piece =
 
 renderRemoteSetupMenu : Content -> Element
 renderRemoteSetupMenu playerName = 
-  flow down [ fromString "Enter your name" |> centered |> container 300 30 middle
-            , field Graphics.Input.Field.defaultStyle (message playerNameMailbox.address) "Your name" playerName
-            , button (message clickMailbox.address StartTwoPlayerOnline) "Start"
+  flow down [ fromString "Enter player name : " |> centered |> container 380 100 midBottom
+            , spacer 1 20
+            , field Graphics.Input.Field.defaultStyle (message playerNameMailbox.address) "Your name" playerName 
+                |> container 380 110 midTop
+            , flow right [ customButton (message clickMailbox.address MainMenuButton) 
+                             (image 196 46 "images/Buttons/Back.png")
+                             (image 196 46 "images/Buttons/Back-H.png")
+                             (image 196 46 "images/Buttons/Back-H.png")
+                         , customButton (message clickMailbox.address StartTwoPlayerOnline) 
+                             (image 196 46 "images/Buttons/Confirm.png")
+                             (image 196 46 "images/Buttons/Confirm-H.png")
+                             (image 196 46 "images/Buttons/Confirm-H.png")
+                         ]
             ]
 
 renderRemoteConnecting : Element

@@ -263,9 +263,9 @@ Elm.Game.make = function (_elm) {
                             ")")),
                             state.delta)]
                            ,["log"
-                            ,A3($Log.add,
+                            ,A3($Log.addPlayerMsg,
                             logText,
-                            $Player.toColor(state.turn),
+                            state.turn,
                             state.log)]],
          state);
       }();

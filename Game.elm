@@ -89,7 +89,7 @@ makeMove move state =
             , heldPiece <- Nothing
             , lastPlaced <- Just move.location
             , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta
-            , log <- Log.add logText (Player.toColor state.turn) state.log }
+            , log <- Log.addPlayerMsg logText state.turn state.log }
 
 {- Given a deck, returns the starting center tile (which must not be a Kullervo),
    two 5-tile hands, and the remaining deck. -}

@@ -56,7 +56,7 @@ performAction action state =
           ParseError e -> state
   in
     if | isGameOver newState -> { newState | gameState <- GameOver
-                                           , log <- Log.add "Game over!" Color.darkGrey newState.log }
+                                           , log <- Log.addSystemMsg "Game over!" newState.log }
        | mustPass newState -> Game.pass newState
        | otherwise -> newState
 

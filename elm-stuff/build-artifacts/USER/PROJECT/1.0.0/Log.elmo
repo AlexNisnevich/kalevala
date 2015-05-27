@@ -12,8 +12,10 @@ Elm.Log.make = function (_elm) {
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
    $Decorate = Elm.Decorate.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $List = Elm.List.make(_elm),
+   $Player = Elm.Player.make(_elm),
    $Text = Elm.Text.make(_elm);
    var display = F2(function (_v0,
    log) {
@@ -28,7 +30,7 @@ Elm.Log.make = function (_elm) {
                        {case "_Tuple2":
                           return $Graphics$Element.width(widthMinusSidebar)($Graphics$Element.leftAligned($Text.color(_v4._0)($Text.fromString(_v4._1))));}
                        _U.badCase($moduleName,
-                       "on line 24, column 34 to 119");
+                       "on line 29, column 34 to 119");
                     }();
                  };
                  var fullLog = $Graphics$Element.width(_v0._0)($Graphics$Element.flow($Graphics$Element.down)(A2($List.map,
@@ -40,15 +42,23 @@ Elm.Log.make = function (_elm) {
                                                   ,_1: "overflow-y: scroll; overflow-x: hidden;"})($Graphics$Element.height(_v0._1)(fullLog)) : fullLog;
               }();}
          _U.badCase($moduleName,
-         "between lines 23 and 30");
+         "between lines 28 and 35");
       }();
    });
-   var add = F3(function (str,
-   color,
+   var addSystemMsg = F2(function (str,
    log) {
       return A2($List._op["::"],
       {ctor: "_Tuple2"
-      ,_0: color
+      ,_0: $Color.darkGrey
+      ,_1: str},
+      log);
+   });
+   var addPlayerMsg = F3(function (str,
+   player,
+   log) {
+      return A2($List._op["::"],
+      {ctor: "_Tuple2"
+      ,_0: $Player.toColor(player)
       ,_1: str},
       log);
    });
@@ -62,7 +72,8 @@ Elm.Log.make = function (_elm) {
    _elm.Log.values = {_op: _op
                      ,empty: empty
                      ,singleton: singleton
-                     ,add: add
+                     ,addPlayerMsg: addPlayerMsg
+                     ,addSystemMsg: addSystemMsg
                      ,display: display};
    return _elm.Log.values;
 };

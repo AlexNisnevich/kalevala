@@ -10,7 +10,6 @@ Elm.Kalevala.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Kalevala",
    $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
    $Debug = Elm.Debug.make(_elm),
    $Deprecated$WebSocket = Elm.Deprecated.WebSocket.make(_elm),
    $Deserialize = Elm.Deserialize.make(_elm),
@@ -206,9 +205,8 @@ Elm.Kalevala.make = function (_elm) {
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]
                                                          ,["log"
-                                                          ,A3($Log.add,
+                                                          ,A2($Log.addSystemMsg,
                                                           "Game over!",
-                                                          $Color.darkGrey,
                                                           newState.log)]],
          newState) : $State.mustPass(newState) ? $Game.pass(newState) : newState;
       }();
