@@ -131,7 +131,9 @@ playerHandText player state playerName =
                HumanVsHumanLocal -> toString player
                HumanVsHumanRemote -> case playerType of
                                Human -> playerName.string
-                               otherwise -> "?"
+                               otherwise -> if State.isNotStarted state 
+                                            then "?"
+                                            else withDefault "?" (Dict.get p state.playerNames)
   in 
     text |> String.toUpper
          |> fromString
@@ -174,7 +176,6 @@ renderRightArea : State -> Content -> Element
 renderRightArea state playerName = 
   let content = if | State.isAtMainMenu state -> renderMenu
                    | State.isSettingUpRemoteGame state -> renderRemoteSetupMenu playerName
-                   | State.isConnectingToRemoteGame state -> renderRemoteConnecting
                    | otherwise -> case State.pieceHeld state of
                                     Just piece -> renderPieceDescription piece
                                     Nothing -> renderLog state
@@ -235,6 +236,3 @@ renderRemoteSetupMenu playerName =
                              (image 196 46 "images/Buttons/Confirm-H.png")
                          ]
             ]
-
-renderRemoteConnecting : Element
-renderRemoteConnecting = fromString "Waiting for opponent ..." |> centered |> container 300 30 middle

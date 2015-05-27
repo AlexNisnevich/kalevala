@@ -158,11 +158,12 @@ Elm.Kalevala.make = function (_elm) {
             {case "CpuAction":
                return $Game.tryAIMove(state);
                case "GameStarted":
-               return A4($Game.gameStarted,
+               return A5($Game.gameStarted,
                  action._0,
                  action._1,
                  action._2,
-                 action._3);
+                 action._3,
+                 state);
                case "MoveToMainMenu":
                return $Game.startState;
                case "MoveToRemoteGameMenu":

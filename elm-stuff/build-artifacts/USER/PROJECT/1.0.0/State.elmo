@@ -32,12 +32,8 @@ Elm.State.make = function (_elm) {
             case "Nothing":
             return $Maybe.Nothing;}
          _U.badCase($moduleName,
-         "between lines 52 and 58");
+         "between lines 48 and 54");
       }();
-   };
-   var isConnectingToRemoteGame = function (state) {
-      return _U.eq(state.gameState,
-      $GameTypes.WaitingForPlayers);
    };
    var isSettingUpRemoteGame = function (state) {
       return _U.eq(state.gameState,
@@ -91,7 +87,6 @@ Elm.State.make = function (_elm) {
                        ,isNotStarted: isNotStarted
                        ,isAtMainMenu: isAtMainMenu
                        ,isSettingUpRemoteGame: isSettingUpRemoteGame
-                       ,isConnectingToRemoteGame: isConnectingToRemoteGame
                        ,isGameOver: isGameOver
                        ,mustPass: mustPass
                        ,isPlayerTurn: isPlayerTurn

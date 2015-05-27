@@ -46,7 +46,7 @@ performAction action state =
           PickUpPiece player idx -> Game.tryToPickUpPiece player idx state
           PlacePiece mousePos dims -> Game.tryMove (mouseToBoardPosition mousePos state dims) state
           StartGame gameType deck player playerName -> Game.startGame gameType deck player playerName
-          GameStarted deck startPlayer localPlayer opponentName -> Game.gameStarted deck startPlayer localPlayer opponentName
+          GameStarted deck startPlayer localPlayer opponentName -> Game.gameStarted deck startPlayer localPlayer opponentName state
           Pass -> { state | turn <- Player.next state.turn }
           MoveToMainMenu -> Game.startState
           MoveToRemoteGameMenu -> { state | gameType <- HumanVsHumanRemote, gameState <- NotStarted }

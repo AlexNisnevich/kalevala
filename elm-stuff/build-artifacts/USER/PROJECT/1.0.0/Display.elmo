@@ -30,10 +30,6 @@ Elm.Display.make = function (_elm) {
    $State = Elm.State.make(_elm),
    $String = Elm.String.make(_elm),
    $Text = Elm.Text.make(_elm);
-   var renderRemoteConnecting = A3($Graphics$Element.container,
-   300,
-   30,
-   $Graphics$Element.middle)($Graphics$Element.centered($Text.fromString("Waiting for opponent ...")));
    var renderPieceDescription = function (piece) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
@@ -130,10 +126,14 @@ Elm.Display.make = function (_elm) {
                     switch (playerType.ctor)
                     {case "Human":
                        return playerName.string;}
-                    return "?";
+                    return $State.isNotStarted(state) ? "?" : A2($Maybe.withDefault,
+                    "?",
+                    A2($Dict.get,
+                    p,
+                    state.playerNames));
                  }();}
             _U.badCase($moduleName,
-            "between lines 127 and 135");
+            "between lines 127 and 137");
          }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
          player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(text)))));
@@ -456,7 +456,7 @@ Elm.Display.make = function (_elm) {
    var renderRightArea = F2(function (state,
    playerName) {
       return function () {
-         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : $State.isConnectingToRemoteGame(state) ? renderRemoteConnecting : function () {
+         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : function () {
             var _v3 = $State.pieceHeld(state);
             switch (_v3.ctor)
             {case "Just":
@@ -464,7 +464,7 @@ Elm.Display.make = function (_elm) {
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
-            "between lines 178 and 181");
+            "between lines 179 and 182");
          }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
@@ -565,7 +565,6 @@ Elm.Display.make = function (_elm) {
                          ,renderMenu: renderMenu
                          ,renderLog: renderLog
                          ,renderPieceDescription: renderPieceDescription
-                         ,renderRemoteSetupMenu: renderRemoteSetupMenu
-                         ,renderRemoteConnecting: renderRemoteConnecting};
+                         ,renderRemoteSetupMenu: renderRemoteSetupMenu};
    return _elm.Display.values;
 };

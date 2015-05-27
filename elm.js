@@ -2638,10 +2638,6 @@ Elm.Display.make = function (_elm) {
    $State = Elm.State.make(_elm),
    $String = Elm.String.make(_elm),
    $Text = Elm.Text.make(_elm);
-   var renderRemoteConnecting = A3($Graphics$Element.container,
-   300,
-   30,
-   $Graphics$Element.middle)($Graphics$Element.centered($Text.fromString("Waiting for opponent ...")));
    var renderPieceDescription = function (piece) {
       return A2($Graphics$Element.flow,
       $Graphics$Element.down,
@@ -2738,10 +2734,14 @@ Elm.Display.make = function (_elm) {
                     switch (playerType.ctor)
                     {case "Human":
                        return playerName.string;}
-                    return "?";
+                    return $State.isNotStarted(state) ? "?" : A2($Maybe.withDefault,
+                    "?",
+                    A2($Dict.get,
+                    p,
+                    state.playerNames));
                  }();}
             _U.badCase($moduleName,
-            "between lines 127 and 135");
+            "between lines 127 and 137");
          }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
          player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(text)))));
@@ -3064,7 +3064,7 @@ Elm.Display.make = function (_elm) {
    var renderRightArea = F2(function (state,
    playerName) {
       return function () {
-         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : $State.isConnectingToRemoteGame(state) ? renderRemoteConnecting : function () {
+         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : function () {
             var _v3 = $State.pieceHeld(state);
             switch (_v3.ctor)
             {case "Just":
@@ -3072,7 +3072,7 @@ Elm.Display.make = function (_elm) {
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
-            "between lines 178 and 181");
+            "between lines 179 and 182");
          }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
@@ -3173,8 +3173,7 @@ Elm.Display.make = function (_elm) {
                          ,renderMenu: renderMenu
                          ,renderLog: renderLog
                          ,renderPieceDescription: renderPieceDescription
-                         ,renderRemoteSetupMenu: renderRemoteSetupMenu
-                         ,renderRemoteConnecting: renderRemoteConnecting};
+                         ,renderRemoteSetupMenu: renderRemoteSetupMenu};
    return _elm.Display.values;
 };
 Elm.Display = Elm.Display || {};
@@ -3684,10 +3683,11 @@ Elm.Game.make = function (_elm) {
                 ,_2: remainder};
       }();
    };
-   var gameStarted = F4(function (deck,
+   var gameStarted = F5(function (deck,
    startPlayer,
    localPlayer,
-   opponentName) {
+   opponentName,
+   state) {
       return function () {
          var $ = getFirstTileHandsAndDeck(deck),
          firstTile = $._0,
@@ -3721,11 +3721,9 @@ Elm.Game.make = function (_elm) {
                             firstTile)]
                            ,["turn",startPlayer]
                            ,["log"
-                            ,A2($Log.singleton,
-                            A2($Basics._op["++"],
-                            "Connected to ",
-                            opponentName),
-                            $Color.darkGrey)]],
+                            ,$Log.addSystemMsg("Game started.")($Log.addSystemMsg(A2($Basics._op["++"],
+                            opponentName,
+                            " joined the game."))(state.log))]],
          startState);
       }();
    });
@@ -3929,7 +3927,11 @@ Elm.Game.make = function (_elm) {
                                                      ,["players",players]
                                                      ,["playerNames"
                                                       ,playerNames]
-                                                     ,["turn",player]],
+                                                     ,["turn",player]
+                                                     ,["log"
+                                                      ,$Log.addSystemMsg("Waiting for opponent . . .")($Log.addSystemMsg(A2($Basics._op["++"],
+                                                      playerName,
+                                                      " joined the game."))($Log.empty))]],
          startState) : _U.replace([["gameType"
                                    ,gameType]
                                   ,["gameState"
@@ -3945,7 +3947,7 @@ Elm.Game.make = function (_elm) {
                                   ,["turn",player]
                                   ,["log"
                                    ,A2($Log.singleton,
-                                   "Game started!",
+                                   "Game started.",
                                    $Color.darkGrey)]],
          startState);
          return _U.eq(A2($Player.getType,
@@ -6494,11 +6496,12 @@ Elm.Kalevala.make = function (_elm) {
             {case "CpuAction":
                return $Game.tryAIMove(state);
                case "GameStarted":
-               return A4($Game.gameStarted,
+               return A5($Game.gameStarted,
                  action._0,
                  action._1,
                  action._2,
-                 action._3);
+                 action._3,
+                 state);
                case "MoveToMainMenu":
                return $Game.startState;
                case "MoveToRemoteGameMenu":
@@ -17036,12 +17039,8 @@ Elm.State.make = function (_elm) {
             case "Nothing":
             return $Maybe.Nothing;}
          _U.badCase($moduleName,
-         "between lines 52 and 58");
+         "between lines 48 and 54");
       }();
-   };
-   var isConnectingToRemoteGame = function (state) {
-      return _U.eq(state.gameState,
-      $GameTypes.WaitingForPlayers);
    };
    var isSettingUpRemoteGame = function (state) {
       return _U.eq(state.gameState,
@@ -17095,7 +17094,6 @@ Elm.State.make = function (_elm) {
                        ,isNotStarted: isNotStarted
                        ,isAtMainMenu: isAtMainMenu
                        ,isSettingUpRemoteGame: isSettingUpRemoteGame
-                       ,isConnectingToRemoteGame: isConnectingToRemoteGame
                        ,isGameOver: isGameOver
                        ,mustPass: mustPass
                        ,isPlayerTurn: isPlayerTurn

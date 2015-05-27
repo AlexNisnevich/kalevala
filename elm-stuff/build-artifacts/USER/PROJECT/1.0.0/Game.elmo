@@ -131,10 +131,11 @@ Elm.Game.make = function (_elm) {
                 ,_2: remainder};
       }();
    };
-   var gameStarted = F4(function (deck,
+   var gameStarted = F5(function (deck,
    startPlayer,
    localPlayer,
-   opponentName) {
+   opponentName,
+   state) {
       return function () {
          var $ = getFirstTileHandsAndDeck(deck),
          firstTile = $._0,
@@ -168,11 +169,9 @@ Elm.Game.make = function (_elm) {
                             firstTile)]
                            ,["turn",startPlayer]
                            ,["log"
-                            ,A2($Log.singleton,
-                            A2($Basics._op["++"],
-                            "Connected to ",
-                            opponentName),
-                            $Color.darkGrey)]],
+                            ,$Log.addSystemMsg("Game started.")($Log.addSystemMsg(A2($Basics._op["++"],
+                            opponentName,
+                            " joined the game."))(state.log))]],
          startState);
       }();
    });
@@ -376,7 +375,11 @@ Elm.Game.make = function (_elm) {
                                                      ,["players",players]
                                                      ,["playerNames"
                                                       ,playerNames]
-                                                     ,["turn",player]],
+                                                     ,["turn",player]
+                                                     ,["log"
+                                                      ,$Log.addSystemMsg("Waiting for opponent . . .")($Log.addSystemMsg(A2($Basics._op["++"],
+                                                      playerName,
+                                                      " joined the game."))($Log.empty))]],
          startState) : _U.replace([["gameType"
                                    ,gameType]
                                   ,["gameState"
@@ -392,7 +395,7 @@ Elm.Game.make = function (_elm) {
                                   ,["turn",player]
                                   ,["log"
                                    ,A2($Log.singleton,
-                                   "Game started!",
+                                   "Game started.",
                                    $Color.darkGrey)]],
          startState);
          return _U.eq(A2($Player.getType,

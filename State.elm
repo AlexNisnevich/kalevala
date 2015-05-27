@@ -28,10 +28,6 @@ isSettingUpRemoteGame : State -> Bool
 isSettingUpRemoteGame state =
   state.gameState == NotStarted && state.gameType == HumanVsHumanRemote
 
-isConnectingToRemoteGame : State -> Bool
-isConnectingToRemoteGame state =
-  state.gameState == WaitingForPlayers
-
 {- Does neither player have any tiles left in the given state? -}
 isGameOver : State -> Bool
 isGameOver state =

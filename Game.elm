@@ -128,7 +128,10 @@ startGame gameType deck player playerName =
                                 , gameState <- WaitingForPlayers
                                 , players <- players
                                 , playerNames <- playerNames
-                                , turn <- player}
+                                , turn <- player
+                                , log <- Log.empty |> Log.addSystemMsg (playerName ++ " joined the game.")
+                                                   |> Log.addSystemMsg "Waiting for opponent . . ."
+                                }
               else { startState | gameType <- gameType
                                 , gameState <- Ongoing
                                 , players <- players
@@ -137,7 +140,7 @@ startGame gameType deck player playerName =
                                 , deck <- remainder
                                 , board <- Dict.singleton (0, 0) firstTile
                                 , turn <- player
-                                , log <- Log.singleton "Game started!" Color.darkGrey }
+                                , log <- Log.singleton "Game started." Color.darkGrey }
   in
     -- if first player is Cpu, make their move
     if Player.getType state.turn state == Cpu
@@ -146,8 +149,8 @@ startGame gameType deck player playerName =
 
 {- Start a HumanVsHumanRemote game after an opponent has been found.
    Returns the state corresponding to the start of the game. -}
-gameStarted : Deck -> Player -> Player -> String -> State
-gameStarted deck startPlayer localPlayer opponentName =
+gameStarted : Deck -> Player -> Player -> String -> State -> State
+gameStarted deck startPlayer localPlayer opponentName state =
   let players = Dict.fromList [ ("Red", if localPlayer == Red then Human else Remote)
                               , ("Blue", if localPlayer == Blue then Human else Remote)
                               ]
@@ -164,7 +167,9 @@ gameStarted deck startPlayer localPlayer opponentName =
                  , deck <- remainder
                  , board <- Dict.singleton (0, 0) firstTile
                  , turn <- startPlayer
-                 , log <- Log.singleton ("Connected to " ++ opponentName) Color.darkGrey }
+                 , log <- state.log |> Log.addSystemMsg (opponentName ++ " joined the game.")
+                                    |> Log.addSystemMsg "Game started."
+                 }
 
 {- The cards in a Voluspa deck -}
 deckContents : List String
