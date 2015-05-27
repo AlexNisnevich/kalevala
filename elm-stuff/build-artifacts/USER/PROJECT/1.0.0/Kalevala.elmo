@@ -63,7 +63,7 @@ Elm.Kalevala.make = function (_elm) {
             return $GameTypes.ParseError(_v3._0);
             case "Ok": return _v3._0;}
          _U.badCase($moduleName,
-         "between lines 103 and 105");
+         "between lines 104 and 106");
       }();
    };
    var encode = function (action) {
@@ -124,7 +124,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 71 and 82");
+            "between lines 72 and 83");
          }();
       }();
    });
@@ -177,7 +177,11 @@ Elm.Kalevala.make = function (_elm) {
                case "NoAction": return state;
                case "OpponentDisconnected":
                return _U.replace([["gameState"
-                                  ,$GameTypes.Disconnected]],
+                                  ,$GameTypes.Disconnected]
+                                 ,["log"
+                                  ,A2($Log.addSystemMsg,
+                                  "Opponent disconnected.",
+                                  state.log)]],
                  state);
                case "ParseError": return state;
                case "Pass":
@@ -203,7 +207,7 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 45 and 57");
+            "between lines 45 and 58");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]

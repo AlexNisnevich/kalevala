@@ -2986,50 +2986,132 @@ Elm.Display.make = function (_elm) {
                 46,
                 "images/Buttons/View_Rules-H.png"))))])));
    var renderLog = function (state) {
-      return A2($Graphics$Element.flow,
-      $Graphics$Element.down,
-      _L.fromArray([A3($Graphics$Element.container,
-                   390,
-                   220,
-                   $Graphics$Element.midTop)(A2($Log.display,
-                   {ctor: "_Tuple2"
-                   ,_0: 390
-                   ,_1: 168},
-                   state.log))
-                   ,A2($Graphics$Element.flow,
-                   $Graphics$Element.right,
-                   _L.fromArray([A4($Graphics$Input.customButton,
-                                A2($Signal.message,
-                                clickMailbox.address,
-                                $GameTypes.PassButton),
-                                A3($Graphics$Element.image,
-                                196,
-                                46,
-                                "images/Buttons/Pass_Turn.png"),
-                                A3($Graphics$Element.image,
-                                196,
-                                46,
-                                "images/Buttons/Pass_Turn-H.png"),
-                                A3($Graphics$Element.image,
-                                196,
-                                46,
-                                "images/Buttons/Pass_Turn-H.png"))
-                                ,A4($Graphics$Input.customButton,
-                                A2($Signal.message,
-                                clickMailbox.address,
-                                $GameTypes.MainMenuButton),
-                                A3($Graphics$Element.image,
-                                196,
-                                46,
-                                "images/Buttons/Quit_Game.png"),
-                                A3($Graphics$Element.image,
-                                196,
-                                46,
-                                "images/Buttons/Quit_Game-H.png"),
-                                A3($Graphics$Element.image,
-                                196,
-                                46,
-                                "images/Buttons/Quit_Game-H.png"))]))]));
+      return function () {
+         var passAndQuitButtons = A2($Graphics$Element.flow,
+         $Graphics$Element.right,
+         _L.fromArray([A4($Graphics$Input.customButton,
+                      A2($Signal.message,
+                      clickMailbox.address,
+                      $GameTypes.PassButton),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Pass_Turn.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Pass_Turn-H.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Pass_Turn-H.png"))
+                      ,A4($Graphics$Input.customButton,
+                      A2($Signal.message,
+                      clickMailbox.address,
+                      $GameTypes.MainMenuButton),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Quit_Game.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Quit_Game-H.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Quit_Game-H.png"))]));
+         var mainMenuAndNewGameButtons = A2($Graphics$Element.flow,
+         $Graphics$Element.right,
+         _L.fromArray([A4($Graphics$Input.customButton,
+                      A2($Signal.message,
+                      clickMailbox.address,
+                      $GameTypes.MainMenuButton),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Main_Menu.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Main_Menu-H.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Main_Menu-H.png"))
+                      ,A4($Graphics$Input.customButton,
+                      A2($Signal.message,
+                      clickMailbox.address,
+                      $GameTypes.StartSinglePlayer),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/New_Game.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/New_Game-H.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/New_Game-H.png"))]));
+         var backAndRulesButtons = A2($Graphics$Element.flow,
+         $Graphics$Element.right,
+         _L.fromArray([A4($Graphics$Input.customButton,
+                      A2($Signal.message,
+                      clickMailbox.address,
+                      $GameTypes.MainMenuButton),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Back.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Back-H.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Back-H.png"))
+                      ,$Graphics$Element.link("rules.html")(A4($Graphics$Input.customButton,
+                      A2($Signal.message,
+                      clickMailbox.address,
+                      $GameTypes.None),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/View_Rules.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/View_Rules-H.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/View_Rules-H.png")))]));
+         var buttons = function () {
+            var _v3 = state.gameState;
+            switch (_v3.ctor)
+            {case "Disconnected":
+               return backAndRulesButtons;
+               case "GameOver":
+               return mainMenuAndNewGameButtons;
+               case "WaitingForPlayers":
+               return backAndRulesButtons;}
+            return passAndQuitButtons;
+         }();
+         return A2($Graphics$Element.flow,
+         $Graphics$Element.down,
+         _L.fromArray([A3($Graphics$Element.container,
+                      390,
+                      220,
+                      $Graphics$Element.midTop)(A2($Log.display,
+                      {ctor: "_Tuple2"
+                      ,_0: 390
+                      ,_1: 168},
+                      state.log))
+                      ,buttons]));
+      }();
    };
    var renderRemoteSetupMenu = function (playerName) {
       return A2($Graphics$Element.flow,
@@ -3088,10 +3170,10 @@ Elm.Display.make = function (_elm) {
    playerName) {
       return function () {
          var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : function () {
-            var _v3 = $State.pieceHeld(state);
-            switch (_v3.ctor)
+            var _v4 = $State.pieceHeld(state);
+            switch (_v4.ctor)
             {case "Just":
-               return renderPieceDescription(_v3._0);
+               return renderPieceDescription(_v4._0);
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
@@ -3100,21 +3182,21 @@ Elm.Display.make = function (_elm) {
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
          $Color.darkGrey)(A3($Graphics$Element.container,
-         400,
+         410,
          $Display$Constants.sidebarRightAreaHeight,
          $Graphics$Element.middle)(content));
       }();
    });
    var renderSidebar = F3(function (state,
-   _v5,
+   _v6,
    playerName) {
       return function () {
-         switch (_v5.ctor)
+         switch (_v6.ctor)
          {case "_Tuple2":
             return function () {
                  var sidebarInnerPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
-                                                                                   ,_0: _v5._0
-                                                                                   ,_1: _v5._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
+                                                                                   ,_0: _v6._0
+                                                                                   ,_1: _v6._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
                  return A2($Graphics$Element.flow,
                  $Graphics$Element.down,
                  _L.fromArray([A3($Graphics$Element.image,
@@ -6412,7 +6494,7 @@ Elm.Kalevala.make = function (_elm) {
             return $GameTypes.ParseError(_v3._0);
             case "Ok": return _v3._0;}
          _U.badCase($moduleName,
-         "between lines 103 and 105");
+         "between lines 104 and 106");
       }();
    };
    var encode = function (action) {
@@ -6473,7 +6555,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 71 and 82");
+            "between lines 72 and 83");
          }();
       }();
    });
@@ -6526,7 +6608,11 @@ Elm.Kalevala.make = function (_elm) {
                case "NoAction": return state;
                case "OpponentDisconnected":
                return _U.replace([["gameState"
-                                  ,$GameTypes.Disconnected]],
+                                  ,$GameTypes.Disconnected]
+                                 ,["log"
+                                  ,A2($Log.addSystemMsg,
+                                  "Opponent disconnected.",
+                                  state.log)]],
                  state);
                case "ParseError": return state;
                case "Pass":
@@ -6552,7 +6638,7 @@ Elm.Kalevala.make = function (_elm) {
                  action._2,
                  action._3);}
             _U.badCase($moduleName,
-            "between lines 45 and 57");
+            "between lines 45 and 58");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]
@@ -16825,11 +16911,7 @@ Elm.Serialize.make = function (_elm) {
          {case "MoveToMainMenu":
             return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
                                                      ,_0: "action"
-                                                     ,_1: $Json$Encode.string("NoAction")}]));
-            case "NoAction":
-            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
-                                                     ,_0: "action"
-                                                     ,_1: $Json$Encode.string("NoAction")}]));
+                                                     ,_1: $Json$Encode.string("OpponentDisconnected")}]));
             case "Pass":
             return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
                                                      ,_0: "action"
@@ -16867,8 +16949,9 @@ Elm.Serialize.make = function (_elm) {
                                                     ,{ctor: "_Tuple2"
                                                      ,_0: "playerName"
                                                      ,_1: $Json$Encode.string(a._3)}]));}
-         _U.badCase($moduleName,
-         "between lines 13 and 25");
+         return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: "action"
+                                                  ,_1: $Json$Encode.string("NoAction")}]));
       }();
    };
    _elm.Serialize.values = {_op: _op

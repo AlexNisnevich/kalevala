@@ -50,7 +50,8 @@ performAction action state =
           Pass -> { state | turn <- Player.next state.turn }
           MoveToMainMenu -> Game.startState
           MoveToRemoteGameMenu -> { state | gameType <- HumanVsHumanRemote, gameState <- NotStarted }
-          OpponentDisconnected -> { state | gameState <- Disconnected }
+          OpponentDisconnected -> { state | gameState <- Disconnected
+                                          , log <- Log.addSystemMsg "Opponent disconnected." state.log }
           CpuAction -> Game.tryAIMove state
           NoAction -> state
           ParseError e -> state

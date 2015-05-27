@@ -38,11 +38,7 @@ Elm.Serialize.make = function (_elm) {
          {case "MoveToMainMenu":
             return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
                                                      ,_0: "action"
-                                                     ,_1: $Json$Encode.string("NoAction")}]));
-            case "NoAction":
-            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
-                                                     ,_0: "action"
-                                                     ,_1: $Json$Encode.string("NoAction")}]));
+                                                     ,_1: $Json$Encode.string("OpponentDisconnected")}]));
             case "Pass":
             return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
                                                      ,_0: "action"
@@ -80,8 +76,9 @@ Elm.Serialize.make = function (_elm) {
                                                     ,{ctor: "_Tuple2"
                                                      ,_0: "playerName"
                                                      ,_1: $Json$Encode.string(a._3)}]));}
-         _U.badCase($moduleName,
-         "between lines 13 and 25");
+         return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
+                                                  ,_0: "action"
+                                                  ,_1: $Json$Encode.string("NoAction")}]));
       }();
    };
    _elm.Serialize.values = {_op: _op

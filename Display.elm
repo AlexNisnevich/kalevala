@@ -180,7 +180,7 @@ renderRightArea state playerName =
                                     Just piece -> renderPieceDescription piece
                                     Nothing -> renderLog state
   in 
-    content |> container 400 sidebarRightAreaHeight middle |> withBorder (2, 2) darkGrey
+    content |> container 410 sidebarRightAreaHeight middle |> withBorder (2, 2) darkGrey
 
 renderMenu : Element
 renderMenu =
@@ -204,17 +204,42 @@ renderMenu =
 
 renderLog : State -> Element
 renderLog state =
-  flow down [ Log.display (390, 168) state.log |> container 390 220 midTop
-            , flow right [ customButton (message clickMailbox.address PassButton) 
-                             (image 196 46 "images/Buttons/Pass_Turn.png")
-                             (image 196 46 "images/Buttons/Pass_Turn-H.png")
-                             (image 196 46 "images/Buttons/Pass_Turn-H.png")
-                         , customButton (message clickMailbox.address MainMenuButton) 
-                             (image 196 46 "images/Buttons/Quit_Game.png")
-                             (image 196 46 "images/Buttons/Quit_Game-H.png")
-                             (image 196 46 "images/Buttons/Quit_Game-H.png")
-                         ]
-            ]
+  let backAndRulesButtons = flow right [ customButton (message clickMailbox.address MainMenuButton) 
+                                           (image 196 46 "images/Buttons/Back.png")
+                                           (image 196 46 "images/Buttons/Back-H.png")
+                                           (image 196 46 "images/Buttons/Back-H.png")
+                                       , customButton (message clickMailbox.address None) 
+                                           (image 196 46 "images/Buttons/View_Rules.png")
+                                           (image 196 46 "images/Buttons/View_Rules-H.png")
+                                           (image 196 46 "images/Buttons/View_Rules-H.png") |> Element.link "rules.html"
+                                       ]
+      mainMenuAndNewGameButtons = flow right [ customButton (message clickMailbox.address MainMenuButton) 
+                                                 (image 196 46 "images/Buttons/Main_Menu.png")
+                                                 (image 196 46 "images/Buttons/Main_Menu-H.png")
+                                                 (image 196 46 "images/Buttons/Main_Menu-H.png")
+                                             , customButton (message clickMailbox.address StartSinglePlayer) 
+                                                 (image 196 46 "images/Buttons/New_Game.png")
+                                                 (image 196 46 "images/Buttons/New_Game-H.png")
+                                                 (image 196 46 "images/Buttons/New_Game-H.png")
+                                             ]
+      passAndQuitButtons = flow right [ customButton (message clickMailbox.address PassButton) 
+                                          (image 196 46 "images/Buttons/Pass_Turn.png")
+                                          (image 196 46 "images/Buttons/Pass_Turn-H.png")
+                                          (image 196 46 "images/Buttons/Pass_Turn-H.png")
+                                      , customButton (message clickMailbox.address MainMenuButton) 
+                                          (image 196 46 "images/Buttons/Quit_Game.png")
+                                          (image 196 46 "images/Buttons/Quit_Game-H.png")
+                                          (image 196 46 "images/Buttons/Quit_Game-H.png")
+                                      ]
+      buttons = case state.gameState of
+                  WaitingForPlayers -> backAndRulesButtons
+                  GameOver          -> mainMenuAndNewGameButtons
+                  Disconnected      -> backAndRulesButtons
+                  otherwise         -> passAndQuitButtons
+  in
+    flow down [ Log.display (390, 168) state.log |> container 390 220 midTop
+              , buttons
+              ]
 
 renderPieceDescription : Piece -> Element
 renderPieceDescription piece = 
