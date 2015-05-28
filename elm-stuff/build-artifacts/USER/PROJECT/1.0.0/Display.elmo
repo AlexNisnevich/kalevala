@@ -239,7 +239,7 @@ Elm.Display.make = function (_elm) {
          var hiddenPiece = A3($Graphics$Element.image,
          $Display$Constants.handTileSize,
          $Display$Constants.handTileSize,
-         "images/100/Back.png");
+         "images/100/Tile_Back.png");
          var pieceSize = $Display$Constants.handTileSize + $Display$Constants.handPadding;
          var dummyHand = A2($List.repeat,
          5,

@@ -88,7 +88,7 @@ renderHand player state =
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
       pieceImage pieceStr = pieceToImage <| Piece.fromString pieceStr
       pieceSize = handTileSize + handPadding
-      hiddenPiece = image handTileSize handTileSize "images/100/Back.png"
+      hiddenPiece = image handTileSize handTileSize "images/100/Tile_Back.png"
       placeholderPiece = image handTileSize handTileSize "images/100/No_Tile.png" 
       
       combineWith elt1 elt2 = flow inward [elt1, elt2]
