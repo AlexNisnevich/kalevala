@@ -1,32 +1,38 @@
 module Game where
 
+import Color
 import Dict exposing (Dict)
 import List exposing (..)
-import Maybe exposing ( withDefault)
+import Maybe exposing (withDefault)
 
 import Helpers exposing (..)
 import GameTypes exposing (..)
+import Log
 import State
 import Piece
 import Board
 import Player
 import AI
 
-{- Pick up a piece if it's the given player's turn, otherwise pick up nothing. 
+{- Pick up a piece if it's the given player's turn, otherwise pick up nothing.
+   If the piece is already picked up, put it down.
    Returns the new state. -}
 tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
   if (state.turn == player) && (State.isOngoing state)
-  then { state | heldPiece <- Just idx }
+  then 
+    if state.heldPiece == Just idx
+    then { state | heldPiece <- Nothing }
+    else {state | heldPiece <- Just idx }
   else state
-
+  
 {- Pass the current player's turn. Returns the new state. -}
 pass : State -> State
 pass state =
-  let p = Player.toString state.turn
+  let logMsg = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " passed."
   in
     { state | turn <- Player.next state.turn
-            , delta <- Dict.insert p "(+0)" state.delta }
+            , log <- Log.addPlayerMsg logMsg state.turn state.log }
 
 {- Move the currently held piece to the given location if possible. 
    Do nothing if there is no held piece or the move is invalid.
@@ -40,12 +46,10 @@ tryMove location state =
           piece = Piece.fromString pieceStr
           move = { piece = piece, idx = idx, location = location }
           nextPlayerType = Player.getType (Player.next state.turn) state
-          nextAction = case nextPlayerType of
-                         Human -> identity
-                         Remote -> identity
-                         Cpu -> tryAIMove
       in
-        if (Board.isValidMove move state.board) then (makeMove move state |> nextAction) else { state | heldPiece <- Nothing }
+        if Board.isValidMove move state.board
+        then makeMove move state
+        else { state | heldPiece <- Nothing }
     Nothing -> state
 
 {- Try to make a move for the AI player. 
@@ -53,9 +57,12 @@ tryMove location state =
    Returns the new state. -}
 tryAIMove : State -> State
 tryAIMove state =
-  case AI.getMove state of
-    Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
-    Nothing -> pass state
+  if Player.getType state.turn state == Cpu
+  then
+    case AI.getMove state of
+      Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
+      Nothing -> pass state
+  else state
 
 {- Make the given move. Returns the new state. -}
 makeMove : Move -> State -> State
@@ -70,9 +77,9 @@ makeMove move state =
       newHand = case existingTile of
         Just piece -> if move.piece == SeppoIlmarinen then (replaceAtIndex move.idx (Piece.toString piece) hand) else handWithDrawnTile
         Nothing -> handWithDrawnTile
-      logText = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " placed a " ++ 
+      logText = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " placed " ++ 
                   Piece.toDisplayString move.piece ++ " for " ++ toString delta ++ " points" ++ 
-                  " (total: " ++ toString newScore ++ ")"
+                  " (total : " ++ toString newScore ++ ")"
   in
     { state | turn <- Player.next state.turn
             , board <- newBoard
@@ -81,8 +88,8 @@ makeMove move state =
             , hands <- Dict.insert p newHand state.hands
             , heldPiece <- Nothing
             , lastPlaced <- Just move.location
-            , delta <- Dict.insert p ("(+" ++ (toString delta) ++ ")") state.delta
-            , log <- ((Player.toColor state.turn), logText) :: state.log }
+            , lastPlacedPlayer <- Just state.turn
+            , log <- Log.addPlayerMsg logText state.turn state.log }
 
 {- Given a deck, returns the starting center tile (which must not be a Kullervo),
    two 5-tile hands, and the remaining deck. -}
@@ -94,7 +101,7 @@ getFirstTileHandsAndDeck deck =
       deckMinusFirstTile = without idxFirstNonKullervo deck
       redHand = take 5 deckMinusFirstTile
       blueHand = take 5 (drop 5 deckMinusFirstTile)
-      hands = Dict.fromList [("red", redHand), ("blue", blueHand)]
+      hands = Dict.fromList [("Red", redHand), ("Blue", blueHand)]
       remainder = drop 10 deckMinusFirstTile
   in
     (firstTile, hands, remainder)
@@ -107,7 +114,10 @@ getFirstTileHandsAndDeck deck =
 startGame : GameType -> Deck -> Player -> String -> State
 startGame gameType deck player playerName =
   let players = Dict.fromList [ (Player.toString player, Human)
-                              , (Player.toString <| Player.next player, if gameType == HumanVsCpu then Cpu else Human)
+                              , (Player.toString <| Player.next player, case gameType of
+                                                                          HumanVsCpu -> Cpu
+                                                                          HumanVsHumanLocal -> Human
+                                                                          HumanVsHumanRemote -> Remote)
                               ]
       playerNames = Dict.fromList [ (Player.toString player, if gameType == HumanVsCpu then "You" else Player.toString player)
                                   , (Player.toString <| Player.next player, if gameType == HumanVsCpu then "CPU" else Player.toString <| Player.next player)
@@ -118,7 +128,10 @@ startGame gameType deck player playerName =
                                 , gameState <- WaitingForPlayers
                                 , players <- players
                                 , playerNames <- playerNames
-                                , turn <- player}
+                                , turn <- player
+                                , log <- Log.empty |> Log.addSystemMsg (playerName ++ " joined the game.")
+                                                   |> Log.addSystemMsg "Waiting for opponent . . ."
+                                }
               else { startState | gameType <- gameType
                                 , gameState <- Ongoing
                                 , players <- players
@@ -126,7 +139,8 @@ startGame gameType deck player playerName =
                                 , hands <- hands
                                 , deck <- remainder
                                 , board <- Dict.singleton (0, 0) firstTile
-                                , turn <- player}
+                                , turn <- player
+                                , log <- Log.singleton "Game started." Color.darkGrey }
   in
     -- if first player is Cpu, make their move
     if Player.getType state.turn state == Cpu
@@ -135,10 +149,10 @@ startGame gameType deck player playerName =
 
 {- Start a HumanVsHumanRemote game after an opponent has been found.
    Returns the state corresponding to the start of the game. -}
-gameStarted : Deck -> Player -> Player -> String -> State
-gameStarted deck startPlayer localPlayer opponentName =
-  let players = Dict.fromList [ ("red", if localPlayer == Red then Human else Remote)
-                              , ("blue", if localPlayer == Blue then Human else Remote)
+gameStarted : Deck -> Player -> Player -> String -> State -> State
+gameStarted deck startPlayer localPlayer opponentName state =
+  let players = Dict.fromList [ ("Red", if localPlayer == Red then Human else Remote)
+                              , ("Blue", if localPlayer == Blue then Human else Remote)
                               ]
       playerNames = Dict.fromList [ (Player.toString localPlayer, "You")
                                   , (Player.toString <| Player.next localPlayer, opponentName)
@@ -152,7 +166,10 @@ gameStarted deck startPlayer localPlayer opponentName =
                  , hands <- hands
                  , deck <- remainder
                  , board <- Dict.singleton (0, 0) firstTile
-                 , turn <- startPlayer}
+                 , turn <- startPlayer
+                 , log <- state.log |> Log.addSystemMsg (opponentName ++ " joined the game.")
+                                    |> Log.addSystemMsg "Game started."
+                 }
 
 {- The cards in a Voluspa deck -}
 deckContents : List String
@@ -173,15 +190,15 @@ startState : State
 startState =
   { gameType = HumanVsCpu
   , gameState = NotStarted
-  , players = Dict.fromList [("red", Human), ("blue", Cpu)]
-  , playerNames = Dict.fromList [("red", "Player"), ("blue", "CPU")]
+  , players = Dict.fromList [("Red", Human), ("Blue", Cpu)]
+  , playerNames = Dict.fromList [("Red", "Player"), ("Blue", "CPU")]
   , turn = Red
   , board = Dict.empty
-  , score = Dict.fromList [("red", 0), ("blue", 0)]
+  , score = Dict.fromList [("Red", 0), ("Blue", 0)]
   , deck = []
-  , hands = Dict.fromList [("red", []), ("blue", [])]
+  , hands = Dict.fromList [("Red", []), ("Blue", [])]
   , heldPiece = Nothing
   , lastPlaced = Nothing
-  , delta = Dict.fromList [("red", ""), ("blue", "")]
-  , log = []
+  , lastPlacedPlayer = Nothing
+  , log = Log.empty
   }

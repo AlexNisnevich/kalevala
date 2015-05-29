@@ -12,10 +12,12 @@ Elm.Game.make = function (_elm) {
    $AI = Elm.AI.make(_elm),
    $Basics = Elm.Basics.make(_elm),
    $Board = Elm.Board.make(_elm),
+   $Color = Elm.Color.make(_elm),
    $Dict = Elm.Dict.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
    $Helpers = Elm.Helpers.make(_elm),
    $List = Elm.List.make(_elm),
+   $Log = Elm.Log.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm),
@@ -23,40 +25,35 @@ Elm.Game.make = function (_elm) {
    var startState = {_: {}
                     ,board: $Dict.empty
                     ,deck: _L.fromArray([])
-                    ,delta: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "red"
-                                                         ,_1: ""}
-                                                        ,{ctor: "_Tuple2"
-                                                         ,_0: "blue"
-                                                         ,_1: ""}]))
                     ,gameState: $GameTypes.NotStarted
                     ,gameType: $GameTypes.HumanVsCpu
                     ,hands: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "red"
+                                                         ,_0: "Red"
                                                          ,_1: _L.fromArray([])}
                                                         ,{ctor: "_Tuple2"
-                                                         ,_0: "blue"
+                                                         ,_0: "Blue"
                                                          ,_1: _L.fromArray([])}]))
                     ,heldPiece: $Maybe.Nothing
                     ,lastPlaced: $Maybe.Nothing
-                    ,log: _L.fromArray([])
+                    ,lastPlacedPlayer: $Maybe.Nothing
+                    ,log: $Log.empty
                     ,playerNames: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                               ,_0: "red"
+                                                               ,_0: "Red"
                                                                ,_1: "Player"}
                                                               ,{ctor: "_Tuple2"
-                                                               ,_0: "blue"
+                                                               ,_0: "Blue"
                                                                ,_1: "CPU"}]))
                     ,players: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                           ,_0: "red"
+                                                           ,_0: "Red"
                                                            ,_1: $GameTypes.Human}
                                                           ,{ctor: "_Tuple2"
-                                                           ,_0: "blue"
+                                                           ,_0: "Blue"
                                                            ,_1: $GameTypes.Cpu}]))
                     ,score: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "red"
+                                                         ,_0: "Red"
                                                          ,_1: 0}
                                                         ,{ctor: "_Tuple2"
-                                                         ,_0: "blue"
+                                                         ,_0: "Blue"
                                                          ,_1: 0}]))
                     ,turn: $GameTypes.Red};
    var deckContents = function () {
@@ -96,7 +93,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 92, column 88 to 112");
+               "on line 99, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -115,10 +112,10 @@ Elm.Game.make = function (_elm) {
          5,
          deckMinusFirstTile));
          var hands = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                  ,_0: "red"
+                                                  ,_0: "Red"
                                                   ,_1: redHand}
                                                  ,{ctor: "_Tuple2"
-                                                  ,_0: "blue"
+                                                  ,_0: "Blue"
                                                   ,_1: blueHand}]));
          var remainder = A2($List.drop,
          10,
@@ -129,10 +126,11 @@ Elm.Game.make = function (_elm) {
                 ,_2: remainder};
       }();
    };
-   var gameStarted = F4(function (deck,
+   var gameStarted = F5(function (deck,
    startPlayer,
    localPlayer,
-   opponentName) {
+   opponentName,
+   state) {
       return function () {
          var $ = getFirstTileHandsAndDeck(deck),
          firstTile = $._0,
@@ -145,11 +143,11 @@ Elm.Game.make = function (_elm) {
                                                         ,_0: $Player.toString($Player.next(localPlayer))
                                                         ,_1: opponentName}]));
          var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                    ,_0: "red"
+                                                    ,_0: "Red"
                                                     ,_1: _U.eq(localPlayer,
                                                     $GameTypes.Red) ? $GameTypes.Human : $GameTypes.Remote}
                                                    ,{ctor: "_Tuple2"
-                                                    ,_0: "blue"
+                                                    ,_0: "Blue"
                                                     ,_1: _U.eq(localPlayer,
                                                     $GameTypes.Blue) ? $GameTypes.Human : $GameTypes.Remote}]));
          return _U.replace([["gameType"
@@ -164,7 +162,11 @@ Elm.Game.make = function (_elm) {
                             ,A2($Dict.singleton,
                             {ctor: "_Tuple2",_0: 0,_1: 0},
                             firstTile)]
-                           ,["turn",startPlayer]],
+                           ,["turn",startPlayer]
+                           ,["log"
+                            ,$Log.addSystemMsg("Game started.")($Log.addSystemMsg(A2($Basics._op["++"],
+                            opponentName,
+                            " joined the game."))(state.log))]],
          startState);
       }();
    });
@@ -195,7 +197,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 70 and 73");
+            "between lines 77 and 80");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -213,7 +215,7 @@ Elm.Game.make = function (_elm) {
          $Player.toString(state.turn),
          state.playerNames)),
          A2($Basics._op["++"],
-         " placed a ",
+         " placed ",
          A2($Basics._op["++"],
          $Piece.toDisplayString(move.piece),
          A2($Basics._op["++"],
@@ -223,7 +225,7 @@ Elm.Game.make = function (_elm) {
          A2($Basics._op["++"],
          " points",
          A2($Basics._op["++"],
-         " (total: ",
+         " (total : ",
          A2($Basics._op["++"],
          $Basics.toString(newScore),
          ")"))))))));
@@ -245,96 +247,85 @@ Elm.Game.make = function (_elm) {
                            ,["heldPiece",$Maybe.Nothing]
                            ,["lastPlaced"
                             ,$Maybe.Just(move.location)]
-                           ,["delta"
-                            ,A3($Dict.insert,
-                            p,
-                            A2($Basics._op["++"],
-                            "(+",
-                            A2($Basics._op["++"],
-                            $Basics.toString(delta),
-                            ")")),
-                            state.delta)]
+                           ,["lastPlacedPlayer"
+                            ,$Maybe.Just(state.turn)]
                            ,["log"
-                            ,A2($List._op["::"],
-                            {ctor: "_Tuple2"
-                            ,_0: $Player.toColor(state.turn)
-                            ,_1: logText},
+                            ,A3($Log.addPlayerMsg,
+                            logText,
+                            state.turn,
                             state.log)]],
          state);
       }();
    });
-   var pass = function (state) {
-      return function () {
-         var p = $Player.toString(state.turn);
-         return _U.replace([["turn"
-                            ,$Player.next(state.turn)]
-                           ,["delta"
-                            ,A3($Dict.insert,
-                            p,
-                            "(+0)",
-                            state.delta)]],
-         state);
-      }();
-   };
-   var tryAIMove = function (state) {
-      return function () {
-         var _v6 = $AI.getMove(state);
-         switch (_v6.ctor)
-         {case "Just": return A2(tryMove,
-              _v6._0.location,
-              _U.replace([["heldPiece"
-                          ,$Maybe.Just(_v6._0.idx)]],
-              state));
-            case "Nothing":
-            return pass(state);}
-         _U.badCase($moduleName,
-         "between lines 56 and 60");
-      }();
-   };
    var tryMove = F2(function (location,
    state) {
       return function () {
-         var _v8 = state.heldPiece;
-         switch (_v8.ctor)
+         var _v6 = state.heldPiece;
+         switch (_v6.ctor)
          {case "Just":
             return function () {
                  var nextPlayerType = A2($Player.getType,
                  $Player.next(state.turn),
                  state);
-                 var nextAction = function () {
-                    switch (nextPlayerType.ctor)
-                    {case "Cpu": return tryAIMove;
-                       case "Human":
-                       return $Basics.identity;
-                       case "Remote":
-                       return $Basics.identity;}
-                    _U.badCase($moduleName,
-                    "between lines 43 and 47");
-                 }();
                  var hand = A2($Player.getHand,
                  state.turn,
                  state);
                  var pieceStr = A2($Helpers._op["!!"],
                  hand,
-                 _v8._0);
+                 _v6._0);
                  var piece = $Piece.fromString(pieceStr);
                  var move = {_: {}
-                            ,idx: _v8._0
+                            ,idx: _v6._0
                             ,location: location
                             ,piece: piece};
                  return A2($Board.isValidMove,
                  move,
-                 state.board) ? nextAction(A2(makeMove,
+                 state.board) ? A2(makeMove,
                  move,
-                 state)) : _U.replace([["heldPiece"
-                                       ,$Maybe.Nothing]],
+                 state) : _U.replace([["heldPiece"
+                                      ,$Maybe.Nothing]],
                  state);
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 36 and 53");
+         "between lines 42 and 57");
       }();
    });
+   var pass = function (state) {
+      return function () {
+         var logMsg = A2($Basics._op["++"],
+         $Maybe.withDefault("")(A2($Dict.get,
+         $Player.toString(state.turn),
+         state.playerNames)),
+         " passed.");
+         return _U.replace([["turn"
+                            ,$Player.next(state.turn)]
+                           ,["log"
+                            ,A3($Log.addPlayerMsg,
+                            logMsg,
+                            state.turn,
+                            state.log)]],
+         state);
+      }();
+   };
+   var tryAIMove = function (state) {
+      return _U.eq(A2($Player.getType,
+      state.turn,
+      state),
+      $GameTypes.Cpu) ? function () {
+         var _v8 = $AI.getMove(state);
+         switch (_v8.ctor)
+         {case "Just": return A2(tryMove,
+              _v8._0.location,
+              _U.replace([["heldPiece"
+                          ,$Maybe.Just(_v8._0.idx)]],
+              state));
+            case "Nothing":
+            return pass(state);}
+         _U.badCase($moduleName,
+         "between lines 62 and 65");
+      }() : state;
+   };
    var startGame = F4(function (gameType,
    deck,
    player,
@@ -357,8 +348,17 @@ Elm.Game.make = function (_elm) {
                                                     ,_1: $GameTypes.Human}
                                                    ,{ctor: "_Tuple2"
                                                     ,_0: $Player.toString($Player.next(player))
-                                                    ,_1: _U.eq(gameType,
-                                                    $GameTypes.HumanVsCpu) ? $GameTypes.Cpu : $GameTypes.Human}]));
+                                                    ,_1: function () {
+                                                       switch (gameType.ctor)
+                                                       {case "HumanVsCpu":
+                                                          return $GameTypes.Cpu;
+                                                          case "HumanVsHumanLocal":
+                                                          return $GameTypes.Human;
+                                                          case "HumanVsHumanRemote":
+                                                          return $GameTypes.Remote;}
+                                                       _U.badCase($moduleName,
+                                                       "between lines 117 and 120");
+                                                    }()}]));
          var state = _U.eq(gameType,
          $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"
                                                       ,gameType]
@@ -367,7 +367,11 @@ Elm.Game.make = function (_elm) {
                                                      ,["players",players]
                                                      ,["playerNames"
                                                       ,playerNames]
-                                                     ,["turn",player]],
+                                                     ,["turn",player]
+                                                     ,["log"
+                                                      ,$Log.addSystemMsg("Waiting for opponent . . .")($Log.addSystemMsg(A2($Basics._op["++"],
+                                                      playerName,
+                                                      " joined the game."))($Log.empty))]],
          startState) : _U.replace([["gameType"
                                    ,gameType]
                                   ,["gameState"
@@ -380,7 +384,11 @@ Elm.Game.make = function (_elm) {
                                    ,A2($Dict.singleton,
                                    {ctor: "_Tuple2",_0: 0,_1: 0},
                                    firstTile)]
-                                  ,["turn",player]],
+                                  ,["turn",player]
+                                  ,["log"
+                                   ,A2($Log.singleton,
+                                   "Game started.",
+                                   $Color.darkGrey)]],
          startState);
          return _U.eq(A2($Player.getType,
          state.turn,
@@ -392,8 +400,11 @@ Elm.Game.make = function (_elm) {
    idx,
    state) {
       return _U.eq(state.turn,
-      player) && $State.isOngoing(state) ? _U.replace([["heldPiece"
-                                                       ,$Maybe.Just(idx)]],
+      player) && $State.isOngoing(state) ? _U.eq(state.heldPiece,
+      $Maybe.Just(idx)) ? _U.replace([["heldPiece"
+                                      ,$Maybe.Nothing]],
+      state) : _U.replace([["heldPiece"
+                           ,$Maybe.Just(idx)]],
       state) : state;
    });
    _elm.Game.values = {_op: _op

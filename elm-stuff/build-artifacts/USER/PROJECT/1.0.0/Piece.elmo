@@ -10,6 +10,52 @@ Elm.Piece.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Piece",
    $GameTypes = Elm.GameTypes.make(_elm);
+   var rulesText = function (piece) {
+      return function () {
+         switch (piece.ctor)
+         {case "Joukahainen":
+            return "4 - Value is the sum of all Joukahainen tiles in the same row or column.";
+            case "Kaarme":
+            return "5 - May be placed on top of other tiles (except other K&auml;&auml;rmes).";
+            case "Kullervo":
+            return "6 - Only other Kullervos may be placed next to this tile.";
+            case "Lemminkainen":
+            return "1 - All adjacent tiles (except other Lemmink&auml;inens) have value 0.";
+            case "Louhi":
+            return "2 - Automatically scores when there are Louhis on both ends of a line.";
+            case "SeppoIlmarinen":
+            return "3 - You may exchange it with any tile on the table (except other Seppo Ilmarinens).";
+            case "Ukko":
+            return "7 - No special rules.";
+            case "Vainamoinen":
+            return "8 - No special rules.";}
+         _U.badCase($moduleName,
+         "between lines 67 and 75");
+      }();
+   };
+   var flavorText = function (piece) {
+      return function () {
+         switch (piece.ctor)
+         {case "Joukahainen":
+            return "After losing a contest, the arrogant archer Joukahainen pledged his sister Aino to V&auml;in&auml;m&ouml;inen, but she drowned herself rather than marry him.";
+            case "Kaarme":
+            return "Plowing a field of poisonous snakes (k&auml;&auml;rmeit&auml;) was the first task that Seppo Ilmarinen had to perform to marry Louhi\'s daughter.";
+            case "Kullervo":
+            return "Kullervo grew up thinking his family was dead, amongst his people\'s murderers, and killed himself after unknowingly seducing his sister.";
+            case "Lemminkainen":
+            return "After Lemmink&auml;inen drowned in the underworld, his mother sewed his body together and restored him to life with ointment from Ukko\'s halls.";
+            case "Louhi":
+            return "Louhi was a powerful witch with the ability to change shape, and the main opponent of V&auml;in&auml;m&ouml;inen in the battle for the magical artifact Sampo.";
+            case "SeppoIlmarinen":
+            return "Seppo Ilmarinen, the Eternal Hammerer, was an immortal blacksmith who was capable of creating practically anything, but unlucky in love.";
+            case "Ukko":
+            return "Ukko, the god of the sky, created lightning with his hammer Ukonvasara and caused thunderstorms by driving his chariot through the skies.";
+            case "Vainamoinen":
+            return "V&auml;in&auml;m&ouml;inen, the central character of the Kalevala, was a shamanistic hero with a magical power of song and music.";}
+         _U.badCase($moduleName,
+         "between lines 55 and 63");
+      }();
+   };
    var baseValue = function (piece) {
       return function () {
          switch (piece.ctor)
@@ -35,7 +81,7 @@ Elm.Piece.make = function (_elm) {
             case "Kullervo":
             return "Kullervo";
             case "Lemminkainen":
-            return "Lemminkäinen";
+            return "Lemmink&auml;inen";
             case "Louhi": return "Louhi";
             case "SeppoIlmarinen":
             return "Seppo Ilmarinen";
@@ -93,6 +139,8 @@ Elm.Piece.make = function (_elm) {
                        ,fromString: fromString
                        ,toString: toString
                        ,toDisplayString: toDisplayString
-                       ,baseValue: baseValue};
+                       ,baseValue: baseValue
+                       ,flavorText: flavorText
+                       ,rulesText: rulesText};
    return _elm.Piece.values;
 };

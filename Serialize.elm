@@ -19,7 +19,9 @@ action a =
       object [("action", string "StartGame"), ("deck", deck d), ("player", player pl), ("playerName", string pln)]
     Pass -> 
       object [("action", string "Pass")]
-    NoAction -> 
+    MoveToMainMenu -> 
+      object [("action", string "OpponentDisconnected")]
+    otherwise -> 
       object [("action", string "NoAction")]
 
 deck : Deck -> Value

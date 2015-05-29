@@ -30,6 +30,8 @@ type alias Score = Dict String Int
 type alias Deck = List String
 type alias Hands = Dict String (List String)
 
+type alias Log = List (Color, String)
+
 type alias State = {
   gameType : GameType,
   gameState : GameState,
@@ -42,8 +44,8 @@ type alias State = {
   hands : Hands,
   heldPiece : Maybe Int,
   lastPlaced : Maybe Location,
-  delta : Dict String String,
-  log : List (Color, String)
+  lastPlacedPlayer : Maybe Player,
+  log : Log
 }
 
 type Piece = Vainamoinen
@@ -62,14 +64,23 @@ type alias WindowDims = (Int, Int)
 type Action = PickUpPiece Player Int
             | PlacePiece MousePos WindowDims
             | StartGame GameType Deck Player String
+            | StartNewGame Deck Player String
+            | MoveToMainMenu
+            | MoveToRemoteGameMenu
             | GameStarted Deck Player Player String -- represents a StartGame message sent from the server
             | Pass
             | OpponentDisconnected
+            | CpuAction
             | NoAction
             | ParseError String
 
-type ClickEvent = Start
+type ClickEvent = StartSinglePlayer
+                | StartRemoteGameButton
+                | StartTwoPlayerOnline
+                | StartTwoPlayerHotseat
+                | StartNewGameButton
                 | BoardClick
                 | PieceInHand Player Int
                 | PassButton
+                | MainMenuButton
                 | None

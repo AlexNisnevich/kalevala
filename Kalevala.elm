@@ -1,5 +1,6 @@
 module Kalevala where
 
+import Color
 import Dict
 import Graphics.Element exposing (Element)
 import Graphics.Input.Field as Field
@@ -8,21 +9,34 @@ import Json.Encode
 import Mouse
 import Random
 import Signal exposing (..)
-import Time
+import Time exposing (Time)
 import Window
 
 import Deprecated.WebSocket as WebSocket
 
 import Helpers exposing (..)
 import GameTypes exposing (..)
+import Log
 import State exposing (isGameOver, mustPass)
 import Display exposing (..)
+import Display.Board exposing (mouseToBoardPosition)
 import Game
 import Player
 import Serialize
 import Deserialize
 
 import Debug
+
+isRemoteSignal : Signal Bool
+isRemoteSignal = 
+  let getIsRemoteFromClickSignal event = 
+    case event of
+    StartSinglePlayer -> Just False
+    StartTwoPlayerHotseat -> Just False
+    StartTwoPlayerOnline -> Just True
+    otherwise -> Nothing
+  in
+    filterMap getIsRemoteFromClickSignal False clickMailbox.signal
 
 {- Perform an action on the current state and return the resulting state. -}
 performAction : Action -> State -> State
@@ -32,28 +46,40 @@ performAction action state =
           PickUpPiece player idx -> Game.tryToPickUpPiece player idx state
           PlacePiece mousePos dims -> Game.tryMove (mouseToBoardPosition mousePos state dims) state
           StartGame gameType deck player playerName -> Game.startGame gameType deck player playerName
-          GameStarted deck startPlayer localPlayer opponentName -> Game.gameStarted deck startPlayer localPlayer opponentName
-          Pass -> { state | turn <- Player.next state.turn }
-          OpponentDisconnected -> { state | gameState <- Disconnected }
+          StartNewGame deck player playerName -> Game.startGame state.gameType deck player playerName
+          GameStarted deck startPlayer localPlayer opponentName -> Game.gameStarted deck startPlayer localPlayer opponentName state
+          Pass -> Game.pass state
+          MoveToMainMenu -> Game.startState
+          MoveToRemoteGameMenu -> { state | gameType <- HumanVsHumanRemote, gameState <- NotStarted }
+          OpponentDisconnected -> { state | gameState <- Disconnected
+                                          , log <- Log.addSystemMsg "Opponent disconnected." state.log }
+          CpuAction -> Game.tryAIMove state
           NoAction -> state
           ParseError e -> state
   in
-    if | isGameOver newState -> { newState | gameState <- GameOver }
+    if | isGameOver newState -> { newState | gameState <- GameOver
+                                           , log <- Log.addSystemMsg "Game over!" newState.log }
        | mustPass newState -> Game.pass newState
        | otherwise -> newState
 
 {- Turn a ClickEvent into an Action -}
-constructAction : ClickEvent -> Random.Seed -> MousePos -> WindowDims -> GameType -> Field.Content -> Action
-constructAction clickType seed mousePos dims gameType playerName =
+constructAction : ClickEvent -> Random.Seed -> MousePos -> WindowDims -> Field.Content -> Action
+constructAction clickType seed mousePos dims playerName =
   let
     pos = Debug.watch "Mouse.position" mousePos
     click = Debug.watch "clickInput.signal" clickType
+    deck = shuffle Game.deckContents seed
   in
     case clickType of
-      Start -> StartGame gameType (shuffle Game.deckContents seed) (Player.random seed) playerName.string
+      StartSinglePlayer -> StartGame HumanVsCpu deck (Player.random seed) playerName.string
+      StartTwoPlayerOnline -> StartGame HumanVsHumanRemote deck (Player.random seed) playerName.string
+      StartTwoPlayerHotseat -> StartGame HumanVsHumanLocal deck (Player.random seed) playerName.string
+      StartNewGameButton -> StartNewGame deck (Player.random seed) playerName.string
       BoardClick -> PlacePiece mousePos dims
       PieceInHand player idx -> PickUpPiece player idx
       PassButton -> Pass
+      MainMenuButton -> MoveToMainMenu
+      StartRemoteGameButton -> MoveToRemoteGameMenu
       None -> NoAction
 
 {- Turn a signal of ClickEvents into a signal of Actions -}
@@ -61,15 +87,43 @@ processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let seedSignal = (Random.initialSeed << round << fst) <~ Time.timestamp signal
       sampledMouse = sampleOn signal Mouse.position
-      sampledGameType = sampleOn signal <| gameTypeMailbox.signal
       sampledPlayerName = sampleOn signal <| playerNameMailbox.signal
   in
-    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ sampledGameType ~ sampledPlayerName
+    constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ sampledPlayerName
 
 {- Path to a Voluspa game server 
    (see https://github.com/neunenak/voluspa-server) -}
 server : String
 server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000"
+
+{- Encodes an Action as a JSON string -}
+encode : Action -> String
+encode action = Json.Encode.encode 0 (Serialize.action action)
+
+{- Decodes an Action from a JSON string -}
+decode : String -> Action
+decode actionJson =
+  case Json.Decode.decodeString Deserialize.action actionJson of
+    Ok action -> action
+    Err e -> ParseError e
+
+getRemoteResponse : Signal Action -> Signal Action
+getRemoteResponse playerAction =
+  let actionForRemote = filterOn playerAction isRemoteSignal NoAction
+      request = Debug.watch "request" <~ (encode <~ actionForRemote)
+      response = Debug.watch "response" <~ WebSocket.connect server request
+  in
+    Debug.watch "deserialized" <~ (decode <~ response)
+
+getCpuResponse : Signal Action -> Time -> Signal Action
+getCpuResponse playerAction delayTime =
+  let processCpuResponse a =
+    case a of
+      PlacePiece mp wd -> CpuAction
+      Pass -> CpuAction
+      otherwise -> NoAction
+  in
+    Time.delay delayTime (processCpuResponse <~ playerAction)
 
 {- The main game loop. 
    The state is folded over time over a stream of Actions, coming from the client and from the server (for an online game.)
@@ -80,19 +134,10 @@ server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000"
 main : Signal Element
 main =
   let
-    encode action = Json.Encode.encode 0 (Serialize.action action)
-    decode actionJson = case Json.Decode.decodeString Deserialize.action actionJson of Ok action -> action
-                                                                                       Err e -> ParseError e
+    playerAction = processClick clickMailbox.signal
+    remoteAction = getRemoteResponse playerAction
+    cpuAction = getCpuResponse playerAction Time.second
 
-    action = processClick clickMailbox.signal
-
-    actionWithGameType = (\a t -> (a, t)) <~ action ~ gameTypeMailbox.signal
-    actionForRemote = (\(a, t) -> a) <~ filter (\(a, t) -> t == HumanVsHumanRemote) (NoAction, HumanVsCpu) actionWithGameType
-
-    request = Debug.watch "request" <~ (encode <~ actionForRemote)
-    response = Debug.watch "response" <~ WebSocket.connect server request
-    responseAction = Debug.watch "deserialized" <~ (decode <~ response)
-
-    state = foldp performAction Game.startState (merge action responseAction)
+    state = foldp performAction Game.startState (mergeMany [playerAction, remoteAction, cpuAction])
   in
-    render <~ state ~ Window.dimensions ~ gameTypeMailbox.signal ~ playerNameMailbox.signal
+    render <~ state ~ Window.dimensions ~ playerNameMailbox.signal

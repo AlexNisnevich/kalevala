@@ -11,16 +11,54 @@ Elm.State.make = function (_elm) {
    $moduleName = "State",
    $Basics = Elm.Basics.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
+   $Helpers = Elm.Helpers.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm);
-   var mustPass = function (state) {
-      return A2($Player.noTilesInHand,
-      state.turn,
-      state);
+   var pieceHeld = function (state) {
+      return function () {
+         var _v0 = state.heldPiece;
+         switch (_v0.ctor)
+         {case "Just":
+            return function () {
+                 var hand = A2($Player.getHand,
+                 state.turn,
+                 state);
+                 var pieceStr = A2($Helpers._op["!!"],
+                 hand,
+                 _v0._0);
+                 return $Maybe.Just($Piece.fromString(pieceStr));
+              }();
+            case "Nothing":
+            return $Maybe.Nothing;}
+         _U.badCase($moduleName,
+         "between lines 48 and 54");
+      }();
+   };
+   var isSettingUpRemoteGame = function (state) {
+      return _U.eq(state.gameState,
+      $GameTypes.NotStarted) && _U.eq(state.gameType,
+      $GameTypes.HumanVsHumanRemote);
+   };
+   var isAtMainMenu = function (state) {
+      return _U.eq(state.gameState,
+      $GameTypes.NotStarted) && !_U.eq(state.gameType,
+      $GameTypes.HumanVsHumanRemote);
+   };
+   var isNotStarted = function (state) {
+      return function () {
+         var _v2 = state.gameState;
+         switch (_v2.ctor)
+         {case "NotStarted": return true;
+            case "WaitingForPlayers":
+            return true;}
+         return false;
+      }();
    };
    var isOngoing = function (state) {
       return function () {
-         var _v0 = state.gameState;
-         switch (_v0.ctor)
+         var _v3 = state.gameState;
+         switch (_v3.ctor)
          {case "Connected": return true;
             case "Ongoing": return true;}
          return false;
@@ -33,6 +71,11 @@ Elm.State.make = function (_elm) {
       $GameTypes.Blue,
       state));
    };
+   var mustPass = function (state) {
+      return isOngoing(state) && A2($Player.noTilesInHand,
+      state.turn,
+      state);
+   };
    var isPlayerTurn = function (state) {
       return isOngoing(state) && _U.eq(A2($Player.getType,
       state.turn,
@@ -41,8 +84,12 @@ Elm.State.make = function (_elm) {
    };
    _elm.State.values = {_op: _op
                        ,isOngoing: isOngoing
+                       ,isNotStarted: isNotStarted
+                       ,isAtMainMenu: isAtMainMenu
+                       ,isSettingUpRemoteGame: isSettingUpRemoteGame
                        ,isGameOver: isGameOver
                        ,mustPass: mustPass
-                       ,isPlayerTurn: isPlayerTurn};
+                       ,isPlayerTurn: isPlayerTurn
+                       ,pieceHeld: pieceHeld};
    return _elm.State.values;
 };

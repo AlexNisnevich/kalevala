@@ -4,28 +4,30 @@ import Color
 import Color exposing (Color)
 import Dict
 import Maybe exposing (withDefault)
-
-import GameTypes exposing (Player (..), PlayerType (..), State)
-import Helpers exposing (..)
 import Random exposing (float, generate)
+
+import GameTypes exposing (..)
+import Helpers exposing (..)
 
 toColor : Player -> Color
 toColor player =
   case player of
-    Red -> Color.red
-    Blue -> Color.blue
+    Red -> Color.rgb 217 33 32
+    Blue -> Color.rgb 70 131 193
 
 fromString : String -> Player
 fromString str =
   case str of
+    "Red" -> Red
     "red" -> Red
+    "Blue" -> Blue
     "blue" -> Blue
 
 toString : Player -> String
 toString player =
   case player of
-    Red -> "red"
-    Blue -> "blue"
+    Red -> "Red"
+    Blue -> "Blue"
 
 next : Player -> Player
 next player =

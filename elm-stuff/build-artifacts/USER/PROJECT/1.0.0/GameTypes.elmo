@@ -13,6 +13,7 @@ Elm.GameTypes.make = function (_elm) {
    $Dict = Elm.Dict.make(_elm),
    $Maybe = Elm.Maybe.make(_elm);
    var None = {ctor: "None"};
+   var MainMenuButton = {ctor: "MainMenuButton"};
    var PassButton = {ctor: "PassButton"};
    var PieceInHand = F2(function (a,
    b) {
@@ -21,12 +22,17 @@ Elm.GameTypes.make = function (_elm) {
              ,_1: b};
    });
    var BoardClick = {ctor: "BoardClick"};
-   var Start = {ctor: "Start"};
+   var StartNewGameButton = {ctor: "StartNewGameButton"};
+   var StartTwoPlayerHotseat = {ctor: "StartTwoPlayerHotseat"};
+   var StartTwoPlayerOnline = {ctor: "StartTwoPlayerOnline"};
+   var StartRemoteGameButton = {ctor: "StartRemoteGameButton"};
+   var StartSinglePlayer = {ctor: "StartSinglePlayer"};
    var ParseError = function (a) {
       return {ctor: "ParseError"
              ,_0: a};
    };
    var NoAction = {ctor: "NoAction"};
+   var CpuAction = {ctor: "CpuAction"};
    var OpponentDisconnected = {ctor: "OpponentDisconnected"};
    var Pass = {ctor: "Pass"};
    var GameStarted = F4(function (a,
@@ -38,6 +44,16 @@ Elm.GameTypes.make = function (_elm) {
              ,_1: b
              ,_2: c
              ,_3: d};
+   });
+   var MoveToRemoteGameMenu = {ctor: "MoveToRemoteGameMenu"};
+   var MoveToMainMenu = {ctor: "MoveToMainMenu"};
+   var StartNewGame = F3(function (a,
+   b,
+   c) {
+      return {ctor: "StartNewGame"
+             ,_0: a
+             ,_1: b
+             ,_2: c};
    });
    var StartGame = F4(function (a,
    b,
@@ -86,12 +102,12 @@ Elm.GameTypes.make = function (_elm) {
                                           return {_: {}
                                                  ,board: f
                                                  ,deck: h
-                                                 ,delta: l
                                                  ,gameState: b
                                                  ,gameType: a
                                                  ,hands: i
                                                  ,heldPiece: j
                                                  ,lastPlaced: k
+                                                 ,lastPlacedPlayer: l
                                                  ,log: m
                                                  ,playerNames: d
                                                  ,players: c
@@ -162,15 +178,24 @@ Elm.GameTypes.make = function (_elm) {
                            ,PickUpPiece: PickUpPiece
                            ,PlacePiece: PlacePiece
                            ,StartGame: StartGame
+                           ,StartNewGame: StartNewGame
+                           ,MoveToMainMenu: MoveToMainMenu
+                           ,MoveToRemoteGameMenu: MoveToRemoteGameMenu
                            ,GameStarted: GameStarted
                            ,Pass: Pass
                            ,OpponentDisconnected: OpponentDisconnected
+                           ,CpuAction: CpuAction
                            ,NoAction: NoAction
                            ,ParseError: ParseError
-                           ,Start: Start
+                           ,StartSinglePlayer: StartSinglePlayer
+                           ,StartRemoteGameButton: StartRemoteGameButton
+                           ,StartTwoPlayerOnline: StartTwoPlayerOnline
+                           ,StartTwoPlayerHotseat: StartTwoPlayerHotseat
+                           ,StartNewGameButton: StartNewGameButton
                            ,BoardClick: BoardClick
                            ,PieceInHand: PieceInHand
                            ,PassButton: PassButton
+                           ,MainMenuButton: MainMenuButton
                            ,None: None};
    return _elm.GameTypes.values;
 };

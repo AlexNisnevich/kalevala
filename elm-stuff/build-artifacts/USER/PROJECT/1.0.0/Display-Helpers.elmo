@@ -1,0 +1,92 @@
+Elm.Display = Elm.Display || {};
+Elm.Display.Helpers = Elm.Display.Helpers || {};
+Elm.Display.Helpers.make = function (_elm) {
+   "use strict";
+   _elm.Display = _elm.Display || {};
+   _elm.Display.Helpers = _elm.Display.Helpers || {};
+   if (_elm.Display.Helpers.values)
+   return _elm.Display.Helpers.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Display.Helpers",
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Display$Constants = Elm.Display.Constants.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Piece = Elm.Piece.make(_elm);
+   var pieceToImage = F3(function (piece,
+   value,
+   tileSize) {
+      return function () {
+         var imgSize = _U.cmp(tileSize,
+         50) > 0 ? 100 : 50;
+         var imgPath = A2($Basics._op["++"],
+         "images/",
+         A2($Basics._op["++"],
+         $Basics.toString(imgSize),
+         A2($Basics._op["++"],
+         "/",
+         A2($Basics._op["++"],
+         $Piece.toString(piece),
+         A2($Basics._op["++"],
+         "-",
+         A2($Basics._op["++"],
+         value,
+         ".png"))))));
+         return A3($Graphics$Element.image,
+         $Basics.round(tileSize),
+         $Basics.round(tileSize),
+         imgPath);
+      }();
+   });
+   var withBorder = F3(function (_v0,
+   color,
+   elt) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return A2($Graphics$Element.flow,
+              $Graphics$Element.down,
+              _L.fromArray([$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
+                           $Graphics$Element.widthOf(elt) + _v0._0 * 2,
+                           _v0._1))
+                           ,A2($Graphics$Element.flow,
+                           $Graphics$Element.right,
+                           _L.fromArray([$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
+                                        _v0._0,
+                                        $Graphics$Element.heightOf(elt)))
+                                        ,elt
+                                        ,$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
+                                        _v0._0,
+                                        $Graphics$Element.heightOf(elt)))]))
+                           ,$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
+                           $Graphics$Element.widthOf(elt) + _v0._0 * 2,
+                           _v0._1))]));}
+         _U.badCase($moduleName,
+         "between lines 27 and 33");
+      }();
+   });
+   var withMargin = F2(function (_v4,
+   elt) {
+      return function () {
+         switch (_v4.ctor)
+         {case "_Tuple2":
+            return A3(withBorder,
+              {ctor: "_Tuple2"
+              ,_0: _v4._0
+              ,_1: _v4._1},
+              $Display$Constants.transparent,
+              elt);}
+         _U.badCase($moduleName,
+         "on line 23, column 25 to 58");
+      }();
+   });
+   _elm.Display.Helpers.values = {_op: _op
+                                 ,withMargin: withMargin
+                                 ,withBorder: withBorder
+                                 ,pieceToImage: pieceToImage};
+   return _elm.Display.Helpers.values;
+};

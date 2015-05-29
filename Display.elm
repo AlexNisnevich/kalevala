@@ -3,7 +3,7 @@ module Display where
 import Color exposing (..)
 import Dict
 import Graphics.Collage exposing (..)
-import Graphics.Element exposing (..)
+import Graphics.Element as Element exposing (..)
 import Graphics.Input exposing (..)
 import Graphics.Input.Field exposing (..)
 import List exposing (..)
@@ -13,131 +13,72 @@ import String
 import Text exposing (..)
 
 import GameTypes exposing (..)
+import Log
 import State
 import Piece
-import Board
 import Player
+import Game
 
-import Debug
+import Display.Board as Board
+import Display.Constants exposing (..)
+import Display.Helpers exposing (..)
 
--- Constants
-
-gameHeaderSize : Int
-gameHeaderSize = 100
-
-handPadding : Int
-handPadding = 10
-
-handTileSize : Float
-handTileSize = 100
-
-transparent : Color
-transparent = rgba 0 0 0 0.0
-
-transpGreen : Color
-transpGreen = rgba 0 255 0 0.5
-
--- Mailboxes
+{- Mailboxes -}
 
 clickMailbox : Mailbox ClickEvent
 clickMailbox = mailbox None
 
-gameTypeMailbox : Mailbox GameType
-gameTypeMailbox = mailbox HumanVsCpu
-
 playerNameMailbox : Mailbox Content
 playerNameMailbox = mailbox noContent
 
--- Helpers
+{- Top-level render methods -}
 
-getTotalBoardSize : WindowDims -> Int
-getTotalBoardSize (width, height) = height - gameHeaderSize
+render : State -> WindowDims -> Content -> Element
+render state dims playerName =
+  withMargin (gameMargin, gameMargin) <| renderGameArea state dims playerName
 
-getTileSizeFromBoardSize : Int -> WindowDims -> Float
-getTileSizeFromBoardSize boardSize dims = toFloat (getTotalBoardSize dims // boardSize)
+renderGameArea : State -> WindowDims -> Content -> Element
+renderGameArea state dims playerName = 
+  flow right [ renderBoard state dims
+             , spacer gameMargin 1
+             , renderSidebar state dims playerName
+             ]
 
-mouseToBoardPosition: MousePos -> State -> WindowDims -> Location
-mouseToBoardPosition (x', y') state dims =
-  let x = x'
-      y = (y' - gameHeaderSize)
-      boardSize = Board.getBoardSize state.board
-      tileSize = round <| getTileSizeFromBoardSize boardSize dims
-      offset = boardSize // 2
-      boardX = (x // tileSize) - offset
-      boardY = 0 - ((y // tileSize) - offset)
-  in (boardX, boardY)
+{- Board -}
 
-pieceToImage: Piece -> String -> Float -> Element
-pieceToImage piece value tileSize =
-  let imgSize = if tileSize > 75 then 100 else 50
-      imgPath = "images/" ++ toString imgSize ++ "/" ++ Piece.toString piece ++ "-" ++ value ++ ".png"
-  in
-    image (round tileSize) (round tileSize) imgPath
-
--- Display
-
-drawGrid : State -> Int -> WindowDims -> List Form
-drawGrid state boardSize dims =
-  let tileSize = getTileSizeFromBoardSize boardSize dims
-      totalSize = (toFloat boardSize) * tileSize
-      offset = tileSize / 2 - totalSize / 2
-      shape x y = 
-        let pos = (tileSize * (toFloat x) + offset, tileSize * (toFloat y) + offset)
-            imgSize = if tileSize > 75 then 100 else 50
-            tile = "images/" ++ toString imgSize ++ "/board" ++ toString ((x ^ 2 + 7 * y) % 6) ++ ".png"
-        in
-          move pos (toForm (image (round tileSize) (round tileSize) tile))
-  in
-    (concatMap (\x -> (map (\y -> shape x y) 
-                                 [0..(boardSize - 1)])) 
-               [0..(boardSize - 1)])
-
-drawPiece : (Location, Piece) -> Board -> Float -> Form
-drawPiece ((x', y'), piece) board tileSize =
-  let x = toFloat x' * tileSize
-      y = toFloat y' * tileSize
-      value = Board.getDisplayedTileValue (x',y') board
-  in
-    move (x, y) (toForm (pieceToImage piece value tileSize))
-
-drawAvailableOverlay : State -> Int -> WindowDims -> List Form
-drawAvailableOverlay state boardSize dims =
-  let tileSize = getTileSizeFromBoardSize boardSize dims
-      totalSize = (toFloat boardSize) * tileSize
-      offset = tileSize / 2 - totalSize / 2
-      shape x y = 
-        let pos = (tileSize * (toFloat x) + offset, tileSize * (toFloat y) + offset)
-            color = if (Board.isValidSquareToMove state (x, y) boardSize) then transpGreen else transparent
-        in
-          move pos (filled color (square tileSize))
-  in
-    (concatMap (\x -> (map (\y -> shape x y) 
-                                 [0..(boardSize - 1)])) 
-               [0..(boardSize - 1)])
-
-drawLastPlacedOutline : State -> Float -> List Form
-drawLastPlacedOutline state tileSize =
-  case state.lastPlaced of
-    Just (x, y) ->
-      let thick c = { defaultLine | color <- c, width <- 4}
-          lastPlacedColor = Player.toColor <| Player.next state.turn
-          lastPlacedOutline = move (tileSize * (toFloat x), tileSize * (toFloat y)) (outlined (thick lastPlacedColor) (square (tileSize + 4)))
-      in [lastPlacedOutline]
-    Nothing -> []
-
-renderBoard : State -> Int -> WindowDims -> Element
-renderBoard state boardSize dims =
-  let tileSize = getTileSizeFromBoardSize boardSize dims
+renderBoard : State -> WindowDims -> Element
+renderBoard state dims =
+  let boardSize = Board.getBoardSize state
+      tileSize = Board.getTileSizeFromBoardSize boardSize dims
       size = boardSize * (round tileSize) + 1
 
-      grid = drawGrid state boardSize dims
-      overlay = drawAvailableOverlay state boardSize dims
-      pieces = map (\p -> drawPiece p state.board tileSize) (Dict.toList state.board)
-      outline = drawLastPlacedOutline state tileSize
+      grid = Board.drawGrid state boardSize dims
+      overlay = Board.drawAvailableOverlay state boardSize dims
+      pieces = map (\p -> Board.drawPiece p state.board tileSize) (Dict.toList state.board)
+      outline = Board.drawLastPlacedOutline state tileSize
 
-      board = collage size size (grid ++ pieces ++ overlay ++ outline)
+      board = collage size size (grid ++ pieces ++ outline ++ overlay)
   in
     clickable (message clickMailbox.address BoardClick) board
+
+{- Sidebar -}
+
+renderSidebar : State -> WindowDims -> Content -> Element
+renderSidebar state (w, h) playerName =
+  let sidebarInnerPaddingHeight = (Board.getTotalBoardSize (w, h) - minSidebarHeight) // 2
+  in
+    flow down [ image sidebarWidth sidebarImageHeight "images/Other/Kalevala.png"
+              , flow down [ renderHand Red state
+                          , spacer 1 sidebarInnerPaddingHeight
+                          , flow right [ renderScoreArea state playerName |> withMargin (16, 11)
+                                       , renderRightArea state playerName |> withMargin (13, 19)
+                                       ]
+                          , spacer 1 sidebarInnerPaddingHeight
+                          , renderHand Blue state
+                          ] |> withMargin (12, 11)
+              ]
+
+{- Sidebar/Hand -}
 
 renderHand : Player -> State -> Element
 renderHand player state =
@@ -146,82 +87,185 @@ renderHand player state =
       hand = Player.getHand player state
       isPieceHeld idx = state.turn == player && state.heldPiece == Just idx
       pieceImage pieceStr = pieceToImage <| Piece.fromString pieceStr
-      pieceSize = (round handTileSize) + handPadding
-      makePiece idx pieceStr = pieceImage pieceStr (toString <| Piece.baseValue <| Piece.fromString pieceStr) handTileSize
+      pieceSize = handTileSize + handPadding
+      hiddenPiece = image handTileSize handTileSize "images/100/Tile_Back.png"
+      placeholderPiece = image handTileSize handTileSize "images/100/No_Tile.png" 
+      
+      combineWith elt1 elt2 = flow inward [elt1, elt2]
+      makePiece idx pieceStr = pieceImage pieceStr (toString <| Piece.baseValue <| Piece.fromString pieceStr) (toFloat handTileSize)
+                                  |> combineWith (if isPieceHeld idx 
+                                                  then (image handTileSize handTileSize ("images/100/"++(Player.toString state.turn)++"-H.png")) 
+                                                  else Element.empty)
                                   |> container pieceSize pieceSize middle
-                                  |> Graphics.Element.color (if isPieceHeld idx then (Player.toColor state.turn) else white)
                                   |> clickable (message clickMailbox.address (PieceInHand player idx))
-      playerHand = if isEmpty hand && state.gameState == Ongoing
-                   then [button (message clickMailbox.address PassButton) "Pass" |> container 100 100 middle]
-                   else indexedMap makePiece hand
-      hiddenPiece = image (round handTileSize) (round handTileSize) "images/100/back1.png"
-      cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
-      handContents = if playerType == Human
-                     then playerHand
-                     else cpuHand
-      handText = playerType |> toString
-                            |> (\t -> if t == "Human" then "Player" else t)
-                            |> String.toUpper
-                            |> fromString
-                            |> (if state.turn == player && State.isOngoing state then bold else identity)
-                            |> Text.color (Player.toColor player)
-                            |> leftAligned
-                            |> container 80 pieceSize middle
-      score = Dict.get p state.score |> withDefault 0
-                                     |> show
-                                     |> container 25 pieceSize midLeft
-      delta = Dict.get p state.delta |> withDefault ""
-                                     |> fromString
-                                     |> Text.height 9
-                                     |> leftAligned
-                                     |> container 20 pieceSize midLeft
-  in
-    flow right ([handText] ++ [score] ++ [delta] ++ handContents)
 
-render : State -> WindowDims -> GameType -> Content -> Element
-render state dims gameType playerName =
-  let boardSize = Board.getBoardSize state.board
-      totalBoardSize = getTotalBoardSize dims
-      tileSize = getTileSizeFromBoardSize boardSize dims
-      handGap = totalBoardSize - 2 * (round handTileSize) - (handPadding * 2)
-      withSpacing padding elt = spacer padding padding `beside` elt
-      rulesAreaWidth = 650
-      startButton = button (message clickMailbox.address Start) "New game"
-      gameTypeDropDown = dropDown (message gameTypeMailbox.address)
-                            [ ("Player vs AI", HumanVsCpu)
-                            , ("Player vs Player (hotseat)" , HumanVsHumanLocal)
-                            , ("Player vs Player (online)" , HumanVsHumanRemote)
-                            ]
-                         |> size 180 40
-      remoteGameStatusText = case state.gameState of
-                               WaitingForPlayers -> "Waiting for opponent ... "
-                               Connected opponentName -> "Connected to " ++ opponentName ++ " "
-                               Disconnected -> "Opponent disconnected "
-                               _ -> ""
-      remoteGameStatusArea = if state.gameState == NotStarted
-                             then field Graphics.Input.Field.defaultStyle (message playerNameMailbox.address) "Your name" playerName
-                             else container 150 40 middle <| centered <| Text.height 11 <| fromString <| remoteGameStatusText
-      statusArea = if gameType == HumanVsHumanRemote then remoteGameStatusArea else Graphics.Element.empty
-      deckSizeArea = if State.isOngoing state
-                     then container 70 40 middle <| centered <| Text.height 11 <| fromString <| "Deck: " ++ toString (length state.deck)
-                     else Graphics.Element.empty
-      controls = container rulesAreaWidth 40 middle <| flow right [ statusArea, gameTypeDropDown, startButton, deckSizeArea ]
-      logArea = state.log
-                |> take 5
-                |> (List.map (\(color, text) -> leftAligned <| Text.color color <| fromString text))
-                |> flow down
-      rightArea = flow down [ logArea
-                            , controls
-                            ]
+      playerHand = indexedMap makePiece hand
+      cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
+      dummyHand = repeat 5 (placeholderPiece |> container pieceSize pieceSize middle)
+
+      handContents = if | State.isNotStarted state -> dummyHand
+                        | playerType == Human      -> playerHand
+                        | otherwise                -> cpuHand
   in
-    flow down
-      [ size totalBoardSize gameHeaderSize (centered (Text.height 50 (typeface ["Rock Salt", "cursive"] (fromString "Kalevala"))))
-      , flow right [ renderBoard state boardSize dims
-                   , flow down [ renderHand Red state
-                               , spacer 1 5
-                               , withSpacing 10 (withSpacing 10 (container rulesAreaWidth (handGap - 10) midLeft rightArea) |> Graphics.Element.color gray)
-                               , spacer 1 5
-                               , renderHand Blue state
-                               ]
-                   ]
-      ]
+    flow right handContents |> container ((handTileSize + handPadding) * 5) (handTileSize + handPadding) topLeft
+
+{- Sidebar/ScoreArea -}
+
+renderScoreArea : State -> Content -> Element
+renderScoreArea state playerName = 
+  flow down [ playerHandText Red state playerName |> centered |> container 85 30 middle
+            , playerScoreText Red state |> centered |> container 85 40 middle |> withMargin (1, 6)
+            , renderDeck state |> withMargin (1, 14)
+            , playerScoreText Blue state |> centered |> container 85 40 middle |> withMargin (1, 6)
+            , playerHandText Blue state playerName |> centered |> container 85 30 middle
+            ]
+
+playerHandText : Player -> State -> Content -> Text
+playerHandText player state playerName =
+  let p = Player.toString player
+      playerType = withDefault Human (Dict.get p state.players)
+      text = case state.gameType of
+               HumanVsCpu -> case playerType of
+                               Human -> "Player"
+                               Cpu -> "CPU"
+               HumanVsHumanLocal -> toString player
+               HumanVsHumanRemote -> case playerType of
+                               Human -> playerName.string
+                               otherwise -> if State.isNotStarted state 
+                                            then "?"
+                                            else withDefault "?" (Dict.get p state.playerNames)
+  in 
+    text |> String.toUpper
+         |> fromString
+         |> (if state.turn == player && State.isOngoing state then bold else identity)
+         |> Text.color (Player.toColor player)
+         |> Text.height 20
+
+playerScoreText : Player -> State -> Text
+playerScoreText player state =
+  let p = Player.toString player
+  in
+    Dict.get p state.score |> withDefault 0
+                           |> toString
+                           |> fromString
+                           |> Text.color (Player.toColor player)
+                           |> Text.height 40
+
+renderDeck : State -> Element
+renderDeck state =
+  let deckSize = if | State.isNotStarted state -> length Game.deckContents
+                    | State.isOngoing state    -> length state.deck
+                    | otherwise                -> 0
+      deckSizeStr = "Deck : " ++ toString deckSize
+      deckImage = if | deckSize == 0 -> "images/Other/Deck-0.png"
+                     | deckSize == 1 -> "images/Other/Deck-1.png"
+                     | deckSize == 2 -> "images/Other/Deck-2.png"
+                     | deckSize == 3 -> "images/Other/Deck-3.png"
+                     | otherwise     -> "images/Other/Deck-4.png"
+  in 
+    flow down [ image 85 85 deckImage
+              , deckSizeStr |> fromString
+                            |> Text.height 14
+                            |> centered
+                            |> container 85 20 midBottom
+              ]
+
+{- Sidebar/RightArea -}
+
+renderRightArea : State -> Content -> Element
+renderRightArea state playerName = 
+  let content = if | State.isAtMainMenu state -> renderMenu
+                   | State.isSettingUpRemoteGame state -> renderRemoteSetupMenu playerName
+                   | otherwise -> case State.pieceHeld state of
+                                    Just piece -> renderPieceDescription piece
+                                    Nothing -> renderLog state
+  in 
+    content |> container 410 sidebarRightAreaHeight middle |> withBorder (2, 2) darkGrey
+
+renderMenu : Element
+renderMenu =
+  flow down [ customButton (message clickMailbox.address StartSinglePlayer) 
+                (image 196 46 "images/Buttons/Single_Player.png")
+                (image 196 46 "images/Buttons/Single_Player-H.png")
+                (image 196 46 "images/Buttons/Single_Player-H.png") |> withMargin (1, 3)
+            , customButton (message clickMailbox.address StartRemoteGameButton) 
+                (image 196 46 "images/Buttons/2P_Online.png")
+                (image 196 46 "images/Buttons/2P_Online-H.png")
+                (image 196 46 "images/Buttons/2P_Online-H.png") |> withMargin (1, 3)
+            , customButton (message clickMailbox.address StartTwoPlayerHotseat) 
+                (image 196 46 "images/Buttons/2P_Hotseat.png")
+                (image 196 46 "images/Buttons/2P_Hotseat-H.png")
+                (image 196 46 "images/Buttons/2P_Hotseat-H.png") |> withMargin (1, 3)
+            , customButton (message clickMailbox.address None) 
+                (image 196 46 "images/Buttons/View_Rules.png")
+                (image 196 46 "images/Buttons/View_Rules-H.png")
+                (image 196 46 "images/Buttons/View_Rules-H.png") |> Element.link "rules.html" |> withMargin (1, 3)
+            ] |> withMargin (95, 35)
+
+renderLog : State -> Element
+renderLog state =
+  let backAndRulesButtons = flow right [ customButton (message clickMailbox.address MainMenuButton) 
+                                           (image 196 46 "images/Buttons/Back.png")
+                                           (image 196 46 "images/Buttons/Back-H.png")
+                                           (image 196 46 "images/Buttons/Back-H.png")
+                                       , customButton (message clickMailbox.address None) 
+                                           (image 196 46 "images/Buttons/View_Rules.png")
+                                           (image 196 46 "images/Buttons/View_Rules-H.png")
+                                           (image 196 46 "images/Buttons/View_Rules-H.png") |> Element.link "rules.html"
+                                       ]
+      mainMenuAndNewGameButtons = flow right [ customButton (message clickMailbox.address MainMenuButton) 
+                                                 (image 196 46 "images/Buttons/Main_Menu.png")
+                                                 (image 196 46 "images/Buttons/Main_Menu-H.png")
+                                                 (image 196 46 "images/Buttons/Main_Menu-H.png")
+                                             , customButton (message clickMailbox.address StartNewGameButton) 
+                                                 (image 196 46 "images/Buttons/New_Game.png")
+                                                 (image 196 46 "images/Buttons/New_Game-H.png")
+                                                 (image 196 46 "images/Buttons/New_Game-H.png")
+                                             ]
+      passAndQuitButtons = flow right [ if Player.getType state.turn state == Human 
+                                        then customButton (message clickMailbox.address PassButton) 
+                                                (image 196 46 "images/Buttons/Pass_Turn.png")
+                                                (image 196 46 "images/Buttons/Pass_Turn-H.png")
+                                                (image 196 46 "images/Buttons/Pass_Turn-H.png")
+                                        else (image 196 46 "images/Buttons/Pass_Turn-H.png")
+                                      , customButton (message clickMailbox.address MainMenuButton) 
+                                          (image 196 46 "images/Buttons/Quit_Game.png")
+                                          (image 196 46 "images/Buttons/Quit_Game-H.png")
+                                          (image 196 46 "images/Buttons/Quit_Game-H.png")
+                                      ]
+      buttons = case state.gameState of
+                  WaitingForPlayers -> backAndRulesButtons
+                  GameOver          -> mainMenuAndNewGameButtons
+                  Disconnected      -> backAndRulesButtons
+                  otherwise         -> passAndQuitButtons
+  in
+    flow down [ Log.display (390, 168) state.log |> container 390 220 midTop
+              , buttons
+              ]
+
+renderPieceDescription : Piece -> Element
+renderPieceDescription piece = 
+  flow down [ spacer 1 10
+            , flow down [ Piece.toDisplayString piece |> fromString |> Text.height 40 |> leftAligned |> width 370 |> withMargin (5, 1)
+                        , Piece.flavorText piece |> fromString |> Text.height 16 |> leftAligned |> width 320 |> withMargin (30, 1)
+                        ] |> container 380 158 topLeft
+            , collage 380 46 [ traced {defaultLine | width <- 2, color <- darkGrey} <| segment (-170.0, 0.0) (170.0, 0.0) ]
+            , Piece.rulesText piece |> fromString |> Text.height 18 |> leftAligned |> width 360 |> container 360 80 topLeft |> withMargin (10, 1)
+            ]
+
+renderRemoteSetupMenu : Content -> Element
+renderRemoteSetupMenu playerName = 
+  flow down [ fromString "Enter player name : " |> centered |> container 380 100 midBottom
+            , spacer 1 20
+            , field Graphics.Input.Field.defaultStyle (message playerNameMailbox.address) "Your name" playerName 
+                |> container 380 110 midTop
+            , flow right [ customButton (message clickMailbox.address MainMenuButton) 
+                             (image 196 46 "images/Buttons/Back.png")
+                             (image 196 46 "images/Buttons/Back-H.png")
+                             (image 196 46 "images/Buttons/Back-H.png")
+                         , customButton (message clickMailbox.address StartTwoPlayerOnline) 
+                             (image 196 46 "images/Buttons/Confirm.png")
+                             (image 196 46 "images/Buttons/Confirm-H.png")
+                             (image 196 46 "images/Buttons/Confirm-H.png")
+                         ]
+            ]

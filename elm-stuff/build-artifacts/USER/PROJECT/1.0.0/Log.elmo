@@ -1,0 +1,79 @@
+Elm.Log = Elm.Log || {};
+Elm.Log.make = function (_elm) {
+   "use strict";
+   _elm.Log = _elm.Log || {};
+   if (_elm.Log.values)
+   return _elm.Log.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Log",
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Decorate = Elm.Decorate.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Player = Elm.Player.make(_elm),
+   $Text = Elm.Text.make(_elm);
+   var display = F2(function (_v0,
+   log) {
+      return function () {
+         switch (_v0.ctor)
+         {case "_Tuple2":
+            return function () {
+                 var widthMinusSidebar = _v0._0 - 16;
+                 var entryToElt = function (_v4) {
+                    return function () {
+                       switch (_v4.ctor)
+                       {case "_Tuple2":
+                          return $Graphics$Element.width(widthMinusSidebar)($Graphics$Element.leftAligned($Text.color(_v4._0)($Text.fromString(_v4._1))));}
+                       _U.badCase($moduleName,
+                       "on line 29, column 34 to 119");
+                    }();
+                 };
+                 var fullLog = $Graphics$Element.width(_v0._0)($Graphics$Element.flow($Graphics$Element.down)(A2($List.map,
+                 entryToElt,
+                 log)));
+                 return _U.cmp($Graphics$Element.heightOf(fullLog),
+                 _v0._1) > 0 ? $Decorate.decorate({ctor: "_Tuple2"
+                                                  ,_0: "style"
+                                                  ,_1: "overflow-y: scroll; overflow-x: hidden;"})($Graphics$Element.height(_v0._1)(fullLog)) : fullLog;
+              }();}
+         _U.badCase($moduleName,
+         "between lines 28 and 35");
+      }();
+   });
+   var addSystemMsg = F2(function (str,
+   log) {
+      return A2($List._op["::"],
+      {ctor: "_Tuple2"
+      ,_0: $Color.darkGrey
+      ,_1: str},
+      log);
+   });
+   var addPlayerMsg = F3(function (str,
+   player,
+   log) {
+      return A2($List._op["::"],
+      {ctor: "_Tuple2"
+      ,_0: $Player.toColor(player)
+      ,_1: str},
+      log);
+   });
+   var singleton = F2(function (str,
+   color) {
+      return _L.fromArray([{ctor: "_Tuple2"
+                           ,_0: color
+                           ,_1: str}]);
+   });
+   var empty = _L.fromArray([]);
+   _elm.Log.values = {_op: _op
+                     ,empty: empty
+                     ,singleton: singleton
+                     ,addPlayerMsg: addPlayerMsg
+                     ,addSystemMsg: addSystemMsg
+                     ,display: display};
+   return _elm.Log.values;
+};

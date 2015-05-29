@@ -1,6 +1,8 @@
 module State where
 
 import GameTypes exposing (..)
+import Helpers exposing (..)
+import Piece
 import Player
 
 {- Is the game ongoing in the given state? -}
@@ -11,6 +13,21 @@ isOngoing state =
     Connected opponentName -> True
     _ -> False
 
+isNotStarted : State -> Bool
+isNotStarted state =
+  case state.gameState of
+    NotStarted -> True
+    WaitingForPlayers -> True
+    _ -> False
+
+isAtMainMenu : State -> Bool
+isAtMainMenu state =
+  state.gameState == NotStarted && state.gameType /= HumanVsHumanRemote
+
+isSettingUpRemoteGame : State -> Bool
+isSettingUpRemoteGame state =
+  state.gameState == NotStarted && state.gameType == HumanVsHumanRemote
+
 {- Does neither player have any tiles left in the given state? -}
 isGameOver : State -> Bool
 isGameOver state =
@@ -19,9 +36,19 @@ isGameOver state =
 {- Must the current player pass in the given state? -}
 mustPass : State -> Bool
 mustPass state =
-  Player.noTilesInHand state.turn state
+  (isOngoing state) && Player.noTilesInHand state.turn state
 
 {- Is it currently a Human's turn (as opposed to a Cpu or Remote)? -}
 isPlayerTurn : State -> Bool
 isPlayerTurn state =
   (isOngoing state) && ((Player.getType state.turn state) == Human)
+
+pieceHeld : State -> Maybe Piece
+pieceHeld state =
+  case state.heldPiece of
+    Just idx ->
+      let hand = Player.getHand state.turn state
+          pieceStr = hand !! idx
+      in
+        Just (Piece.fromString pieceStr)
+    Nothing -> Nothing
