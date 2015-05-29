@@ -25,14 +25,7 @@ tryToPickUpPiece player idx state =
     then { state | heldPiece <- Nothing }
     else {state | heldPiece <- Just idx }
   else state
-
-{- Pass the current player's turn if it's the human player. Returns the new state. -}
-tryToPass : State -> State
-tryToPass state =
-  if Player.getType state.turn state == Human
-  then pass state
-  else state
-
+  
 {- Pass the current player's turn. Returns the new state. -}
 pass : State -> State
 pass state =

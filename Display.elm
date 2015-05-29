@@ -103,9 +103,9 @@ renderHand player state =
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
       dummyHand = repeat 5 (placeholderPiece |> container pieceSize pieceSize middle)
 
-      handContents = if | State.isNotStarted  -> dummyHand
-                        | playerType == Human -> playerHand
-                        | otherwise           -> cpuHand
+      handContents = if | State.isNotStarted state -> dummyHand
+                        | playerType == Human      -> playerHand
+                        | otherwise                -> cpuHand
   in
     flow right handContents |> container ((handTileSize + handPadding) * 5) (handTileSize + handPadding) topLeft
 
@@ -222,10 +222,12 @@ renderLog state =
                                                  (image 196 46 "images/Buttons/New_Game-H.png")
                                                  (image 196 46 "images/Buttons/New_Game-H.png")
                                              ]
-      passAndQuitButtons = flow right [ customButton (message clickMailbox.address PassButton) 
-                                          (image 196 46 "images/Buttons/Pass_Turn.png")
-                                          (image 196 46 "images/Buttons/Pass_Turn-H.png")
-                                          (image 196 46 "images/Buttons/Pass_Turn-H.png")
+      passAndQuitButtons = flow right [ if Player.getType state.turn state == Human 
+                                        then customButton (message clickMailbox.address PassButton) 
+                                                (image 196 46 "images/Buttons/Pass_Turn.png")
+                                                (image 196 46 "images/Buttons/Pass_Turn-H.png")
+                                                (image 196 46 "images/Buttons/Pass_Turn-H.png")
+                                        else (image 196 46 "images/Buttons/Pass_Turn-H.png")
                                       , customButton (message clickMailbox.address MainMenuButton) 
                                           (image 196 46 "images/Buttons/Quit_Game.png")
                                           (image 196 46 "images/Buttons/Quit_Game-H.png")

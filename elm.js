@@ -2902,7 +2902,7 @@ Elm.Display.make = function (_elm) {
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
-         var handContents = $Basics.not($State.isOngoing(state)) ? dummyHand : _U.eq(playerType,
+         var handContents = $State.isNotStarted(state) ? dummyHand : _U.eq(playerType,
          $GameTypes.Human) ? playerHand : cpuHand;
          return A3($Graphics$Element.container,
          ($Display$Constants.handTileSize + $Display$Constants.handPadding) * 5,
@@ -2992,7 +2992,10 @@ Elm.Display.make = function (_elm) {
       return function () {
          var passAndQuitButtons = A2($Graphics$Element.flow,
          $Graphics$Element.right,
-         _L.fromArray([A4($Graphics$Input.customButton,
+         _L.fromArray([_U.eq(A2($Player.getType,
+                      state.turn,
+                      state),
+                      $GameTypes.Human) ? A4($Graphics$Input.customButton,
                       A2($Signal.message,
                       clickMailbox.address,
                       $GameTypes.PassButton),
@@ -3007,7 +3010,10 @@ Elm.Display.make = function (_elm) {
                       A3($Graphics$Element.image,
                       196,
                       46,
-                      "images/Buttons/Pass_Turn-H.png"))
+                      "images/Buttons/Pass_Turn-H.png")) : A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Pass_Turn-H.png")
                       ,A4($Graphics$Input.customButton,
                       A2($Signal.message,
                       clickMailbox.address,
@@ -3758,7 +3764,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 106, column 88 to 112");
+               "on line 99, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -3862,7 +3868,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 84 and 87");
+            "between lines 77 and 80");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -3953,7 +3959,7 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 49 and 64");
+         "between lines 42 and 57");
       }();
    });
    var pass = function (state) {
@@ -3988,7 +3994,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 69 and 72");
+         "between lines 62 and 65");
       }() : state;
    };
    var startGame = F4(function (gameType,
@@ -4022,7 +4028,7 @@ Elm.Game.make = function (_elm) {
                                                           case "HumanVsHumanRemote":
                                                           return $GameTypes.Remote;}
                                                        _U.badCase($moduleName,
-                                                       "between lines 124 and 127");
+                                                       "between lines 117 and 120");
                                                     }()}]));
          var state = _U.eq(gameType,
          $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"
@@ -4061,12 +4067,6 @@ Elm.Game.make = function (_elm) {
          $GameTypes.Cpu) ? tryAIMove(state) : state;
       }();
    });
-   var tryToPass = function (state) {
-      return _U.eq(A2($Player.getType,
-      state.turn,
-      state),
-      $GameTypes.Human) ? pass(state) : state;
-   };
    var tryToPickUpPiece = F3(function (player,
    idx,
    state) {
@@ -4080,7 +4080,6 @@ Elm.Game.make = function (_elm) {
    });
    _elm.Game.values = {_op: _op
                       ,tryToPickUpPiece: tryToPickUpPiece
-                      ,tryToPass: tryToPass
                       ,pass: pass
                       ,tryMove: tryMove
                       ,tryAIMove: tryAIMove
@@ -6651,7 +6650,7 @@ Elm.Kalevala.make = function (_elm) {
                  state);
                case "ParseError": return state;
                case "Pass":
-               return $Game.tryToPass(state);
+               return $Game.pass(state);
                case "PickUpPiece":
                return A3($Game.tryToPickUpPiece,
                  action._0,

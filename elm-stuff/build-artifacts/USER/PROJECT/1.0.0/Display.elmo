@@ -294,7 +294,7 @@ Elm.Display.make = function (_elm) {
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
-         var handContents = $Basics.not($State.isOngoing(state)) ? dummyHand : _U.eq(playerType,
+         var handContents = $State.isNotStarted(state) ? dummyHand : _U.eq(playerType,
          $GameTypes.Human) ? playerHand : cpuHand;
          return A3($Graphics$Element.container,
          ($Display$Constants.handTileSize + $Display$Constants.handPadding) * 5,
@@ -384,7 +384,10 @@ Elm.Display.make = function (_elm) {
       return function () {
          var passAndQuitButtons = A2($Graphics$Element.flow,
          $Graphics$Element.right,
-         _L.fromArray([A4($Graphics$Input.customButton,
+         _L.fromArray([_U.eq(A2($Player.getType,
+                      state.turn,
+                      state),
+                      $GameTypes.Human) ? A4($Graphics$Input.customButton,
                       A2($Signal.message,
                       clickMailbox.address,
                       $GameTypes.PassButton),
@@ -399,7 +402,10 @@ Elm.Display.make = function (_elm) {
                       A3($Graphics$Element.image,
                       196,
                       46,
-                      "images/Buttons/Pass_Turn-H.png"))
+                      "images/Buttons/Pass_Turn-H.png")) : A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/Pass_Turn-H.png")
                       ,A4($Graphics$Input.customButton,
                       A2($Signal.message,
                       clickMailbox.address,

@@ -190,7 +190,7 @@ Elm.Kalevala.make = function (_elm) {
                  state);
                case "ParseError": return state;
                case "Pass":
-               return $Game.tryToPass(state);
+               return $Game.pass(state);
                case "PickUpPiece":
                return A3($Game.tryToPickUpPiece,
                  action._0,

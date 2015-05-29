@@ -48,7 +48,7 @@ performAction action state =
           StartGame gameType deck player playerName -> Game.startGame gameType deck player playerName
           StartNewGame deck player playerName -> Game.startGame state.gameType deck player playerName
           GameStarted deck startPlayer localPlayer opponentName -> Game.gameStarted deck startPlayer localPlayer opponentName state
-          Pass -> Game.tryToPass state
+          Pass -> Game.pass state
           MoveToMainMenu -> Game.startState
           MoveToRemoteGameMenu -> { state | gameType <- HumanVsHumanRemote, gameState <- NotStarted }
           OpponentDisconnected -> { state | gameState <- Disconnected
