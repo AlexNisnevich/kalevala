@@ -2904,9 +2904,12 @@ Elm.Display.make = function (_elm) {
          A2($Dict.get,p,state.players));
          var handContents = $Basics.not($State.isOngoing(state)) ? dummyHand : _U.eq(playerType,
          $GameTypes.Human) ? playerHand : cpuHand;
-         return A2($Graphics$Element.flow,
+         return A3($Graphics$Element.container,
+         ($Display$Constants.handTileSize + $Display$Constants.handPadding) * 5,
+         $Display$Constants.handTileSize + $Display$Constants.handPadding,
+         $Graphics$Element.topLeft)(A2($Graphics$Element.flow,
          $Graphics$Element.right,
-         handContents);
+         handContents));
       }();
    });
    var renderMenu = $Display$Helpers.withMargin({ctor: "_Tuple2"
@@ -3042,7 +3045,7 @@ Elm.Display.make = function (_elm) {
                       ,A4($Graphics$Input.customButton,
                       A2($Signal.message,
                       clickMailbox.address,
-                      $GameTypes.StartSinglePlayer),
+                      $GameTypes.StartNewGameButton),
                       A3($Graphics$Element.image,
                       196,
                       46,
@@ -3755,7 +3758,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 102, column 88 to 112");
+               "on line 106, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -3859,7 +3862,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 80 and 83");
+            "between lines 84 and 87");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -3950,19 +3953,16 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 45 and 60");
+         "between lines 49 and 64");
       }();
    });
    var pass = function (state) {
-      return _U.eq(A2($Player.getType,
-      state.turn,
-      state),
-      $GameTypes.Human) ? function () {
+      return function () {
          var logMsg = A2($Basics._op["++"],
          $Maybe.withDefault("")(A2($Dict.get,
          $Player.toString(state.turn),
          state.playerNames)),
-         " passed their turn.");
+         " passed.");
          return _U.replace([["turn"
                             ,$Player.next(state.turn)]
                            ,["log"
@@ -3971,7 +3971,7 @@ Elm.Game.make = function (_elm) {
                             state.turn,
                             state.log)]],
          state);
-      }() : state;
+      }();
    };
    var tryAIMove = function (state) {
       return _U.eq(A2($Player.getType,
@@ -3988,7 +3988,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 65 and 68");
+         "between lines 69 and 72");
       }() : state;
    };
    var startGame = F4(function (gameType,
@@ -4022,7 +4022,7 @@ Elm.Game.make = function (_elm) {
                                                           case "HumanVsHumanRemote":
                                                           return $GameTypes.Remote;}
                                                        _U.badCase($moduleName,
-                                                       "between lines 120 and 123");
+                                                       "between lines 124 and 127");
                                                     }()}]));
          var state = _U.eq(gameType,
          $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"
@@ -4061,6 +4061,12 @@ Elm.Game.make = function (_elm) {
          $GameTypes.Cpu) ? tryAIMove(state) : state;
       }();
    });
+   var tryToPass = function (state) {
+      return _U.eq(A2($Player.getType,
+      state.turn,
+      state),
+      $GameTypes.Human) ? pass(state) : state;
+   };
    var tryToPickUpPiece = F3(function (player,
    idx,
    state) {
@@ -4074,6 +4080,7 @@ Elm.Game.make = function (_elm) {
    });
    _elm.Game.values = {_op: _op
                       ,tryToPickUpPiece: tryToPickUpPiece
+                      ,tryToPass: tryToPass
                       ,pass: pass
                       ,tryMove: tryMove
                       ,tryAIMove: tryAIMove
@@ -4109,6 +4116,7 @@ Elm.GameTypes.make = function (_elm) {
              ,_1: b};
    });
    var BoardClick = {ctor: "BoardClick"};
+   var StartNewGameButton = {ctor: "StartNewGameButton"};
    var StartTwoPlayerHotseat = {ctor: "StartTwoPlayerHotseat"};
    var StartTwoPlayerOnline = {ctor: "StartTwoPlayerOnline"};
    var StartRemoteGameButton = {ctor: "StartRemoteGameButton"};
@@ -4133,6 +4141,14 @@ Elm.GameTypes.make = function (_elm) {
    });
    var MoveToRemoteGameMenu = {ctor: "MoveToRemoteGameMenu"};
    var MoveToMainMenu = {ctor: "MoveToMainMenu"};
+   var StartNewGame = F3(function (a,
+   b,
+   c) {
+      return {ctor: "StartNewGame"
+             ,_0: a
+             ,_1: b
+             ,_2: c};
+   });
    var StartGame = F4(function (a,
    b,
    c,
@@ -4256,6 +4272,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,PickUpPiece: PickUpPiece
                            ,PlacePiece: PlacePiece
                            ,StartGame: StartGame
+                           ,StartNewGame: StartNewGame
                            ,MoveToMainMenu: MoveToMainMenu
                            ,MoveToRemoteGameMenu: MoveToRemoteGameMenu
                            ,GameStarted: GameStarted
@@ -4268,6 +4285,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,StartRemoteGameButton: StartRemoteGameButton
                            ,StartTwoPlayerOnline: StartTwoPlayerOnline
                            ,StartTwoPlayerHotseat: StartTwoPlayerHotseat
+                           ,StartNewGameButton: StartNewGameButton
                            ,BoardClick: BoardClick
                            ,PieceInHand: PieceInHand
                            ,PassButton: PassButton
@@ -6506,7 +6524,7 @@ Elm.Kalevala.make = function (_elm) {
             return $GameTypes.ParseError(_v3._0);
             case "Ok": return _v3._0;}
          _U.badCase($moduleName,
-         "between lines 104 and 106");
+         "between lines 106 and 108");
       }();
    };
    var encode = function (action) {
@@ -6546,6 +6564,11 @@ Elm.Kalevala.make = function (_elm) {
                return A2($GameTypes.PickUpPiece,
                  clickType._0,
                  clickType._1);
+               case "StartNewGameButton":
+               return A3($GameTypes.StartNewGame,
+                 deck,
+                 $Player.random(seed),
+                 playerName.string);
                case "StartRemoteGameButton":
                return $GameTypes.MoveToRemoteGameMenu;
                case "StartSinglePlayer":
@@ -6567,7 +6590,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 72 and 83");
+            "between lines 73 and 85");
          }();
       }();
    });
@@ -6628,7 +6651,7 @@ Elm.Kalevala.make = function (_elm) {
                  state);
                case "ParseError": return state;
                case "Pass":
-               return $Game.pass(state);
+               return $Game.tryToPass(state);
                case "PickUpPiece":
                return A3($Game.tryToPickUpPiece,
                  action._0,
@@ -6646,9 +6669,15 @@ Elm.Kalevala.make = function (_elm) {
                  action._0,
                  action._1,
                  action._2,
-                 action._3);}
+                 action._3);
+               case "StartNewGame":
+               return A4($Game.startGame,
+                 state.gameType,
+                 action._0,
+                 action._1,
+                 action._2);}
             _U.badCase($moduleName,
-            "between lines 45 and 58");
+            "between lines 45 and 59");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]

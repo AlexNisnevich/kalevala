@@ -46,8 +46,9 @@ performAction action state =
           PickUpPiece player idx -> Game.tryToPickUpPiece player idx state
           PlacePiece mousePos dims -> Game.tryMove (mouseToBoardPosition mousePos state dims) state
           StartGame gameType deck player playerName -> Game.startGame gameType deck player playerName
+          StartNewGame deck player playerName -> Game.startGame state.gameType deck player playerName
           GameStarted deck startPlayer localPlayer opponentName -> Game.gameStarted deck startPlayer localPlayer opponentName state
-          Pass -> Game.pass state
+          Pass -> Game.tryToPass state
           MoveToMainMenu -> Game.startState
           MoveToRemoteGameMenu -> { state | gameType <- HumanVsHumanRemote, gameState <- NotStarted }
           OpponentDisconnected -> { state | gameState <- Disconnected
@@ -73,6 +74,7 @@ constructAction clickType seed mousePos dims playerName =
       StartSinglePlayer -> StartGame HumanVsCpu deck (Player.random seed) playerName.string
       StartTwoPlayerOnline -> StartGame HumanVsHumanRemote deck (Player.random seed) playerName.string
       StartTwoPlayerHotseat -> StartGame HumanVsHumanLocal deck (Player.random seed) playerName.string
+      StartNewGameButton -> StartNewGame deck (Player.random seed) playerName.string
       BoardClick -> PlacePiece mousePos dims
       PieceInHand player idx -> PickUpPiece player idx
       PassButton -> Pass

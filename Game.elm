@@ -26,16 +26,20 @@ tryToPickUpPiece player idx state =
     else {state | heldPiece <- Just idx }
   else state
 
+{- Pass the current player's turn if it's the human player. Returns the new state. -}
+tryToPass : State -> State
+tryToPass state =
+  if Player.getType state.turn state == Human
+  then pass state
+  else state
+
 {- Pass the current player's turn. Returns the new state. -}
 pass : State -> State
 pass state =
-  if Player.getType state.turn state == Human
-  then 
-    let logMsg = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " passed."
-    in
-      { state | turn <- Player.next state.turn
-              , log <- Log.addPlayerMsg logMsg state.turn state.log }
-  else state
+  let logMsg = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " passed."
+  in
+    { state | turn <- Player.next state.turn
+            , log <- Log.addPlayerMsg logMsg state.turn state.log }
 
 {- Move the currently held piece to the given location if possible. 
    Do nothing if there is no held piece or the move is invalid.

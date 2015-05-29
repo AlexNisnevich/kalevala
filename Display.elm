@@ -103,11 +103,11 @@ renderHand player state =
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
       dummyHand = repeat 5 (placeholderPiece |> container pieceSize pieceSize middle)
 
-      handContents = if | not (State.isOngoing state) -> dummyHand
-                        | playerType == Human         -> playerHand
-                        | otherwise                   -> cpuHand
+      handContents = if | State.isNotStarted  -> dummyHand
+                        | playerType == Human -> playerHand
+                        | otherwise           -> cpuHand
   in
-    flow right handContents
+    flow right handContents |> container ((handTileSize + handPadding) * 5) (handTileSize + handPadding) topLeft
 
 {- Sidebar/ScoreArea -}
 
@@ -217,7 +217,7 @@ renderLog state =
                                                  (image 196 46 "images/Buttons/Main_Menu.png")
                                                  (image 196 46 "images/Buttons/Main_Menu-H.png")
                                                  (image 196 46 "images/Buttons/Main_Menu-H.png")
-                                             , customButton (message clickMailbox.address StartSinglePlayer) 
+                                             , customButton (message clickMailbox.address StartNewGameButton) 
                                                  (image 196 46 "images/Buttons/New_Game.png")
                                                  (image 196 46 "images/Buttons/New_Game-H.png")
                                                  (image 196 46 "images/Buttons/New_Game-H.png")

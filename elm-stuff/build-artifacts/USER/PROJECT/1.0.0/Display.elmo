@@ -296,9 +296,12 @@ Elm.Display.make = function (_elm) {
          A2($Dict.get,p,state.players));
          var handContents = $Basics.not($State.isOngoing(state)) ? dummyHand : _U.eq(playerType,
          $GameTypes.Human) ? playerHand : cpuHand;
-         return A2($Graphics$Element.flow,
+         return A3($Graphics$Element.container,
+         ($Display$Constants.handTileSize + $Display$Constants.handPadding) * 5,
+         $Display$Constants.handTileSize + $Display$Constants.handPadding,
+         $Graphics$Element.topLeft)(A2($Graphics$Element.flow,
          $Graphics$Element.right,
-         handContents);
+         handContents));
       }();
    });
    var renderMenu = $Display$Helpers.withMargin({ctor: "_Tuple2"
@@ -434,7 +437,7 @@ Elm.Display.make = function (_elm) {
                       ,A4($Graphics$Input.customButton,
                       A2($Signal.message,
                       clickMailbox.address,
-                      $GameTypes.StartSinglePlayer),
+                      $GameTypes.StartNewGameButton),
                       A3($Graphics$Element.image,
                       196,
                       46,

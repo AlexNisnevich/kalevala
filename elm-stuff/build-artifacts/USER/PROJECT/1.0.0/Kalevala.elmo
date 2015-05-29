@@ -63,7 +63,7 @@ Elm.Kalevala.make = function (_elm) {
             return $GameTypes.ParseError(_v3._0);
             case "Ok": return _v3._0;}
          _U.badCase($moduleName,
-         "between lines 104 and 106");
+         "between lines 106 and 108");
       }();
    };
    var encode = function (action) {
@@ -103,6 +103,11 @@ Elm.Kalevala.make = function (_elm) {
                return A2($GameTypes.PickUpPiece,
                  clickType._0,
                  clickType._1);
+               case "StartNewGameButton":
+               return A3($GameTypes.StartNewGame,
+                 deck,
+                 $Player.random(seed),
+                 playerName.string);
                case "StartRemoteGameButton":
                return $GameTypes.MoveToRemoteGameMenu;
                case "StartSinglePlayer":
@@ -124,7 +129,7 @@ Elm.Kalevala.make = function (_elm) {
                  $Player.random(seed),
                  playerName.string);}
             _U.badCase($moduleName,
-            "between lines 72 and 83");
+            "between lines 73 and 85");
          }();
       }();
    });
@@ -185,7 +190,7 @@ Elm.Kalevala.make = function (_elm) {
                  state);
                case "ParseError": return state;
                case "Pass":
-               return $Game.pass(state);
+               return $Game.tryToPass(state);
                case "PickUpPiece":
                return A3($Game.tryToPickUpPiece,
                  action._0,
@@ -203,9 +208,15 @@ Elm.Kalevala.make = function (_elm) {
                  action._0,
                  action._1,
                  action._2,
-                 action._3);}
+                 action._3);
+               case "StartNewGame":
+               return A4($Game.startGame,
+                 state.gameType,
+                 action._0,
+                 action._1,
+                 action._2);}
             _U.badCase($moduleName,
-            "between lines 45 and 58");
+            "between lines 45 and 59");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]
