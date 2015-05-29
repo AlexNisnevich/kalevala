@@ -103,9 +103,9 @@ renderHand player state =
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
       dummyHand = repeat 5 (placeholderPiece |> container pieceSize pieceSize middle)
 
-      handContents = if | State.isNotStarted state -> dummyHand
-                        | playerType == Human      -> playerHand
-                        | otherwise                -> cpuHand
+      handContents = if | not (State.isOngoing state) -> dummyHand
+                        | playerType == Human         -> playerHand
+                        | otherwise                   -> cpuHand
   in
     flow right handContents
 

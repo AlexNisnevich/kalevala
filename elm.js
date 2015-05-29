@@ -2902,7 +2902,7 @@ Elm.Display.make = function (_elm) {
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
-         var handContents = $State.isNotStarted(state) ? dummyHand : _U.eq(playerType,
+         var handContents = $Basics.not($State.isOngoing(state)) ? dummyHand : _U.eq(playerType,
          $GameTypes.Human) ? playerHand : cpuHand;
          return A2($Graphics$Element.flow,
          $Graphics$Element.right,
@@ -3755,7 +3755,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 98, column 88 to 112");
+               "on line 102, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -3859,7 +3859,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 76 and 79");
+            "between lines 80 and 83");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -3950,16 +3950,28 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 41 and 56");
+         "between lines 45 and 60");
       }();
    });
    var pass = function (state) {
       return _U.eq(A2($Player.getType,
       state.turn,
       state),
-      $GameTypes.Human) ? _U.replace([["turn"
-                                      ,$Player.next(state.turn)]],
-      state) : state;
+      $GameTypes.Human) ? function () {
+         var logMsg = A2($Basics._op["++"],
+         $Maybe.withDefault("")(A2($Dict.get,
+         $Player.toString(state.turn),
+         state.playerNames)),
+         " passed their turn.");
+         return _U.replace([["turn"
+                            ,$Player.next(state.turn)]
+                           ,["log"
+                            ,A3($Log.addPlayerMsg,
+                            logMsg,
+                            state.turn,
+                            state.log)]],
+         state);
+      }() : state;
    };
    var tryAIMove = function (state) {
       return _U.eq(A2($Player.getType,
@@ -3976,7 +3988,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 61 and 64");
+         "between lines 65 and 68");
       }() : state;
    };
    var startGame = F4(function (gameType,
@@ -4010,7 +4022,7 @@ Elm.Game.make = function (_elm) {
                                                           case "HumanVsHumanRemote":
                                                           return $GameTypes.Remote;}
                                                        _U.badCase($moduleName,
-                                                       "between lines 116 and 119");
+                                                       "between lines 120 and 123");
                                                     }()}]));
          var state = _U.eq(gameType,
          $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"
@@ -6616,9 +6628,7 @@ Elm.Kalevala.make = function (_elm) {
                  state);
                case "ParseError": return state;
                case "Pass":
-               return _U.replace([["turn"
-                                  ,$Player.next(state.turn)]],
-                 state);
+               return $Game.pass(state);
                case "PickUpPiece":
                return A3($Game.tryToPickUpPiece,
                  action._0,

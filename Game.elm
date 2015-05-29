@@ -30,7 +30,11 @@ tryToPickUpPiece player idx state =
 pass : State -> State
 pass state =
   if Player.getType state.turn state == Human
-  then { state | turn <- Player.next state.turn }
+  then 
+    let logMsg = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " passed."
+    in
+      { state | turn <- Player.next state.turn
+              , log <- Log.addPlayerMsg logMsg state.turn state.log }
   else state
 
 {- Move the currently held piece to the given location if possible. 
