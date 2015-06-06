@@ -190,54 +190,24 @@ renderRightArea state playerName =
 
 renderMenu : Element
 renderMenu =
-  flow down [ customButton (message clickMailbox.address StartSinglePlayer) 
-                (image 196 46 "images/Buttons/Single_Player.png")
-                (image 196 46 "images/Buttons/Single_Player-H.png")
-                (image 196 46 "images/Buttons/Single_Player-H.png") |> withMargin (1, 3)
-            , customButton (message clickMailbox.address StartRemoteGameButton) 
-                (image 196 46 "images/Buttons/2P_Online.png")
-                (image 196 46 "images/Buttons/2P_Online-H.png")
-                (image 196 46 "images/Buttons/2P_Online-H.png") |> withMargin (1, 3)
-            , customButton (message clickMailbox.address StartTwoPlayerHotseat) 
-                (image 196 46 "images/Buttons/2P_Hotseat.png")
-                (image 196 46 "images/Buttons/2P_Hotseat-H.png")
-                (image 196 46 "images/Buttons/2P_Hotseat-H.png") |> withMargin (1, 3)
-            , customButton (message clickMailbox.address None) 
-                (image 196 46 "images/Buttons/View_Rules.png")
-                (image 196 46 "images/Buttons/View_Rules-H.png")
-                (image 196 46 "images/Buttons/View_Rules-H.png") |> Element.link "rules.html" |> withMargin (1, 3)
+  flow down [ startSinglePlayerButton |> withMargin (1, 3)
+            , startRemoteButton |> withMargin (1, 3)
+            , startHotseatButton |> withMargin (1, 3)
+            , viewRulesButton |> withMargin (1, 3)
             ] |> withMargin (95, 35)
 
 renderLog : State -> Element
 renderLog state =
-  let backAndRulesButtons = flow right [ customButton (message clickMailbox.address MainMenuButton) 
-                                           (image 196 46 "images/Buttons/Back.png")
-                                           (image 196 46 "images/Buttons/Back-H.png")
-                                           (image 196 46 "images/Buttons/Back-H.png")
-                                       , customButton (message clickMailbox.address None) 
-                                           (image 196 46 "images/Buttons/View_Rules.png")
-                                           (image 196 46 "images/Buttons/View_Rules-H.png")
-                                           (image 196 46 "images/Buttons/View_Rules-H.png") |> Element.link "rules.html"
+  let backAndRulesButtons = flow right [ backToMainMenuButton
+                                       , viewRulesButton
                                        ]
-      mainMenuAndNewGameButtons = flow right [ customButton (message clickMailbox.address MainMenuButton) 
-                                                 (image 196 46 "images/Buttons/Main_Menu.png")
-                                                 (image 196 46 "images/Buttons/Main_Menu-H.png")
-                                                 (image 196 46 "images/Buttons/Main_Menu-H.png")
-                                             , customButton (message clickMailbox.address StartNewGameButton) 
-                                                 (image 196 46 "images/Buttons/New_Game.png")
-                                                 (image 196 46 "images/Buttons/New_Game-H.png")
-                                                 (image 196 46 "images/Buttons/New_Game-H.png")
+      mainMenuAndNewGameButtons = flow right [ mainMenuButton
+                                             , newGameButton
                                              ]
       passAndQuitButtons = flow right [ if Player.getType state.turn state == Human 
-                                        then customButton (message clickMailbox.address PassButton) 
-                                                (image 196 46 "images/Buttons/Pass_Turn.png")
-                                                (image 196 46 "images/Buttons/Pass_Turn-H.png")
-                                                (image 196 46 "images/Buttons/Pass_Turn-H.png")
-                                        else (image 196 46 "images/Buttons/Pass_Turn-H.png")
-                                      , customButton (message clickMailbox.address MainMenuButton) 
-                                          (image 196 46 "images/Buttons/Quit_Game.png")
-                                          (image 196 46 "images/Buttons/Quit_Game-H.png")
-                                          (image 196 46 "images/Buttons/Quit_Game-H.png")
+                                        then passTurnButton
+                                        else passTurnDisabledButton
+                                      , quitGameButton
                                       ]
       buttons = case state.gameState of
                   WaitingForPlayers -> backAndRulesButtons
@@ -265,13 +235,61 @@ renderRemoteSetupMenu playerName =
             , spacer 1 20
             , field Graphics.Input.Field.defaultStyle (message playerNameMailbox.address) "Your name" playerName 
                 |> container 380 110 midTop
-            , flow right [ customButton (message clickMailbox.address MainMenuButton) 
-                             (image 196 46 "images/Buttons/Back.png")
-                             (image 196 46 "images/Buttons/Back-H.png")
-                             (image 196 46 "images/Buttons/Back-H.png")
-                         , customButton (message clickMailbox.address StartTwoPlayerOnline) 
-                             (image 196 46 "images/Buttons/Confirm.png")
-                             (image 196 46 "images/Buttons/Confirm-H.png")
-                             (image 196 46 "images/Buttons/Confirm-H.png")
+            , flow right [ backToMainMenuButton
+                         , startRemoteGameConfirmButton
                          ]
             ]
+
+{- Buttons -}
+
+startSinglePlayerButton = customButton (message clickMailbox.address StartSinglePlayer) 
+                            (image 196 46 "images/Buttons/Single_Player.png")
+                            (image 196 46 "images/Buttons/Single_Player-H.png")
+                            (image 196 46 "images/Buttons/Single_Player-H.png")
+
+startRemoteButton = customButton (message clickMailbox.address StartRemoteGameButton) 
+                          (image 196 46 "images/Buttons/2P_Online.png")
+                          (image 196 46 "images/Buttons/2P_Online-H.png")
+                          (image 196 46 "images/Buttons/2P_Online-H.png")
+
+startHotseatButton = customButton (message clickMailbox.address StartTwoPlayerHotseat) 
+                           (image 196 46 "images/Buttons/2P_Hotseat.png")
+                           (image 196 46 "images/Buttons/2P_Hotseat-H.png")
+                           (image 196 46 "images/Buttons/2P_Hotseat-H.png")
+
+viewRulesButton = customButton (message clickMailbox.address None) 
+                    (image 196 46 "images/Buttons/View_Rules.png")
+                    (image 196 46 "images/Buttons/View_Rules-H.png")
+                    (image 196 46 "images/Buttons/View_Rules-H.png") |> Element.link "rules.html"
+
+backToMainMenuButton = customButton (message clickMailbox.address MainMenuButton) 
+                         (image 196 46 "images/Buttons/Back.png")
+                         (image 196 46 "images/Buttons/Back-H.png")
+                         (image 196 46 "images/Buttons/Back-H.png")
+
+startRemoteGameConfirmButton = customButton (message clickMailbox.address StartTwoPlayerOnline) 
+                                 (image 196 46 "images/Buttons/Confirm.png")
+                                 (image 196 46 "images/Buttons/Confirm-H.png")
+                                 (image 196 46 "images/Buttons/Confirm-H.png")
+
+passTurnButton = customButton (message clickMailbox.address PassButton) 
+                   (image 196 46 "images/Buttons/Pass_Turn.png")
+                   (image 196 46 "images/Buttons/Pass_Turn-H.png")
+                   (image 196 46 "images/Buttons/Pass_Turn-H.png")
+
+passTurnDisabledButton = (image 196 46 "images/Buttons/Pass_Turn-H.png")
+
+quitGameButton = customButton (message clickMailbox.address MainMenuButton) 
+                   (image 196 46 "images/Buttons/Quit_Game.png")
+                   (image 196 46 "images/Buttons/Quit_Game-H.png")
+                   (image 196 46 "images/Buttons/Quit_Game-H.png")
+
+mainMenuButton = customButton (message clickMailbox.address MainMenuButton) 
+                   (image 196 46 "images/Buttons/Main_Menu.png")
+                   (image 196 46 "images/Buttons/Main_Menu-H.png")
+                   (image 196 46 "images/Buttons/Main_Menu-H.png")
+
+newGameButton = customButton (message clickMailbox.address StartNewGameButton) 
+                (image 196 46 "images/Buttons/New_Game.png")
+                (image 196 46 "images/Buttons/New_Game-H.png")
+                (image 196 46 "images/Buttons/New_Game-H.png")
