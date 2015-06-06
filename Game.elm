@@ -54,10 +54,11 @@ tryMove location state =
 
 {- Try to make a move for the AI player. 
    If no valid move is found, pass.
+   If it's not the AI player's turn, do nothing.
    Returns the new state. -}
 tryAIMove : State -> State
 tryAIMove state =
-  if Player.getType state.turn state == Cpu
+  if State.isOngoing state && Player.getType state.turn state == Cpu
   then
     case AI.getMove state of
       Just move -> tryMove move.location { state | heldPiece <- Just move.idx }

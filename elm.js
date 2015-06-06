@@ -3764,7 +3764,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 99, column 88 to 112");
+               "on line 100, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -3868,7 +3868,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 77 and 80");
+            "between lines 78 and 81");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -3959,7 +3959,7 @@ Elm.Game.make = function (_elm) {
               }();
             case "Nothing": return state;}
          _U.badCase($moduleName,
-         "between lines 42 and 57");
+         "between lines 42 and 58");
       }();
    });
    var pass = function (state) {
@@ -3980,7 +3980,7 @@ Elm.Game.make = function (_elm) {
       }();
    };
    var tryAIMove = function (state) {
-      return _U.eq(A2($Player.getType,
+      return $State.isOngoing(state) && _U.eq(A2($Player.getType,
       state.turn,
       state),
       $GameTypes.Cpu) ? function () {
@@ -3994,7 +3994,7 @@ Elm.Game.make = function (_elm) {
             case "Nothing":
             return pass(state);}
          _U.badCase($moduleName,
-         "between lines 62 and 65");
+         "between lines 63 and 66");
       }() : state;
    };
    var startGame = F4(function (gameType,
@@ -4028,7 +4028,7 @@ Elm.Game.make = function (_elm) {
                                                           case "HumanVsHumanRemote":
                                                           return $GameTypes.Remote;}
                                                        _U.badCase($moduleName,
-                                                       "between lines 117 and 120");
+                                                       "between lines 118 and 121");
                                                     }()}]));
          var state = _U.eq(gameType,
          $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"
