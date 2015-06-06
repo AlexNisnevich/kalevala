@@ -31,6 +31,12 @@ clickMailbox = mailbox None
 playerNameMailbox : Mailbox Content
 playerNameMailbox = mailbox noContent
 
+playerNameSignal : Signal Content
+playerNameSignal =
+  let limitTo6Chars content = { content | string <- String.left 6 content.string }
+  in 
+    Signal.map limitTo6Chars playerNameMailbox.signal
+
 {- Top-level render methods -}
 
 render : State -> WindowDims -> Content -> Element

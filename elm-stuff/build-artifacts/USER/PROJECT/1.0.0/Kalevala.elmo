@@ -135,7 +135,7 @@ Elm.Kalevala.make = function (_elm) {
    });
    var processClick = function (signal) {
       return function () {
-         var sampledPlayerName = $Signal.sampleOn(signal)($Display.playerNameMailbox.signal);
+         var sampledPlayerName = $Signal.sampleOn(signal)($Display.playerNameSignal);
          var sampledMouse = A2($Signal.sampleOn,
          signal,
          $Mouse.position);
@@ -286,7 +286,7 @@ Elm.Kalevala.make = function (_elm) {
       $Display.render,
       state),
       $Window.dimensions),
-      $Display.playerNameMailbox.signal);
+      $Display.playerNameSignal);
    }();
    _elm.Kalevala.values = {_op: _op
                           ,isRemoteSignal: isRemoteSignal

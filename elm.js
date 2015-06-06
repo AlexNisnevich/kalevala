@@ -2725,7 +2725,7 @@ Elm.Display.make = function (_elm) {
                     {case "Cpu": return "CPU";
                        case "Human": return "Player";}
                     _U.badCase($moduleName,
-                    "between lines 128 and 131");
+                    "between lines 134 and 137");
                  }();
                case "HumanVsHumanLocal":
                return $Basics.toString(player);
@@ -2741,7 +2741,7 @@ Elm.Display.make = function (_elm) {
                     state.playerNames));
                  }();}
             _U.badCase($moduleName,
-            "between lines 127 and 137");
+            "between lines 133 and 143");
          }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
          player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(text)))));
@@ -2786,6 +2786,18 @@ Elm.Display.make = function (_elm) {
                    playerName)))]));
    });
    var playerNameMailbox = $Signal.mailbox($Graphics$Input$Field.noContent);
+   var playerNameSignal = function () {
+      var limitTo6Chars = function (content) {
+         return _U.replace([["string"
+                            ,A2($String.left,
+                            6,
+                            content.string)]],
+         content);
+      };
+      return A2($Signal.map,
+      limitTo6Chars,
+      playerNameMailbox.signal);
+   }();
    var clickMailbox = $Signal.mailbox($GameTypes.None);
    var renderBoard = F2(function (state,
    dims) {
@@ -3186,7 +3198,7 @@ Elm.Display.make = function (_elm) {
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
-            "between lines 179 and 182");
+            "between lines 185 and 188");
          }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
@@ -3242,7 +3254,7 @@ Elm.Display.make = function (_elm) {
                                            state)])))]));
               }();}
          _U.badCase($moduleName,
-         "between lines 68 and 79");
+         "between lines 74 and 85");
       }();
    });
    var renderGameArea = F3(function (state,
@@ -3274,6 +3286,7 @@ Elm.Display.make = function (_elm) {
    _elm.Display.values = {_op: _op
                          ,clickMailbox: clickMailbox
                          ,playerNameMailbox: playerNameMailbox
+                         ,playerNameSignal: playerNameSignal
                          ,render: render
                          ,renderGameArea: renderGameArea
                          ,renderBoard: renderBoard
@@ -6595,7 +6608,7 @@ Elm.Kalevala.make = function (_elm) {
    });
    var processClick = function (signal) {
       return function () {
-         var sampledPlayerName = $Signal.sampleOn(signal)($Display.playerNameMailbox.signal);
+         var sampledPlayerName = $Signal.sampleOn(signal)($Display.playerNameSignal);
          var sampledMouse = A2($Signal.sampleOn,
          signal,
          $Mouse.position);
@@ -6746,7 +6759,7 @@ Elm.Kalevala.make = function (_elm) {
       $Display.render,
       state),
       $Window.dimensions),
-      $Display.playerNameMailbox.signal);
+      $Display.playerNameSignal);
    }();
    _elm.Kalevala.values = {_op: _op
                           ,isRemoteSignal: isRemoteSignal

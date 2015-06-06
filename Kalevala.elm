@@ -87,7 +87,7 @@ processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let seedSignal = (Random.initialSeed << round << fst) <~ Time.timestamp signal
       sampledMouse = sampleOn signal Mouse.position
-      sampledPlayerName = sampleOn signal <| playerNameMailbox.signal
+      sampledPlayerName = sampleOn signal <| playerNameSignal
   in
     constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ sampledPlayerName
 
@@ -140,4 +140,4 @@ main =
 
     state = foldp performAction Game.startState (mergeMany [playerAction, remoteAction, cpuAction])
   in
-    render <~ state ~ Window.dimensions ~ playerNameMailbox.signal
+    render <~ state ~ Window.dimensions ~ playerNameSignal
