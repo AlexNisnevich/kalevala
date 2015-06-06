@@ -2725,7 +2725,7 @@ Elm.Display.make = function (_elm) {
                     {case "Cpu": return "CPU";
                        case "Human": return "Player";}
                     _U.badCase($moduleName,
-                    "between lines 128 and 131");
+                    "between lines 132 and 135");
                  }();
                case "HumanVsHumanLocal":
                return $Basics.toString(player);
@@ -2741,7 +2741,7 @@ Elm.Display.make = function (_elm) {
                     state.playerNames));
                  }();}
             _U.badCase($moduleName,
-            "between lines 127 and 137");
+            "between lines 131 and 141");
          }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
          player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(text)))));
@@ -3186,7 +3186,7 @@ Elm.Display.make = function (_elm) {
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
-            "between lines 179 and 182");
+            "between lines 183 and 186");
          }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
@@ -3203,9 +3203,13 @@ Elm.Display.make = function (_elm) {
          switch (_v6.ctor)
          {case "_Tuple2":
             return function () {
-                 var sidebarInnerPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
-                                                                                   ,_0: _v6._0
-                                                                                   ,_1: _v6._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
+                 var sidebarPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
+                                                                              ,_0: _v6._0
+                                                                              ,_1: _v6._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
+                 var sidebarInnerPaddingHeight = A2($Basics.min,
+                 30,
+                 sidebarPaddingHeight * 2 / 3 | 0);
+                 var sidebarOuterPaddingHeight = sidebarPaddingHeight - sidebarInnerPaddingHeight;
                  return A2($Graphics$Element.flow,
                  $Graphics$Element.down,
                  _L.fromArray([A3($Graphics$Element.image,
@@ -3216,7 +3220,10 @@ Elm.Display.make = function (_elm) {
                                                            ,_0: 12
                                                            ,_1: 11})(A2($Graphics$Element.flow,
                               $Graphics$Element.down,
-                              _L.fromArray([A2(renderHand,
+                              _L.fromArray([A2($Graphics$Element.spacer,
+                                           1,
+                                           sidebarOuterPaddingHeight)
+                                           ,A2(renderHand,
                                            $GameTypes.Red,
                                            state)
                                            ,A2($Graphics$Element.spacer,
@@ -3239,10 +3246,13 @@ Elm.Display.make = function (_elm) {
                                            sidebarInnerPaddingHeight)
                                            ,A2(renderHand,
                                            $GameTypes.Blue,
-                                           state)])))]));
+                                           state)
+                                           ,A2($Graphics$Element.spacer,
+                                           1,
+                                           sidebarOuterPaddingHeight)])))]));
               }();}
          _U.badCase($moduleName,
-         "between lines 68 and 79");
+         "between lines 68 and 83");
       }();
    });
    var renderGameArea = F3(function (state,

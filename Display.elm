@@ -65,16 +65,20 @@ renderBoard state dims =
 
 renderSidebar : State -> WindowDims -> Content -> Element
 renderSidebar state (w, h) playerName =
-  let sidebarInnerPaddingHeight = (Board.getTotalBoardSize (w, h) - minSidebarHeight) // 2
+  let sidebarPaddingHeight = (Board.getTotalBoardSize (w, h) - minSidebarHeight) // 2
+      sidebarInnerPaddingHeight = min 30 (sidebarPaddingHeight * 2 // 3)
+      sidebarOuterPaddingHeight = sidebarPaddingHeight - sidebarInnerPaddingHeight
   in
     flow down [ image sidebarWidth sidebarImageHeight "images/Other/Kalevala.png"
-              , flow down [ renderHand Red state
+              , flow down [ spacer 1 sidebarOuterPaddingHeight
+                          , renderHand Red state
                           , spacer 1 sidebarInnerPaddingHeight
                           , flow right [ renderScoreArea state playerName |> withMargin (16, 11)
                                        , renderRightArea state playerName |> withMargin (13, 19)
                                        ]
                           , spacer 1 sidebarInnerPaddingHeight
                           , renderHand Blue state
+                          , spacer 1 sidebarOuterPaddingHeight
                           ] |> withMargin (12, 11)
               ]
 
