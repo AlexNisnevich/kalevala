@@ -2918,7 +2918,7 @@ Elm.Display.make = function (_elm) {
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
-         var handContents = $State.isNotStarted(state) ? dummyHand : _U.eq(playerType,
+         var handContents = $State.isNotStarted(state) || $State.isSwitchingPlayers(state) ? dummyHand : _U.eq(playerType,
          $GameTypes.Human) ? playerHand : cpuHand;
          return A3($Graphics$Element.container,
          ($Display$Constants.handTileSize + $Display$Constants.handPadding) * 5,
@@ -3079,6 +3079,22 @@ Elm.Display.make = function (_elm) {
    196,
    46,
    "images/Buttons/Pass_Turn-H.png"));
+   var switchButton = A4($Graphics$Input.customButton,
+   A2($Signal.message,
+   clickMailbox.address,
+   $GameTypes.SwitchButton),
+   A3($Graphics$Element.image,
+   196,
+   46,
+   "images/Buttons/Switch.png"),
+   A3($Graphics$Element.image,
+   196,
+   46,
+   "images/Buttons/Switch-H.png"),
+   A3($Graphics$Element.image,
+   196,
+   46,
+   "images/Buttons/Switch-H.png"));
    var quitGameButton = A4($Graphics$Input.customButton,
    A2($Signal.message,
    clickMailbox.address,
@@ -3129,6 +3145,15 @@ Elm.Display.make = function (_elm) {
    "images/Buttons/New_Game-H.png"));
    var renderLog = function (state) {
       return function () {
+         var currentTurnAndSwitchButton = A2($Graphics$Element.flow,
+         $Graphics$Element.right,
+         _L.fromArray([A3($Graphics$Element.container,
+                      196,
+                      48,
+                      $Graphics$Element.middle)($Graphics$Element.leftAligned($Text.height(18)($Text.color($Player.toColor(state.turn))($Text.fromString(A2($Basics._op["++"],
+                      $Player.toString(state.turn),
+                      "\'s Turn"))))))
+                      ,switchButton]));
          var passAndQuitButtons = A2($Graphics$Element.flow,
          $Graphics$Element.right,
          _L.fromArray([_U.eq(A2($Player.getType,
@@ -3153,7 +3178,7 @@ Elm.Display.make = function (_elm) {
                return mainMenuAndNewGameButtons;
                case "WaitingForPlayers":
                return backAndRulesButtons;}
-            return passAndQuitButtons;
+            return $State.isSwitchingPlayers(state) ? currentTurnAndSwitchButton : passAndQuitButtons;
          }();
          return A2($Graphics$Element.flow,
          $Graphics$Element.down,
@@ -3290,6 +3315,7 @@ Elm.Display.make = function (_elm) {
                          ,startRemoteGameConfirmButton: startRemoteGameConfirmButton
                          ,passTurnButton: passTurnButton
                          ,passTurnDisabledButton: passTurnDisabledButton
+                         ,switchButton: switchButton
                          ,quitGameButton: quitGameButton
                          ,mainMenuButton: mainMenuButton
                          ,newGameButton: newGameButton};
@@ -3906,7 +3932,7 @@ Elm.Game.make = function (_elm) {
          $Basics.toString(newScore),
          ")"))))))));
          return _U.replace([["turn"
-                            ,$Player.next(state.turn)]
+                            ,$State.nextPlayer(state)]
                            ,["board",newBoard]
                            ,["score"
                             ,A3($Dict.insert,
@@ -3941,7 +3967,7 @@ Elm.Game.make = function (_elm) {
          {case "Just":
             return function () {
                  var nextPlayerType = A2($Player.getType,
-                 $Player.next(state.turn),
+                 $State.nextPlayer(state),
                  state);
                  var hand = A2($Player.getHand,
                  state.turn,
@@ -3975,7 +4001,7 @@ Elm.Game.make = function (_elm) {
          state.playerNames)),
          " passed.");
          return _U.replace([["turn"
-                            ,$Player.next(state.turn)]
+                            ,$State.nextPlayer(state)]
                            ,["log"
                             ,A3($Log.addPlayerMsg,
                             logMsg,
@@ -4111,6 +4137,7 @@ Elm.GameTypes.make = function (_elm) {
    $Dict = Elm.Dict.make(_elm),
    $Maybe = Elm.Maybe.make(_elm);
    var None = {ctor: "None"};
+   var SwitchButton = {ctor: "SwitchButton"};
    var MainMenuButton = {ctor: "MainMenuButton"};
    var PassButton = {ctor: "PassButton"};
    var PieceInHand = F2(function (a,
@@ -4132,6 +4159,7 @@ Elm.GameTypes.make = function (_elm) {
    var NoAction = {ctor: "NoAction"};
    var CpuAction = {ctor: "CpuAction"};
    var OpponentDisconnected = {ctor: "OpponentDisconnected"};
+   var Switch = {ctor: "Switch"};
    var Pass = {ctor: "Pass"};
    var GameStarted = F4(function (a,
    b,
@@ -4230,6 +4258,10 @@ Elm.GameTypes.make = function (_elm) {
              ,location: c
              ,piece: a};
    });
+   var SwitchingTo = function (a) {
+      return {ctor: "SwitchingTo"
+             ,_0: a};
+   };
    var Blue = {ctor: "Blue"};
    var Red = {ctor: "Red"};
    var Remote = {ctor: "Remote"};
@@ -4262,6 +4294,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,Remote: Remote
                            ,Red: Red
                            ,Blue: Blue
+                           ,SwitchingTo: SwitchingTo
                            ,Move: Move
                            ,State: State
                            ,Vainamoinen: Vainamoinen
@@ -4281,6 +4314,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,MoveToRemoteGameMenu: MoveToRemoteGameMenu
                            ,GameStarted: GameStarted
                            ,Pass: Pass
+                           ,Switch: Switch
                            ,OpponentDisconnected: OpponentDisconnected
                            ,CpuAction: CpuAction
                            ,NoAction: NoAction
@@ -4294,6 +4328,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,PieceInHand: PieceInHand
                            ,PassButton: PassButton
                            ,MainMenuButton: MainMenuButton
+                           ,SwitchButton: SwitchButton
                            ,None: None};
    return _elm.GameTypes.values;
 };
@@ -6528,7 +6563,7 @@ Elm.Kalevala.make = function (_elm) {
             return $GameTypes.ParseError(_v3._0);
             case "Ok": return _v3._0;}
          _U.badCase($moduleName,
-         "between lines 106 and 108");
+         "between lines 108 and 110");
       }();
    };
    var encode = function (action) {
@@ -6592,9 +6627,11 @@ Elm.Kalevala.make = function (_elm) {
                  $GameTypes.HumanVsHumanRemote,
                  deck,
                  $Player.random(seed),
-                 playerName.string);}
+                 playerName.string);
+               case "SwitchButton":
+               return $GameTypes.Switch;}
             _U.badCase($moduleName,
-            "between lines 73 and 85");
+            "between lines 74 and 87");
          }();
       }();
    });
@@ -6679,9 +6716,13 @@ Elm.Kalevala.make = function (_elm) {
                  state.gameType,
                  action._0,
                  action._1,
-                 action._2);}
+                 action._2);
+               case "Switch":
+               return _U.replace([["turn"
+                                  ,$Player.next(state.turn)]],
+                 state);}
             _U.badCase($moduleName,
-            "between lines 45 and 59");
+            "between lines 45 and 60");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]
@@ -16306,18 +16347,22 @@ Elm.Player.make = function (_elm) {
          {case "Blue":
             return $GameTypes.Red;
             case "Red":
-            return $GameTypes.Blue;}
+            return $GameTypes.Blue;
+            case "SwitchingTo":
+            return player._0;}
          _U.badCase($moduleName,
-         "between lines 34 and 36");
+         "between lines 36 and 39");
       }();
    };
    var toString = function (player) {
       return function () {
          switch (player.ctor)
          {case "Blue": return "Blue";
-            case "Red": return "Red";}
+            case "Red": return "Red";
+            case "SwitchingTo":
+            return toString(player._0);}
          _U.badCase($moduleName,
-         "between lines 28 and 30");
+         "between lines 29 and 32");
       }();
    };
    var getType = F2(function (player,
@@ -16354,7 +16399,7 @@ Elm.Player.make = function (_elm) {
             case "red":
             return $GameTypes.Red;}
          _U.badCase($moduleName,
-         "between lines 20 and 24");
+         "between lines 21 and 25");
       }();
    };
    var toColor = function (player) {
@@ -16366,12 +16411,11 @@ Elm.Player.make = function (_elm) {
               131,
               193);
             case "Red":
-            return A3($Color.rgb,
-              217,
-              33,
-              32);}
+            return A3($Color.rgb,217,33,32);
+            case "SwitchingTo":
+            return toColor(player._0);}
          _U.badCase($moduleName,
-         "between lines 14 and 16");
+         "between lines 14 and 17");
       }();
    };
    _elm.Player.values = {_op: _op
@@ -17165,6 +17209,13 @@ Elm.State.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm);
+   var nextPlayer = function (state) {
+      return function () {
+         var next = $Player.next(state.turn);
+         return _U.eq(state.gameType,
+         $GameTypes.HumanVsHumanLocal) ? $GameTypes.SwitchingTo(next) : next;
+      }();
+   };
    var pieceHeld = function (state) {
       return function () {
          var _v0 = state.heldPiece;
@@ -17182,7 +17233,16 @@ Elm.State.make = function (_elm) {
             case "Nothing":
             return $Maybe.Nothing;}
          _U.badCase($moduleName,
-         "between lines 48 and 54");
+         "between lines 54 and 60");
+      }();
+   };
+   var isSwitchingPlayers = function (state) {
+      return function () {
+         var _v2 = state.turn;
+         switch (_v2.ctor)
+         {case "SwitchingTo":
+            return true;}
+         return false;
       }();
    };
    var isSettingUpRemoteGame = function (state) {
@@ -17197,8 +17257,8 @@ Elm.State.make = function (_elm) {
    };
    var isNotStarted = function (state) {
       return function () {
-         var _v2 = state.gameState;
-         switch (_v2.ctor)
+         var _v4 = state.gameState;
+         switch (_v4.ctor)
          {case "NotStarted": return true;
             case "WaitingForPlayers":
             return true;}
@@ -17207,8 +17267,8 @@ Elm.State.make = function (_elm) {
    };
    var isOngoing = function (state) {
       return function () {
-         var _v3 = state.gameState;
-         switch (_v3.ctor)
+         var _v5 = state.gameState;
+         switch (_v5.ctor)
          {case "Connected": return true;
             case "Ongoing": return true;}
          return false;
@@ -17222,9 +17282,9 @@ Elm.State.make = function (_elm) {
       state));
    };
    var mustPass = function (state) {
-      return isOngoing(state) && A2($Player.noTilesInHand,
+      return isOngoing(state) && ($Basics.not(isSwitchingPlayers(state)) && A2($Player.noTilesInHand,
       state.turn,
-      state);
+      state));
    };
    var isPlayerTurn = function (state) {
       return isOngoing(state) && _U.eq(A2($Player.getType,
@@ -17240,7 +17300,9 @@ Elm.State.make = function (_elm) {
                        ,isGameOver: isGameOver
                        ,mustPass: mustPass
                        ,isPlayerTurn: isPlayerTurn
-                       ,pieceHeld: pieceHeld};
+                       ,isSwitchingPlayers: isSwitchingPlayers
+                       ,pieceHeld: pieceHeld
+                       ,nextPlayer: nextPlayer};
    return _elm.State.values;
 };
 Elm.String = Elm.String || {};

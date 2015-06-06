@@ -109,9 +109,9 @@ renderHand player state =
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
       dummyHand = repeat 5 (placeholderPiece |> container pieceSize pieceSize middle)
 
-      handContents = if | State.isNotStarted state -> dummyHand
-                        | playerType == Human      -> playerHand
-                        | otherwise                -> cpuHand
+      handContents = if | State.isNotStarted state || State.isSwitchingPlayers state -> dummyHand
+                        | playerType == Human                                        -> playerHand
+                        | otherwise                                                  -> cpuHand
   in
     flow right handContents |> container ((handTileSize + handPadding) * 5) (handTileSize + handPadding) topLeft
 
@@ -209,11 +209,20 @@ renderLog state =
                                         else passTurnDisabledButton
                                       , quitGameButton
                                       ]
+      currentTurnAndSwitchButton = flow right [ Player.toString state.turn ++ "'s Turn" |> fromString
+                                                                                        |> Text.color (Player.toColor state.turn)
+                                                                                        |> Text.height 18
+                                                                                        |> leftAligned 
+                                                                                        |> container 196 48 middle
+                                              , switchButton
+                                              ]
       buttons = case state.gameState of
                   WaitingForPlayers -> backAndRulesButtons
                   GameOver          -> mainMenuAndNewGameButtons
                   Disconnected      -> backAndRulesButtons
-                  otherwise         -> passAndQuitButtons
+                  otherwise         -> if State.isSwitchingPlayers state
+                                       then currentTurnAndSwitchButton
+                                       else passAndQuitButtons
   in
     flow down [ Log.display (390, 168) state.log |> container 390 220 midTop
               , buttons
@@ -278,6 +287,11 @@ passTurnButton = customButton (message clickMailbox.address PassButton)
                    (image 196 46 "images/Buttons/Pass_Turn-H.png")
 
 passTurnDisabledButton = (image 196 46 "images/Buttons/Pass_Turn-H.png")
+
+switchButton = customButton (message clickMailbox.address SwitchButton) 
+                 (image 196 46 "images/Buttons/Switch.png")
+                 (image 196 46 "images/Buttons/Switch-H.png")
+                 (image 196 46 "images/Buttons/Switch-H.png")
 
 quitGameButton = customButton (message clickMailbox.address MainMenuButton) 
                    (image 196 46 "images/Buttons/Quit_Game.png")

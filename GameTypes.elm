@@ -21,6 +21,7 @@ type PlayerType = Human
 
 type Player = Red
             | Blue
+            | SwitchingTo Player
 
 type alias Move = { piece : Piece, idx : Int, location : Location }
 type alias Location = (Int, Int)
@@ -69,6 +70,7 @@ type Action = PickUpPiece Player Int
             | MoveToRemoteGameMenu
             | GameStarted Deck Player Player String -- represents a StartGame message sent from the server
             | Pass
+            | Switch
             | OpponentDisconnected
             | CpuAction
             | NoAction
@@ -83,4 +85,5 @@ type ClickEvent = StartSinglePlayer
                 | PieceInHand Player Int
                 | PassButton
                 | MainMenuButton
+                | SwitchButton
                 | None

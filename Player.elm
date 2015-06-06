@@ -14,6 +14,7 @@ toColor player =
   case player of
     Red -> Color.rgb 217 33 32
     Blue -> Color.rgb 70 131 193
+    SwitchingTo pl -> toColor pl
 
 fromString : String -> Player
 fromString str =
@@ -28,12 +29,14 @@ toString player =
   case player of
     Red -> "Red"
     Blue -> "Blue"
+    SwitchingTo pl -> toString pl
 
 next : Player -> Player
 next player =
   case player of
     Red -> Blue
     Blue -> Red
+    SwitchingTo pl -> pl
 
 getType : Player -> State -> PlayerType
 getType player state =

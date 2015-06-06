@@ -63,7 +63,7 @@ Elm.Kalevala.make = function (_elm) {
             return $GameTypes.ParseError(_v3._0);
             case "Ok": return _v3._0;}
          _U.badCase($moduleName,
-         "between lines 106 and 108");
+         "between lines 108 and 110");
       }();
    };
    var encode = function (action) {
@@ -127,9 +127,11 @@ Elm.Kalevala.make = function (_elm) {
                  $GameTypes.HumanVsHumanRemote,
                  deck,
                  $Player.random(seed),
-                 playerName.string);}
+                 playerName.string);
+               case "SwitchButton":
+               return $GameTypes.Switch;}
             _U.badCase($moduleName,
-            "between lines 73 and 85");
+            "between lines 74 and 87");
          }();
       }();
    });
@@ -214,9 +216,13 @@ Elm.Kalevala.make = function (_elm) {
                  state.gameType,
                  action._0,
                  action._1,
-                 action._2);}
+                 action._2);
+               case "Switch":
+               return _U.replace([["turn"
+                                  ,$Player.next(state.turn)]],
+                 state);}
             _U.badCase($moduleName,
-            "between lines 45 and 59");
+            "between lines 45 and 60");
          }();
          return $State.isGameOver(newState) ? _U.replace([["gameState"
                                                           ,$GameTypes.GameOver]

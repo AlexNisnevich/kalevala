@@ -310,7 +310,7 @@ Elm.Display.make = function (_elm) {
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
-         var handContents = $State.isNotStarted(state) ? dummyHand : _U.eq(playerType,
+         var handContents = $State.isNotStarted(state) || $State.isSwitchingPlayers(state) ? dummyHand : _U.eq(playerType,
          $GameTypes.Human) ? playerHand : cpuHand;
          return A3($Graphics$Element.container,
          ($Display$Constants.handTileSize + $Display$Constants.handPadding) * 5,
@@ -471,6 +471,22 @@ Elm.Display.make = function (_elm) {
    196,
    46,
    "images/Buttons/Pass_Turn-H.png"));
+   var switchButton = A4($Graphics$Input.customButton,
+   A2($Signal.message,
+   clickMailbox.address,
+   $GameTypes.SwitchButton),
+   A3($Graphics$Element.image,
+   196,
+   46,
+   "images/Buttons/Switch.png"),
+   A3($Graphics$Element.image,
+   196,
+   46,
+   "images/Buttons/Switch-H.png"),
+   A3($Graphics$Element.image,
+   196,
+   46,
+   "images/Buttons/Switch-H.png"));
    var quitGameButton = A4($Graphics$Input.customButton,
    A2($Signal.message,
    clickMailbox.address,
@@ -521,6 +537,15 @@ Elm.Display.make = function (_elm) {
    "images/Buttons/New_Game-H.png"));
    var renderLog = function (state) {
       return function () {
+         var currentTurnAndSwitchButton = A2($Graphics$Element.flow,
+         $Graphics$Element.right,
+         _L.fromArray([A3($Graphics$Element.container,
+                      196,
+                      48,
+                      $Graphics$Element.middle)($Graphics$Element.leftAligned($Text.height(18)($Text.color($Player.toColor(state.turn))($Text.fromString(A2($Basics._op["++"],
+                      $Player.toString(state.turn),
+                      "\'s Turn"))))))
+                      ,switchButton]));
          var passAndQuitButtons = A2($Graphics$Element.flow,
          $Graphics$Element.right,
          _L.fromArray([_U.eq(A2($Player.getType,
@@ -545,7 +570,7 @@ Elm.Display.make = function (_elm) {
                return mainMenuAndNewGameButtons;
                case "WaitingForPlayers":
                return backAndRulesButtons;}
-            return passAndQuitButtons;
+            return $State.isSwitchingPlayers(state) ? currentTurnAndSwitchButton : passAndQuitButtons;
          }();
          return A2($Graphics$Element.flow,
          $Graphics$Element.down,
@@ -682,6 +707,7 @@ Elm.Display.make = function (_elm) {
                          ,startRemoteGameConfirmButton: startRemoteGameConfirmButton
                          ,passTurnButton: passTurnButton
                          ,passTurnDisabledButton: passTurnDisabledButton
+                         ,switchButton: switchButton
                          ,quitGameButton: quitGameButton
                          ,mainMenuButton: mainMenuButton
                          ,newGameButton: newGameButton};

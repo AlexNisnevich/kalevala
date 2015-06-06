@@ -36,12 +36,18 @@ isGameOver state =
 {- Must the current player pass in the given state? -}
 mustPass : State -> Bool
 mustPass state =
-  (isOngoing state) && Player.noTilesInHand state.turn state
+  (isOngoing state) && (not <| isSwitchingPlayers state) && Player.noTilesInHand state.turn state
 
 {- Is it currently a Human's turn (as opposed to a Cpu or Remote)? -}
 isPlayerTurn : State -> Bool
 isPlayerTurn state =
   (isOngoing state) && ((Player.getType state.turn state) == Human)
+
+isSwitchingPlayers : State -> Bool
+isSwitchingPlayers state =
+  case state.turn of
+    SwitchingTo _ -> True
+    _ -> False
 
 pieceHeld : State -> Maybe Piece
 pieceHeld state =
@@ -52,3 +58,11 @@ pieceHeld state =
       in
         Just (Piece.fromString pieceStr)
     Nothing -> Nothing
+
+nextPlayer : State -> Player
+nextPlayer state = 
+  let next = Player.next state.turn
+  in
+    if state.gameType == HumanVsHumanLocal
+    then SwitchingTo next
+    else next

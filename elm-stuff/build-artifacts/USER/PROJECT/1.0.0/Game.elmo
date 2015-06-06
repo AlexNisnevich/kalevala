@@ -230,7 +230,7 @@ Elm.Game.make = function (_elm) {
          $Basics.toString(newScore),
          ")"))))))));
          return _U.replace([["turn"
-                            ,$Player.next(state.turn)]
+                            ,$State.nextPlayer(state)]
                            ,["board",newBoard]
                            ,["score"
                             ,A3($Dict.insert,
@@ -265,7 +265,7 @@ Elm.Game.make = function (_elm) {
          {case "Just":
             return function () {
                  var nextPlayerType = A2($Player.getType,
-                 $Player.next(state.turn),
+                 $State.nextPlayer(state),
                  state);
                  var hand = A2($Player.getHand,
                  state.turn,
@@ -299,7 +299,7 @@ Elm.Game.make = function (_elm) {
          state.playerNames)),
          " passed.");
          return _U.replace([["turn"
-                            ,$Player.next(state.turn)]
+                            ,$State.nextPlayer(state)]
                            ,["log"
                             ,A3($Log.addPlayerMsg,
                             logMsg,

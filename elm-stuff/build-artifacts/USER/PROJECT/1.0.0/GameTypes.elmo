@@ -13,6 +13,7 @@ Elm.GameTypes.make = function (_elm) {
    $Dict = Elm.Dict.make(_elm),
    $Maybe = Elm.Maybe.make(_elm);
    var None = {ctor: "None"};
+   var SwitchButton = {ctor: "SwitchButton"};
    var MainMenuButton = {ctor: "MainMenuButton"};
    var PassButton = {ctor: "PassButton"};
    var PieceInHand = F2(function (a,
@@ -34,6 +35,7 @@ Elm.GameTypes.make = function (_elm) {
    var NoAction = {ctor: "NoAction"};
    var CpuAction = {ctor: "CpuAction"};
    var OpponentDisconnected = {ctor: "OpponentDisconnected"};
+   var Switch = {ctor: "Switch"};
    var Pass = {ctor: "Pass"};
    var GameStarted = F4(function (a,
    b,
@@ -132,6 +134,10 @@ Elm.GameTypes.make = function (_elm) {
              ,location: c
              ,piece: a};
    });
+   var SwitchingTo = function (a) {
+      return {ctor: "SwitchingTo"
+             ,_0: a};
+   };
    var Blue = {ctor: "Blue"};
    var Red = {ctor: "Red"};
    var Remote = {ctor: "Remote"};
@@ -164,6 +170,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,Remote: Remote
                            ,Red: Red
                            ,Blue: Blue
+                           ,SwitchingTo: SwitchingTo
                            ,Move: Move
                            ,State: State
                            ,Vainamoinen: Vainamoinen
@@ -183,6 +190,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,MoveToRemoteGameMenu: MoveToRemoteGameMenu
                            ,GameStarted: GameStarted
                            ,Pass: Pass
+                           ,Switch: Switch
                            ,OpponentDisconnected: OpponentDisconnected
                            ,CpuAction: CpuAction
                            ,NoAction: NoAction
@@ -196,6 +204,7 @@ Elm.GameTypes.make = function (_elm) {
                            ,PieceInHand: PieceInHand
                            ,PassButton: PassButton
                            ,MainMenuButton: MainMenuButton
+                           ,SwitchButton: SwitchButton
                            ,None: None};
    return _elm.GameTypes.values;
 };
