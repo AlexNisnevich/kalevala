@@ -15,6 +15,31 @@ Elm.State.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm);
+   var endStateMsg = function (state) {
+      return function () {
+         var blueP = $Player.toString($GameTypes.Blue);
+         var blueScore = A2($Helpers.getU,
+         blueP,
+         state.score);
+         var redP = $Player.toString($GameTypes.Red);
+         var redScore = A2($Helpers.getU,
+         redP,
+         state.score);
+         return _U.eq(redScore,
+         blueScore) ? "Tie game!" : _U.cmp(redScore,
+         blueScore) > 0 ? A2($Basics._op["++"],
+         A2($Helpers.getU,
+         redP,
+         state.playerNames),
+         " wins!") : _U.cmp(redScore,
+         blueScore) < 0 ? A2($Basics._op["++"],
+         A2($Helpers.getU,
+         blueP,
+         state.playerNames),
+         " wins!") : _U.badIf($moduleName,
+         "between lines 77 and 79");
+      }();
+   };
    var nextPlayer = function (state) {
       return function () {
          var next = $Player.next(state.turn);
@@ -108,6 +133,7 @@ Elm.State.make = function (_elm) {
                        ,isPlayerTurn: isPlayerTurn
                        ,isSwitchingPlayers: isSwitchingPlayers
                        ,pieceHeld: pieceHeld
-                       ,nextPlayer: nextPlayer};
+                       ,nextPlayer: nextPlayer
+                       ,endStateMsg: endStateMsg};
    return _elm.State.values;
 };

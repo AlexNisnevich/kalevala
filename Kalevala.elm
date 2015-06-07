@@ -59,8 +59,7 @@ performAction action state =
           ParseError e -> state
   in
     if | isGameOver newState -> { newState | gameState <- GameOver
-                                           , log <- Log.addSystemMsg "Game over!" newState.log }
-       | mustPass newState -> Game.pass newState
+                                           , log <- Log.addSystemMsg ("Game over!" ++ State.endStateMsg newState) newState.log }
        | otherwise -> newState
 
 {- Turn a ClickEvent into an Action -}

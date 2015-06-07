@@ -1,5 +1,6 @@
 module Helpers where
 
+import Dict
 import List exposing (..)
 import Random exposing (..)
 import Signal
@@ -10,11 +11,12 @@ getOrFail maybe =
   case maybe of
     Just something -> something
 
-{- Unsafe list methods -}
+{- Unsafe List and Dict methods -}
 headU l = getOrFail <| head l
 tailU l = getOrFail <| tail l
 maximumU l = getOrFail <| maximum l
 minimumU l = getOrFail <| minimum l
+getU key dict = getOrFail <| Dict.get key dict
 
 (!!) : List a -> Int -> a
 (!!) list idx = headU (drop idx list)

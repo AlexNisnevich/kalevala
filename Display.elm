@@ -109,9 +109,14 @@ renderHand player state =
       cpuHand = map (\x -> hiddenPiece |> container pieceSize pieceSize middle) hand
       dummyHand = repeat 5 (placeholderPiece |> container pieceSize pieceSize middle)
 
-      handContents = if | State.isNotStarted state || State.isSwitchingPlayers state -> dummyHand
-                        | playerType == Human                                        -> playerHand
-                        | otherwise                                                  -> cpuHand
+      isHandShown = case state.gameType of
+                      HumanVsCpu -> playerType == Human
+                      HumanVsHumanLocal -> state.turn == player
+                      HumanVsHumanRemote -> playerType == Human
+
+      handContents = if | State.isNotStarted state -> dummyHand
+                        | isHandShown              -> playerHand
+                        | otherwise                -> cpuHand
   in
     flow right handContents |> container ((handTileSize + handPadding) * 5) (handTileSize + handPadding) topLeft
 

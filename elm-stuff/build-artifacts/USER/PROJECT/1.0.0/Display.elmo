@@ -121,7 +121,7 @@ Elm.Display.make = function (_elm) {
                     {case "Cpu": return "CPU";
                        case "Human": return "Player";}
                     _U.badCase($moduleName,
-                    "between lines 134 and 137");
+                    "between lines 139 and 142");
                  }();
                case "HumanVsHumanLocal":
                return $Basics.toString(player);
@@ -137,7 +137,7 @@ Elm.Display.make = function (_elm) {
                     state.playerNames));
                  }();}
             _U.badCase($moduleName,
-            "between lines 133 and 143");
+            "between lines 138 and 148");
          }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
          player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(text)))));
@@ -310,8 +310,21 @@ Elm.Display.make = function (_elm) {
          var playerType = A2($Maybe.withDefault,
          $GameTypes.Human,
          A2($Dict.get,p,state.players));
-         var handContents = $State.isNotStarted(state) || $State.isSwitchingPlayers(state) ? dummyHand : _U.eq(playerType,
-         $GameTypes.Human) ? playerHand : cpuHand;
+         var isHandShown = function () {
+            var _v3 = state.gameType;
+            switch (_v3.ctor)
+            {case "HumanVsCpu":
+               return _U.eq(playerType,
+                 $GameTypes.Human);
+               case "HumanVsHumanLocal":
+               return _U.eq(state.turn,player);
+               case "HumanVsHumanRemote":
+               return _U.eq(playerType,
+                 $GameTypes.Human);}
+            _U.badCase($moduleName,
+            "between lines 112 and 117");
+         }();
+         var handContents = $State.isNotStarted(state) ? dummyHand : isHandShown ? playerHand : cpuHand;
          return A3($Graphics$Element.container,
          ($Display$Constants.handTileSize + $Display$Constants.handPadding) * 5,
          $Display$Constants.handTileSize + $Display$Constants.handPadding,
@@ -562,8 +575,8 @@ Elm.Display.make = function (_elm) {
          _L.fromArray([backToMainMenuButton
                       ,viewRulesButton]));
          var buttons = function () {
-            var _v3 = state.gameState;
-            switch (_v3.ctor)
+            var _v4 = state.gameState;
+            switch (_v4.ctor)
             {case "Disconnected":
                return backAndRulesButtons;
                case "GameOver":
@@ -589,14 +602,14 @@ Elm.Display.make = function (_elm) {
    playerName) {
       return function () {
          var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : function () {
-            var _v4 = $State.pieceHeld(state);
-            switch (_v4.ctor)
+            var _v5 = $State.pieceHeld(state);
+            switch (_v5.ctor)
             {case "Just":
-               return renderPieceDescription(_v4._0);
+               return renderPieceDescription(_v5._0);
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
-            "between lines 185 and 188");
+            "between lines 190 and 193");
          }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
@@ -607,15 +620,15 @@ Elm.Display.make = function (_elm) {
       }();
    });
    var renderSidebar = F3(function (state,
-   _v6,
+   _v7,
    playerName) {
       return function () {
-         switch (_v6.ctor)
+         switch (_v7.ctor)
          {case "_Tuple2":
             return function () {
                  var sidebarInnerPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
-                                                                                   ,_0: _v6._0
-                                                                                   ,_1: _v6._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
+                                                                                   ,_0: _v7._0
+                                                                                   ,_1: _v7._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
                  return A2($Graphics$Element.flow,
                  $Graphics$Element.down,
                  _L.fromArray([A3($Graphics$Element.image,
