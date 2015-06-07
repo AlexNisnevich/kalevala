@@ -3818,7 +3818,7 @@ Elm.Game.make = function (_elm) {
                   return $Basics.not(_U.eq(_v0._1,
                     "Kullervo"));}
                _U.badCase($moduleName,
-               "on line 100, column 88 to 112");
+               "on line 106, column 88 to 112");
             }();
          },
          deckWithIndices)),
@@ -3898,6 +3898,11 @@ Elm.Game.make = function (_elm) {
    var makeMove = F2(function (move,
    state) {
       return function () {
+         var leadChangeText = A2($Basics._op["++"],
+         A2($Helpers.getU,
+         $Player.toString(state.turn),
+         state.playerNames),
+         " took the lead!");
          var existingTile = A2($Dict.get,
          move.location,
          state.board);
@@ -3922,7 +3927,7 @@ Elm.Game.make = function (_elm) {
                case "Nothing":
                return handWithDrawnTile;}
             _U.badCase($moduleName,
-            "between lines 78 and 81");
+            "between lines 79 and 83");
          }();
          var newBoard = A3($Dict.insert,
          move.location,
@@ -3936,9 +3941,9 @@ Elm.Game.make = function (_elm) {
          p,
          state.score)) + delta;
          var logText = A2($Basics._op["++"],
-         $Maybe.withDefault("")(A2($Dict.get,
+         A2($Helpers.getU,
          $Player.toString(state.turn),
-         state.playerNames)),
+         state.playerNames),
          A2($Basics._op["++"],
          " placed ",
          A2($Basics._op["++"],
@@ -3954,14 +3959,25 @@ Elm.Game.make = function (_elm) {
          A2($Basics._op["++"],
          $Basics.toString(newScore),
          ")"))))))));
+         var newScores = A3($Dict.insert,
+         p,
+         newScore,
+         state.score);
+         var newLog = _U.eq($State.leadingPlayer(_U.replace([["score"
+                                                             ,newScores]],
+         state)),
+         $Maybe.Just(state.turn)) && !_U.eq($State.leadingPlayer(state),
+         $Maybe.Just(state.turn)) ? A2($Log.addPlayerMsg,
+         leadChangeText,
+         state.turn)(A2($Log.addPlayerMsg,
+         logText,
+         state.turn)(state.log)) : A2($Log.addPlayerMsg,
+         logText,
+         state.turn)(state.log);
          return _U.replace([["turn"
                             ,$State.nextPlayer(state)]
                            ,["board",newBoard]
-                           ,["score"
-                            ,A3($Dict.insert,
-                            p,
-                            newScore,
-                            state.score)]
+                           ,["score",newScores]
                            ,["deck"
                             ,A2($List.drop,1,state.deck)]
                            ,["hands"
@@ -3974,11 +3990,7 @@ Elm.Game.make = function (_elm) {
                             ,$Maybe.Just(move.location)]
                            ,["lastPlacedPlayer"
                             ,$Maybe.Just(state.turn)]
-                           ,["log"
-                            ,A3($Log.addPlayerMsg,
-                            logText,
-                            state.turn,
-                            state.log)]],
+                           ,["log",newLog]],
          state);
       }();
    });
@@ -4082,7 +4094,7 @@ Elm.Game.make = function (_elm) {
                                                           case "HumanVsHumanRemote":
                                                           return $GameTypes.Remote;}
                                                        _U.badCase($moduleName,
-                                                       "between lines 118 and 121");
+                                                       "between lines 124 and 127");
                                                     }()}]));
          var state = _U.eq(gameType,
          $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"
@@ -17244,27 +17256,38 @@ Elm.State.make = function (_elm) {
    $Player = Elm.Player.make(_elm);
    var endStateMsg = function (state) {
       return function () {
-         var blueP = $Player.toString($GameTypes.Blue);
          var blueScore = A2($Helpers.getU,
-         blueP,
+         "Blue",
          state.score);
-         var redP = $Player.toString($GameTypes.Red);
          var redScore = A2($Helpers.getU,
-         redP,
+         "Red",
          state.score);
          return _U.eq(redScore,
          blueScore) ? "Tie game!" : _U.cmp(redScore,
          blueScore) > 0 ? A2($Basics._op["++"],
          A2($Helpers.getU,
-         redP,
+         "Red",
          state.playerNames),
          " wins!") : _U.cmp(redScore,
          blueScore) < 0 ? A2($Basics._op["++"],
          A2($Helpers.getU,
-         blueP,
+         "Blue",
          state.playerNames),
          " wins!") : _U.badIf($moduleName,
-         "between lines 77 and 79");
+         "between lines 84 and 86");
+      }();
+   };
+   var leadingPlayer = function (state) {
+      return function () {
+         var blueScore = A2($Helpers.getU,
+         "Blue",
+         state.score);
+         var redScore = A2($Helpers.getU,
+         "Red",
+         state.score);
+         return _U.cmp(redScore,
+         blueScore) > 0 ? $Maybe.Just($GameTypes.Red) : _U.cmp(blueScore,
+         redScore) > 0 ? $Maybe.Just($GameTypes.Blue) : $Maybe.Nothing;
       }();
    };
    var nextPlayer = function (state) {
@@ -17361,6 +17384,7 @@ Elm.State.make = function (_elm) {
                        ,isSwitchingPlayers: isSwitchingPlayers
                        ,pieceHeld: pieceHeld
                        ,nextPlayer: nextPlayer
+                       ,leadingPlayer: leadingPlayer
                        ,endStateMsg: endStateMsg};
    return _elm.State.values;
 };

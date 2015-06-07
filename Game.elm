@@ -20,12 +20,12 @@ import AI
 tryToPickUpPiece : Player -> Int -> State -> State
 tryToPickUpPiece player idx state =
   if (state.turn == player) && (State.isOngoing state)
-  then 
+  then
     if state.heldPiece == Just idx
     then { state | heldPiece <- Nothing }
     else {state | heldPiece <- Just idx }
   else state
-  
+ 
 {- Pass the current player's turn. Returns the new state. -}
 pass : State -> State
 pass state =
@@ -34,7 +34,7 @@ pass state =
     { state | turn <- State.nextPlayer state
             , log <- Log.addPlayerMsg logMsg state.turn state.log }
 
-{- Move the currently held piece to the given location if possible. 
+{- Move the currently held piece to the given location if possible.
    Do nothing if there is no held piece or the move is invalid.
    Returns the new state. -}
 tryMove : Location -> State -> State
@@ -52,7 +52,7 @@ tryMove location state =
         else { state | heldPiece <- Nothing }
     Nothing -> state
 
-{- Try to make a move for the AI player. 
+{- Try to make a move for the AI player.
    If no valid move is found, pass.
    If it's not the AI player's turn, do nothing.
    Returns the new state. -}
@@ -72,25 +72,31 @@ makeMove move state =
       newBoard = Dict.insert move.location move.piece state.board
       delta = Board.scoreMove move newBoard
       newScore = (withDefault 0 <| Dict.get p state.score) + delta
+      newScores = Dict.insert p newScore state.score
       hand = Player.getHand state.turn state
       existingTile = Dict.get move.location state.board
       handWithDrawnTile = without move.idx hand ++ (if (not <| List.isEmpty state.deck) then (take 1 state.deck) else [])
       newHand = case existingTile of
         Just piece -> if move.piece == SeppoIlmarinen then (replaceAtIndex move.idx (Piece.toString piece) hand) else handWithDrawnTile
         Nothing -> handWithDrawnTile
-      logText = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " placed " ++ 
-                  Piece.toDisplayString move.piece ++ " for " ++ toString delta ++ " points" ++ 
+
+      logText = (getU (Player.toString state.turn) state.playerNames) ++ " placed " ++
+                  Piece.toDisplayString move.piece ++ " for " ++ toString delta ++ " points" ++
                   " (total : " ++ toString newScore ++ ")"
+      leadChangeText = (getU (Player.toString state.turn) state.playerNames) ++ " took the lead!"
+      newLog = if State.leadingPlayer {state | score <- newScores} == Just state.turn && State.leadingPlayer state /= Just state.turn
+               then state.log |> Log.addPlayerMsg logText state.turn |> Log.addPlayerMsg leadChangeText state.turn
+               else state.log |> Log.addPlayerMsg logText state.turn
   in
     { state | turn <- State.nextPlayer state
             , board <- newBoard
-            , score <- Dict.insert p newScore state.score
+            , score <- newScores
             , deck <- drop 1 state.deck
             , hands <- Dict.insert p newHand state.hands
             , heldPiece <- Nothing
             , lastPlaced <- Just move.location
             , lastPlacedPlayer <- Just state.turn
-            , log <- Log.addPlayerMsg logText state.turn state.log }
+            , log <- newLog }
 
 {- Given a deck, returns the starting center tile (which must not be a Kullervo),
    two 5-tile hands, and the remaining deck. -}
@@ -110,7 +116,7 @@ getFirstTileHandsAndDeck deck =
 {- Start a game of the given type, with the given starting deck and starting player.
    If the first player is an AI player, make their move.
    Returns the state corresponding to the start of the game.
-   NOTE: For HumanVsHumanRemote games, startGame triggers when matchmaking begins, and 
+   NOTE: For HumanVsHumanRemote games, startGame triggers when matchmaking begins, and
          gameStarted triggers when a match has been found. -}
 startGame : GameType -> Deck -> Player -> String -> State
 startGame gameType deck player playerName =

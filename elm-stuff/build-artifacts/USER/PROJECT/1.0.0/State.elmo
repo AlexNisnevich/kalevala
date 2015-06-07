@@ -17,27 +17,38 @@ Elm.State.make = function (_elm) {
    $Player = Elm.Player.make(_elm);
    var endStateMsg = function (state) {
       return function () {
-         var blueP = $Player.toString($GameTypes.Blue);
          var blueScore = A2($Helpers.getU,
-         blueP,
+         "Blue",
          state.score);
-         var redP = $Player.toString($GameTypes.Red);
          var redScore = A2($Helpers.getU,
-         redP,
+         "Red",
          state.score);
          return _U.eq(redScore,
          blueScore) ? "Tie game!" : _U.cmp(redScore,
          blueScore) > 0 ? A2($Basics._op["++"],
          A2($Helpers.getU,
-         redP,
+         "Red",
          state.playerNames),
          " wins!") : _U.cmp(redScore,
          blueScore) < 0 ? A2($Basics._op["++"],
          A2($Helpers.getU,
-         blueP,
+         "Blue",
          state.playerNames),
          " wins!") : _U.badIf($moduleName,
-         "between lines 77 and 79");
+         "between lines 84 and 86");
+      }();
+   };
+   var leadingPlayer = function (state) {
+      return function () {
+         var blueScore = A2($Helpers.getU,
+         "Blue",
+         state.score);
+         var redScore = A2($Helpers.getU,
+         "Red",
+         state.score);
+         return _U.cmp(redScore,
+         blueScore) > 0 ? $Maybe.Just($GameTypes.Red) : _U.cmp(blueScore,
+         redScore) > 0 ? $Maybe.Just($GameTypes.Blue) : $Maybe.Nothing;
       }();
    };
    var nextPlayer = function (state) {
@@ -134,6 +145,7 @@ Elm.State.make = function (_elm) {
                        ,isSwitchingPlayers: isSwitchingPlayers
                        ,pieceHeld: pieceHeld
                        ,nextPlayer: nextPlayer
+                       ,leadingPlayer: leadingPlayer
                        ,endStateMsg: endStateMsg};
    return _elm.State.values;
 };

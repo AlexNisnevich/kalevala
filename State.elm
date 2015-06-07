@@ -67,13 +67,20 @@ nextPlayer state =
     then SwitchingTo next
     else next
 
+leadingPlayer : State -> Maybe Player
+leadingPlayer state = 
+  let redScore = getU "Red" state.score
+      blueScore = getU "Blue" state.score
+  in
+    if | redScore > blueScore -> Just Red
+       | blueScore > redScore -> Just Blue
+       | otherwise -> Nothing
+
 endStateMsg : State -> String
 endStateMsg state =
-  let redP = Player.toString Red
-      blueP = Player.toString Blue
-      redScore = getU redP state.score
-      blueScore = getU blueP state.score
+  let redScore = getU "Red" state.score
+      blueScore = getU "Blue" state.score
   in 
     if | redScore == blueScore -> "Tie game!"
-       | redScore > blueScore -> getU redP state.playerNames ++ " wins!"
-       | redScore < blueScore -> getU blueP state.playerNames ++ " wins!"
+       | redScore > blueScore -> getU "Red" state.playerNames ++ " wins!"
+       | redScore < blueScore -> getU "Blue" state.playerNames ++ " wins!"
