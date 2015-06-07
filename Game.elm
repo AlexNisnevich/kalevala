@@ -31,7 +31,7 @@ pass : State -> State
 pass state =
   let logMsg = (withDefault "" <| Dict.get (Player.toString state.turn) state.playerNames) ++ " passed."
   in
-    { state | turn <- Player.next state.turn
+    { state | turn <- State.nextPlayer state
             , log <- Log.addPlayerMsg logMsg state.turn state.log }
 
 {- Move the currently held piece to the given location if possible. 
@@ -45,7 +45,7 @@ tryMove location state =
           pieceStr = hand !! idx
           piece = Piece.fromString pieceStr
           move = { piece = piece, idx = idx, location = location }
-          nextPlayerType = Player.getType (Player.next state.turn) state
+          nextPlayerType = Player.getType (State.nextPlayer state) state
       in
         if Board.isValidMove move state.board
         then makeMove move state
@@ -54,10 +54,11 @@ tryMove location state =
 
 {- Try to make a move for the AI player. 
    If no valid move is found, pass.
+   If it's not the AI player's turn, do nothing.
    Returns the new state. -}
 tryAIMove : State -> State
 tryAIMove state =
-  if Player.getType state.turn state == Cpu
+  if State.isOngoing state && Player.getType state.turn state == Cpu
   then
     case AI.getMove state of
       Just move -> tryMove move.location { state | heldPiece <- Just move.idx }
@@ -81,7 +82,7 @@ makeMove move state =
                   Piece.toDisplayString move.piece ++ " for " ++ toString delta ++ " points" ++ 
                   " (total : " ++ toString newScore ++ ")"
   in
-    { state | turn <- Player.next state.turn
+    { state | turn <- State.nextPlayer state
             , board <- newBoard
             , score <- Dict.insert p newScore state.score
             , deck <- drop 1 state.deck

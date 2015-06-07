@@ -10,6 +10,7 @@ Elm.Helpers.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Helpers",
    $Basics = Elm.Basics.make(_elm),
+   $Dict = Elm.Dict.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Random = Elm.Random.make(_elm),
@@ -74,7 +75,7 @@ Elm.Helpers.make = function (_elm) {
          switch (maybe.ctor)
          {case "Just": return maybe._0;}
          _U.badCase($moduleName,
-         "between lines 10 and 13");
+         "between lines 11 and 14");
       }();
    };
    var headU = function (l) {
@@ -115,12 +116,19 @@ Elm.Helpers.make = function (_elm) {
    var minimumU = function (l) {
       return getOrFail($List.minimum(l));
    };
+   var getU = F2(function (key,
+   dict) {
+      return getOrFail(A2($Dict.get,
+      key,
+      dict));
+   });
    _elm.Helpers.values = {_op: _op
                          ,getOrFail: getOrFail
                          ,headU: headU
                          ,tailU: tailU
                          ,maximumU: maximumU
                          ,minimumU: minimumU
+                         ,getU: getU
                          ,tuple: tuple
                          ,without: without
                          ,replaceAtIndex: replaceAtIndex

@@ -49,6 +49,7 @@ performAction action state =
           StartNewGame deck player playerName -> Game.startGame state.gameType deck player playerName
           GameStarted deck startPlayer localPlayer opponentName -> Game.gameStarted deck startPlayer localPlayer opponentName state
           Pass -> Game.pass state
+          Switch -> { state | turn <- Player.next state.turn }
           MoveToMainMenu -> Game.startState
           MoveToRemoteGameMenu -> { state | gameType <- HumanVsHumanRemote, gameState <- NotStarted }
           OpponentDisconnected -> { state | gameState <- Disconnected
@@ -58,8 +59,7 @@ performAction action state =
           ParseError e -> state
   in
     if | isGameOver newState -> { newState | gameState <- GameOver
-                                           , log <- Log.addSystemMsg "Game over!" newState.log }
-       | mustPass newState -> Game.pass newState
+                                           , log <- Log.addSystemMsg ("Game over!" ++ State.endStateMsg newState) newState.log }
        | otherwise -> newState
 
 {- Turn a ClickEvent into an Action -}
@@ -78,6 +78,7 @@ constructAction clickType seed mousePos dims playerName =
       BoardClick -> PlacePiece mousePos dims
       PieceInHand player idx -> PickUpPiece player idx
       PassButton -> Pass
+      SwitchButton -> Switch
       MainMenuButton -> MoveToMainMenu
       StartRemoteGameButton -> MoveToRemoteGameMenu
       None -> NoAction
@@ -87,7 +88,7 @@ processClick : Signal ClickEvent -> Signal Action
 processClick signal =
   let seedSignal = (Random.initialSeed << round << fst) <~ Time.timestamp signal
       sampledMouse = sampleOn signal Mouse.position
-      sampledPlayerName = sampleOn signal <| playerNameMailbox.signal
+      sampledPlayerName = sampleOn signal <| playerNameSignal
   in
     constructAction <~ signal ~ seedSignal ~ sampledMouse ~ Window.dimensions ~ sampledPlayerName
 
@@ -140,4 +141,4 @@ main =
 
     state = foldp performAction Game.startState (mergeMany [playerAction, remoteAction, cpuAction])
   in
-    render <~ state ~ Window.dimensions ~ playerNameMailbox.signal
+    render <~ state ~ Window.dimensions ~ playerNameSignal

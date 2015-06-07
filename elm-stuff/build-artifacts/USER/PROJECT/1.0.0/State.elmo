@@ -15,6 +15,38 @@ Elm.State.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm);
+   var endStateMsg = function (state) {
+      return function () {
+         var blueP = $Player.toString($GameTypes.Blue);
+         var blueScore = A2($Helpers.getU,
+         blueP,
+         state.score);
+         var redP = $Player.toString($GameTypes.Red);
+         var redScore = A2($Helpers.getU,
+         redP,
+         state.score);
+         return _U.eq(redScore,
+         blueScore) ? "Tie game!" : _U.cmp(redScore,
+         blueScore) > 0 ? A2($Basics._op["++"],
+         A2($Helpers.getU,
+         redP,
+         state.playerNames),
+         " wins!") : _U.cmp(redScore,
+         blueScore) < 0 ? A2($Basics._op["++"],
+         A2($Helpers.getU,
+         blueP,
+         state.playerNames),
+         " wins!") : _U.badIf($moduleName,
+         "between lines 77 and 79");
+      }();
+   };
+   var nextPlayer = function (state) {
+      return function () {
+         var next = $Player.next(state.turn);
+         return _U.eq(state.gameType,
+         $GameTypes.HumanVsHumanLocal) ? $GameTypes.SwitchingTo(next) : next;
+      }();
+   };
    var pieceHeld = function (state) {
       return function () {
          var _v0 = state.heldPiece;
@@ -32,7 +64,16 @@ Elm.State.make = function (_elm) {
             case "Nothing":
             return $Maybe.Nothing;}
          _U.badCase($moduleName,
-         "between lines 48 and 54");
+         "between lines 54 and 60");
+      }();
+   };
+   var isSwitchingPlayers = function (state) {
+      return function () {
+         var _v2 = state.turn;
+         switch (_v2.ctor)
+         {case "SwitchingTo":
+            return true;}
+         return false;
       }();
    };
    var isSettingUpRemoteGame = function (state) {
@@ -47,8 +88,8 @@ Elm.State.make = function (_elm) {
    };
    var isNotStarted = function (state) {
       return function () {
-         var _v2 = state.gameState;
-         switch (_v2.ctor)
+         var _v4 = state.gameState;
+         switch (_v4.ctor)
          {case "NotStarted": return true;
             case "WaitingForPlayers":
             return true;}
@@ -57,8 +98,8 @@ Elm.State.make = function (_elm) {
    };
    var isOngoing = function (state) {
       return function () {
-         var _v3 = state.gameState;
-         switch (_v3.ctor)
+         var _v5 = state.gameState;
+         switch (_v5.ctor)
          {case "Connected": return true;
             case "Ongoing": return true;}
          return false;
@@ -72,9 +113,9 @@ Elm.State.make = function (_elm) {
       state));
    };
    var mustPass = function (state) {
-      return isOngoing(state) && A2($Player.noTilesInHand,
+      return isOngoing(state) && ($Basics.not(isSwitchingPlayers(state)) && A2($Player.noTilesInHand,
       state.turn,
-      state);
+      state));
    };
    var isPlayerTurn = function (state) {
       return isOngoing(state) && _U.eq(A2($Player.getType,
@@ -90,6 +131,9 @@ Elm.State.make = function (_elm) {
                        ,isGameOver: isGameOver
                        ,mustPass: mustPass
                        ,isPlayerTurn: isPlayerTurn
-                       ,pieceHeld: pieceHeld};
+                       ,isSwitchingPlayers: isSwitchingPlayers
+                       ,pieceHeld: pieceHeld
+                       ,nextPlayer: nextPlayer
+                       ,endStateMsg: endStateMsg};
    return _elm.State.values;
 };
