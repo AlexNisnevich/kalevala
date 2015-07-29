@@ -57,7 +57,7 @@ In this example, a *Käärme* swoops in on top of a stubborn *Väinämöinen* to
 
 ### Joukahainen (4)
 
-The value of a *Joukahainen* tile in a row or column is equal to the sum of **all** of the *Joukahainen* tiles in a row or column. This means that a *Joukahainen* tile may have a different value in its row and in its column.
+The value of a *Joukahainen* tile in a row or column is equal to the sum of **all** of the *Joukahainen* tiles in a row or column. This means that a *Joukahainen* tile may have a different value in its row and in its column. *Joukahainen* tiles that have an increased value in their row or column are indicated by a **4+** symbol.
 
 *Joukahainen* tiles adjacent to *Lemminkainen* **(1)** tiles have zero value and don't contribute to the values of other *Joukahainen*s in their row and column. (More on *Lemminkainen* later!)
 
@@ -90,3 +90,10 @@ All other tiles adjacent to *Lemminkainen* tiles have zero value (except other *
 In this example, a *Lemminkainen* scores 4 points (2 for its row and 2 for its column) by reducing all of its neighbors to zero value:
 
 ![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/1-Lemmi_Example.gif)
+
+## Credits
+
+*Kalevala* was programmed by [Alex Nisnevich](http://alex.nisnevich.com) and [Greg Shuflin](http://github.everydayimshuflin.com/) with art by [Jordan Arnesen](http://byjor.com/)
+
+It's based on the board game _[
+Völuspá](http://www.whitegoblingames.com/game/126/Vlusp)_, designed by [Scott Caputo](https://boardgamegeek.com/boardgamedesigner/8862/scott-caputo) and published by [White Goblin Games](http://www.whitegoblingames.com). _Völuspá_ supports up to four players and has many expansions that add new tiles -- if you like *Kalevala*, you should check it out!
