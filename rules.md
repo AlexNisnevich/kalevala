@@ -93,7 +93,7 @@ In this example, a *Lemminkainen* scores 4 points (2 for its row and 2 for its c
 
 ## Credits
 
-*Kalevala* was programmed by [Alex Nisnevich](http://alex.nisnevich.com) and [Greg Shuflin](http://github.everydayimshuflin.com/) with art by [Jordan Arnesen](http://byjor.com/)
+*Kalevala* was programmed by [Alex Nisnevich](http://alex.nisnevich.com) and [Greg Shuflin](http://github.everydayimshuflin.com/) with art by [Jordan Arnesen](http://byjor.com/).
 
 It's based on the board game _[
-Völuspá](http://www.whitegoblingames.com/game/126/Vlusp)_, designed by [Scott Caputo](https://boardgamegeek.com/boardgamedesigner/8862/scott-caputo) and published by [White Goblin Games](http://www.whitegoblingames.com). _Völuspá_ supports up to four players and has many expansions that add new tiles -- if you like *Kalevala*, you should check it out!
+Völuspá](http://www.whitegoblingames.com/game/126/Vlusp)_, designed by [Scott Caputo](https://boardgamegeek.com/boardgamedesigner/8862/scott-caputo) and published by [White Goblin Games](http://www.whitegoblingames.com). _Völuspá_ supports up to four players and has many expansions that add new tiles - if you like *Kalevala*, you should check it out!
