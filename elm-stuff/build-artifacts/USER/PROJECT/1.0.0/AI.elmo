@@ -17,7 +17,9 @@ Elm.AI.make = function (_elm) {
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
-   $Player = Elm.Player.make(_elm);
+   $Player = Elm.Player.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
    var getMove = function (state) {
       return $List.isEmpty(A2($Player.getHand,
       state.turn,

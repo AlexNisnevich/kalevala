@@ -16,7 +16,11 @@ Elm.Display.Helpers.make = function (_elm) {
    $Display$Constants = Elm.Display.Constants.make(_elm),
    $GameTypes = Elm.GameTypes.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Piece = Elm.Piece.make(_elm);
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Piece = Elm.Piece.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
    var pieceToImage = F3(function (piece,
    value,
    tileSize) {

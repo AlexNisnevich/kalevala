@@ -1,0 +1,54 @@
+Elm.Markdown = Elm.Markdown || {};
+Elm.Markdown.make = function (_elm) {
+   "use strict";
+   _elm.Markdown = _elm.Markdown || {};
+   if (_elm.Markdown.values)
+   return _elm.Markdown.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Markdown",
+   $Basics = Elm.Basics.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Html = Elm.Html.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Markdown = Elm.Native.Markdown.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var toElementWith = $Native$Markdown.toElementWith;
+   var toHtmlWith = $Native$Markdown.toHtmlWith;
+   var defaultOptions = {_: {}
+                        ,githubFlavored: $Maybe.Just({_: {}
+                                                     ,breaks: false
+                                                     ,tables: false})
+                        ,sanitize: false
+                        ,smartypants: false};
+   var Options = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,githubFlavored: a
+             ,sanitize: b
+             ,smartypants: c};
+   });
+   var toElement = function (string) {
+      return A2($Native$Markdown.toElementWith,
+      defaultOptions,
+      string);
+   };
+   var toHtml = function (string) {
+      return A2($Native$Markdown.toHtmlWith,
+      defaultOptions,
+      string);
+   };
+   _elm.Markdown.values = {_op: _op
+                          ,toHtml: toHtml
+                          ,toElement: toElement
+                          ,Options: Options
+                          ,defaultOptions: defaultOptions
+                          ,toHtmlWith: toHtmlWith
+                          ,toElementWith: toElementWith};
+   return _elm.Markdown.values;
+};

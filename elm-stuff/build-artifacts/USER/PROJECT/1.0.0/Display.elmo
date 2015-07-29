@@ -26,6 +26,7 @@ Elm.Display.make = function (_elm) {
    $Maybe = Elm.Maybe.make(_elm),
    $Piece = Elm.Piece.make(_elm),
    $Player = Elm.Player.make(_elm),
+   $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $State = Elm.State.make(_elm),
    $String = Elm.String.make(_elm),

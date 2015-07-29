@@ -11,8 +11,12 @@ Elm.Html.Events.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "Html.Events",
+   $Basics = Elm.Basics.make(_elm),
    $Html = Elm.Html.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm),
    $VirtualDom = Elm.VirtualDom.make(_elm);
    var keyCode = A2($Json$Decode._op[":="],

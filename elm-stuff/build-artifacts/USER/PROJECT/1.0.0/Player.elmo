@@ -15,7 +15,9 @@ Elm.Player.make = function (_elm) {
    $GameTypes = Elm.GameTypes.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Random = Elm.Random.make(_elm);
+   $Random = Elm.Random.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
    var random = function (seed) {
       return _U.cmp($Basics.fst(A2($Random.generate,
       A2($Random.$float,0,1),

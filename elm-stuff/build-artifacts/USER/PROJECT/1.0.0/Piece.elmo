@@ -9,7 +9,12 @@ Elm.Piece.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "Piece",
-   $GameTypes = Elm.GameTypes.make(_elm);
+   $Basics = Elm.Basics.make(_elm),
+   $GameTypes = Elm.GameTypes.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
    var rulesText = function (piece) {
       return function () {
          switch (piece.ctor)

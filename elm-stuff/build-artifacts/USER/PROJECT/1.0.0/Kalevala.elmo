@@ -22,6 +22,7 @@ Elm.Kalevala.make = function (_elm) {
    $Helpers = Elm.Helpers.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
    $Json$Encode = Elm.Json.Encode.make(_elm),
+   $List = Elm.List.make(_elm),
    $Log = Elm.Log.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
    $Mouse = Elm.Mouse.make(_elm),

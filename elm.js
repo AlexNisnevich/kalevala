@@ -1,112 +1,4 @@
 var Elm = Elm || { Native: {} };
-Elm.AI = Elm.AI || {};
-Elm.AI.make = function (_elm) {
-   "use strict";
-   _elm.AI = _elm.AI || {};
-   if (_elm.AI.values)
-   return _elm.AI.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "AI",
-   $Basics = Elm.Basics.make(_elm),
-   $Board = Elm.Board.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $Helpers = Elm.Helpers.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Piece = Elm.Piece.make(_elm),
-   $Player = Elm.Player.make(_elm);
-   var getMove = function (state) {
-      return $List.isEmpty(A2($Player.getHand,
-      state.turn,
-      state)) ? $Maybe.Nothing : function () {
-         var boardSize = $Board.getBoardSize(state.board);
-         var xs = A2($List.map,
-         function (x) {
-            return x - (boardSize / 2 | 0);
-         },
-         _L.range(0,boardSize - 1));
-         var locations = A2($List.concatMap,
-         function (x) {
-            return A2($List.map,
-            function (y) {
-               return {ctor: "_Tuple2"
-                      ,_0: x
-                      ,_1: y};
-            },
-            xs);
-         },
-         xs);
-         var validLocsByPiece = function (piece) {
-            return A2($List.filter,
-            function (loc) {
-               return A2($Board.isValidMove,
-               {_: {}
-               ,idx: 0
-               ,location: loc
-               ,piece: piece},
-               state.board);
-            },
-            locations);
-         };
-         var hand = A2($Player.getHand,
-         state.turn,
-         state);
-         var idxs = _L.range(0,
-         $List.length(hand) - 1);
-         var pieceAtIdx = function (i) {
-            return $Piece.fromString(A2($Helpers._op["!!"],
-            hand,
-            i));
-         };
-         var validMoves = A2($List.concatMap,
-         function (i) {
-            return function () {
-               var piece = pieceAtIdx(i);
-               var move = function (loc) {
-                  return {_: {}
-                         ,idx: i
-                         ,location: loc
-                         ,piece: piece};
-               };
-               var boardAfterMoveTo = function (loc) {
-                  return A3($Dict.insert,
-                  loc,
-                  piece,
-                  state.board);
-               };
-               var moveWithScore = function (loc) {
-                  return {ctor: "_Tuple2"
-                         ,_0: move(loc)
-                         ,_1: A2($Board.scoreMove,
-                         move(loc),
-                         boardAfterMoveTo(loc))};
-               };
-               return A2($List.map,
-               moveWithScore,
-               validLocsByPiece(piece));
-            }();
-         },
-         idxs);
-         var _ = $Helpers.headU($List.reverse(A2($List.sortBy,
-         $Basics.snd,
-         validMoves)));
-         var bestMove = function () {
-            switch (_.ctor)
-            {case "_Tuple2": return _._0;}
-            _U.badCase($moduleName,
-            "between lines 32 and 34");
-         }();
-         return $Maybe.Just(bestMove);
-      }();
-   };
-   _elm.AI.values = {_op: _op
-                    ,getMove: getMove};
-   return _elm.AI.values;
-};
 Elm.Array = Elm.Array || {};
 Elm.Array.make = function (_elm) {
    "use strict";
@@ -124,6 +16,10 @@ Elm.Array.make = function (_elm) {
    $Native$Array = Elm.Native.Array.make(_elm);
    var append = $Native$Array.append;
    var length = $Native$Array.length;
+   var isEmpty = function (array) {
+      return _U.eq(length(array),
+      0);
+   };
    var slice = $Native$Array.slice;
    var set = $Native$Array.set;
    var get = F2(function (i,
@@ -180,6 +76,7 @@ Elm.Array.make = function (_elm) {
                        ,repeat: repeat
                        ,initialize: initialize
                        ,fromList: fromList
+                       ,isEmpty: isEmpty
                        ,length: length
                        ,push: push
                        ,append: append
@@ -372,556 +269,6 @@ Elm.Basics.make = function (_elm) {
                         ,EQ: EQ
                         ,GT: GT};
    return _elm.Basics.values;
-};
-Elm.Board = Elm.Board || {};
-Elm.Board.make = function (_elm) {
-   "use strict";
-   _elm.Board = _elm.Board || {};
-   if (_elm.Board.values)
-   return _elm.Board.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Board",
-   $Basics = Elm.Basics.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $Helpers = Elm.Helpers.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Piece = Elm.Piece.make(_elm),
-   $Player = Elm.Player.make(_elm),
-   $State = Elm.State.make(_elm);
-   var isAdjacent = F2(function (_v0,
-   _v1) {
-      return function () {
-         switch (_v1.ctor)
-         {case "_Tuple2":
-            return function () {
-                 switch (_v0.ctor)
-                 {case "_Tuple2":
-                    return _U.eq(_v0._1,
-                      _v1._1) && _U.eq($Basics.abs(_v0._0 - _v1._0),
-                      1) || _U.eq(_v0._0,
-                      _v1._0) && _U.eq($Basics.abs(_v0._1 - _v1._1),
-                      1);}
-                 _U.badCase($moduleName,
-                 "on line 65, column 4 to 70");
-              }();}
-         _U.badCase($moduleName,
-         "on line 65, column 4 to 70");
-      }();
-   });
-   var adjacentTiles = F2(function (_v8,
-   board) {
-      return function () {
-         switch (_v8.ctor)
-         {case "_Tuple2":
-            return A2($List.filter,
-              function (loc) {
-                 return A2(isAdjacent,
-                 loc,
-                 {ctor: "_Tuple2"
-                 ,_0: _v8._0
-                 ,_1: _v8._1});
-              },
-              $Dict.keys(board));}
-         _U.badCase($moduleName,
-         "on line 69, column 3 to 58");
-      }();
-   });
-   var findRightward = F2(function (_v12,
-   board) {
-      return function () {
-         switch (_v12.ctor)
-         {case "_Tuple2":
-            return A2($Dict.member,
-              {ctor: "_Tuple2"
-              ,_0: _v12._0
-              ,_1: _v12._1},
-              board) ? A2($Basics._op["++"],
-              _L.fromArray([{ctor: "_Tuple2"
-                            ,_0: _v12._0
-                            ,_1: _v12._1}]),
-              A2(findRightward,
-              {ctor: "_Tuple2"
-              ,_0: _v12._0 + 1
-              ,_1: _v12._1},
-              board)) : _L.fromArray([]);}
-         _U.badCase($moduleName,
-         "between lines 53 and 55");
-      }();
-   });
-   var findLeftward = F2(function (_v16,
-   board) {
-      return function () {
-         switch (_v16.ctor)
-         {case "_Tuple2":
-            return A2($Dict.member,
-              {ctor: "_Tuple2"
-              ,_0: _v16._0
-              ,_1: _v16._1},
-              board) ? A2($Basics._op["++"],
-              _L.fromArray([{ctor: "_Tuple2"
-                            ,_0: _v16._0
-                            ,_1: _v16._1}]),
-              A2(findLeftward,
-              {ctor: "_Tuple2"
-              ,_0: _v16._0 - 1
-              ,_1: _v16._1},
-              board)) : _L.fromArray([]);}
-         _U.badCase($moduleName,
-         "between lines 47 and 49");
-      }();
-   });
-   var findRow = F2(function (_v20,
-   board) {
-      return function () {
-         switch (_v20.ctor)
-         {case "_Tuple2":
-            return A2($Basics._op["++"],
-              A2(findLeftward,
-              {ctor: "_Tuple2"
-              ,_0: _v20._0 - 1
-              ,_1: _v20._1},
-              board),
-              A2(findRightward,
-              {ctor: "_Tuple2"
-              ,_0: _v20._0 + 1
-              ,_1: _v20._1},
-              board));}
-         _U.badCase($moduleName,
-         "on line 61, column 24 to 83");
-      }();
-   });
-   var findBelow = F2(function (_v24,
-   board) {
-      return function () {
-         switch (_v24.ctor)
-         {case "_Tuple2":
-            return A2($Dict.member,
-              {ctor: "_Tuple2"
-              ,_0: _v24._0
-              ,_1: _v24._1},
-              board) ? A2($Basics._op["++"],
-              _L.fromArray([{ctor: "_Tuple2"
-                            ,_0: _v24._0
-                            ,_1: _v24._1}]),
-              A2(findBelow,
-              {ctor: "_Tuple2"
-              ,_0: _v24._0
-              ,_1: _v24._1 + 1},
-              board)) : _L.fromArray([]);}
-         _U.badCase($moduleName,
-         "between lines 41 and 43");
-      }();
-   });
-   var findAbove = F2(function (_v28,
-   board) {
-      return function () {
-         switch (_v28.ctor)
-         {case "_Tuple2":
-            return A2($Dict.member,
-              {ctor: "_Tuple2"
-              ,_0: _v28._0
-              ,_1: _v28._1},
-              board) ? A2($Basics._op["++"],
-              _L.fromArray([{ctor: "_Tuple2"
-                            ,_0: _v28._0
-                            ,_1: _v28._1}]),
-              A2(findAbove,
-              {ctor: "_Tuple2"
-              ,_0: _v28._0
-              ,_1: _v28._1 - 1},
-              board)) : _L.fromArray([]);}
-         _U.badCase($moduleName,
-         "between lines 35 and 37");
-      }();
-   });
-   var findColumn = F2(function (_v32,
-   board) {
-      return function () {
-         switch (_v32.ctor)
-         {case "_Tuple2":
-            return A2($Basics._op["++"],
-              A2(findAbove,
-              {ctor: "_Tuple2"
-              ,_0: _v32._0
-              ,_1: _v32._1 - 1},
-              board),
-              A2(findBelow,
-              {ctor: "_Tuple2"
-              ,_0: _v32._0
-              ,_1: _v32._1 + 1},
-              board));}
-         _U.badCase($moduleName,
-         "on line 58, column 27 to 79");
-      }();
-   });
-   var pieceAt = F2(function (loc,
-   board) {
-      return A2($Maybe.withDefault,
-      $GameTypes.NoPiece,
-      A2($Dict.get,loc,board));
-   });
-   var isValidMove = F2(function (move,
-   board) {
-      return function () {
-         var adjacents = A2(adjacentTiles,
-         move.location,
-         board);
-         var hasAdjacentTile = $Basics.not($List.isEmpty(adjacents));
-         var adjacentToKullervo = A2($List.any,
-         function (loc) {
-            return _U.eq(A2(pieceAt,
-            loc,
-            board),
-            $GameTypes.Kullervo);
-         },
-         adjacents);
-         var rowLength = $List.length(A2(findRow,
-         move.location,
-         board)) + 1;
-         var columnLength = $List.length(A2(findColumn,
-         move.location,
-         board)) + 1;
-         var longestLine = A2($Basics.max,
-         columnLength,
-         rowLength);
-         var existingTile = A2($Dict.get,
-         move.location,
-         board);
-         var canOverlapExistingTile = (_U.eq(move.piece,
-         $GameTypes.Kaarme) || _U.eq(move.piece,
-         $GameTypes.SeppoIlmarinen)) && $Basics.not(_U.eq(existingTile,
-         $Maybe.Just(move.piece)));
-         var isUnoccupied = $Basics.not(A2($Dict.member,
-         move.location,
-         board));
-         return (isUnoccupied || canOverlapExistingTile) && (hasAdjacentTile && (($Basics.not(adjacentToKullervo) || _U.eq(move.piece,
-         $GameTypes.Kullervo)) && _U.cmp(longestLine,
-         7) < 1));
-      }();
-   });
-   var isValidSquareToMove = F3(function (state,
-   _v36,
-   size) {
-      return function () {
-         switch (_v36.ctor)
-         {case "_Tuple2":
-            return $State.isPlayerTurn(state) ? function () {
-                 var _v40 = state.heldPiece;
-                 switch (_v40.ctor)
-                 {case "Just":
-                    return function () {
-                         var location = {ctor: "_Tuple2"
-                                        ,_0: _v36._0 - (size / 2 | 0)
-                                        ,_1: _v36._1 - (size / 2 | 0)};
-                         var hand = A2($Player.getHand,
-                         state.turn,
-                         state);
-                         var piece = $Piece.fromString($Helpers.headU(A2($List.drop,
-                         _v40._0,
-                         hand)));
-                         return A2(isValidMove,
-                         {_: {}
-                         ,idx: _v40._0
-                         ,location: location
-                         ,piece: piece},
-                         state.board);
-                      }();
-                    case "Nothing": return false;}
-                 _U.badCase($moduleName,
-                 "between lines 171 and 179");
-              }() : false;}
-         _U.badCase($moduleName,
-         "between lines 169 and 179");
-      }();
-   });
-   var getDisplayedTileValue = F2(function (_v42,
-   board) {
-      return function () {
-         switch (_v42.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var adjacentToLemminkainen = $List.any(function (l) {
-                    return _U.eq(A2(pieceAt,
-                    l,
-                    board),
-                    $GameTypes.Lemminkainen);
-                 })(A2(adjacentTiles,
-                 {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1},
-                 board));
-                 var piece = A2(pieceAt,
-                 {ctor: "_Tuple2"
-                 ,_0: _v42._0
-                 ,_1: _v42._1},
-                 board);
-                 return adjacentToLemminkainen && $Basics.not(_U.eq(piece,
-                 $GameTypes.Lemminkainen)) ? "0" : _U.eq(piece,
-                 $GameTypes.Joukahainen) ? function () {
-                    var column = A2(findColumn,
-                    {ctor: "_Tuple2"
-                    ,_0: _v42._0
-                    ,_1: _v42._1},
-                    board);
-                    var row = A2(findRow,
-                    {ctor: "_Tuple2"
-                    ,_0: _v42._0
-                    ,_1: _v42._1},
-                    board);
-                    return A2($List.any,
-                    function (loc) {
-                       return $Basics.not(adjacentToLemminkainen) && _U.eq(A2(pieceAt,
-                       loc,
-                       board),
-                       $GameTypes.Joukahainen);
-                    },
-                    A2($Basics._op["++"],
-                    row,
-                    column)) ? "4_star" : "4";
-                 }() : $Basics.toString($Piece.baseValue(piece));
-              }();}
-         _U.badCase($moduleName,
-         "between lines 134 and 147");
-      }();
-   });
-   var hasSamePieceAtOtherEnd = F3(function (_v46,
-   board,
-   dir) {
-      return function () {
-         switch (_v46.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var right = A2(findRightward,
-                 {ctor: "_Tuple2"
-                 ,_0: _v46._0 + 1
-                 ,_1: _v46._1},
-                 board);
-                 var left = A2(findLeftward,
-                 {ctor: "_Tuple2"
-                 ,_0: _v46._0 - 1
-                 ,_1: _v46._1},
-                 board);
-                 var below = A2(findBelow,
-                 {ctor: "_Tuple2"
-                 ,_0: _v46._0
-                 ,_1: _v46._1 + 1},
-                 board);
-                 var above = A2(findAbove,
-                 {ctor: "_Tuple2"
-                 ,_0: _v46._0
-                 ,_1: _v46._1 - 1},
-                 board);
-                 var samePieces = F2(function (pos1,
-                 pos2) {
-                    return _U.eq(A2(pieceAt,
-                    pos1,
-                    board),
-                    A2(pieceAt,pos2,board));
-                 });
-                 var last = function (list) {
-                    return $Helpers.headU($List.reverse(list));
-                 };
-                 var samePieceBelow = $List.isEmpty(above) && ($Basics.not($List.isEmpty(below)) && A2(samePieces,
-                 last(below),
-                 {ctor: "_Tuple2"
-                 ,_0: _v46._0
-                 ,_1: _v46._1}));
-                 var samePieceAbove = $List.isEmpty(below) && ($Basics.not($List.isEmpty(above)) && A2(samePieces,
-                 last(above),
-                 {ctor: "_Tuple2"
-                 ,_0: _v46._0
-                 ,_1: _v46._1}));
-                 var samePieceLeft = $List.isEmpty(right) && ($Basics.not($List.isEmpty(left)) && A2(samePieces,
-                 last(left),
-                 {ctor: "_Tuple2"
-                 ,_0: _v46._0
-                 ,_1: _v46._1}));
-                 var samePieceRight = $List.isEmpty(left) && ($Basics.not($List.isEmpty(right)) && A2(samePieces,
-                 last(right),
-                 {ctor: "_Tuple2"
-                 ,_0: _v46._0
-                 ,_1: _v46._1}));
-                 return function () {
-                    switch (dir.ctor)
-                    {case "Horizontal":
-                       return samePieceLeft || samePieceRight;
-                       case "Vertical":
-                       return samePieceBelow || samePieceAbove;}
-                    _U.badCase($moduleName,
-                    "between lines 163 and 165");
-                 }();
-              }();}
-         _U.badCase($moduleName,
-         "between lines 152 and 165");
-      }();
-   });
-   var getTileValue = F4(function (_v51,
-   dir,
-   move,
-   board) {
-      return function () {
-         switch (_v51.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var isCurrentTile = _U.eq(move.location,
-                 {ctor: "_Tuple2"
-                 ,_0: _v51._0
-                 ,_1: _v51._1});
-                 var adjacentToLemminkainen = function (loc) {
-                    return $List.any(function (l) {
-                       return _U.eq(A2(pieceAt,
-                       l,
-                       board),
-                       $GameTypes.Lemminkainen);
-                    })(A2(adjacentTiles,loc,board));
-                 };
-                 var piece = A2(pieceAt,
-                 {ctor: "_Tuple2"
-                 ,_0: _v51._0
-                 ,_1: _v51._1},
-                 board);
-                 return _U.eq(piece,
-                 $GameTypes.Joukahainen) ? function () {
-                    var line = A2($Basics._op["++"],
-                    A2(function () {
-                       switch (dir.ctor)
-                       {case "Horizontal":
-                          return findRow;
-                          case "Vertical":
-                          return findColumn;}
-                       _U.badCase($moduleName,
-                       "between lines 115 and 116");
-                    }(),
-                    {ctor: "_Tuple2"
-                    ,_0: _v51._0
-                    ,_1: _v51._1},
-                    board),
-                    _L.fromArray([{ctor: "_Tuple2"
-                                  ,_0: _v51._0
-                                  ,_1: _v51._1}]));
-                    var numJoukahainens = $List.length(A2($List.filter,
-                    function (loc) {
-                       return $Basics.not(adjacentToLemminkainen(loc)) && (_U.eq(A2(pieceAt,
-                       loc,
-                       board),
-                       $GameTypes.Joukahainen) && ($Basics.not(_U.eq(loc,
-                       move.location)) || isCurrentTile));
-                    },
-                    line));
-                    return 4 * numJoukahainens;
-                 }() : _U.eq(piece,
-                 $GameTypes.Louhi) && (isCurrentTile && A3(hasSamePieceAtOtherEnd,
-                 {ctor: "_Tuple2"
-                 ,_0: _v51._0
-                 ,_1: _v51._1},
-                 board,
-                 dir)) ? 100 : adjacentToLemminkainen({ctor: "_Tuple2"
-                                                      ,_0: _v51._0
-                                                      ,_1: _v51._1}) && $Basics.not(_U.eq(piece,
-                 $GameTypes.Lemminkainen)) ? 0 : $Piece.baseValue(piece);
-              }();}
-         _U.badCase($moduleName,
-         "between lines 110 and 128");
-      }();
-   });
-   var getBoardSize = function (board) {
-      return $List.isEmpty($Dict.toList(board)) ? 5 : function () {
-         var locations = $Dict.keys(board);
-         var xs = A2($List.map,
-         $Basics.fst,
-         locations);
-         var maxX = A2($Basics.max,
-         $Helpers.maximumU(xs),
-         $Basics.abs($Helpers.minimumU(xs)));
-         var ys = A2($List.map,
-         $Basics.snd,
-         locations);
-         var maxY = A2($Basics.max,
-         $Helpers.maximumU(ys),
-         $Basics.abs($Helpers.minimumU(ys)));
-         var distFromCenter = A2($Basics.max,
-         maxX,
-         maxY) + 2;
-         return distFromCenter * 2 + 1;
-      }();
-   };
-   var Horizontal = {ctor: "Horizontal"};
-   var Vertical = {ctor: "Vertical"};
-   var scoreMove = F2(function (move,
-   board) {
-      return function () {
-         var tileScoreInRow = A4(getTileValue,
-         move.location,
-         Horizontal,
-         move,
-         board);
-         var row = A2(findRow,
-         move.location,
-         board);
-         var rowSize = $List.length(row) + 1;
-         var rowScores = A2($List.map,
-         function (loc) {
-            return A4(getTileValue,
-            loc,
-            Horizontal,
-            move,
-            board);
-         },
-         row);
-         var rowHighScore = $List.isEmpty(row) ? 0 : $Helpers.maximumU(rowScores);
-         var rowPoints = _U.cmp(tileScoreInRow,
-         rowHighScore) > 0 && _U.cmp(rowSize,
-         2) > -1 ? rowSize : 0;
-         var tileScoreInColumn = A4(getTileValue,
-         move.location,
-         Vertical,
-         move,
-         board);
-         var column = A2(findColumn,
-         move.location,
-         board);
-         var columnSize = $List.length(column) + 1;
-         var columnScores = A2($List.map,
-         function (loc) {
-            return A4(getTileValue,
-            loc,
-            Vertical,
-            move,
-            board);
-         },
-         column);
-         var columnHighScore = $List.isEmpty(column) ? 0 : $Helpers.maximumU(columnScores);
-         var columnPoints = _U.cmp(tileScoreInColumn,
-         columnHighScore) > 0 && _U.cmp(columnSize,
-         2) > -1 ? columnSize : 0;
-         return columnPoints + rowPoints;
-      }();
-   });
-   _elm.Board.values = {_op: _op
-                       ,Vertical: Vertical
-                       ,Horizontal: Horizontal
-                       ,getBoardSize: getBoardSize
-                       ,pieceAt: pieceAt
-                       ,findAbove: findAbove
-                       ,findBelow: findBelow
-                       ,findLeftward: findLeftward
-                       ,findRightward: findRightward
-                       ,findColumn: findColumn
-                       ,findRow: findRow
-                       ,isAdjacent: isAdjacent
-                       ,adjacentTiles: adjacentTiles
-                       ,isValidMove: isValidMove
-                       ,scoreMove: scoreMove
-                       ,getTileValue: getTileValue
-                       ,getDisplayedTileValue: getDisplayedTileValue
-                       ,hasSamePieceAtOtherEnd: hasSamePieceAtOtherEnd
-                       ,isValidSquareToMove: isValidSquareToMove};
-   return _elm.Board.values;
 };
 Elm.Char = Elm.Char || {};
 Elm.Char.make = function (_elm) {
@@ -1161,7 +508,7 @@ Elm.Color.make = function (_elm) {
                         ,saturation: s};
               }();}
          _U.badCase($moduleName,
-         "between lines 114 and 121");
+         "between lines 114 and 118");
       }();
    };
    var HSLA = F4(function (a,
@@ -1217,7 +564,7 @@ Elm.Color.make = function (_elm) {
                  color._3);
               }();}
          _U.badCase($moduleName,
-         "between lines 105 and 111");
+         "between lines 105 and 108");
       }();
    };
    var grayscale = function (p) {
@@ -1464,163 +811,6 @@ Elm.Debug.make = function (_elm) {
                        ,trace: trace};
    return _elm.Debug.values;
 };
-Elm.Decorate = Elm.Decorate || {};
-Elm.Decorate.make = function (_elm) {
-   "use strict";
-   _elm.Decorate = _elm.Decorate || {};
-   if (_elm.Decorate.values)
-   return _elm.Decorate.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Decorate",
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Html$Attributes = Elm.Html.Attributes.make(_elm);
-   var decorate = F2(function (_v0,
-   elt) {
-      return function () {
-         switch (_v0.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var height = $Graphics$Element.heightOf(elt);
-                 var width = $Graphics$Element.widthOf(elt);
-                 var html = $Html.fromElement(elt);
-                 var htmlWithStyle = A2($Html.div,
-                 _L.fromArray([A2($Html$Attributes.attribute,
-                 _v0._0,
-                 _v0._1)]),
-                 _L.fromArray([html]));
-                 return A3($Html.toElement,
-                 width,
-                 height,
-                 htmlWithStyle);
-              }();}
-         _U.badCase($moduleName,
-         "between lines 11 and 16");
-      }();
-   });
-   _elm.Decorate.values = {_op: _op
-                          ,decorate: decorate};
-   return _elm.Decorate.values;
-};
-Elm.Deprecated = Elm.Deprecated || {};
-Elm.Deprecated.WebSocket = Elm.Deprecated.WebSocket || {};
-Elm.Deprecated.WebSocket.make = function (_elm) {
-   "use strict";
-   _elm.Deprecated = _elm.Deprecated || {};
-   _elm.Deprecated.WebSocket = _elm.Deprecated.WebSocket || {};
-   if (_elm.Deprecated.WebSocket.values)
-   return _elm.Deprecated.WebSocket.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Deprecated.WebSocket",
-   $Native$WebSocket = Elm.Native.WebSocket.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var connect = $Native$WebSocket.connect;
-   _elm.Deprecated.WebSocket.values = {_op: _op
-                                      ,connect: connect};
-   return _elm.Deprecated.WebSocket.values;
-};
-Elm.Deserialize = Elm.Deserialize || {};
-Elm.Deserialize.make = function (_elm) {
-   "use strict";
-   _elm.Deserialize = _elm.Deserialize || {};
-   if (_elm.Deserialize.values)
-   return _elm.Deserialize.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Deserialize",
-   $Basics = Elm.Basics.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $Json$Decode = Elm.Json.Decode.make(_elm),
-   $Player = Elm.Player.make(_elm);
-   var windowDims = A3($Json$Decode.tuple2,
-   F2(function (v0,v1) {
-      return {ctor: "_Tuple2"
-             ,_0: v0
-             ,_1: v1};
-   }),
-   $Json$Decode.$int,
-   $Json$Decode.$int);
-   var mousePos = A3($Json$Decode.tuple2,
-   F2(function (v0,v1) {
-      return {ctor: "_Tuple2"
-             ,_0: v0
-             ,_1: v1};
-   }),
-   $Json$Decode.$int,
-   $Json$Decode.$int);
-   var player = A2($Json$Decode.map,
-   $Player.fromString,
-   $Json$Decode.string);
-   var deck = $Json$Decode.list($Json$Decode.string);
-   var actionInfo = function (actionType) {
-      return function () {
-         switch (actionType)
-         {case "NoAction":
-            return $Json$Decode.succeed($GameTypes.NoAction);
-            case "OpponentDisconnected":
-            return $Json$Decode.succeed($GameTypes.OpponentDisconnected);
-            case "Pass":
-            return $Json$Decode.succeed($GameTypes.Pass);
-            case "PickUpPiece":
-            return A3($Json$Decode.object2,
-              $GameTypes.PickUpPiece,
-              A2($Json$Decode._op[":="],
-              "player",
-              player),
-              A2($Json$Decode._op[":="],
-              "idx",
-              $Json$Decode.$int));
-            case "PlacePiece":
-            return A3($Json$Decode.object2,
-              $GameTypes.PlacePiece,
-              A2($Json$Decode._op[":="],
-              "mousePos",
-              mousePos),
-              A2($Json$Decode._op[":="],
-              "dims",
-              windowDims));
-            case "StartGame":
-            return A5($Json$Decode.object4,
-              $GameTypes.GameStarted,
-              A2($Json$Decode._op[":="],
-              "deck",
-              deck),
-              A2($Json$Decode._op[":="],
-              "player",
-              player),
-              A2($Json$Decode._op[":="],
-              "color",
-              player),
-              A2($Json$Decode._op[":="],
-              "opponentName",
-              $Json$Decode.string));}
-         return $Json$Decode.fail(A2($Basics._op["++"],
-         actionType,
-         " is not a recognized type of action"));
-      }();
-   };
-   var action = A2($Json$Decode.andThen,
-   A2($Json$Decode._op[":="],
-   "action",
-   $Json$Decode.string),
-   actionInfo);
-   _elm.Deserialize.values = {_op: _op
-                             ,action: action
-                             ,actionInfo: actionInfo
-                             ,deck: deck
-                             ,player: player
-                             ,mousePos: mousePos
-                             ,windowDims: windowDims};
-   return _elm.Deserialize.values;
-};
 Elm.Dict = Elm.Dict || {};
 Elm.Dict.make = function (_elm) {
    "use strict";
@@ -1654,7 +844,7 @@ Elm.Dict.make = function (_elm) {
               A3(foldr,f,acc,t._4)),
               t._3);}
          _U.badCase($moduleName,
-         "between lines 408 and 416");
+         "between lines 417 and 421");
       }();
    });
    var keys = function (dict) {
@@ -1710,7 +900,7 @@ Elm.Dict.make = function (_elm) {
               A3(foldl,f,acc,dict._3)),
               dict._4);}
          _U.badCase($moduleName,
-         "between lines 397 and 405");
+         "between lines 406 and 410");
       }();
    });
    var isBBlack = function (dict) {
@@ -1734,7 +924,7 @@ Elm.Dict.make = function (_elm) {
             case "Remove": return "Remove";
             case "Same": return "Same";}
          _U.badCase($moduleName,
-         "between lines 173 and 179");
+         "between lines 182 and 185");
       }();
    };
    var Same = {ctor: "Same"};
@@ -1764,10 +954,10 @@ Elm.Dict.make = function (_elm) {
                       targetKey,
                       dict._3);}
                  _U.badCase($moduleName,
-                 "between lines 129 and 135");
+                 "between lines 129 and 132");
               }();}
          _U.badCase($moduleName,
-         "between lines 124 and 135");
+         "between lines 124 and 132");
       }();
    });
    var member = F2(function (key,
@@ -1794,7 +984,7 @@ Elm.Dict.make = function (_elm) {
                         ,_1: dict._2};}
               return max(dict._4);}
          _U.badCase($moduleName,
-         "between lines 100 and 121");
+         "between lines 100 and 108");
       }();
    };
    var min = function (dict) {
@@ -1848,6 +1038,9 @@ Elm.Dict.make = function (_elm) {
    var LBBlack = {ctor: "LBBlack"};
    var LBlack = {ctor: "LBlack"};
    var empty = RBEmpty(LBlack);
+   var isEmpty = function (dict) {
+      return _U.eq(dict,empty);
+   };
    var map = F2(function (f,dict) {
       return function () {
          switch (dict.ctor)
@@ -1863,7 +1056,7 @@ Elm.Dict.make = function (_elm) {
               A2(map,f,dict._3),
               A2(map,f,dict._4));}
          _U.badCase($moduleName,
-         "between lines 385 and 394");
+         "between lines 394 and 399");
       }();
    });
    var showNColor = function (c) {
@@ -1912,7 +1105,7 @@ Elm.Dict.make = function (_elm) {
                    dict._4);}
               break;}
          _U.badCase($moduleName,
-         "between lines 145 and 157");
+         "between lines 154 and 162");
       }();
    };
    var blackish = function (t) {
@@ -1923,7 +1116,7 @@ Elm.Dict.make = function (_elm) {
             return _U.eq(t._0,
               Black) || _U.eq(t._0,BBlack);}
          _U.badCase($moduleName,
-         "between lines 330 and 332");
+         "between lines 339 and 341");
       }();
    };
    var blacken = function (t) {
@@ -1938,7 +1131,7 @@ Elm.Dict.make = function (_elm) {
               t._3,
               t._4);}
          _U.badCase($moduleName,
-         "between lines 369 and 371");
+         "between lines 378 and 380");
       }();
    };
    var Red = {ctor: "Red"};
@@ -1951,7 +1144,7 @@ Elm.Dict.make = function (_elm) {
             case "NBlack": return Red;
             case "Red": return Black;}
          _U.badCase($moduleName,
-         "between lines 235 and 239");
+         "between lines 244 and 248");
       }();
    };
    var lessBlack = function (color) {
@@ -1963,7 +1156,7 @@ Elm.Dict.make = function (_elm) {
             return $Native$Debug.crash("Can\'t make a negative black node less black!");
             case "Red": return NBlack;}
          _U.badCase($moduleName,
-         "between lines 244 and 248");
+         "between lines 253 and 257");
       }();
    };
    var lessBlackTree = function (dict) {
@@ -1981,7 +1174,7 @@ Elm.Dict.make = function (_elm) {
               dict._3,
               dict._4);}
          _U.badCase($moduleName,
-         "between lines 253 and 255");
+         "between lines 262 and 264");
       }();
    };
    var redden = function (t) {
@@ -1996,7 +1189,7 @@ Elm.Dict.make = function (_elm) {
               t._3,
               t._4);}
          _U.badCase($moduleName,
-         "between lines 377 and 382");
+         "between lines 386 and 388");
       }();
    };
    var balance_node = function (t) {
@@ -2198,7 +1391,7 @@ Elm.Dict.make = function (_elm) {
               r._3,
               r._4));}
          _U.badCase($moduleName,
-         "between lines 314 and 319");
+         "between lines 323 and 328");
       }();
    });
    var rem = F3(function (c,l,r) {
@@ -2219,7 +1412,7 @@ Elm.Dict.make = function (_elm) {
                               case "Red":
                               return RBEmpty(LBlack);}
                            _U.badCase($moduleName,
-                           "between lines 273 and 277");
+                           "between lines 282 and 286");
                         }();
                       case "RBNode":
                       return function () {
@@ -2309,7 +1502,7 @@ Elm.Dict.make = function (_elm) {
                    break;}
               break;}
          _U.badCase($moduleName,
-         "between lines 271 and 300");
+         "between lines 280 and 309");
       }();
    });
    var update = F3(function (k,
@@ -2339,7 +1532,7 @@ Elm.Dict.make = function (_elm) {
                                       ,_0: Same
                                       ,_1: empty};}
                             _U.badCase($moduleName,
-                            "between lines 185 and 189");
+                            "between lines 194 and 198");
                          }();}
                     break;
                   case "RBNode":
@@ -2368,7 +1561,7 @@ Elm.Dict.make = function (_elm) {
                                          dict._3,
                                          dict._4)};}
                                _U.badCase($moduleName,
-                               "between lines 192 and 197");
+                               "between lines 201 and 206");
                             }();
                           case "GT": return function () {
                                var $ = up(dict._4),
@@ -2404,7 +1597,7 @@ Elm.Dict.make = function (_elm) {
                                             dict._3,
                                             newRight)};}
                                   _U.badCase($moduleName,
-                                  "between lines 206 and 211");
+                                  "between lines 215 and 220");
                                }();
                             }();
                           case "LT": return function () {
@@ -2441,14 +1634,14 @@ Elm.Dict.make = function (_elm) {
                                             newLeft,
                                             dict._4)};}
                                   _U.badCase($moduleName,
-                                  "between lines 199 and 204");
+                                  "between lines 208 and 213");
                                }();
                             }();}
                        _U.badCase($moduleName,
-                       "between lines 190 and 211");
+                       "between lines 199 and 220");
                     }();}
                _U.badCase($moduleName,
-               "between lines 183 and 211");
+               "between lines 192 and 220");
             }();
          };
          var $ = up(dict),
@@ -2463,7 +1656,7 @@ Elm.Dict.make = function (_elm) {
                case "Same":
                return updatedDict;}
             _U.badCase($moduleName,
-            "between lines 213 and 219");
+            "between lines 222 and 225");
          }();
       }();
    });
@@ -2480,7 +1673,7 @@ Elm.Dict.make = function (_elm) {
       return A3(insert,
       key,
       value,
-      RBEmpty(LBlack));
+      empty);
    });
    var union = F2(function (t1,
    t2) {
@@ -2500,7 +1693,7 @@ Elm.Dict.make = function (_elm) {
                  _v214._1,
                  dict);}
             _U.badCase($moduleName,
-            "on line 457, column 38 to 59");
+            "on line 466, column 38 to 59");
          }();
       }),
       empty,
@@ -2558,7 +1751,7 @@ Elm.Dict.make = function (_elm) {
                                               value,
                                               _v220._1)};}
                _U.badCase($moduleName,
-               "between lines 478 and 480");
+               "between lines 487 and 489");
             }();
          });
          return A3(foldl,
@@ -2589,6 +1782,7 @@ Elm.Dict.make = function (_elm) {
                       ,singleton: singleton
                       ,insert: insert
                       ,update: update
+                      ,isEmpty: isEmpty
                       ,get: get
                       ,remove: remove
                       ,member: member
@@ -2605,1767 +1799,6 @@ Elm.Dict.make = function (_elm) {
                       ,toList: toList
                       ,fromList: fromList};
    return _elm.Dict.values;
-};
-Elm.Display = Elm.Display || {};
-Elm.Display.make = function (_elm) {
-   "use strict";
-   _elm.Display = _elm.Display || {};
-   if (_elm.Display.values)
-   return _elm.Display.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Display",
-   $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $Display$Board = Elm.Display.Board.make(_elm),
-   $Display$Constants = Elm.Display.Constants.make(_elm),
-   $Display$Helpers = Elm.Display.Helpers.make(_elm),
-   $Game = Elm.Game.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Graphics$Input = Elm.Graphics.Input.make(_elm),
-   $Graphics$Input$Field = Elm.Graphics.Input.Field.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Log = Elm.Log.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Piece = Elm.Piece.make(_elm),
-   $Player = Elm.Player.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $State = Elm.State.make(_elm),
-   $String = Elm.String.make(_elm),
-   $Text = Elm.Text.make(_elm);
-   var passTurnDisabledButton = A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Pass_Turn-H.png");
-   var renderPieceDescription = function (piece) {
-      return A2($Graphics$Element.flow,
-      $Graphics$Element.down,
-      _L.fromArray([A2($Graphics$Element.spacer,
-                   1,
-                   10)
-                   ,A3($Graphics$Element.container,
-                   380,
-                   158,
-                   $Graphics$Element.topLeft)(A2($Graphics$Element.flow,
-                   $Graphics$Element.down,
-                   _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                             ,_0: 5
-                                                             ,_1: 1})($Graphics$Element.width(370)($Graphics$Element.leftAligned($Text.height(40)($Text.fromString($Piece.toDisplayString(piece))))))
-                                ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                             ,_0: 30
-                                                             ,_1: 1})($Graphics$Element.width(320)($Graphics$Element.leftAligned($Text.height(16)($Text.fromString($Piece.flavorText(piece))))))])))
-                   ,A3($Graphics$Collage.collage,
-                   380,
-                   46,
-                   _L.fromArray([$Graphics$Collage.traced(_U.replace([["width"
-                                                                      ,2]
-                                                                     ,["color"
-                                                                      ,$Color.darkGrey]],
-                   $Graphics$Collage.defaultLine))(A2($Graphics$Collage.segment,
-                   {ctor: "_Tuple2"
-                   ,_0: -170.0
-                   ,_1: 0.0},
-                   {ctor: "_Tuple2"
-                   ,_0: 170.0
-                   ,_1: 0.0}))]))
-                   ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                ,_0: 10
-                                                ,_1: 1})(A3($Graphics$Element.container,
-                   360,
-                   80,
-                   $Graphics$Element.topLeft)($Graphics$Element.width(360)($Graphics$Element.leftAligned($Text.height(18)($Text.fromString($Piece.rulesText(piece)))))))]));
-   };
-   var renderDeck = function (state) {
-      return function () {
-         var deckSize = $State.isNotStarted(state) ? $List.length($Game.deckContents) : $State.isOngoing(state) ? $List.length(state.deck) : 0;
-         var deckSizeStr = A2($Basics._op["++"],
-         "Deck : ",
-         $Basics.toString(deckSize));
-         var deckImage = _U.eq(deckSize,
-         0) ? "images/Other/Deck-0.png" : _U.eq(deckSize,
-         1) ? "images/Other/Deck-1.png" : _U.eq(deckSize,
-         2) ? "images/Other/Deck-2.png" : _U.eq(deckSize,
-         3) ? "images/Other/Deck-3.png" : "images/Other/Deck-4.png";
-         return A2($Graphics$Element.flow,
-         $Graphics$Element.down,
-         _L.fromArray([A3($Graphics$Element.image,
-                      85,
-                      85,
-                      deckImage)
-                      ,A3($Graphics$Element.container,
-                      85,
-                      20,
-                      $Graphics$Element.midBottom)($Graphics$Element.centered($Text.height(14)($Text.fromString(deckSizeStr))))]));
-      }();
-   };
-   var playerScoreText = F2(function (player,
-   state) {
-      return function () {
-         var p = $Player.toString(player);
-         return $Text.height(40)($Text.color($Player.toColor(player))($Text.fromString($Basics.toString($Maybe.withDefault(0)(A2($Dict.get,
-         p,
-         state.score))))));
-      }();
-   });
-   var playerHandText = F3(function (player,
-   state,
-   playerName) {
-      return function () {
-         var p = $Player.toString(player);
-         var playerType = A2($Maybe.withDefault,
-         $GameTypes.Human,
-         A2($Dict.get,p,state.players));
-         var text = function () {
-            var _v0 = state.gameType;
-            switch (_v0.ctor)
-            {case "HumanVsCpu":
-               return function () {
-                    switch (playerType.ctor)
-                    {case "Cpu": return "CPU";
-                       case "Human": return "Player";}
-                    _U.badCase($moduleName,
-                    "between lines 143 and 146");
-                 }();
-               case "HumanVsHumanLocal":
-               return $Basics.toString(player);
-               case "HumanVsHumanRemote":
-               return function () {
-                    switch (playerType.ctor)
-                    {case "Human":
-                       return playerName.string;}
-                    return $State.isNotStarted(state) ? "?" : A2($Maybe.withDefault,
-                    "?",
-                    A2($Dict.get,
-                    p,
-                    state.playerNames));
-                 }();}
-            _U.badCase($moduleName,
-            "between lines 142 and 152");
-         }();
-         return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
-         player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(text)))));
-      }();
-   });
-   var renderScoreArea = F2(function (state,
-   playerName) {
-      return A2($Graphics$Element.flow,
-      $Graphics$Element.down,
-      _L.fromArray([A3($Graphics$Element.container,
-                   85,
-                   30,
-                   $Graphics$Element.middle)($Graphics$Element.centered(A3(playerHandText,
-                   $GameTypes.Red,
-                   state,
-                   playerName)))
-                   ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                ,_0: 1
-                                                ,_1: 6})(A3($Graphics$Element.container,
-                   85,
-                   40,
-                   $Graphics$Element.middle)($Graphics$Element.centered(A2(playerScoreText,
-                   $GameTypes.Red,
-                   state))))
-                   ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                ,_0: 1
-                                                ,_1: 14})(renderDeck(state))
-                   ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                ,_0: 1
-                                                ,_1: 6})(A3($Graphics$Element.container,
-                   85,
-                   40,
-                   $Graphics$Element.middle)($Graphics$Element.centered(A2(playerScoreText,
-                   $GameTypes.Blue,
-                   state))))
-                   ,A3($Graphics$Element.container,
-                   85,
-                   30,
-                   $Graphics$Element.middle)($Graphics$Element.centered(A3(playerHandText,
-                   $GameTypes.Blue,
-                   state,
-                   playerName)))]));
-   });
-   var playerNameMailbox = $Signal.mailbox($Graphics$Input$Field.noContent);
-   var playerNameSignal = function () {
-      var limitTo6Chars = function (content) {
-         return _U.replace([["string"
-                            ,A2($String.left,
-                            6,
-                            content.string)]],
-         content);
-      };
-      return A2($Signal.map,
-      limitTo6Chars,
-      playerNameMailbox.signal);
-   }();
-   var clickMailbox = $Signal.mailbox($GameTypes.None);
-   var renderBoard = F2(function (state,
-   dims) {
-      return function () {
-         var boardSize = $Display$Board.getBoardSize(state);
-         var tileSize = A2($Display$Board.getTileSizeFromBoardSize,
-         boardSize,
-         dims);
-         var pieces = A2($List.map,
-         function (p) {
-            return A3($Display$Board.drawPiece,
-            p,
-            state.board,
-            tileSize);
-         },
-         $Dict.toList(state.board));
-         var outline = A2($Display$Board.drawLastPlacedOutline,
-         state,
-         tileSize);
-         var size = boardSize * $Basics.round(tileSize) + 1;
-         var grid = A3($Display$Board.drawGrid,
-         state,
-         boardSize,
-         dims);
-         var overlay = A3($Display$Board.drawAvailableOverlay,
-         state,
-         boardSize,
-         dims);
-         var board = A3($Graphics$Collage.collage,
-         size,
-         size,
-         A2($Basics._op["++"],
-         grid,
-         A2($Basics._op["++"],
-         pieces,
-         A2($Basics._op["++"],
-         outline,
-         overlay))));
-         return A2($Graphics$Input.clickable,
-         A2($Signal.message,
-         clickMailbox.address,
-         $GameTypes.BoardClick),
-         board);
-      }();
-   });
-   var renderHand = F2(function (player,
-   state) {
-      return function () {
-         var combineWith = F2(function (elt1,
-         elt2) {
-            return A2($Graphics$Element.flow,
-            $Graphics$Element.inward,
-            _L.fromArray([elt1,elt2]));
-         });
-         var placeholderPiece = A3($Graphics$Element.image,
-         $Display$Constants.handTileSize,
-         $Display$Constants.handTileSize,
-         "images/100/No_Tile.png");
-         var hiddenPiece = A3($Graphics$Element.image,
-         $Display$Constants.handTileSize,
-         $Display$Constants.handTileSize,
-         "images/100/Tile_Back.png");
-         var pieceSize = $Display$Constants.handTileSize + $Display$Constants.handPadding;
-         var dummyHand = A2($List.repeat,
-         5,
-         A3($Graphics$Element.container,
-         pieceSize,
-         pieceSize,
-         $Graphics$Element.middle)(placeholderPiece));
-         var pieceImage = function (pieceStr) {
-            return $Display$Helpers.pieceToImage($Piece.fromString(pieceStr));
-         };
-         var isPieceHeld = function (idx) {
-            return _U.eq(state.turn,
-            player) && _U.eq(state.heldPiece,
-            $Maybe.Just(idx));
-         };
-         var makePiece = F2(function (idx,
-         pieceStr) {
-            return $Graphics$Input.clickable(A2($Signal.message,
-            clickMailbox.address,
-            A2($GameTypes.PieceInHand,
-            player,
-            idx)))(A3($Graphics$Element.container,
-            pieceSize,
-            pieceSize,
-            $Graphics$Element.middle)(combineWith(isPieceHeld(idx) ? A3($Graphics$Element.image,
-            $Display$Constants.handTileSize,
-            $Display$Constants.handTileSize,
-            A2($Basics._op["++"],
-            "images/100/",
-            A2($Basics._op["++"],
-            $Player.toString(state.turn),
-            "-H.png"))) : $Graphics$Element.empty)(A3(pieceImage,
-            pieceStr,
-            $Basics.toString($Piece.baseValue($Piece.fromString(pieceStr))),
-            $Basics.toFloat($Display$Constants.handTileSize)))));
-         });
-         var hand = A2($Player.getHand,
-         player,
-         state);
-         var playerHand = A2($List.indexedMap,
-         makePiece,
-         hand);
-         var cpuHand = A2($List.map,
-         function (x) {
-            return A3($Graphics$Element.container,
-            pieceSize,
-            pieceSize,
-            $Graphics$Element.middle)(hiddenPiece);
-         },
-         hand);
-         var p = $Player.toString(player);
-         var playerType = A2($Maybe.withDefault,
-         $GameTypes.Human,
-         A2($Dict.get,p,state.players));
-         var isHandShown = function () {
-            var _v3 = state.gameType;
-            switch (_v3.ctor)
-            {case "HumanVsCpu":
-               return _U.eq(playerType,
-                 $GameTypes.Human);
-               case "HumanVsHumanLocal":
-               return _U.eq(state.turn,player);
-               case "HumanVsHumanRemote":
-               return _U.eq(playerType,
-                 $GameTypes.Human);}
-            _U.badCase($moduleName,
-            "between lines 116 and 121");
-         }();
-         var handContents = $State.isNotStarted(state) ? dummyHand : isHandShown ? playerHand : cpuHand;
-         return A3($Graphics$Element.container,
-         ($Display$Constants.handTileSize + $Display$Constants.handPadding) * 5,
-         $Display$Constants.handTileSize + $Display$Constants.handPadding,
-         $Graphics$Element.topLeft)(A2($Graphics$Element.flow,
-         $Graphics$Element.right,
-         handContents));
-      }();
-   });
-   var startSinglePlayerButton = A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.StartSinglePlayer),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Single_Player.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Single_Player-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Single_Player-H.png"));
-   var startRemoteButton = A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.StartRemoteGameButton),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/2P_Online.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/2P_Online-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/2P_Online-H.png"));
-   var startHotseatButton = A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.StartTwoPlayerHotseat),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/2P_Hotseat.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/2P_Hotseat-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/2P_Hotseat-H.png"));
-   var viewRulesButton = $Graphics$Element.link("rules.html")(A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.None),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/View_Rules.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/View_Rules-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/View_Rules-H.png")));
-   var renderMenu = $Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                ,_0: 95
-                                                ,_1: 35})(A2($Graphics$Element.flow,
-   $Graphics$Element.down,
-   _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                             ,_0: 1
-                                             ,_1: 3})(startSinglePlayerButton)
-                ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                             ,_0: 1
-                                             ,_1: 3})(startRemoteButton)
-                ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                             ,_0: 1
-                                             ,_1: 3})(startHotseatButton)
-                ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                             ,_0: 1
-                                             ,_1: 3})(viewRulesButton)])));
-   var backToMainMenuButton = A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.MainMenuButton),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Back.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Back-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Back-H.png"));
-   var startRemoteGameConfirmButton = A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.StartTwoPlayerOnline),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Confirm.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Confirm-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Confirm-H.png"));
-   var renderRemoteSetupMenu = function (playerName) {
-      return A2($Graphics$Element.flow,
-      $Graphics$Element.down,
-      _L.fromArray([A3($Graphics$Element.container,
-                   380,
-                   100,
-                   $Graphics$Element.midBottom)($Graphics$Element.centered($Text.fromString("Enter player name : ")))
-                   ,A2($Graphics$Element.spacer,
-                   1,
-                   20)
-                   ,A3($Graphics$Element.container,
-                   380,
-                   110,
-                   $Graphics$Element.midTop)(A4($Graphics$Input$Field.field,
-                   $Graphics$Input$Field.defaultStyle,
-                   $Signal.message(playerNameMailbox.address),
-                   "Your name",
-                   playerName))
-                   ,A2($Graphics$Element.flow,
-                   $Graphics$Element.right,
-                   _L.fromArray([backToMainMenuButton
-                                ,startRemoteGameConfirmButton]))]));
-   };
-   var passTurnButton = A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.PassButton),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Pass_Turn.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Pass_Turn-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Pass_Turn-H.png"));
-   var switchButton = A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.SwitchButton),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Switch.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Switch-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Switch-H.png"));
-   var quitGameButton = A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.MainMenuButton),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Quit_Game.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Quit_Game-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Quit_Game-H.png"));
-   var mainMenuButton = A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.MainMenuButton),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Main_Menu.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Main_Menu-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/Main_Menu-H.png"));
-   var newGameButton = A4($Graphics$Input.customButton,
-   A2($Signal.message,
-   clickMailbox.address,
-   $GameTypes.StartNewGameButton),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/New_Game.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/New_Game-H.png"),
-   A3($Graphics$Element.image,
-   196,
-   46,
-   "images/Buttons/New_Game-H.png"));
-   var renderLog = function (state) {
-      return function () {
-         var currentTurnAndSwitchButton = A2($Graphics$Element.flow,
-         $Graphics$Element.right,
-         _L.fromArray([A3($Graphics$Element.container,
-                      196,
-                      48,
-                      $Graphics$Element.middle)($Graphics$Element.leftAligned($Text.height(18)($Text.color($Player.toColor(state.turn))($Text.fromString(A2($Basics._op["++"],
-                      $Player.toString(state.turn),
-                      "\'s Turn"))))))
-                      ,switchButton]));
-         var passAndQuitButtons = A2($Graphics$Element.flow,
-         $Graphics$Element.right,
-         _L.fromArray([_U.eq(A2($Player.getType,
-                      state.turn,
-                      state),
-                      $GameTypes.Human) ? passTurnButton : passTurnDisabledButton
-                      ,quitGameButton]));
-         var mainMenuAndNewGameButtons = A2($Graphics$Element.flow,
-         $Graphics$Element.right,
-         _L.fromArray([mainMenuButton
-                      ,newGameButton]));
-         var backAndRulesButtons = A2($Graphics$Element.flow,
-         $Graphics$Element.right,
-         _L.fromArray([backToMainMenuButton
-                      ,viewRulesButton]));
-         var buttons = function () {
-            var _v4 = state.gameState;
-            switch (_v4.ctor)
-            {case "Disconnected":
-               return backAndRulesButtons;
-               case "GameOver":
-               return mainMenuAndNewGameButtons;
-               case "WaitingForPlayers":
-               return backAndRulesButtons;}
-            return $State.isSwitchingPlayers(state) ? currentTurnAndSwitchButton : passAndQuitButtons;
-         }();
-         return A2($Graphics$Element.flow,
-         $Graphics$Element.down,
-         _L.fromArray([A3($Graphics$Element.container,
-                      390,
-                      220,
-                      $Graphics$Element.midTop)(A2($Log.display,
-                      {ctor: "_Tuple2"
-                      ,_0: 390
-                      ,_1: 168},
-                      state.log))
-                      ,buttons]));
-      }();
-   };
-   var renderRightArea = F2(function (state,
-   playerName) {
-      return function () {
-         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : function () {
-            var _v5 = $State.pieceHeld(state);
-            switch (_v5.ctor)
-            {case "Just":
-               return renderPieceDescription(_v5._0);
-               case "Nothing":
-               return renderLog(state);}
-            _U.badCase($moduleName,
-            "between lines 194 and 197");
-         }();
-         return A2($Display$Helpers.withBorder,
-         {ctor: "_Tuple2",_0: 2,_1: 2},
-         $Color.darkGrey)(A3($Graphics$Element.container,
-         410,
-         $Display$Constants.sidebarRightAreaHeight,
-         $Graphics$Element.middle)(content));
-      }();
-   });
-   var renderSidebar = F3(function (state,
-   _v7,
-   playerName) {
-      return function () {
-         switch (_v7.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var sidebarPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
-                                                                              ,_0: _v7._0
-                                                                              ,_1: _v7._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
-                 var sidebarInnerPaddingHeight = A2($Basics.min,
-                 30,
-                 sidebarPaddingHeight * 2 / 3 | 0);
-                 var sidebarOuterPaddingHeight = sidebarPaddingHeight - sidebarInnerPaddingHeight;
-                 return A2($Graphics$Element.flow,
-                 $Graphics$Element.down,
-                 _L.fromArray([A3($Graphics$Element.image,
-                              $Display$Constants.sidebarWidth,
-                              $Display$Constants.sidebarImageHeight,
-                              "images/Other/Kalevala.png")
-                              ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                           ,_0: 12
-                                                           ,_1: 11})(A2($Graphics$Element.flow,
-                              $Graphics$Element.down,
-                              _L.fromArray([A2($Graphics$Element.spacer,
-                                           1,
-                                           sidebarOuterPaddingHeight)
-                                           ,A2(renderHand,
-                                           $GameTypes.Red,
-                                           state)
-                                           ,A2($Graphics$Element.spacer,
-                                           1,
-                                           sidebarInnerPaddingHeight)
-                                           ,A2($Graphics$Element.flow,
-                                           $Graphics$Element.right,
-                                           _L.fromArray([$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                                                     ,_0: 16
-                                                                                     ,_1: 11})(A2(renderScoreArea,
-                                                        state,
-                                                        playerName))
-                                                        ,$Display$Helpers.withMargin({ctor: "_Tuple2"
-                                                                                     ,_0: 13
-                                                                                     ,_1: 19})(A2(renderRightArea,
-                                                        state,
-                                                        playerName))]))
-                                           ,A2($Graphics$Element.spacer,
-                                           1,
-                                           sidebarInnerPaddingHeight)
-                                           ,A2(renderHand,
-                                           $GameTypes.Blue,
-                                           state)
-                                           ,A2($Graphics$Element.spacer,
-                                           1,
-                                           sidebarOuterPaddingHeight)])))]));
-              }();}
-         _U.badCase($moduleName,
-         "between lines 74 and 89");
-      }();
-   });
-   var renderGameArea = F3(function (state,
-   dims,
-   playerName) {
-      return A2($Graphics$Element.flow,
-      $Graphics$Element.right,
-      _L.fromArray([A2(renderBoard,
-                   state,
-                   dims)
-                   ,A2($Graphics$Element.spacer,
-                   $Display$Constants.gameMargin,
-                   1)
-                   ,A3(renderSidebar,
-                   state,
-                   dims,
-                   playerName)]));
-   });
-   var render = F3(function (state,
-   dims,
-   playerName) {
-      return $Display$Helpers.withMargin({ctor: "_Tuple2"
-                                         ,_0: $Display$Constants.gameMargin
-                                         ,_1: $Display$Constants.gameMargin})(A3(renderGameArea,
-      state,
-      dims,
-      playerName));
-   });
-   _elm.Display.values = {_op: _op
-                         ,clickMailbox: clickMailbox
-                         ,playerNameMailbox: playerNameMailbox
-                         ,playerNameSignal: playerNameSignal
-                         ,render: render
-                         ,renderGameArea: renderGameArea
-                         ,renderBoard: renderBoard
-                         ,renderSidebar: renderSidebar
-                         ,renderHand: renderHand
-                         ,renderScoreArea: renderScoreArea
-                         ,playerHandText: playerHandText
-                         ,playerScoreText: playerScoreText
-                         ,renderDeck: renderDeck
-                         ,renderRightArea: renderRightArea
-                         ,renderMenu: renderMenu
-                         ,renderLog: renderLog
-                         ,renderPieceDescription: renderPieceDescription
-                         ,renderRemoteSetupMenu: renderRemoteSetupMenu
-                         ,startSinglePlayerButton: startSinglePlayerButton
-                         ,startRemoteButton: startRemoteButton
-                         ,startHotseatButton: startHotseatButton
-                         ,viewRulesButton: viewRulesButton
-                         ,backToMainMenuButton: backToMainMenuButton
-                         ,startRemoteGameConfirmButton: startRemoteGameConfirmButton
-                         ,passTurnButton: passTurnButton
-                         ,passTurnDisabledButton: passTurnDisabledButton
-                         ,switchButton: switchButton
-                         ,quitGameButton: quitGameButton
-                         ,mainMenuButton: mainMenuButton
-                         ,newGameButton: newGameButton};
-   return _elm.Display.values;
-};
-Elm.Display = Elm.Display || {};
-Elm.Display.Board = Elm.Display.Board || {};
-Elm.Display.Board.make = function (_elm) {
-   "use strict";
-   _elm.Display = _elm.Display || {};
-   _elm.Display.Board = _elm.Display.Board || {};
-   if (_elm.Display.Board.values)
-   return _elm.Display.Board.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Display.Board",
-   $Basics = Elm.Basics.make(_elm),
-   $Board = Elm.Board.make(_elm),
-   $Display$Constants = Elm.Display.Constants.make(_elm),
-   $Display$Helpers = Elm.Display.Helpers.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Player = Elm.Player.make(_elm);
-   var drawLastPlacedOutline = F2(function (state,
-   tileSize) {
-      return function () {
-         var _v0 = {ctor: "_Tuple2"
-                   ,_0: state.lastPlaced
-                   ,_1: state.lastPlacedPlayer};
-         switch (_v0.ctor)
-         {case "_Tuple2":
-            switch (_v0._0.ctor)
-              {case "Just":
-                 switch (_v0._0._0.ctor)
-                   {case "_Tuple2":
-                      switch (_v0._1.ctor)
-                        {case "Just":
-                           return function () {
-                                var lastPlacedColorStr = $Player.toString(_v0._1._0);
-                                var imgSize = _U.cmp(tileSize,
-                                50) > 0 ? 100 : 50;
-                                var lastPlacedOutlinePath = A2($Basics._op["++"],
-                                "images/",
-                                A2($Basics._op["++"],
-                                $Basics.toString(imgSize),
-                                A2($Basics._op["++"],
-                                "/",
-                                A2($Basics._op["++"],
-                                lastPlacedColorStr,
-                                "-H.png"))));
-                                var lastPlacedOutline = A2($Graphics$Collage.move,
-                                {ctor: "_Tuple2"
-                                ,_0: tileSize * $Basics.toFloat(_v0._0._0._0)
-                                ,_1: tileSize * $Basics.toFloat(_v0._0._0._1)},
-                                $Graphics$Collage.toForm(A3($Graphics$Element.image,
-                                tileSize,
-                                tileSize,
-                                lastPlacedOutlinePath)));
-                                return _L.fromArray([lastPlacedOutline]);
-                             }();}
-                        break;}
-                   break;}
-              break;}
-         return _L.fromArray([]);
-      }();
-   });
-   var drawPiece = F3(function (_v7,
-   board,
-   tileSize) {
-      return function () {
-         switch (_v7.ctor)
-         {case "_Tuple2":
-            switch (_v7._0.ctor)
-              {case "_Tuple2":
-                 return function () {
-                      var value = A2($Board.getDisplayedTileValue,
-                      {ctor: "_Tuple2"
-                      ,_0: _v7._0._0
-                      ,_1: _v7._0._1},
-                      board);
-                      var y = $Basics.toFloat(_v7._0._1) * tileSize;
-                      var x = $Basics.toFloat(_v7._0._0) * tileSize;
-                      return A2($Graphics$Collage.move,
-                      {ctor: "_Tuple2",_0: x,_1: y},
-                      $Graphics$Collage.toForm(A3($Display$Helpers.pieceToImage,
-                      _v7._1,
-                      value,
-                      tileSize)));
-                   }();}
-              break;}
-         _U.badCase($moduleName,
-         "between lines 67 and 71");
-      }();
-   });
-   var getBoardSize = function (state) {
-      return $Board.getBoardSize(state.board);
-   };
-   var getTotalBoardSize = function (_v13) {
-      return function () {
-         switch (_v13.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var availableHeight = _v13._1 - 2 * $Display$Constants.gameMargin;
-                 var availableWidth = _v13._0 - $Display$Constants.sidebarWidth - 3 * $Display$Constants.gameMargin;
-                 return A2($Basics.max,
-                 A2($Basics.min,
-                 availableHeight,
-                 availableWidth),
-                 $Display$Constants.minSidebarHeight);
-              }();}
-         _U.badCase($moduleName,
-         "between lines 27 and 30");
-      }();
-   };
-   var getTileSizeFromBoardSize = F2(function (boardSize,
-   dims) {
-      return $Basics.toFloat(getTotalBoardSize(dims) / boardSize | 0);
-   });
-   var mouseToBoardPosition = F3(function (_v17,
-   state,
-   dims) {
-      return function () {
-         switch (_v17.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var boardSize = $Board.getBoardSize(state.board);
-                 var tileSize = $Basics.round(A2(getTileSizeFromBoardSize,
-                 boardSize,
-                 dims));
-                 var offset = boardSize / 2 | 0;
-                 var y = _v17._1 - $Display$Constants.gameMargin;
-                 var boardY = 0 - ((y / tileSize | 0) - offset);
-                 var x = _v17._0 - $Display$Constants.gameMargin;
-                 var boardX = (x / tileSize | 0) - offset;
-                 return {ctor: "_Tuple2"
-                        ,_0: boardX
-                        ,_1: boardY};
-              }();}
-         _U.badCase($moduleName,
-         "between lines 40 and 47");
-      }();
-   });
-   var drawGrid = F3(function (state,
-   boardSize,
-   dims) {
-      return function () {
-         var tileSize = A2(getTileSizeFromBoardSize,
-         boardSize,
-         dims);
-         var totalSize = $Basics.toFloat(boardSize) * tileSize;
-         var offset = tileSize / 2 - totalSize / 2;
-         var shape = F2(function (x,y) {
-            return function () {
-               var imgSize = _U.cmp(tileSize,
-               50) > 0 ? 100 : 50;
-               var tile = A2($Basics._op["++"],
-               "images/",
-               A2($Basics._op["++"],
-               $Basics.toString(imgSize),
-               A2($Basics._op["++"],
-               "/Board-",
-               A2($Basics._op["++"],
-               $Basics.toString(A2($Basics._op["%"],
-               Math.pow(x,2) + 7 * y,
-               6)),
-               ".png"))));
-               var pos = {ctor: "_Tuple2"
-                         ,_0: tileSize * $Basics.toFloat(x) + offset
-                         ,_1: tileSize * $Basics.toFloat(y) + offset};
-               return A2($Graphics$Collage.move,
-               pos,
-               $Graphics$Collage.toForm(A3($Graphics$Element.image,
-               $Basics.round(tileSize),
-               $Basics.round(tileSize),
-               tile)));
-            }();
-         });
-         return A2($List.concatMap,
-         function (x) {
-            return A2($List.map,
-            function (y) {
-               return A2(shape,x,y);
-            },
-            _L.range(0,boardSize - 1));
-         },
-         _L.range(0,boardSize - 1));
-      }();
-   });
-   var drawAvailableOverlay = F3(function (state,
-   boardSize,
-   dims) {
-      return function () {
-         var tileSize = A2(getTileSizeFromBoardSize,
-         boardSize,
-         dims);
-         var totalSize = $Basics.toFloat(boardSize) * tileSize;
-         var imgSize = _U.cmp(tileSize,
-         50) > 0 ? 100 : 50;
-         var overlayImgPath = A2($Basics._op["++"],
-         "images/",
-         A2($Basics._op["++"],
-         $Basics.toString(imgSize),
-         "/Green-H.png"));
-         var offset = tileSize / 2 - totalSize / 2;
-         var shape = F2(function (x,y) {
-            return function () {
-               var overlay = A3($Board.isValidSquareToMove,
-               state,
-               {ctor: "_Tuple2",_0: x,_1: y},
-               boardSize) ? A3($Graphics$Element.image,
-               $Basics.round(tileSize),
-               $Basics.round(tileSize),
-               overlayImgPath) : $Graphics$Element.empty;
-               var pos = {ctor: "_Tuple2"
-                         ,_0: tileSize * $Basics.toFloat(x) + offset
-                         ,_1: tileSize * $Basics.toFloat(y) + offset};
-               return A2($Graphics$Collage.move,
-               pos,
-               $Graphics$Collage.toForm(overlay));
-            }();
-         });
-         return A2($List.concatMap,
-         function (x) {
-            return A2($List.map,
-            function (y) {
-               return A2(shape,x,y);
-            },
-            _L.range(0,boardSize - 1));
-         },
-         _L.range(0,boardSize - 1));
-      }();
-   });
-   _elm.Display.Board.values = {_op: _op
-                               ,getTotalBoardSize: getTotalBoardSize
-                               ,getTileSizeFromBoardSize: getTileSizeFromBoardSize
-                               ,getBoardSize: getBoardSize
-                               ,mouseToBoardPosition: mouseToBoardPosition
-                               ,drawGrid: drawGrid
-                               ,drawPiece: drawPiece
-                               ,drawAvailableOverlay: drawAvailableOverlay
-                               ,drawLastPlacedOutline: drawLastPlacedOutline};
-   return _elm.Display.Board.values;
-};
-Elm.Display = Elm.Display || {};
-Elm.Display.Constants = Elm.Display.Constants || {};
-Elm.Display.Constants.make = function (_elm) {
-   "use strict";
-   _elm.Display = _elm.Display || {};
-   _elm.Display.Constants = _elm.Display.Constants || {};
-   if (_elm.Display.Constants.values)
-   return _elm.Display.Constants.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Display.Constants",
-   $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm);
-   var transpGreen = A4($Color.rgba,
-   0,
-   255,
-   0,
-   0.5);
-   var transparent = A4($Color.rgba,
-   0,
-   0,
-   0,
-   0.0);
-   var handTileSize = 100;
-   var handPadding = 10;
-   var sidebarRightAreaHeight = 282;
-   var sidebarImageHeight = 82;
-   var minSidebarHeight = 2 * (handPadding + handTileSize) + sidebarImageHeight + sidebarRightAreaHeight + 2 * 11 + 2 * 19;
-   var sidebarWidth = 582;
-   var gameMargin = 16;
-   _elm.Display.Constants.values = {_op: _op
-                                   ,gameMargin: gameMargin
-                                   ,sidebarWidth: sidebarWidth
-                                   ,sidebarImageHeight: sidebarImageHeight
-                                   ,sidebarRightAreaHeight: sidebarRightAreaHeight
-                                   ,handPadding: handPadding
-                                   ,handTileSize: handTileSize
-                                   ,minSidebarHeight: minSidebarHeight
-                                   ,transparent: transparent
-                                   ,transpGreen: transpGreen};
-   return _elm.Display.Constants.values;
-};
-Elm.Display = Elm.Display || {};
-Elm.Display.Helpers = Elm.Display.Helpers || {};
-Elm.Display.Helpers.make = function (_elm) {
-   "use strict";
-   _elm.Display = _elm.Display || {};
-   _elm.Display.Helpers = _elm.Display.Helpers || {};
-   if (_elm.Display.Helpers.values)
-   return _elm.Display.Helpers.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Display.Helpers",
-   $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $Display$Constants = Elm.Display.Constants.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Piece = Elm.Piece.make(_elm);
-   var pieceToImage = F3(function (piece,
-   value,
-   tileSize) {
-      return function () {
-         var imgSize = _U.cmp(tileSize,
-         50) > 0 ? 100 : 50;
-         var imgPath = A2($Basics._op["++"],
-         "images/",
-         A2($Basics._op["++"],
-         $Basics.toString(imgSize),
-         A2($Basics._op["++"],
-         "/",
-         A2($Basics._op["++"],
-         $Piece.toString(piece),
-         A2($Basics._op["++"],
-         "-",
-         A2($Basics._op["++"],
-         value,
-         ".png"))))));
-         return A3($Graphics$Element.image,
-         $Basics.round(tileSize),
-         $Basics.round(tileSize),
-         imgPath);
-      }();
-   });
-   var withBorder = F3(function (_v0,
-   color,
-   elt) {
-      return function () {
-         switch (_v0.ctor)
-         {case "_Tuple2":
-            return A2($Graphics$Element.flow,
-              $Graphics$Element.down,
-              _L.fromArray([$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
-                           $Graphics$Element.widthOf(elt) + _v0._0 * 2,
-                           _v0._1))
-                           ,A2($Graphics$Element.flow,
-                           $Graphics$Element.right,
-                           _L.fromArray([$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
-                                        _v0._0,
-                                        $Graphics$Element.heightOf(elt)))
-                                        ,elt
-                                        ,$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
-                                        _v0._0,
-                                        $Graphics$Element.heightOf(elt)))]))
-                           ,$Graphics$Element.color(color)(A2($Graphics$Element.spacer,
-                           $Graphics$Element.widthOf(elt) + _v0._0 * 2,
-                           _v0._1))]));}
-         _U.badCase($moduleName,
-         "between lines 27 and 33");
-      }();
-   });
-   var withMargin = F2(function (_v4,
-   elt) {
-      return function () {
-         switch (_v4.ctor)
-         {case "_Tuple2":
-            return A3(withBorder,
-              {ctor: "_Tuple2"
-              ,_0: _v4._0
-              ,_1: _v4._1},
-              $Display$Constants.transparent,
-              elt);}
-         _U.badCase($moduleName,
-         "on line 23, column 25 to 58");
-      }();
-   });
-   _elm.Display.Helpers.values = {_op: _op
-                                 ,withMargin: withMargin
-                                 ,withBorder: withBorder
-                                 ,pieceToImage: pieceToImage};
-   return _elm.Display.Helpers.values;
-};
-Elm.Game = Elm.Game || {};
-Elm.Game.make = function (_elm) {
-   "use strict";
-   _elm.Game = _elm.Game || {};
-   if (_elm.Game.values)
-   return _elm.Game.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Game",
-   $AI = Elm.AI.make(_elm),
-   $Basics = Elm.Basics.make(_elm),
-   $Board = Elm.Board.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $Helpers = Elm.Helpers.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Log = Elm.Log.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Piece = Elm.Piece.make(_elm),
-   $Player = Elm.Player.make(_elm),
-   $State = Elm.State.make(_elm);
-   var startState = {_: {}
-                    ,board: $Dict.empty
-                    ,deck: _L.fromArray([])
-                    ,gameState: $GameTypes.NotStarted
-                    ,gameType: $GameTypes.HumanVsCpu
-                    ,hands: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "Red"
-                                                         ,_1: _L.fromArray([])}
-                                                        ,{ctor: "_Tuple2"
-                                                         ,_0: "Blue"
-                                                         ,_1: _L.fromArray([])}]))
-                    ,heldPiece: $Maybe.Nothing
-                    ,lastPlaced: $Maybe.Nothing
-                    ,lastPlacedPlayer: $Maybe.Nothing
-                    ,log: $Log.empty
-                    ,playerNames: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                               ,_0: "Red"
-                                                               ,_1: "Player"}
-                                                              ,{ctor: "_Tuple2"
-                                                               ,_0: "Blue"
-                                                               ,_1: "CPU"}]))
-                    ,players: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                           ,_0: "Red"
-                                                           ,_1: $GameTypes.Human}
-                                                          ,{ctor: "_Tuple2"
-                                                           ,_0: "Blue"
-                                                           ,_1: $GameTypes.Cpu}]))
-                    ,score: $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                         ,_0: "Red"
-                                                         ,_1: 0}
-                                                        ,{ctor: "_Tuple2"
-                                                         ,_0: "Blue"
-                                                         ,_1: 0}]))
-                    ,turn: $GameTypes.Red};
-   var deckContents = function () {
-      var r = $List.repeat;
-      return A2($Basics._op["++"],
-      A2(r,6,"Vain"),
-      A2($Basics._op["++"],
-      A2(r,8,"Ukko"),
-      A2($Basics._op["++"],
-      A2(r,6,"Kullervo"),
-      A2($Basics._op["++"],
-      A2(r,8,"Kaarme"),
-      A2($Basics._op["++"],
-      A2(r,8,"Jouk"),
-      A2($Basics._op["++"],
-      A2(r,9,"Ilmar"),
-      A2($Basics._op["++"],
-      A2(r,9,"Louhi"),
-      A2(r,6,"Lemmi"))))))));
-   }();
-   var getFirstTileHandsAndDeck = function (deck) {
-      return function () {
-         var deckWithIndices = A3($List.map2,
-         F2(function (v0,v1) {
-            return {ctor: "_Tuple2"
-                   ,_0: v0
-                   ,_1: v1};
-         }),
-         _L.range(0,
-         $List.length(deck) - 1),
-         deck);
-         var $ = $Helpers.headU(A2($List.filter,
-         function (_v0) {
-            return function () {
-               switch (_v0.ctor)
-               {case "_Tuple2":
-                  return $Basics.not(_U.eq(_v0._1,
-                    "Kullervo"));}
-               _U.badCase($moduleName,
-               "on line 106, column 88 to 112");
-            }();
-         },
-         deckWithIndices)),
-         idxFirstNonKullervo = $._0,
-         pieceFirstNonKullervo = $._1;
-         var firstTile = $Piece.fromString(pieceFirstNonKullervo);
-         var deckMinusFirstTile = A2($Helpers.without,
-         idxFirstNonKullervo,
-         deck);
-         var redHand = A2($List.take,
-         5,
-         deckMinusFirstTile);
-         var blueHand = A2($List.take,
-         5,
-         A2($List.drop,
-         5,
-         deckMinusFirstTile));
-         var hands = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                  ,_0: "Red"
-                                                  ,_1: redHand}
-                                                 ,{ctor: "_Tuple2"
-                                                  ,_0: "Blue"
-                                                  ,_1: blueHand}]));
-         var remainder = A2($List.drop,
-         10,
-         deckMinusFirstTile);
-         return {ctor: "_Tuple3"
-                ,_0: firstTile
-                ,_1: hands
-                ,_2: remainder};
-      }();
-   };
-   var gameStarted = F5(function (deck,
-   startPlayer,
-   localPlayer,
-   opponentName,
-   state) {
-      return function () {
-         var $ = getFirstTileHandsAndDeck(deck),
-         firstTile = $._0,
-         hands = $._1,
-         remainder = $._2;
-         var playerNames = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                        ,_0: $Player.toString(localPlayer)
-                                                        ,_1: "You"}
-                                                       ,{ctor: "_Tuple2"
-                                                        ,_0: $Player.toString($Player.next(localPlayer))
-                                                        ,_1: opponentName}]));
-         var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                    ,_0: "Red"
-                                                    ,_1: _U.eq(localPlayer,
-                                                    $GameTypes.Red) ? $GameTypes.Human : $GameTypes.Remote}
-                                                   ,{ctor: "_Tuple2"
-                                                    ,_0: "Blue"
-                                                    ,_1: _U.eq(localPlayer,
-                                                    $GameTypes.Blue) ? $GameTypes.Human : $GameTypes.Remote}]));
-         return _U.replace([["gameType"
-                            ,$GameTypes.HumanVsHumanRemote]
-                           ,["gameState"
-                            ,$GameTypes.Connected(opponentName)]
-                           ,["players",players]
-                           ,["playerNames",playerNames]
-                           ,["hands",hands]
-                           ,["deck",remainder]
-                           ,["board"
-                            ,A2($Dict.singleton,
-                            {ctor: "_Tuple2",_0: 0,_1: 0},
-                            firstTile)]
-                           ,["turn",startPlayer]
-                           ,["log"
-                            ,$Log.addSystemMsg("Game started.")($Log.addSystemMsg(A2($Basics._op["++"],
-                            opponentName,
-                            " joined the game."))(state.log))]],
-         startState);
-      }();
-   });
-   var makeMove = F2(function (move,
-   state) {
-      return function () {
-         var leadChangeText = A2($Basics._op["++"],
-         A2($Helpers.getU,
-         $Player.toString(state.turn),
-         state.playerNames),
-         " took the lead!");
-         var existingTile = A2($Dict.get,
-         move.location,
-         state.board);
-         var hand = A2($Player.getHand,
-         state.turn,
-         state);
-         var handWithDrawnTile = A2($Basics._op["++"],
-         A2($Helpers.without,
-         move.idx,
-         hand),
-         $Basics.not($List.isEmpty(state.deck)) ? A2($List.take,
-         1,
-         state.deck) : _L.fromArray([]));
-         var newHand = function () {
-            switch (existingTile.ctor)
-            {case "Just":
-               return _U.eq(move.piece,
-                 $GameTypes.SeppoIlmarinen) ? A3($Helpers.replaceAtIndex,
-                 move.idx,
-                 $Piece.toString(existingTile._0),
-                 hand) : handWithDrawnTile;
-               case "Nothing":
-               return handWithDrawnTile;}
-            _U.badCase($moduleName,
-            "between lines 79 and 83");
-         }();
-         var newBoard = A3($Dict.insert,
-         move.location,
-         move.piece,
-         state.board);
-         var delta = A2($Board.scoreMove,
-         move,
-         newBoard);
-         var p = $Player.toString(state.turn);
-         var newScore = $Maybe.withDefault(0)(A2($Dict.get,
-         p,
-         state.score)) + delta;
-         var logText = A2($Basics._op["++"],
-         A2($Helpers.getU,
-         $Player.toString(state.turn),
-         state.playerNames),
-         A2($Basics._op["++"],
-         " placed ",
-         A2($Basics._op["++"],
-         $Piece.toDisplayString(move.piece),
-         A2($Basics._op["++"],
-         " for ",
-         A2($Basics._op["++"],
-         $Basics.toString(delta),
-         A2($Basics._op["++"],
-         " points",
-         A2($Basics._op["++"],
-         " (total : ",
-         A2($Basics._op["++"],
-         $Basics.toString(newScore),
-         ")"))))))));
-         var newScores = A3($Dict.insert,
-         p,
-         newScore,
-         state.score);
-         var newLog = _U.eq($State.leadingPlayer(_U.replace([["score"
-                                                             ,newScores]],
-         state)),
-         $Maybe.Just(state.turn)) && !_U.eq($State.leadingPlayer(state),
-         $Maybe.Just(state.turn)) ? A2($Log.addPlayerMsg,
-         leadChangeText,
-         state.turn)(A2($Log.addPlayerMsg,
-         logText,
-         state.turn)(state.log)) : A2($Log.addPlayerMsg,
-         logText,
-         state.turn)(state.log);
-         return _U.replace([["turn"
-                            ,$State.nextPlayer(state)]
-                           ,["board",newBoard]
-                           ,["score",newScores]
-                           ,["deck"
-                            ,A2($List.drop,1,state.deck)]
-                           ,["hands"
-                            ,A3($Dict.insert,
-                            p,
-                            newHand,
-                            state.hands)]
-                           ,["heldPiece",$Maybe.Nothing]
-                           ,["lastPlaced"
-                            ,$Maybe.Just(move.location)]
-                           ,["lastPlacedPlayer"
-                            ,$Maybe.Just(state.turn)]
-                           ,["log",newLog]],
-         state);
-      }();
-   });
-   var tryMove = F2(function (location,
-   state) {
-      return function () {
-         var _v6 = state.heldPiece;
-         switch (_v6.ctor)
-         {case "Just":
-            return function () {
-                 var nextPlayerType = A2($Player.getType,
-                 $State.nextPlayer(state),
-                 state);
-                 var hand = A2($Player.getHand,
-                 state.turn,
-                 state);
-                 var pieceStr = A2($Helpers._op["!!"],
-                 hand,
-                 _v6._0);
-                 var piece = $Piece.fromString(pieceStr);
-                 var move = {_: {}
-                            ,idx: _v6._0
-                            ,location: location
-                            ,piece: piece};
-                 return A2($Board.isValidMove,
-                 move,
-                 state.board) ? A2(makeMove,
-                 move,
-                 state) : _U.replace([["heldPiece"
-                                      ,$Maybe.Nothing]],
-                 state);
-              }();
-            case "Nothing": return state;}
-         _U.badCase($moduleName,
-         "between lines 42 and 58");
-      }();
-   });
-   var pass = function (state) {
-      return function () {
-         var logMsg = A2($Basics._op["++"],
-         $Maybe.withDefault("")(A2($Dict.get,
-         $Player.toString(state.turn),
-         state.playerNames)),
-         " passed.");
-         return _U.replace([["turn"
-                            ,$State.nextPlayer(state)]
-                           ,["log"
-                            ,A3($Log.addPlayerMsg,
-                            logMsg,
-                            state.turn,
-                            state.log)]],
-         state);
-      }();
-   };
-   var tryAIMove = function (state) {
-      return $State.isOngoing(state) && _U.eq(A2($Player.getType,
-      state.turn,
-      state),
-      $GameTypes.Cpu) ? function () {
-         var _v8 = $AI.getMove(state);
-         switch (_v8.ctor)
-         {case "Just": return A2(tryMove,
-              _v8._0.location,
-              _U.replace([["heldPiece"
-                          ,$Maybe.Just(_v8._0.idx)]],
-              state));
-            case "Nothing":
-            return pass(state);}
-         _U.badCase($moduleName,
-         "between lines 63 and 66");
-      }() : state;
-   };
-   var startGame = F4(function (gameType,
-   deck,
-   player,
-   playerName) {
-      return function () {
-         var $ = getFirstTileHandsAndDeck(deck),
-         firstTile = $._0,
-         hands = $._1,
-         remainder = $._2;
-         var playerNames = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                        ,_0: $Player.toString(player)
-                                                        ,_1: _U.eq(gameType,
-                                                        $GameTypes.HumanVsCpu) ? "You" : $Player.toString(player)}
-                                                       ,{ctor: "_Tuple2"
-                                                        ,_0: $Player.toString($Player.next(player))
-                                                        ,_1: _U.eq(gameType,
-                                                        $GameTypes.HumanVsCpu) ? "CPU" : $Player.toString($Player.next(player))}]));
-         var players = $Dict.fromList(_L.fromArray([{ctor: "_Tuple2"
-                                                    ,_0: $Player.toString(player)
-                                                    ,_1: $GameTypes.Human}
-                                                   ,{ctor: "_Tuple2"
-                                                    ,_0: $Player.toString($Player.next(player))
-                                                    ,_1: function () {
-                                                       switch (gameType.ctor)
-                                                       {case "HumanVsCpu":
-                                                          return $GameTypes.Cpu;
-                                                          case "HumanVsHumanLocal":
-                                                          return $GameTypes.Human;
-                                                          case "HumanVsHumanRemote":
-                                                          return $GameTypes.Remote;}
-                                                       _U.badCase($moduleName,
-                                                       "between lines 124 and 127");
-                                                    }()}]));
-         var state = _U.eq(gameType,
-         $GameTypes.HumanVsHumanRemote) ? _U.replace([["gameType"
-                                                      ,gameType]
-                                                     ,["gameState"
-                                                      ,$GameTypes.WaitingForPlayers]
-                                                     ,["players",players]
-                                                     ,["playerNames"
-                                                      ,playerNames]
-                                                     ,["turn",player]
-                                                     ,["log"
-                                                      ,$Log.addSystemMsg("Waiting for opponent . . .")($Log.addSystemMsg(A2($Basics._op["++"],
-                                                      playerName,
-                                                      " joined the game."))($Log.empty))]],
-         startState) : _U.replace([["gameType"
-                                   ,gameType]
-                                  ,["gameState"
-                                   ,$GameTypes.Ongoing]
-                                  ,["players",players]
-                                  ,["playerNames",playerNames]
-                                  ,["hands",hands]
-                                  ,["deck",remainder]
-                                  ,["board"
-                                   ,A2($Dict.singleton,
-                                   {ctor: "_Tuple2",_0: 0,_1: 0},
-                                   firstTile)]
-                                  ,["turn",player]
-                                  ,["log"
-                                   ,A2($Log.singleton,
-                                   "Game started.",
-                                   $Color.darkGrey)]],
-         startState);
-         return _U.eq(A2($Player.getType,
-         state.turn,
-         state),
-         $GameTypes.Cpu) ? tryAIMove(state) : state;
-      }();
-   });
-   var tryToPickUpPiece = F3(function (player,
-   idx,
-   state) {
-      return _U.eq(state.turn,
-      player) && $State.isOngoing(state) ? _U.eq(state.heldPiece,
-      $Maybe.Just(idx)) ? _U.replace([["heldPiece"
-                                      ,$Maybe.Nothing]],
-      state) : _U.replace([["heldPiece"
-                           ,$Maybe.Just(idx)]],
-      state) : state;
-   });
-   _elm.Game.values = {_op: _op
-                      ,tryToPickUpPiece: tryToPickUpPiece
-                      ,pass: pass
-                      ,tryMove: tryMove
-                      ,tryAIMove: tryAIMove
-                      ,makeMove: makeMove
-                      ,getFirstTileHandsAndDeck: getFirstTileHandsAndDeck
-                      ,startGame: startGame
-                      ,gameStarted: gameStarted
-                      ,deckContents: deckContents
-                      ,startState: startState};
-   return _elm.Game.values;
-};
-Elm.GameTypes = Elm.GameTypes || {};
-Elm.GameTypes.make = function (_elm) {
-   "use strict";
-   _elm.GameTypes = _elm.GameTypes || {};
-   if (_elm.GameTypes.values)
-   return _elm.GameTypes.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "GameTypes",
-   $Color = Elm.Color.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm);
-   var None = {ctor: "None"};
-   var SwitchButton = {ctor: "SwitchButton"};
-   var MainMenuButton = {ctor: "MainMenuButton"};
-   var PassButton = {ctor: "PassButton"};
-   var PieceInHand = F2(function (a,
-   b) {
-      return {ctor: "PieceInHand"
-             ,_0: a
-             ,_1: b};
-   });
-   var BoardClick = {ctor: "BoardClick"};
-   var StartNewGameButton = {ctor: "StartNewGameButton"};
-   var StartTwoPlayerHotseat = {ctor: "StartTwoPlayerHotseat"};
-   var StartTwoPlayerOnline = {ctor: "StartTwoPlayerOnline"};
-   var StartRemoteGameButton = {ctor: "StartRemoteGameButton"};
-   var StartSinglePlayer = {ctor: "StartSinglePlayer"};
-   var ParseError = function (a) {
-      return {ctor: "ParseError"
-             ,_0: a};
-   };
-   var NoAction = {ctor: "NoAction"};
-   var CpuAction = {ctor: "CpuAction"};
-   var OpponentDisconnected = {ctor: "OpponentDisconnected"};
-   var Switch = {ctor: "Switch"};
-   var Pass = {ctor: "Pass"};
-   var GameStarted = F4(function (a,
-   b,
-   c,
-   d) {
-      return {ctor: "GameStarted"
-             ,_0: a
-             ,_1: b
-             ,_2: c
-             ,_3: d};
-   });
-   var MoveToRemoteGameMenu = {ctor: "MoveToRemoteGameMenu"};
-   var MoveToMainMenu = {ctor: "MoveToMainMenu"};
-   var StartNewGame = F3(function (a,
-   b,
-   c) {
-      return {ctor: "StartNewGame"
-             ,_0: a
-             ,_1: b
-             ,_2: c};
-   });
-   var StartGame = F4(function (a,
-   b,
-   c,
-   d) {
-      return {ctor: "StartGame"
-             ,_0: a
-             ,_1: b
-             ,_2: c
-             ,_3: d};
-   });
-   var PlacePiece = F2(function (a,
-   b) {
-      return {ctor: "PlacePiece"
-             ,_0: a
-             ,_1: b};
-   });
-   var PickUpPiece = F2(function (a,
-   b) {
-      return {ctor: "PickUpPiece"
-             ,_0: a
-             ,_1: b};
-   });
-   var NoPiece = {ctor: "NoPiece"};
-   var Lemminkainen = {ctor: "Lemminkainen"};
-   var Louhi = {ctor: "Louhi"};
-   var SeppoIlmarinen = {ctor: "SeppoIlmarinen"};
-   var Joukahainen = {ctor: "Joukahainen"};
-   var Kaarme = {ctor: "Kaarme"};
-   var Kullervo = {ctor: "Kullervo"};
-   var Ukko = {ctor: "Ukko"};
-   var Vainamoinen = {ctor: "Vainamoinen"};
-   var State = function (a) {
-      return function (b) {
-         return function (c) {
-            return function (d) {
-               return function (e) {
-                  return function (f) {
-                     return function (g) {
-                        return function (h) {
-                           return function (i) {
-                              return function (j) {
-                                 return function (k) {
-                                    return function (l) {
-                                       return function (m) {
-                                          return {_: {}
-                                                 ,board: f
-                                                 ,deck: h
-                                                 ,gameState: b
-                                                 ,gameType: a
-                                                 ,hands: i
-                                                 ,heldPiece: j
-                                                 ,lastPlaced: k
-                                                 ,lastPlacedPlayer: l
-                                                 ,log: m
-                                                 ,playerNames: d
-                                                 ,players: c
-                                                 ,score: g
-                                                 ,turn: e};
-                                       };
-                                    };
-                                 };
-                              };
-                           };
-                        };
-                     };
-                  };
-               };
-            };
-         };
-      };
-   };
-   var Move = F3(function (a,b,c) {
-      return {_: {}
-             ,idx: b
-             ,location: c
-             ,piece: a};
-   });
-   var SwitchingTo = function (a) {
-      return {ctor: "SwitchingTo"
-             ,_0: a};
-   };
-   var Blue = {ctor: "Blue"};
-   var Red = {ctor: "Red"};
-   var Remote = {ctor: "Remote"};
-   var Cpu = {ctor: "Cpu"};
-   var Human = {ctor: "Human"};
-   var Disconnected = {ctor: "Disconnected"};
-   var GameOver = {ctor: "GameOver"};
-   var Connected = function (a) {
-      return {ctor: "Connected"
-             ,_0: a};
-   };
-   var Ongoing = {ctor: "Ongoing"};
-   var WaitingForPlayers = {ctor: "WaitingForPlayers"};
-   var NotStarted = {ctor: "NotStarted"};
-   var HumanVsHumanRemote = {ctor: "HumanVsHumanRemote"};
-   var HumanVsHumanLocal = {ctor: "HumanVsHumanLocal"};
-   var HumanVsCpu = {ctor: "HumanVsCpu"};
-   _elm.GameTypes.values = {_op: _op
-                           ,HumanVsCpu: HumanVsCpu
-                           ,HumanVsHumanLocal: HumanVsHumanLocal
-                           ,HumanVsHumanRemote: HumanVsHumanRemote
-                           ,NotStarted: NotStarted
-                           ,WaitingForPlayers: WaitingForPlayers
-                           ,Ongoing: Ongoing
-                           ,Connected: Connected
-                           ,GameOver: GameOver
-                           ,Disconnected: Disconnected
-                           ,Human: Human
-                           ,Cpu: Cpu
-                           ,Remote: Remote
-                           ,Red: Red
-                           ,Blue: Blue
-                           ,SwitchingTo: SwitchingTo
-                           ,Move: Move
-                           ,State: State
-                           ,Vainamoinen: Vainamoinen
-                           ,Ukko: Ukko
-                           ,Kullervo: Kullervo
-                           ,Kaarme: Kaarme
-                           ,Joukahainen: Joukahainen
-                           ,SeppoIlmarinen: SeppoIlmarinen
-                           ,Louhi: Louhi
-                           ,Lemminkainen: Lemminkainen
-                           ,NoPiece: NoPiece
-                           ,PickUpPiece: PickUpPiece
-                           ,PlacePiece: PlacePiece
-                           ,StartGame: StartGame
-                           ,StartNewGame: StartNewGame
-                           ,MoveToMainMenu: MoveToMainMenu
-                           ,MoveToRemoteGameMenu: MoveToRemoteGameMenu
-                           ,GameStarted: GameStarted
-                           ,Pass: Pass
-                           ,Switch: Switch
-                           ,OpponentDisconnected: OpponentDisconnected
-                           ,CpuAction: CpuAction
-                           ,NoAction: NoAction
-                           ,ParseError: ParseError
-                           ,StartSinglePlayer: StartSinglePlayer
-                           ,StartRemoteGameButton: StartRemoteGameButton
-                           ,StartTwoPlayerOnline: StartTwoPlayerOnline
-                           ,StartTwoPlayerHotseat: StartTwoPlayerHotseat
-                           ,StartNewGameButton: StartNewGameButton
-                           ,BoardClick: BoardClick
-                           ,PieceInHand: PieceInHand
-                           ,PassButton: PassButton
-                           ,MainMenuButton: MainMenuButton
-                           ,SwitchButton: SwitchButton
-                           ,None: None};
-   return _elm.GameTypes.values;
 };
 Elm.Graphics = Elm.Graphics || {};
 Elm.Graphics.Collage = Elm.Graphics.Collage || {};
@@ -4484,7 +1917,7 @@ Elm.Graphics.Collage.make = function (_elm) {
                               ,["y",f.y + _v0._1]],
               f);}
          _U.badCase($moduleName,
-         "on line 226, column 7 to 35");
+         "on line 226, column 3 to 37");
       }();
    });
    var form = function (f) {
@@ -5167,7 +2600,7 @@ Elm.Graphics.Element.make = function (_elm) {
                  maxOrZero(ws),
                  $List.sum(hs));}
             _U.badCase($moduleName,
-            "between lines 362 and 373");
+            "between lines 362 and 368");
          }();
       }();
    });
@@ -5255,294 +2688,6 @@ Elm.Graphics.Element.make = function (_elm) {
                                   ,Position: Position};
    return _elm.Graphics.Element.values;
 };
-Elm.Graphics = Elm.Graphics || {};
-Elm.Graphics.Input = Elm.Graphics.Input || {};
-Elm.Graphics.Input.make = function (_elm) {
-   "use strict";
-   _elm.Graphics = _elm.Graphics || {};
-   _elm.Graphics.Input = _elm.Graphics.Input || {};
-   if (_elm.Graphics.Input.values)
-   return _elm.Graphics.Input.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Graphics.Input",
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Native$Graphics$Input = Elm.Native.Graphics.Input.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var clickable = $Native$Graphics$Input.clickable;
-   var hoverable = $Native$Graphics$Input.hoverable;
-   var dropDown = $Native$Graphics$Input.dropDown;
-   var checkbox = $Native$Graphics$Input.checkbox;
-   var customButton = $Native$Graphics$Input.customButton;
-   var button = $Native$Graphics$Input.button;
-   _elm.Graphics.Input.values = {_op: _op
-                                ,button: button
-                                ,customButton: customButton
-                                ,checkbox: checkbox
-                                ,dropDown: dropDown
-                                ,hoverable: hoverable
-                                ,clickable: clickable};
-   return _elm.Graphics.Input.values;
-};
-Elm.Graphics = Elm.Graphics || {};
-Elm.Graphics.Input = Elm.Graphics.Input || {};
-Elm.Graphics.Input.Field = Elm.Graphics.Input.Field || {};
-Elm.Graphics.Input.Field.make = function (_elm) {
-   "use strict";
-   _elm.Graphics = _elm.Graphics || {};
-   _elm.Graphics.Input = _elm.Graphics.Input || {};
-   _elm.Graphics.Input.Field = _elm.Graphics.Input.Field || {};
-   if (_elm.Graphics.Input.Field.values)
-   return _elm.Graphics.Input.Field.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Graphics.Input.Field",
-   $Color = Elm.Color.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Native$Graphics$Input = Elm.Native.Graphics.Input.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $Text = Elm.Text.make(_elm);
-   var email = $Native$Graphics$Input.email;
-   var password = $Native$Graphics$Input.password;
-   var field = $Native$Graphics$Input.field;
-   var Backward = {ctor: "Backward"};
-   var Forward = {ctor: "Forward"};
-   var Selection = F3(function (a,
-   b,
-   c) {
-      return {_: {}
-             ,direction: c
-             ,end: b
-             ,start: a};
-   });
-   var Content = F2(function (a,
-   b) {
-      return {_: {}
-             ,selection: b
-             ,string: a};
-   });
-   var noContent = A2(Content,
-   "",
-   A3(Selection,0,0,Forward));
-   var Style = F4(function (a,
-   b,
-   c,
-   d) {
-      return {_: {}
-             ,highlight: c
-             ,outline: b
-             ,padding: a
-             ,style: d};
-   });
-   var Highlight = F2(function (a,
-   b) {
-      return {_: {}
-             ,color: a
-             ,width: b};
-   });
-   var noHighlight = A2(Highlight,
-   $Color.blue,
-   0);
-   var Outline = F3(function (a,
-   b,
-   c) {
-      return {_: {}
-             ,color: a
-             ,radius: c
-             ,width: b};
-   });
-   var Dimensions = F4(function (a,
-   b,
-   c,
-   d) {
-      return {_: {}
-             ,bottom: d
-             ,left: a
-             ,right: b
-             ,top: c};
-   });
-   var uniformly = function (n) {
-      return A4(Dimensions,
-      n,
-      n,
-      n,
-      n);
-   };
-   var noOutline = A3(Outline,
-   $Color.grey,
-   uniformly(0),
-   0);
-   var defaultStyle = {_: {}
-                      ,highlight: A2(Highlight,
-                      $Color.blue,
-                      1)
-                      ,outline: A3(Outline,
-                      $Color.grey,
-                      uniformly(1),
-                      2)
-                      ,padding: uniformly(4)
-                      ,style: $Text.defaultStyle};
-   _elm.Graphics.Input.Field.values = {_op: _op
-                                      ,uniformly: uniformly
-                                      ,Dimensions: Dimensions
-                                      ,Outline: Outline
-                                      ,noOutline: noOutline
-                                      ,Highlight: Highlight
-                                      ,noHighlight: noHighlight
-                                      ,Style: Style
-                                      ,defaultStyle: defaultStyle
-                                      ,Content: Content
-                                      ,Selection: Selection
-                                      ,Forward: Forward
-                                      ,Backward: Backward
-                                      ,noContent: noContent
-                                      ,field: field
-                                      ,password: password
-                                      ,email: email};
-   return _elm.Graphics.Input.Field.values;
-};
-Elm.Helpers = Elm.Helpers || {};
-Elm.Helpers.make = function (_elm) {
-   "use strict";
-   _elm.Helpers = _elm.Helpers || {};
-   if (_elm.Helpers.values)
-   return _elm.Helpers.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Helpers",
-   $Basics = Elm.Basics.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Random = Elm.Random.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var replaceAtIndex = F3(function (i,
-   elt,
-   arr) {
-      return function () {
-         var after = A2($List.drop,
-         i + 1,
-         arr);
-         var before = A2($List.take,
-         i,
-         arr);
-         return A2($Basics._op["++"],
-         before,
-         A2($Basics._op["++"],
-         _L.fromArray([elt]),
-         after));
-      }();
-   });
-   var without = F2(function (i,
-   arr) {
-      return function () {
-         var after = A2($List.drop,
-         i + 1,
-         arr);
-         var before = A2($List.take,
-         i,
-         arr);
-         return A2($Basics._op["++"],
-         before,
-         after);
-      }();
-   });
-   var tuple = F2(function (a,b) {
-      return {ctor: "_Tuple2"
-             ,_0: a
-             ,_1: b};
-   });
-   var filterOn = F3(function (inputSignal,
-   conditionSignal,
-   $default) {
-      return function () {
-         var joinedSignal = A3($Signal.map2,
-         tuple,
-         inputSignal,
-         conditionSignal);
-         var filteredSignal = A3($Signal.filter,
-         $Basics.snd,
-         {ctor: "_Tuple2"
-         ,_0: $default
-         ,_1: false},
-         joinedSignal);
-         return A2($Signal.map,
-         $Basics.fst,
-         filteredSignal);
-      }();
-   });
-   var getOrFail = function (maybe) {
-      return function () {
-         switch (maybe.ctor)
-         {case "Just": return maybe._0;}
-         _U.badCase($moduleName,
-         "between lines 11 and 14");
-      }();
-   };
-   var headU = function (l) {
-      return getOrFail($List.head(l));
-   };
-   _op["!!"] = F2(function (list,
-   idx) {
-      return headU(A2($List.drop,
-      idx,
-      list));
-   });
-   var shuffle = F2(function (list,
-   seed) {
-      return $List.isEmpty(list) ? _L.fromArray([]) : function () {
-         var generator = A2($Random.$int,
-         0,
-         $List.length(list) - 1);
-         var $ = A2($Random.generate,
-         generator,
-         seed),
-         i = $._0,
-         newSeed = $._1;
-         return A2($Basics._op["++"],
-         _L.fromArray([A2(_op["!!"],
-         list,
-         i)]),
-         A2(shuffle,
-         A2(without,i,list),
-         newSeed));
-      }();
-   });
-   var tailU = function (l) {
-      return getOrFail($List.tail(l));
-   };
-   var maximumU = function (l) {
-      return getOrFail($List.maximum(l));
-   };
-   var minimumU = function (l) {
-      return getOrFail($List.minimum(l));
-   };
-   var getU = F2(function (key,
-   dict) {
-      return getOrFail(A2($Dict.get,
-      key,
-      dict));
-   });
-   _elm.Helpers.values = {_op: _op
-                         ,getOrFail: getOrFail
-                         ,headU: headU
-                         ,tailU: tailU
-                         ,maximumU: maximumU
-                         ,minimumU: minimumU
-                         ,getU: getU
-                         ,tuple: tuple
-                         ,without: without
-                         ,replaceAtIndex: replaceAtIndex
-                         ,shuffle: shuffle
-                         ,filterOn: filterOn};
-   return _elm.Helpers.values;
-};
 Elm.Html = Elm.Html || {};
 Elm.Html.make = function (_elm) {
    "use strict";
@@ -5554,7 +2699,12 @@ Elm.Html.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "Html",
+   $Basics = Elm.Basics.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
    $VirtualDom = Elm.VirtualDom.make(_elm);
    var fromElement = $VirtualDom.fromElement;
    var toElement = $VirtualDom.toElement;
@@ -5765,634 +2915,6 @@ Elm.Html.make = function (_elm) {
                       ,menu: menu};
    return _elm.Html.values;
 };
-Elm.Html = Elm.Html || {};
-Elm.Html.Attributes = Elm.Html.Attributes || {};
-Elm.Html.Attributes.make = function (_elm) {
-   "use strict";
-   _elm.Html = _elm.Html || {};
-   _elm.Html.Attributes = _elm.Html.Attributes || {};
-   if (_elm.Html.Attributes.values)
-   return _elm.Html.Attributes.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Html.Attributes",
-   $Basics = Elm.Basics.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $Json$Encode = Elm.Json.Encode.make(_elm),
-   $List = Elm.List.make(_elm),
-   $String = Elm.String.make(_elm),
-   $VirtualDom = Elm.VirtualDom.make(_elm);
-   var attribute = $VirtualDom.attribute;
-   var property = $VirtualDom.property;
-   var stringProperty = F2(function (name,
-   string) {
-      return A2(property,
-      name,
-      $Json$Encode.string(string));
-   });
-   var $class = function (name) {
-      return A2(stringProperty,
-      "className",
-      name);
-   };
-   var id = function (name) {
-      return A2(stringProperty,
-      "id",
-      name);
-   };
-   var title = function (name) {
-      return A2(stringProperty,
-      "title",
-      name);
-   };
-   var accesskey = function ($char) {
-      return A2(stringProperty,
-      "accesskey",
-      $String.fromList(_L.fromArray([$char])));
-   };
-   var contextmenu = function (value) {
-      return A2(stringProperty,
-      "contextmenu",
-      value);
-   };
-   var dir = function (value) {
-      return A2(stringProperty,
-      "dir",
-      value);
-   };
-   var draggable = function (value) {
-      return A2(stringProperty,
-      "draggable",
-      value);
-   };
-   var dropzone = function (value) {
-      return A2(stringProperty,
-      "dropzone",
-      value);
-   };
-   var itemprop = function (value) {
-      return A2(stringProperty,
-      "itemprop",
-      value);
-   };
-   var lang = function (value) {
-      return A2(stringProperty,
-      "lang",
-      value);
-   };
-   var tabindex = function (n) {
-      return A2(stringProperty,
-      "tabIndex",
-      $Basics.toString(n));
-   };
-   var charset = function (value) {
-      return A2(stringProperty,
-      "charset",
-      value);
-   };
-   var content = function (value) {
-      return A2(stringProperty,
-      "content",
-      value);
-   };
-   var httpEquiv = function (value) {
-      return A2(stringProperty,
-      "httpEquiv",
-      value);
-   };
-   var language = function (value) {
-      return A2(stringProperty,
-      "language",
-      value);
-   };
-   var src = function (value) {
-      return A2(stringProperty,
-      "src",
-      value);
-   };
-   var height = function (value) {
-      return A2(stringProperty,
-      "height",
-      $Basics.toString(value));
-   };
-   var width = function (value) {
-      return A2(stringProperty,
-      "width",
-      $Basics.toString(value));
-   };
-   var alt = function (value) {
-      return A2(stringProperty,
-      "alt",
-      value);
-   };
-   var preload = function (value) {
-      return A2(stringProperty,
-      "preload",
-      value);
-   };
-   var poster = function (value) {
-      return A2(stringProperty,
-      "poster",
-      value);
-   };
-   var kind = function (value) {
-      return A2(stringProperty,
-      "kind",
-      value);
-   };
-   var srclang = function (value) {
-      return A2(stringProperty,
-      "srclang",
-      value);
-   };
-   var sandbox = function (value) {
-      return A2(stringProperty,
-      "sandbox",
-      value);
-   };
-   var srcdoc = function (value) {
-      return A2(stringProperty,
-      "srcdoc",
-      value);
-   };
-   var type$ = function (value) {
-      return A2(stringProperty,
-      "type",
-      value);
-   };
-   var value = function (value) {
-      return A2(stringProperty,
-      "value",
-      value);
-   };
-   var placeholder = function (value) {
-      return A2(stringProperty,
-      "placeholder",
-      value);
-   };
-   var accept = function (value) {
-      return A2(stringProperty,
-      "accept",
-      value);
-   };
-   var acceptCharset = function (value) {
-      return A2(stringProperty,
-      "acceptCharset",
-      value);
-   };
-   var action = function (value) {
-      return A2(stringProperty,
-      "action",
-      value);
-   };
-   var autocomplete = function (bool) {
-      return A2(stringProperty,
-      "autocomplete",
-      bool ? "on" : "off");
-   };
-   var autosave = function (value) {
-      return A2(stringProperty,
-      "autosave",
-      value);
-   };
-   var enctype = function (value) {
-      return A2(stringProperty,
-      "enctype",
-      value);
-   };
-   var formaction = function (value) {
-      return A2(stringProperty,
-      "formaction",
-      value);
-   };
-   var list = function (value) {
-      return A2(stringProperty,
-      "list",
-      value);
-   };
-   var minlength = function (n) {
-      return A2(stringProperty,
-      "minLength",
-      $Basics.toString(n));
-   };
-   var maxlength = function (n) {
-      return A2(stringProperty,
-      "maxLength",
-      $Basics.toString(n));
-   };
-   var method = function (value) {
-      return A2(stringProperty,
-      "method",
-      value);
-   };
-   var name = function (value) {
-      return A2(stringProperty,
-      "name",
-      value);
-   };
-   var pattern = function (value) {
-      return A2(stringProperty,
-      "pattern",
-      value);
-   };
-   var size = function (n) {
-      return A2(stringProperty,
-      "size",
-      $Basics.toString(n));
-   };
-   var $for = function (value) {
-      return A2(stringProperty,
-      "htmlFor",
-      value);
-   };
-   var form = function (value) {
-      return A2(stringProperty,
-      "form",
-      value);
-   };
-   var max = function (value) {
-      return A2(stringProperty,
-      "max",
-      value);
-   };
-   var min = function (value) {
-      return A2(stringProperty,
-      "min",
-      value);
-   };
-   var step = function (n) {
-      return A2(stringProperty,
-      "step",
-      n);
-   };
-   var cols = function (n) {
-      return A2(stringProperty,
-      "cols",
-      $Basics.toString(n));
-   };
-   var rows = function (n) {
-      return A2(stringProperty,
-      "rows",
-      $Basics.toString(n));
-   };
-   var wrap = function (value) {
-      return A2(stringProperty,
-      "wrap",
-      value);
-   };
-   var usemap = function (value) {
-      return A2(stringProperty,
-      "useMap",
-      value);
-   };
-   var shape = function (value) {
-      return A2(stringProperty,
-      "shape",
-      value);
-   };
-   var coords = function (value) {
-      return A2(stringProperty,
-      "coords",
-      value);
-   };
-   var challenge = function (value) {
-      return A2(stringProperty,
-      "challenge",
-      value);
-   };
-   var keytype = function (value) {
-      return A2(stringProperty,
-      "keytype",
-      value);
-   };
-   var align = function (value) {
-      return A2(stringProperty,
-      "align",
-      value);
-   };
-   var cite = function (value) {
-      return A2(stringProperty,
-      "cite",
-      value);
-   };
-   var href = function (value) {
-      return A2(stringProperty,
-      "href",
-      value);
-   };
-   var target = function (value) {
-      return A2(stringProperty,
-      "target",
-      value);
-   };
-   var downloadAs = function (value) {
-      return A2(stringProperty,
-      "download",
-      value);
-   };
-   var hreflang = function (value) {
-      return A2(stringProperty,
-      "hreflang",
-      value);
-   };
-   var media = function (value) {
-      return A2(stringProperty,
-      "media",
-      value);
-   };
-   var ping = function (value) {
-      return A2(stringProperty,
-      "ping",
-      value);
-   };
-   var rel = function (value) {
-      return A2(stringProperty,
-      "rel",
-      value);
-   };
-   var datetime = function (value) {
-      return A2(stringProperty,
-      "datetime",
-      value);
-   };
-   var pubdate = function (value) {
-      return A2(stringProperty,
-      "pubdate",
-      value);
-   };
-   var start = function (n) {
-      return A2(stringProperty,
-      "start",
-      $Basics.toString(n));
-   };
-   var colspan = function (n) {
-      return A2(stringProperty,
-      "colSpan",
-      $Basics.toString(n));
-   };
-   var headers = function (value) {
-      return A2(stringProperty,
-      "headers",
-      value);
-   };
-   var rowspan = function (n) {
-      return A2(stringProperty,
-      "rowSpan",
-      $Basics.toString(n));
-   };
-   var scope = function (value) {
-      return A2(stringProperty,
-      "scope",
-      value);
-   };
-   var manifest = function (value) {
-      return A2(stringProperty,
-      "manifest",
-      value);
-   };
-   var boolProperty = F2(function (name,
-   bool) {
-      return A2(property,
-      name,
-      $Json$Encode.bool(bool));
-   });
-   var hidden = function (bool) {
-      return A2(boolProperty,
-      "hidden",
-      bool);
-   };
-   var contenteditable = function (bool) {
-      return A2(boolProperty,
-      "contentEditable",
-      bool);
-   };
-   var spellcheck = function (bool) {
-      return A2(boolProperty,
-      "spellcheck",
-      bool);
-   };
-   var async = function (bool) {
-      return A2(boolProperty,
-      "async",
-      bool);
-   };
-   var defer = function (bool) {
-      return A2(boolProperty,
-      "defer",
-      bool);
-   };
-   var scoped = function (bool) {
-      return A2(boolProperty,
-      "scoped",
-      bool);
-   };
-   var autoplay = function (bool) {
-      return A2(boolProperty,
-      "autoplay",
-      bool);
-   };
-   var controls = function (bool) {
-      return A2(boolProperty,
-      "controls",
-      bool);
-   };
-   var loop = function (bool) {
-      return A2(boolProperty,
-      "loop",
-      bool);
-   };
-   var $default = function (bool) {
-      return A2(boolProperty,
-      "default",
-      bool);
-   };
-   var seamless = function (bool) {
-      return A2(boolProperty,
-      "seamless",
-      bool);
-   };
-   var checked = function (bool) {
-      return A2(boolProperty,
-      "checked",
-      bool);
-   };
-   var selected = function (bool) {
-      return A2(boolProperty,
-      "selected",
-      bool);
-   };
-   var autofocus = function (bool) {
-      return A2(boolProperty,
-      "autofocus",
-      bool);
-   };
-   var disabled = function (bool) {
-      return A2(boolProperty,
-      "disabled",
-      bool);
-   };
-   var multiple = function (bool) {
-      return A2(boolProperty,
-      "multiple",
-      bool);
-   };
-   var novalidate = function (bool) {
-      return A2(boolProperty,
-      "noValidate",
-      bool);
-   };
-   var readonly = function (bool) {
-      return A2(boolProperty,
-      "readOnly",
-      bool);
-   };
-   var required = function (bool) {
-      return A2(boolProperty,
-      "required",
-      bool);
-   };
-   var ismap = function (value) {
-      return A2(boolProperty,
-      "isMap",
-      value);
-   };
-   var download = function (bool) {
-      return A2(boolProperty,
-      "download",
-      bool);
-   };
-   var reversed = function (bool) {
-      return A2(boolProperty,
-      "reversed",
-      bool);
-   };
-   var classList = function (list) {
-      return $class($String.join(" ")($List.map($Basics.fst)($List.filter($Basics.snd)(list))));
-   };
-   var style = function (props) {
-      return property("style")($Json$Encode.object($List.map(function (_v0) {
-         return function () {
-            switch (_v0.ctor)
-            {case "_Tuple2":
-               return {ctor: "_Tuple2"
-                      ,_0: _v0._0
-                      ,_1: $Json$Encode.string(_v0._1)};}
-            _U.badCase($moduleName,
-            "on line 133, column 35 to 57");
-         }();
-      })(props)));
-   };
-   var key = function (k) {
-      return A2(stringProperty,
-      "key",
-      k);
-   };
-   _elm.Html.Attributes.values = {_op: _op
-                                 ,key: key
-                                 ,style: style
-                                 ,classList: classList
-                                 ,property: property
-                                 ,stringProperty: stringProperty
-                                 ,boolProperty: boolProperty
-                                 ,attribute: attribute
-                                 ,$class: $class
-                                 ,hidden: hidden
-                                 ,id: id
-                                 ,title: title
-                                 ,accesskey: accesskey
-                                 ,contenteditable: contenteditable
-                                 ,contextmenu: contextmenu
-                                 ,dir: dir
-                                 ,draggable: draggable
-                                 ,dropzone: dropzone
-                                 ,itemprop: itemprop
-                                 ,lang: lang
-                                 ,spellcheck: spellcheck
-                                 ,tabindex: tabindex
-                                 ,async: async
-                                 ,charset: charset
-                                 ,content: content
-                                 ,defer: defer
-                                 ,httpEquiv: httpEquiv
-                                 ,language: language
-                                 ,scoped: scoped
-                                 ,src: src
-                                 ,height: height
-                                 ,width: width
-                                 ,alt: alt
-                                 ,autoplay: autoplay
-                                 ,controls: controls
-                                 ,loop: loop
-                                 ,preload: preload
-                                 ,poster: poster
-                                 ,$default: $default
-                                 ,kind: kind
-                                 ,srclang: srclang
-                                 ,sandbox: sandbox
-                                 ,seamless: seamless
-                                 ,srcdoc: srcdoc
-                                 ,type$: type$
-                                 ,value: value
-                                 ,checked: checked
-                                 ,placeholder: placeholder
-                                 ,selected: selected
-                                 ,accept: accept
-                                 ,acceptCharset: acceptCharset
-                                 ,action: action
-                                 ,autocomplete: autocomplete
-                                 ,autofocus: autofocus
-                                 ,autosave: autosave
-                                 ,disabled: disabled
-                                 ,enctype: enctype
-                                 ,formaction: formaction
-                                 ,list: list
-                                 ,minlength: minlength
-                                 ,maxlength: maxlength
-                                 ,method: method
-                                 ,multiple: multiple
-                                 ,name: name
-                                 ,novalidate: novalidate
-                                 ,pattern: pattern
-                                 ,readonly: readonly
-                                 ,required: required
-                                 ,size: size
-                                 ,$for: $for
-                                 ,form: form
-                                 ,max: max
-                                 ,min: min
-                                 ,step: step
-                                 ,cols: cols
-                                 ,rows: rows
-                                 ,wrap: wrap
-                                 ,ismap: ismap
-                                 ,usemap: usemap
-                                 ,shape: shape
-                                 ,coords: coords
-                                 ,challenge: challenge
-                                 ,keytype: keytype
-                                 ,align: align
-                                 ,cite: cite
-                                 ,href: href
-                                 ,target: target
-                                 ,download: download
-                                 ,downloadAs: downloadAs
-                                 ,hreflang: hreflang
-                                 ,media: media
-                                 ,ping: ping
-                                 ,rel: rel
-                                 ,datetime: datetime
-                                 ,pubdate: pubdate
-                                 ,reversed: reversed
-                                 ,start: start
-                                 ,colspan: colspan
-                                 ,headers: headers
-                                 ,rowspan: rowspan
-                                 ,scope: scope
-                                 ,manifest: manifest};
-   return _elm.Html.Attributes.values;
-};
 Elm.Json = Elm.Json || {};
 Elm.Json.Decode = Elm.Json.Decode || {};
 Elm.Json.Decode.make = function (_elm) {
@@ -6464,9 +2986,23 @@ Elm.Json.Decode.make = function (_elm) {
    };
    var Decoder = {ctor: "Decoder"};
    _elm.Json.Decode.values = {_op: _op
-                             ,Decoder: Decoder
-                             ,map: map
                              ,decodeString: decodeString
+                             ,decodeValue: decodeValue
+                             ,string: string
+                             ,$int: $int
+                             ,$float: $float
+                             ,bool: bool
+                             ,$null: $null
+                             ,list: list
+                             ,array: array
+                             ,tuple1: tuple1
+                             ,tuple2: tuple2
+                             ,tuple3: tuple3
+                             ,tuple4: tuple4
+                             ,tuple5: tuple5
+                             ,tuple6: tuple6
+                             ,tuple7: tuple7
+                             ,tuple8: tuple8
                              ,at: at
                              ,object1: object1
                              ,object2: object2
@@ -6478,29 +3014,15 @@ Elm.Json.Decode.make = function (_elm) {
                              ,object8: object8
                              ,keyValuePairs: keyValuePairs
                              ,dict: dict
-                             ,oneOf: oneOf
-                             ,string: string
-                             ,$float: $float
-                             ,$int: $int
-                             ,bool: bool
-                             ,list: list
-                             ,array: array
-                             ,$null: $null
                              ,maybe: maybe
-                             ,value: value
-                             ,decodeValue: decodeValue
-                             ,customDecoder: customDecoder
-                             ,andThen: andThen
+                             ,oneOf: oneOf
+                             ,map: map
                              ,fail: fail
                              ,succeed: succeed
-                             ,tuple1: tuple1
-                             ,tuple2: tuple2
-                             ,tuple3: tuple3
-                             ,tuple4: tuple4
-                             ,tuple5: tuple5
-                             ,tuple6: tuple6
-                             ,tuple7: tuple7
-                             ,tuple8: tuple8};
+                             ,andThen: andThen
+                             ,value: value
+                             ,customDecoder: customDecoder
+                             ,Decoder: Decoder};
    return _elm.Json.Decode.values;
 };
 Elm.Json = Elm.Json || {};
@@ -6529,328 +3051,17 @@ Elm.Json.Encode.make = function (_elm) {
    var encode = $Native$Json.encode;
    var Value = {ctor: "Value"};
    _elm.Json.Encode.values = {_op: _op
-                             ,Value: Value
                              ,encode: encode
                              ,string: string
                              ,$int: $int
                              ,$float: $float
                              ,bool: bool
                              ,$null: $null
-                             ,object: object
+                             ,list: list
                              ,array: array
-                             ,list: list};
+                             ,object: object
+                             ,Value: Value};
    return _elm.Json.Encode.values;
-};
-Elm.Kalevala = Elm.Kalevala || {};
-Elm.Kalevala.make = function (_elm) {
-   "use strict";
-   _elm.Kalevala = _elm.Kalevala || {};
-   if (_elm.Kalevala.values)
-   return _elm.Kalevala.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Kalevala",
-   $Basics = Elm.Basics.make(_elm),
-   $Debug = Elm.Debug.make(_elm),
-   $Deprecated$WebSocket = Elm.Deprecated.WebSocket.make(_elm),
-   $Deserialize = Elm.Deserialize.make(_elm),
-   $Display = Elm.Display.make(_elm),
-   $Display$Board = Elm.Display.Board.make(_elm),
-   $Game = Elm.Game.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Graphics$Input$Field = Elm.Graphics.Input.Field.make(_elm),
-   $Helpers = Elm.Helpers.make(_elm),
-   $Json$Decode = Elm.Json.Decode.make(_elm),
-   $Json$Encode = Elm.Json.Encode.make(_elm),
-   $Log = Elm.Log.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Mouse = Elm.Mouse.make(_elm),
-   $Player = Elm.Player.make(_elm),
-   $Random = Elm.Random.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Serialize = Elm.Serialize.make(_elm),
-   $Signal = Elm.Signal.make(_elm),
-   $State = Elm.State.make(_elm),
-   $Time = Elm.Time.make(_elm),
-   $Window = Elm.Window.make(_elm);
-   var getCpuResponse = F2(function (playerAction,
-   delayTime) {
-      return function () {
-         var processCpuResponse = function (a) {
-            return function () {
-               switch (a.ctor)
-               {case "Pass":
-                  return $GameTypes.CpuAction;
-                  case "PlacePiece":
-                  return $GameTypes.CpuAction;}
-               return $GameTypes.NoAction;
-            }();
-         };
-         return A2($Time.delay,
-         delayTime,
-         A2($Signal._op["<~"],
-         processCpuResponse,
-         playerAction));
-      }();
-   });
-   var decode = function (actionJson) {
-      return function () {
-         var _v3 = A2($Json$Decode.decodeString,
-         $Deserialize.action,
-         actionJson);
-         switch (_v3.ctor)
-         {case "Err":
-            return $GameTypes.ParseError(_v3._0);
-            case "Ok": return _v3._0;}
-         _U.badCase($moduleName,
-         "between lines 107 and 109");
-      }();
-   };
-   var encode = function (action) {
-      return A2($Json$Encode.encode,
-      0,
-      $Serialize.action(action));
-   };
-   var server = "ws://ec2-52-10-22-64.us-west-2.compute.amazonaws.com:22000";
-   var constructAction = F5(function (clickType,
-   seed,
-   mousePos,
-   dims,
-   playerName) {
-      return function () {
-         var deck = A2($Helpers.shuffle,
-         $Game.deckContents,
-         seed);
-         var click = A2($Debug.watch,
-         "clickInput.signal",
-         clickType);
-         var pos = A2($Debug.watch,
-         "Mouse.position",
-         mousePos);
-         return function () {
-            switch (clickType.ctor)
-            {case "BoardClick":
-               return A2($GameTypes.PlacePiece,
-                 mousePos,
-                 dims);
-               case "MainMenuButton":
-               return $GameTypes.MoveToMainMenu;
-               case "None":
-               return $GameTypes.NoAction;
-               case "PassButton":
-               return $GameTypes.Pass;
-               case "PieceInHand":
-               return A2($GameTypes.PickUpPiece,
-                 clickType._0,
-                 clickType._1);
-               case "StartNewGameButton":
-               return A3($GameTypes.StartNewGame,
-                 deck,
-                 $Player.random(seed),
-                 playerName.string);
-               case "StartRemoteGameButton":
-               return $GameTypes.MoveToRemoteGameMenu;
-               case "StartSinglePlayer":
-               return A4($GameTypes.StartGame,
-                 $GameTypes.HumanVsCpu,
-                 deck,
-                 $Player.random(seed),
-                 playerName.string);
-               case "StartTwoPlayerHotseat":
-               return A4($GameTypes.StartGame,
-                 $GameTypes.HumanVsHumanLocal,
-                 deck,
-                 $Player.random(seed),
-                 playerName.string);
-               case "StartTwoPlayerOnline":
-               return A4($GameTypes.StartGame,
-                 $GameTypes.HumanVsHumanRemote,
-                 deck,
-                 $Player.random(seed),
-                 playerName.string);
-               case "SwitchButton":
-               return $GameTypes.Switch;}
-            _U.badCase($moduleName,
-            "between lines 73 and 86");
-         }();
-      }();
-   });
-   var processClick = function (signal) {
-      return function () {
-         var sampledPlayerName = $Signal.sampleOn(signal)($Display.playerNameSignal);
-         var sampledMouse = A2($Signal.sampleOn,
-         signal,
-         $Mouse.position);
-         var seedSignal = A2($Signal._op["<~"],
-         function ($) {
-            return $Random.initialSeed($Basics.round($Basics.fst($)));
-         },
-         $Time.timestamp(signal));
-         return A2($Signal._op["~"],
-         A2($Signal._op["~"],
-         A2($Signal._op["~"],
-         A2($Signal._op["~"],
-         A2($Signal._op["<~"],
-         constructAction,
-         signal),
-         seedSignal),
-         sampledMouse),
-         $Window.dimensions),
-         sampledPlayerName);
-      }();
-   };
-   var performAction = F2(function (action,
-   state) {
-      return function () {
-         var newState = function () {
-            switch (action.ctor)
-            {case "CpuAction":
-               return $Game.tryAIMove(state);
-               case "GameStarted":
-               return A5($Game.gameStarted,
-                 action._0,
-                 action._1,
-                 action._2,
-                 action._3,
-                 state);
-               case "MoveToMainMenu":
-               return $Game.startState;
-               case "MoveToRemoteGameMenu":
-               return _U.replace([["gameType"
-                                  ,$GameTypes.HumanVsHumanRemote]
-                                 ,["gameState"
-                                  ,$GameTypes.NotStarted]],
-                 state);
-               case "NoAction": return state;
-               case "OpponentDisconnected":
-               return _U.replace([["gameState"
-                                  ,$GameTypes.Disconnected]
-                                 ,["log"
-                                  ,A2($Log.addSystemMsg,
-                                  "Opponent disconnected.",
-                                  state.log)]],
-                 state);
-               case "ParseError": return state;
-               case "Pass":
-               return $Game.pass(state);
-               case "PickUpPiece":
-               return A3($Game.tryToPickUpPiece,
-                 action._0,
-                 action._1,
-                 state);
-               case "PlacePiece":
-               return A2($Game.tryMove,
-                 A3($Display$Board.mouseToBoardPosition,
-                 action._0,
-                 state,
-                 action._1),
-                 state);
-               case "StartGame":
-               return A4($Game.startGame,
-                 action._0,
-                 action._1,
-                 action._2,
-                 action._3);
-               case "StartNewGame":
-               return A4($Game.startGame,
-                 state.gameType,
-                 action._0,
-                 action._1,
-                 action._2);
-               case "Switch":
-               return _U.replace([["turn"
-                                  ,$Player.next(state.turn)]],
-                 state);}
-            _U.badCase($moduleName,
-            "between lines 45 and 60");
-         }();
-         return $State.isGameOver(newState) ? _U.replace([["gameState"
-                                                          ,$GameTypes.GameOver]
-                                                         ,["log"
-                                                          ,A2($Log.addSystemMsg,
-                                                          A2($Basics._op["++"],
-                                                          "Game over!",
-                                                          $State.endStateMsg(newState)),
-                                                          newState.log)]],
-         newState) : newState;
-      }();
-   });
-   var isRemoteSignal = function () {
-      var getIsRemoteFromClickSignal = function (event) {
-         return function () {
-            switch (event.ctor)
-            {case "StartSinglePlayer":
-               return $Maybe.Just(false);
-               case "StartTwoPlayerHotseat":
-               return $Maybe.Just(false);
-               case "StartTwoPlayerOnline":
-               return $Maybe.Just(true);}
-            return $Maybe.Nothing;
-         }();
-      };
-      return A3($Signal.filterMap,
-      getIsRemoteFromClickSignal,
-      false,
-      $Display.clickMailbox.signal);
-   }();
-   var getRemoteResponse = function (playerAction) {
-      return function () {
-         var actionForRemote = A3($Helpers.filterOn,
-         playerAction,
-         isRemoteSignal,
-         $GameTypes.NoAction);
-         var request = A2($Signal._op["<~"],
-         $Debug.watch("request"),
-         A2($Signal._op["<~"],
-         encode,
-         actionForRemote));
-         var response = A2($Signal._op["<~"],
-         $Debug.watch("response"),
-         A2($Deprecated$WebSocket.connect,
-         server,
-         request));
-         return A2($Signal._op["<~"],
-         $Debug.watch("deserialized"),
-         A2($Signal._op["<~"],
-         decode,
-         response));
-      }();
-   };
-   var main = function () {
-      var playerAction = processClick($Display.clickMailbox.signal);
-      var remoteAction = getRemoteResponse(playerAction);
-      var cpuAction = A2(getCpuResponse,
-      playerAction,
-      $Time.second);
-      var state = A3($Signal.foldp,
-      performAction,
-      $Game.startState,
-      $Signal.mergeMany(_L.fromArray([playerAction
-                                     ,remoteAction
-                                     ,cpuAction])));
-      return A2($Signal._op["~"],
-      A2($Signal._op["~"],
-      A2($Signal._op["<~"],
-      $Display.render,
-      state),
-      $Window.dimensions),
-      $Display.playerNameSignal);
-   }();
-   _elm.Kalevala.values = {_op: _op
-                          ,isRemoteSignal: isRemoteSignal
-                          ,performAction: performAction
-                          ,constructAction: constructAction
-                          ,processClick: processClick
-                          ,server: server
-                          ,encode: encode
-                          ,decode: decode
-                          ,getRemoteResponse: getRemoteResponse
-                          ,getCpuResponse: getCpuResponse
-                          ,main: main};
-   return _elm.Kalevala.values;
 };
 Elm.List = Elm.List || {};
 Elm.List.make = function (_elm) {
@@ -6969,7 +3180,7 @@ Elm.List.make = function (_elm) {
             case "[]":
             return $Maybe.Nothing;}
          _U.badCase($moduleName,
-         "between lines 87 and 95");
+         "between lines 87 and 89");
       }();
    };
    var head = function (list) {
@@ -6980,7 +3191,7 @@ Elm.List.make = function (_elm) {
             case "[]":
             return $Maybe.Nothing;}
          _U.badCase($moduleName,
-         "between lines 75 and 84");
+         "between lines 75 and 77");
       }();
    };
    _op["::"] = $Native$List.cons;
@@ -7019,7 +3230,7 @@ Elm.List.make = function (_elm) {
             return A2(_op["::"],_v15._0,xs);
             case "Nothing": return xs;}
          _U.badCase($moduleName,
-         "between lines 179 and 186");
+         "between lines 179 and 181");
       }();
    });
    var filterMap = F2(function (f,
@@ -7166,7 +3377,7 @@ Elm.List.make = function (_elm) {
             case "[]":
             return _L.fromArray([]);}
          _U.badCase($moduleName,
-         "between lines 350 and 361");
+         "between lines 350 and 356");
       }();
    });
    _elm.List.values = {_op: _op
@@ -7207,84 +3418,59 @@ Elm.List.make = function (_elm) {
                       ,sortWith: sortWith};
    return _elm.List.values;
 };
-Elm.Log = Elm.Log || {};
-Elm.Log.make = function (_elm) {
+Elm.Markdown = Elm.Markdown || {};
+Elm.Markdown.make = function (_elm) {
    "use strict";
-   _elm.Log = _elm.Log || {};
-   if (_elm.Log.values)
-   return _elm.Log.values;
+   _elm.Markdown = _elm.Markdown || {};
+   if (_elm.Markdown.values)
+   return _elm.Markdown.values;
    var _op = {},
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   $moduleName = "Log",
+   $moduleName = "Markdown",
    $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $Decorate = Elm.Decorate.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Html = Elm.Html.make(_elm),
    $List = Elm.List.make(_elm),
-   $Player = Elm.Player.make(_elm),
-   $Text = Elm.Text.make(_elm);
-   var display = F2(function (_v0,
-   log) {
-      return function () {
-         switch (_v0.ctor)
-         {case "_Tuple2":
-            return function () {
-                 var widthMinusSidebar = _v0._0 - 16;
-                 var entryToElt = function (_v4) {
-                    return function () {
-                       switch (_v4.ctor)
-                       {case "_Tuple2":
-                          return $Graphics$Element.width(widthMinusSidebar)($Graphics$Element.leftAligned($Text.color(_v4._0)($Text.fromString(_v4._1))));}
-                       _U.badCase($moduleName,
-                       "on line 29, column 34 to 119");
-                    }();
-                 };
-                 var fullLog = $Graphics$Element.width(_v0._0)($Graphics$Element.flow($Graphics$Element.down)(A2($List.map,
-                 entryToElt,
-                 log)));
-                 return _U.cmp($Graphics$Element.heightOf(fullLog),
-                 _v0._1) > 0 ? $Decorate.decorate({ctor: "_Tuple2"
-                                                  ,_0: "style"
-                                                  ,_1: "overflow-y: scroll; overflow-x: hidden;"})($Graphics$Element.height(_v0._1)(fullLog)) : fullLog;
-              }();}
-         _U.badCase($moduleName,
-         "between lines 28 and 35");
-      }();
+   $Maybe = Elm.Maybe.make(_elm),
+   $Native$Markdown = Elm.Native.Markdown.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var toElementWith = $Native$Markdown.toElementWith;
+   var toHtmlWith = $Native$Markdown.toHtmlWith;
+   var defaultOptions = {_: {}
+                        ,githubFlavored: $Maybe.Just({_: {}
+                                                     ,breaks: false
+                                                     ,tables: false})
+                        ,sanitize: false
+                        ,smartypants: false};
+   var Options = F3(function (a,
+   b,
+   c) {
+      return {_: {}
+             ,githubFlavored: a
+             ,sanitize: b
+             ,smartypants: c};
    });
-   var addSystemMsg = F2(function (str,
-   log) {
-      return A2($List._op["::"],
-      {ctor: "_Tuple2"
-      ,_0: $Color.darkGrey
-      ,_1: str},
-      log);
-   });
-   var addPlayerMsg = F3(function (str,
-   player,
-   log) {
-      return A2($List._op["::"],
-      {ctor: "_Tuple2"
-      ,_0: $Player.toColor(player)
-      ,_1: str},
-      log);
-   });
-   var singleton = F2(function (str,
-   color) {
-      return _L.fromArray([{ctor: "_Tuple2"
-                           ,_0: color
-                           ,_1: str}]);
-   });
-   var empty = _L.fromArray([]);
-   _elm.Log.values = {_op: _op
-                     ,empty: empty
-                     ,singleton: singleton
-                     ,addPlayerMsg: addPlayerMsg
-                     ,addSystemMsg: addSystemMsg
-                     ,display: display};
-   return _elm.Log.values;
+   var toElement = function (string) {
+      return A2($Native$Markdown.toElementWith,
+      defaultOptions,
+      string);
+   };
+   var toHtml = function (string) {
+      return A2($Native$Markdown.toHtmlWith,
+      defaultOptions,
+      string);
+   };
+   _elm.Markdown.values = {_op: _op
+                          ,toHtml: toHtml
+                          ,toElement: toElement
+                          ,Options: Options
+                          ,defaultOptions: defaultOptions
+                          ,toHtmlWith: toHtmlWith
+                          ,toElementWith: toElementWith};
+   return _elm.Markdown.values;
 };
 Elm.Maybe = Elm.Maybe || {};
 Elm.Maybe.make = function (_elm) {
@@ -7305,7 +3491,7 @@ Elm.Maybe.make = function (_elm) {
             case "Nothing":
             return $default;}
          _U.badCase($moduleName,
-         "between lines 45 and 56");
+         "between lines 45 and 47");
       }();
    });
    var Nothing = {ctor: "Nothing"};
@@ -7318,11 +3504,11 @@ Elm.Maybe.make = function (_elm) {
                     case "Nothing":
                     return oneOf(maybes._1);}
                  _U.badCase($moduleName,
-                 "between lines 64 and 73");
+                 "between lines 64 and 66");
               }();
             case "[]": return Nothing;}
          _U.badCase($moduleName,
-         "between lines 59 and 73");
+         "between lines 59 and 66");
       }();
    };
    var andThen = F2(function (maybeValue,
@@ -7347,7 +3533,7 @@ Elm.Maybe.make = function (_elm) {
             return Just(f(maybe._0));
             case "Nothing": return Nothing;}
          _U.badCase($moduleName,
-         "between lines 76 and 107");
+         "between lines 76 and 78");
       }();
    });
    _elm.Maybe.values = {_op: _op
@@ -7358,37 +3544,6 @@ Elm.Maybe.make = function (_elm) {
                        ,Just: Just
                        ,Nothing: Nothing};
    return _elm.Maybe.values;
-};
-Elm.Mouse = Elm.Mouse || {};
-Elm.Mouse.make = function (_elm) {
-   "use strict";
-   _elm.Mouse = _elm.Mouse || {};
-   if (_elm.Mouse.values)
-   return _elm.Mouse.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Mouse",
-   $Basics = Elm.Basics.make(_elm),
-   $Native$Mouse = Elm.Native.Mouse.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var clicks = $Native$Mouse.clicks;
-   var isDown = $Native$Mouse.isDown;
-   var position = $Native$Mouse.position;
-   var x = A2($Signal.map,
-   $Basics.fst,
-   position);
-   var y = A2($Signal.map,
-   $Basics.snd,
-   position);
-   _elm.Mouse.values = {_op: _op
-                       ,position: position
-                       ,x: x
-                       ,y: y
-                       ,isDown: isDown
-                       ,clicks: clicks};
-   return _elm.Mouse.values;
 };
 Elm.Native.Array = {};
 Elm.Native.Array.make = function(localRuntime) {
@@ -10016,479 +6171,6 @@ Elm.Native.Graphics.Element.make = function(localRuntime) {
 
 };
 
-// setup
-Elm.Native = Elm.Native || {};
-Elm.Native.Graphics = Elm.Native.Graphics || {};
-Elm.Native.Graphics.Input = Elm.Native.Graphics.Input || {};
-
-// definition
-Elm.Native.Graphics.Input.make = function(localRuntime) {
-	'use strict';
-
-	// attempt to short-circuit
-	if ('values' in Elm.Native.Graphics.Input) {
-		return Elm.Native.Graphics.Input.values;
-	}
-
-	var Color = Elm.Native.Color.make(localRuntime);
-	var List = Elm.Native.List.make(localRuntime);
-	var Signal = Elm.Native.Signal.make(localRuntime);
-	var Text = Elm.Native.Text.make(localRuntime);
-	var Utils = Elm.Native.Utils.make(localRuntime);
-
-	var Element = Elm.Native.Graphics.Element.make(localRuntime);
-
-
-	function renderDropDown(model)
-	{
-		var drop = Element.createNode('select');
-		drop.style.border = '0 solid';
-		drop.style.pointerEvents = 'auto';
-		drop.style.display = 'block';
-
-		drop.elm_values = List.toArray(model.values);
-		drop.elm_handler = model.handler;
-		var values = drop.elm_values;
-
-		for (var i = 0; i < values.length; ++i)
-		{
-			var option = Element.createNode('option');
-			var name = values[i]._0;
-			option.value = name;
-			option.innerHTML = name;
-			drop.appendChild(option);
-		}
-		drop.addEventListener('change', function() {
-			Signal.sendMessage(drop.elm_handler(drop.elm_values[drop.selectedIndex]._1));
-		});
-
-		return drop;
-	}
-
-	function updateDropDown(node, oldModel, newModel)
-	{
-		node.elm_values = List.toArray(newModel.values);
-		node.elm_handler = newModel.handler;
-
-		var values = node.elm_values;
-		var kids = node.childNodes;
-		var kidsLength = kids.length;
-
-		var i = 0;
-		for (; i < kidsLength && i < values.length; ++i)
-		{
-			var option = kids[i];
-			var name = values[i]._0;
-			option.value = name;
-			option.innerHTML = name;
-		}
-		for (; i < kidsLength; ++i)
-		{
-			node.removeChild(node.lastChild);
-		}
-		for (; i < values.length; ++i)
-		{
-			var option = Element.createNode('option');
-			var name = values[i]._0;
-			option.value = name;
-			option.innerHTML = name;
-			node.appendChild(option);
-		}
-		return node;
-	}
-
-	function dropDown(handler, values)
-	{
-		return A3(Element.newElement, 100, 24, {
-			ctor: 'Custom',
-			type: 'DropDown',
-			render: renderDropDown,
-			update: updateDropDown,
-			model: {
-				values: values,
-				handler: handler
-			}
-		});
-	}
-
-	function renderButton(model)
-	{
-		var node = Element.createNode('button');
-		node.style.display = 'block';
-		node.style.pointerEvents = 'auto';
-		node.elm_message = model.message;
-		function click()
-		{
-			Signal.sendMessage(node.elm_message);
-		}
-		node.addEventListener('click', click);
-		node.innerHTML = model.text;
-		return node;
-	}
-
-	function updateButton(node, oldModel, newModel)
-	{
-		node.elm_message = newModel.message;
-		var txt = newModel.text;
-		if (oldModel.text !== txt)
-		{
-			node.innerHTML = txt;
-		}
-		return node;
-	}
-
-	function button(message, text)
-	{
-		return A3(Element.newElement, 100, 40, {
-			ctor: 'Custom',
-			type: 'Button',
-			render: renderButton,
-			update: updateButton,
-			model: {
-				message: message,
-				text:text
-			}
-		});
-	}
-
-	function renderCustomButton(model)
-	{
-		var btn = Element.createNode('div');
-		btn.style.pointerEvents = 'auto';
-		btn.elm_message = model.message;
-
-		btn.elm_up    = Element.render(model.up);
-		btn.elm_hover = Element.render(model.hover);
-		btn.elm_down  = Element.render(model.down);
-
-		btn.elm_up.style.display = 'block';
-		btn.elm_hover.style.display = 'none';
-		btn.elm_down.style.display = 'none';
-
-		btn.appendChild(btn.elm_up);
-		btn.appendChild(btn.elm_hover);
-		btn.appendChild(btn.elm_down);
-
-		function swap(visibleNode, hiddenNode1, hiddenNode2)
-		{
-			visibleNode.style.display = 'block';
-			hiddenNode1.style.display = 'none';
-			hiddenNode2.style.display = 'none';
-		}
-
-		var overCount = 0;
-		function over(e)
-		{
-			if (overCount++ > 0) return;
-			swap(btn.elm_hover, btn.elm_down, btn.elm_up);
-		}
-		function out(e)
-		{
-			if (btn.contains(e.toElement || e.relatedTarget)) return;
-			overCount = 0;
-			swap(btn.elm_up, btn.elm_down, btn.elm_hover);
-		}
-		function up()
-		{
-			swap(btn.elm_hover, btn.elm_down, btn.elm_up);
-			Signal.sendMessage(btn.elm_message);
-		}
-		function down()
-		{
-			swap(btn.elm_down, btn.elm_hover, btn.elm_up);
-		}
-
-		btn.addEventListener('mouseover', over);
-		btn.addEventListener('mouseout' , out);
-		btn.addEventListener('mousedown', down);
-		btn.addEventListener('mouseup'  , up);
-
-		return btn;
-	}
-
-	function updateCustomButton(node, oldModel, newModel)
-	{
-		node.elm_message = newModel.message;
-
-		var kids = node.childNodes;
-		var styleUp    = kids[0].style.display;
-		var styleHover = kids[1].style.display;
-		var styleDown  = kids[2].style.display;
-
-		Element.updateAndReplace(kids[0], oldModel.up, newModel.up);
-		Element.updateAndReplace(kids[1], oldModel.hover, newModel.hover);
-		Element.updateAndReplace(kids[2], oldModel.down, newModel.down);
-
-		var kids = node.childNodes;
-		kids[0].style.display = styleUp;
-		kids[1].style.display = styleHover;
-		kids[2].style.display = styleDown;
-
-		return node;
-	}
-
-	function max3(a,b,c)
-	{
-		var ab = a > b ? a : b;
-		return ab > c ? ab : c;
-	}
-
-	function customButton(message, up, hover, down)
-	{
-		return A3(Element.newElement,
-				  max3(up.props.width, hover.props.width, down.props.width),
-				  max3(up.props.height, hover.props.height, down.props.height),
-				  { ctor: 'Custom',
-					type: 'CustomButton',
-					render: renderCustomButton,
-					update: updateCustomButton,
-					model: {
-						message: message,
-						up: up,
-						hover: hover,
-						down: down
-					}
-				  });
-	}
-
-	function renderCheckbox(model)
-	{
-		var node = Element.createNode('input');
-		node.type = 'checkbox';
-		node.checked = model.checked;
-		node.style.display = 'block';
-		node.style.pointerEvents = 'auto';
-		node.elm_handler = model.handler;
-		function change()
-		{
-			Signal.sendMessage(node.elm_handler(node.checked));
-		}
-		node.addEventListener('change', change);
-		return node;
-	}
-
-	function updateCheckbox(node, oldModel, newModel)
-	{
-		node.elm_handler = newModel.handler;
-		node.checked = newModel.checked;
-		return node;
-	}
-
-	function checkbox(handler, checked)
-	{
-		return A3(Element.newElement, 13, 13, {
-			ctor: 'Custom',
-			type: 'CheckBox',
-			render: renderCheckbox,
-			update: updateCheckbox,
-			model: { handler:handler, checked:checked }
-		});
-	}
-
-	function setRange(node, start, end, dir)
-	{
-		if (node.parentNode)
-		{
-			node.setSelectionRange(start, end, dir);
-		}
-		else
-		{
-			setTimeout(function(){node.setSelectionRange(start, end, dir);}, 0);
-		}
-	}
-
-	function updateIfNeeded(css, attribute, latestAttribute)
-	{
-		if (css[attribute] !== latestAttribute)
-		{
-			css[attribute] = latestAttribute;
-		}
-	}
-	function cssDimensions(dimensions)
-	{
-		return dimensions.top    + 'px ' +
-			   dimensions.right  + 'px ' +
-			   dimensions.bottom + 'px ' +
-			   dimensions.left   + 'px';
-	}
-	function updateFieldStyle(css, style)
-	{
-		updateIfNeeded(css, 'padding', cssDimensions(style.padding));
-
-		var outline = style.outline;
-		updateIfNeeded(css, 'border-width', cssDimensions(outline.width));
-		updateIfNeeded(css, 'border-color', Color.toCss(outline.color));
-		updateIfNeeded(css, 'border-radius', outline.radius + 'px');
-
-		var highlight = style.highlight;
-		if (highlight.width === 0)
-		{
-			css.outline = 'none';
-		}
-		else
-		{
-			updateIfNeeded(css, 'outline-width', highlight.width + 'px');
-			updateIfNeeded(css, 'outline-color', Color.toCss(highlight.color));
-		}
-
-		var textStyle = style.style;
-		updateIfNeeded(css, 'color', Color.toCss(textStyle.color));
-		if (textStyle.typeface.ctor !== '[]')
-		{
-			updateIfNeeded(css, 'font-family', Text.toTypefaces(textStyle.typeface));
-		}
-		if (textStyle.height.ctor !== "Nothing")
-		{
-			updateIfNeeded(css, 'font-size', textStyle.height._0 + 'px');
-		}
-		updateIfNeeded(css, 'font-weight', textStyle.bold ? 'bold' : 'normal');
-		updateIfNeeded(css, 'font-style', textStyle.italic ? 'italic' : 'normal');
-		if (textStyle.line.ctor !== 'Nothing')
-		{
-			updateIfNeeded(css, 'text-decoration', Text.toLine(textStyle.line._0));
-		}
-	}
-
-	function renderField(model)
-	{
-		var field = Element.createNode('input');
-		updateFieldStyle(field.style, model.style);
-		field.style.borderStyle = 'solid';
-		field.style.pointerEvents = 'auto';
-
-		field.type = model.type;
-		field.placeholder = model.placeHolder;
-		field.value = model.content.string;
-
-		field.elm_handler = model.handler;
-		field.elm_old_value = field.value;
-
-		function inputUpdate(event)
-		{
-			var curr = field.elm_old_value;
-			var next = field.value;
-			if (curr === next)
-			{
-				return;
-			}
-
-			var direction = field.selectionDirection === 'forward' ? 'Forward' : 'Backward';
-			var start = field.selectionStart;
-			var end = field.selectionEnd;
-			field.value = field.elm_old_value;
-
-			Signal.sendMessage(field.elm_handler({
-				_:{},
-				string: next,
-				selection: {
-					_:{},
-					start: start,
-					end: end,
-					direction: { ctor: direction }
-				}
-			}));
-		}
-
-		field.addEventListener('input', inputUpdate);
-		field.addEventListener('focus', function() {
-			field.elm_hasFocus = true;
-		});
-		field.addEventListener('blur', function() {
-			field.elm_hasFocus = false;
-		});
-
-		return field;
-	}
-
-	function updateField(field, oldModel, newModel)
-	{
-		if (oldModel.style !== newModel.style)
-		{
-			updateFieldStyle(field.style, newModel.style);
-		}
-		field.elm_handler = newModel.handler;
-
-		field.type = newModel.type;
-		field.placeholder = newModel.placeHolder;
-		var value = newModel.content.string;
-		field.value = value;
-		field.elm_old_value = value;
-		if (field.elm_hasFocus)
-		{
-			var selection = newModel.content.selection;
-			var direction = selection.direction.ctor === 'Forward' ? 'forward' : 'backward';
-			setRange(field, selection.start, selection.end, direction);
-		}
-		return field;
-	}
-
-	function mkField(type)
-	{
-		function field(style, handler, placeHolder, content)
-		{
-			var padding = style.padding;
-			var outline = style.outline.width;
-			var adjustWidth = padding.left + padding.right + outline.left + outline.right;
-			var adjustHeight = padding.top + padding.bottom + outline.top + outline.bottom;
-			return A3(Element.newElement, 200, 30, {
-				ctor: 'Custom',
-				type: type + 'Field',
-				adjustWidth: adjustWidth,
-				adjustHeight: adjustHeight,
-				render: renderField,
-				update: updateField,
-				model: {
-					handler:handler,
-					placeHolder:placeHolder,
-					content:content,
-					style:style,
-					type:type
-				}
-			});
-		}
-		return F4(field);
-	}
-
-	function hoverable(handler, elem)
-	{
-		function onHover(bool)
-		{
-			Signal.sendMessage(handler(bool));
-		}
-		var props = Utils.replace([['hover',onHover]], elem.props);
-		return {
-			props: props,
-			element: elem.element
-		};
-	}
-
-	function clickable(message, elem)
-	{
-		function onClick()
-		{
-			Signal.sendMessage(message);
-		}
-		var props = Utils.replace([['click',onClick]], elem.props);
-		return {
-			props: props,
-			element: elem.element
-		};
-	}
-
-	return Elm.Native.Graphics.Input.values = {
-		button: F2(button),
-		customButton: F4(customButton),
-		checkbox: F2(checkbox),
-		dropDown: F2(dropDown),
-		field: mkField('text'),
-		email: mkField('email'),
-		password: mkField('password'),
-		hoverable: F2(hoverable),
-		clickable: F2(clickable)
-	};
-
-};
-
 Elm.Native.Json = {};
 Elm.Native.Json.make = function(localRuntime) {
 
@@ -11202,50 +6884,108 @@ Elm.Native.List.make = function(localRuntime) {
 
 };
 
-Elm.Native = Elm.Native || {};
-Elm.Native.Mouse = {};
-Elm.Native.Mouse.make = function(localRuntime) {
 
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Mouse = localRuntime.Native.Mouse || {};
-	if (localRuntime.Native.Mouse.values)
+// setup
+Elm.Native = Elm.Native || {};
+Elm.Native.Markdown = Elm.Native.Markdown || {};
+
+// definition
+Elm.Native.Markdown.make = function(localRuntime) {
+	'use strict';
+
+	// attempt to short-circuit
+	if ('values' in Elm.Native.Markdown)
 	{
-		return localRuntime.Native.Mouse.values;
+		return Elm.Native.Markdown.values;
 	}
 
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Utils = Elm.Native.Utils.make(localRuntime);
+	var Element = Elm.Native.Graphics.Element.make(localRuntime);
 
-	var position = NS.input('Mouse.position', Utils.Tuple2(0,0));
+	/**
+	 * marked - a markdown parser
+	 * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
+	 * https://github.com/chjj/marked
+	 */
+	(function(){var block={newline:/^\n+/,code:/^( {4}[^\n]+\n*)+/,fences:noop,hr:/^( *[-*_]){3,} *(?:\n+|$)/,heading:/^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,nptable:noop,lheading:/^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/,blockquote:/^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,list:/^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,html:/^ *(?:comment|closed|closing) *(?:\n{2,}|\s*$)/,def:/^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,table:noop,paragraph:/^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote|tag|def))+)\n*/,text:/^[^\n]+/};block.bullet=/(?:[*+-]|\d+\.)/;block.item=/^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;block.item=replace(block.item,"gm")(/bull/g,block.bullet)();block.list=replace(block.list)(/bull/g,block.bullet)("hr","\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))")("def","\\n+(?="+block.def.source+")")();block.blockquote=replace(block.blockquote)("def",block.def)();block._tag="(?!(?:"+"a|em|strong|small|s|cite|q|dfn|abbr|data|time|code"+"|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo"+"|span|br|wbr|ins|del|img)\\b)\\w+(?!:/|[^\\w\\s@]*@)\\b";block.html=replace(block.html)("comment",/<!--[\s\S]*?-->/)("closed",/<(tag)[\s\S]+?<\/\1>/)("closing",/<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)(/tag/g,block._tag)();block.paragraph=replace(block.paragraph)("hr",block.hr)("heading",block.heading)("lheading",block.lheading)("blockquote",block.blockquote)("tag","<"+block._tag)("def",block.def)();block.normal=merge({},block);block.gfm=merge({},block.normal,{fences:/^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,paragraph:/^/});block.gfm.paragraph=replace(block.paragraph)("(?!","(?!"+block.gfm.fences.source.replace("\\1","\\2")+"|"+block.list.source.replace("\\1","\\3")+"|")();block.tables=merge({},block.gfm,{nptable:/^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,table:/^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/});function Lexer(options){this.tokens=[];this.tokens.links={};this.options=options||marked.defaults;this.rules=block.normal;if(this.options.gfm){if(this.options.tables){this.rules=block.tables}else{this.rules=block.gfm}}}Lexer.rules=block;Lexer.lex=function(src,options){var lexer=new Lexer(options);return lexer.lex(src)};Lexer.prototype.lex=function(src){src=src.replace(/\r\n|\r/g,"\n").replace(/\t/g,"    ").replace(/\u00a0/g," ").replace(/\u2424/g,"\n");return this.token(src,true)};Lexer.prototype.token=function(src,top,bq){var src=src.replace(/^ +$/gm,""),next,loose,cap,bull,b,item,space,i,l;while(src){if(cap=this.rules.newline.exec(src)){src=src.substring(cap[0].length);if(cap[0].length>1){this.tokens.push({type:"space"})}}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);cap=cap[0].replace(/^ {4}/gm,"");this.tokens.push({type:"code",text:!this.options.pedantic?cap.replace(/\n+$/,""):cap});continue}if(cap=this.rules.fences.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"code",lang:cap[2],text:cap[3]});continue}if(cap=this.rules.heading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[1].length,text:cap[2]});continue}if(top&&(cap=this.rules.nptable.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].split(/ *\| */)}this.tokens.push(item);continue}if(cap=this.rules.lheading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[2]==="="?1:2,text:cap[1]});continue}if(cap=this.rules.hr.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"hr"});continue}if(cap=this.rules.blockquote.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"blockquote_start"});cap=cap[0].replace(/^ *> ?/gm,"");this.token(cap,top,true);this.tokens.push({type:"blockquote_end"});continue}if(cap=this.rules.list.exec(src)){src=src.substring(cap[0].length);bull=cap[2];this.tokens.push({type:"list_start",ordered:bull.length>1});cap=cap[0].match(this.rules.item);next=false;l=cap.length;i=0;for(;i<l;i++){item=cap[i];space=item.length;item=item.replace(/^ *([*+-]|\d+\.) +/,"");if(~item.indexOf("\n ")){space-=item.length;item=!this.options.pedantic?item.replace(new RegExp("^ {1,"+space+"}","gm"),""):item.replace(/^ {1,4}/gm,"")}if(this.options.smartLists&&i!==l-1){b=block.bullet.exec(cap[i+1])[0];if(bull!==b&&!(bull.length>1&&b.length>1)){src=cap.slice(i+1).join("\n")+src;i=l-1}}loose=next||/\n\n(?!\s*$)/.test(item);if(i!==l-1){next=item.charAt(item.length-1)==="\n";if(!loose)loose=next}this.tokens.push({type:loose?"loose_item_start":"list_item_start"});this.token(item,false,bq);this.tokens.push({type:"list_item_end"})}this.tokens.push({type:"list_end"});continue}if(cap=this.rules.html.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:this.options.sanitize?"paragraph":"html",pre:cap[1]==="pre"||cap[1]==="script"||cap[1]==="style",text:cap[0]});continue}if(!bq&&top&&(cap=this.rules.def.exec(src))){src=src.substring(cap[0].length);this.tokens.links[cap[1].toLowerCase()]={href:cap[2],title:cap[3]};continue}if(top&&(cap=this.rules.table.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/(?: *\| *)?\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].replace(/^ *\| *| *\| *$/g,"").split(/ *\| */)}this.tokens.push(item);continue}if(top&&(cap=this.rules.paragraph.exec(src))){src=src.substring(cap[0].length);this.tokens.push({type:"paragraph",text:cap[1].charAt(cap[1].length-1)==="\n"?cap[1].slice(0,-1):cap[1]});continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"text",text:cap[0]});continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return this.tokens};var inline={escape:/^\\([\\`*{}\[\]()#+\-.!_>])/,autolink:/^<([^ >]+(@|:\/)[^ >]+)>/,url:noop,tag:/^<!--[\s\S]*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>/,link:/^!?\[(inside)\]\(href\)/,reflink:/^!?\[(inside)\]\s*\[([^\]]*)\]/,nolink:/^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,strong:/^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,em:/^\b_((?:__|[\s\S])+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,code:/^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,br:/^ {2,}\n(?!\s*$)/,del:noop,text:/^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/};inline._inside=/(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;inline._href=/\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/;inline.link=replace(inline.link)("inside",inline._inside)("href",inline._href)();inline.reflink=replace(inline.reflink)("inside",inline._inside)();inline.normal=merge({},inline);inline.pedantic=merge({},inline.normal,{strong:/^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,em:/^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/});inline.gfm=merge({},inline.normal,{escape:replace(inline.escape)("])","~|])")(),url:/^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,del:/^~~(?=\S)([\s\S]*?\S)~~/,text:replace(inline.text)("]|","~]|")("|","|https?://|")()});inline.breaks=merge({},inline.gfm,{br:replace(inline.br)("{2,}","*")(),text:replace(inline.gfm.text)("{2,}","*")()});function InlineLexer(links,options){this.options=options||marked.defaults;this.links=links;this.rules=inline.normal;this.renderer=this.options.renderer||new Renderer;this.renderer.options=this.options;if(!this.links){throw new Error("Tokens array requires a `links` property.")}if(this.options.gfm){if(this.options.breaks){this.rules=inline.breaks}else{this.rules=inline.gfm}}else if(this.options.pedantic){this.rules=inline.pedantic}}InlineLexer.rules=inline;InlineLexer.output=function(src,links,options){var inline=new InlineLexer(links,options);return inline.output(src)};InlineLexer.prototype.output=function(src){var out="",link,text,href,cap;while(src){if(cap=this.rules.escape.exec(src)){src=src.substring(cap[0].length);out+=cap[1];continue}if(cap=this.rules.autolink.exec(src)){src=src.substring(cap[0].length);if(cap[2]==="@"){text=cap[1].charAt(6)===":"?this.mangle(cap[1].substring(7)):this.mangle(cap[1]);href=this.mangle("mailto:")+text}else{text=escape(cap[1]);href=text}out+=this.renderer.link(href,null,text);continue}if(!this.inLink&&(cap=this.rules.url.exec(src))){src=src.substring(cap[0].length);text=escape(cap[1]);href=text;out+=this.renderer.link(href,null,text);continue}if(cap=this.rules.tag.exec(src)){if(!this.inLink&&/^<a /i.test(cap[0])){this.inLink=true}else if(this.inLink&&/^<\/a>/i.test(cap[0])){this.inLink=false}src=src.substring(cap[0].length);out+=this.options.sanitize?escape(cap[0]):cap[0];continue}if(cap=this.rules.link.exec(src)){src=src.substring(cap[0].length);this.inLink=true;out+=this.outputLink(cap,{href:cap[2],title:cap[3]});this.inLink=false;continue}if((cap=this.rules.reflink.exec(src))||(cap=this.rules.nolink.exec(src))){src=src.substring(cap[0].length);link=(cap[2]||cap[1]).replace(/\s+/g," ");link=this.links[link.toLowerCase()];if(!link||!link.href){out+=cap[0].charAt(0);src=cap[0].substring(1)+src;continue}this.inLink=true;out+=this.outputLink(cap,link);this.inLink=false;continue}if(cap=this.rules.strong.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.strong(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.em.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.em(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.codespan(escape(cap[2],true));continue}if(cap=this.rules.br.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.br();continue}if(cap=this.rules.del.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.del(this.output(cap[1]));continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);out+=escape(this.smartypants(cap[0]));continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return out};InlineLexer.prototype.outputLink=function(cap,link){var href=escape(link.href),title=link.title?escape(link.title):null;return cap[0].charAt(0)!=="!"?this.renderer.link(href,title,this.output(cap[1])):this.renderer.image(href,title,escape(cap[1]))};InlineLexer.prototype.smartypants=function(text){if(!this.options.smartypants)return text;return text.replace(/--/g,"—").replace(/(^|[-\u2014/(\[{"\s])'/g,"$1‘").replace(/'/g,"’").replace(/(^|[-\u2014/(\[{\u2018\s])"/g,"$1“").replace(/"/g,"”").replace(/\.{3}/g,"…")};InlineLexer.prototype.mangle=function(text){var out="",l=text.length,i=0,ch;for(;i<l;i++){ch=text.charCodeAt(i);if(Math.random()>.5){ch="x"+ch.toString(16)}out+="&#"+ch+";"}return out};function Renderer(options){this.options=options||{}}Renderer.prototype.code=function(code,lang,escaped){if(this.options.highlight){var out=this.options.highlight(code,lang);if(out!=null&&out!==code){escaped=true;code=out}}if(!lang){return"<pre><code>"+(escaped?code:escape(code,true))+"\n</code></pre>"}return'<pre><code class="'+this.options.langPrefix+escape(lang,true)+'">'+(escaped?code:escape(code,true))+"\n</code></pre>\n"};Renderer.prototype.blockquote=function(quote){return"<blockquote>\n"+quote+"</blockquote>\n"};Renderer.prototype.html=function(html){return html};Renderer.prototype.heading=function(text,level,raw){return"<h"+level+' id="'+this.options.headerPrefix+raw.toLowerCase().replace(/[^\w]+/g,"-")+'">'+text+"</h"+level+">\n"};Renderer.prototype.hr=function(){return this.options.xhtml?"<hr/>\n":"<hr>\n"};Renderer.prototype.list=function(body,ordered){var type=ordered?"ol":"ul";return"<"+type+">\n"+body+"</"+type+">\n"};Renderer.prototype.listitem=function(text){return"<li>"+text+"</li>\n"};Renderer.prototype.paragraph=function(text){return"<p>"+text+"</p>\n"};Renderer.prototype.table=function(header,body){return"<table>\n"+"<thead>\n"+header+"</thead>\n"+"<tbody>\n"+body+"</tbody>\n"+"</table>\n"};Renderer.prototype.tablerow=function(content){return"<tr>\n"+content+"</tr>\n"};Renderer.prototype.tablecell=function(content,flags){var type=flags.header?"th":"td";var tag=flags.align?"<"+type+' style="text-align:'+flags.align+'">':"<"+type+">";return tag+content+"</"+type+">\n"};Renderer.prototype.strong=function(text){return"<strong>"+text+"</strong>"};Renderer.prototype.em=function(text){return"<em>"+text+"</em>"};Renderer.prototype.codespan=function(text){return"<code>"+text+"</code>"};Renderer.prototype.br=function(){return this.options.xhtml?"<br/>":"<br>"};Renderer.prototype.del=function(text){return"<del>"+text+"</del>"};Renderer.prototype.link=function(href,title,text){if(this.options.sanitize){try{var prot=decodeURIComponent(unescape(href)).replace(/[^\w:]/g,"").toLowerCase()}catch(e){return""}if(prot.indexOf("javascript:")===0){return""}}var out='<a href="'+href+'"';if(title){out+=' title="'+title+'"'}out+=">"+text+"</a>";return out};Renderer.prototype.image=function(href,title,text){var out='<img src="'+href+'" alt="'+text+'"';if(title){out+=' title="'+title+'"'}out+=this.options.xhtml?"/>":">";return out};function Parser(options){this.tokens=[];this.token=null;this.options=options||marked.defaults;this.options.renderer=this.options.renderer||new Renderer;this.renderer=this.options.renderer;this.renderer.options=this.options}Parser.parse=function(src,options,renderer){var parser=new Parser(options,renderer);return parser.parse(src)};Parser.prototype.parse=function(src){this.inline=new InlineLexer(src.links,this.options,this.renderer);this.tokens=src.reverse();var out="";while(this.next()){out+=this.tok()}return out};Parser.prototype.next=function(){return this.token=this.tokens.pop()};Parser.prototype.peek=function(){return this.tokens[this.tokens.length-1]||0};Parser.prototype.parseText=function(){var body=this.token.text;while(this.peek().type==="text"){body+="\n"+this.next().text}return this.inline.output(body)};Parser.prototype.tok=function(){switch(this.token.type){case"space":{return""}case"hr":{return this.renderer.hr()}case"heading":{return this.renderer.heading(this.inline.output(this.token.text),this.token.depth,this.token.text)}case"code":{return this.renderer.code(this.token.text,this.token.lang,this.token.escaped)}case"table":{var header="",body="",i,row,cell,flags,j;cell="";for(i=0;i<this.token.header.length;i++){flags={header:true,align:this.token.align[i]};cell+=this.renderer.tablecell(this.inline.output(this.token.header[i]),{header:true,align:this.token.align[i]})}header+=this.renderer.tablerow(cell);for(i=0;i<this.token.cells.length;i++){row=this.token.cells[i];cell="";for(j=0;j<row.length;j++){cell+=this.renderer.tablecell(this.inline.output(row[j]),{header:false,align:this.token.align[j]})}body+=this.renderer.tablerow(cell)}return this.renderer.table(header,body)}case"blockquote_start":{var body="";while(this.next().type!=="blockquote_end"){body+=this.tok()}return this.renderer.blockquote(body)}case"list_start":{var body="",ordered=this.token.ordered;while(this.next().type!=="list_end"){body+=this.tok()}return this.renderer.list(body,ordered)}case"list_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.token.type==="text"?this.parseText():this.tok()}return this.renderer.listitem(body)}case"loose_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.tok()}return this.renderer.listitem(body)}case"html":{var html=!this.token.pre&&!this.options.pedantic?this.inline.output(this.token.text):this.token.text;return this.renderer.html(html)}case"paragraph":{return this.renderer.paragraph(this.inline.output(this.token.text))}case"text":{return this.renderer.paragraph(this.parseText())}}};function escape(html,encode){return html.replace(!encode?/&(?!#?\w+;)/g:/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}function unescape(html){return html.replace(/&([#\w]+);/g,function(_,n){n=n.toLowerCase();if(n==="colon")return":";if(n.charAt(0)==="#"){return n.charAt(1)==="x"?String.fromCharCode(parseInt(n.substring(2),16)):String.fromCharCode(+n.substring(1))}return""})}function replace(regex,opt){regex=regex.source;opt=opt||"";return function self(name,val){if(!name)return new RegExp(regex,opt);val=val.source||val;val=val.replace(/(^|[^\[])\^/g,"$1");regex=regex.replace(name,val);return self}}function noop(){}noop.exec=noop;function merge(obj){var i=1,target,key;for(;i<arguments.length;i++){target=arguments[i];for(key in target){if(Object.prototype.hasOwnProperty.call(target,key)){obj[key]=target[key]}}}return obj}function marked(src,opt,callback){if(callback||typeof opt==="function"){if(!callback){callback=opt;opt=null}opt=merge({},marked.defaults,opt||{});var highlight=opt.highlight,tokens,pending,i=0;try{tokens=Lexer.lex(src,opt)}catch(e){return callback(e)}pending=tokens.length;var done=function(err){if(err){opt.highlight=highlight;return callback(err)}var out;try{out=Parser.parse(tokens,opt)}catch(e){err=e}opt.highlight=highlight;return err?callback(err):callback(null,out)};if(!highlight||highlight.length<3){return done()}delete opt.highlight;if(!pending)return done();for(;i<tokens.length;i++){(function(token){if(token.type!=="code"){return--pending||done()}return highlight(token.text,token.lang,function(err,code){if(err)return done(err);if(code==null||code===token.text){return--pending||done()}token.text=code;token.escaped=true;--pending||done()})})(tokens[i])}return}try{if(opt)opt=merge({},marked.defaults,opt);return Parser.parse(Lexer.lex(src,opt),opt)}catch(e){e.message+="\nPlease report this to https://github.com/chjj/marked.";if((opt||marked.defaults).silent){return"<p>An error occured:</p><pre>"+escape(e.message+"",true)+"</pre>"}throw e}}marked.options=marked.setOptions=function(opt){merge(marked.defaults,opt);return marked};marked.defaults={gfm:true,tables:true,breaks:false,pedantic:false,sanitize:false,smartLists:false,silent:false,highlight:null,langPrefix:"lang-",smartypants:false,headerPrefix:"",renderer:new Renderer,xhtml:false};marked.Parser=Parser;marked.parser=Parser.parse;marked.Renderer=Renderer;marked.Lexer=Lexer;marked.lexer=Lexer.lex;marked.InlineLexer=InlineLexer;marked.inlineLexer=InlineLexer.output;marked.parse=marked;if(typeof module!=="undefined"&&typeof exports==="object"){module.exports=marked}else if(typeof define==="function"&&define.amd){define(function(){return marked})}else{this.marked=marked}}).call(function(){return this||(typeof window!=="undefined"?window:global)}());
 
-	var isDown = NS.input('Mouse.isDown', false);
-
-	var clicks = NS.input('Mouse.clicks', Utils.Tuple0);
-
-	var node = localRuntime.isFullscreen()
-		? document
-		: localRuntime.node;
-
-	localRuntime.addListener([clicks.id], node, 'click', function click() {
-		localRuntime.notify(clicks.id, Utils.Tuple0);
-	});
-	localRuntime.addListener([isDown.id], node, 'mousedown', function down() {
-		localRuntime.notify(isDown.id, true);
-	});
-	localRuntime.addListener([isDown.id], node, 'mouseup', function up() {
-		localRuntime.notify(isDown.id, false);
-	});
-	localRuntime.addListener([position.id], node, 'mousemove', function move(e) {
-		localRuntime.notify(position.id, Utils.getXY(e));
+	marked.setOptions({
+		highlight: function (code, lang) {
+			if (typeof hljs !== 'undefined'
+				&& lang
+				&& hljs.listLanguages().indexOf(lang) >= 0)
+			{
+				return hljs.highlight(lang, code, true).value;
+			}
+			return code;
+		}
 	});
 
-	return localRuntime.Native.Mouse.values = {
-		position: position,
-		isDown: isDown,
-		clicks: clicks
+	function formatOptions(options) {
+		var gfm = options.githubFlavored;
+		if (gfm.ctor === 'Just')
+		{
+			return {
+				gfm: true,
+				tables: gfm.tables,
+				breaks: gfm.breaks,
+				sanitize: options.sanitize,
+				smartypants: options.smartypants
+			};
+		}
+		else
+		{
+			return {
+				gfm: false,
+				tables: false,
+				breaks: false,
+				sanitize: options.sanitize,
+				smartypants: options.smartypants
+			};
+		}
+	}
+
+	function toHtmlWith(options, rawMarkdown)
+	{
+		return new MarkdownWidget(options, rawMarkdown);
+	}
+
+	function MarkdownWidget(options, rawMarkdown)
+	{
+		this.options = options;
+		this.markdown = rawMarkdown;
+	}
+
+	MarkdownWidget.prototype.type = "Widget";
+
+	MarkdownWidget.prototype.init = function init()
+	{
+		var html = marked(this.markdown, formatOptions(this.options));
+		var div = document.createElement('div');
+		div.innerHTML = html;
+		return div;
+	};
+
+	MarkdownWidget.prototype.update = function update(previous, node)
+	{
+		if (this.markdown !== previous.markdown || this.options != previous.options)
+		{
+			var html = marked(this.markdown, formatOptions(this.options));
+			node.innerHTML = html;
+		}
+		return node;
+	};
+
+
+	function toElementWith(options, rawMarkdown)
+	{
+		return Element.markdown(marked(rawMarkdown, formatOptions(options)));
+	}
+
+	return Elm.Native.Markdown.values = {
+		toHtmlWith: F2(toHtmlWith),
+		toElementWith: F2(toElementWith)
 	};
 };
-
 Elm.Native.Port = {};
 Elm.Native.Port.make = function(localRuntime) {
 
@@ -11318,7 +7058,7 @@ Elm.Native.Port.make = function(localRuntime) {
 				"Regarding the port named '" + name + "' with type:\n\n" +
 				"    " + type.split('\n').join('\n        ') + "\n\n" +
 				"You just sent the value:\n\n" +
-				"    " + JSON.stringify(arg.value) + "\n\n" +
+				"    " + JSON.stringify(value) + "\n\n" +
 				"but it cannot be converted to the necessary type.\n" +
 				e.message
 			);
@@ -12152,9 +7892,7 @@ Elm.Native.Show.make = function(localRuntime) {
 		}
 		if (type === 'object' && 'notify' in v && 'id' in v)
 		{
-			return 'initialValue' in v
-				? '<Signal>'
-				: '<Stream>';
+			return '<Signal>';
 		}
 		return "<internal structure>";
 	};
@@ -13539,117 +9277,6 @@ Elm.Native.Text.make = function(localRuntime) {
 		toLine: toLine,
 		renderHtml: renderHtml
 	};
-};
-
-Elm.Native.Time = {};
-Elm.Native.Time.make = function(localRuntime)
-{
-
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Time = localRuntime.Native.Time || {};
-	if (localRuntime.Native.Time.values)
-	{
-		return localRuntime.Native.Time.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Maybe = Elm.Maybe.make(localRuntime);
-
-
-	// FRAMES PER SECOND
-
-	function fpsWhen(desiredFPS, isOn)
-	{
-		var msPerFrame = 1000 / desiredFPS;
-		var ticker = NS.input('fps-' + desiredFPS, null);
-
-		function notifyTicker()
-		{
-			localRuntime.notify(ticker.id, null);
-		}
-
-		function firstArg(x, y)
-		{
-			return x;
-		}
-
-		// input fires either when isOn changes, or when ticker fires.
-		// Its value is a tuple with the current timestamp, and the state of isOn
-		var input = NS.timestamp(A3(NS.map2, F2(firstArg), NS.dropRepeats(isOn), ticker));
-
-		var initialState = {
-			isOn: false,
-			time: localRuntime.timer.programStart,
-			delta: 0
-		};
-
-		var timeoutId;
-
-		function update(input,state)
-		{
-			var currentTime = input._0;
-			var isOn = input._1;
-			var wasOn = state.isOn;
-			var previousTime = state.time;
-
-			if (isOn)
-			{
-				timeoutId = localRuntime.setTimeout(notifyTicker, msPerFrame);
-			}
-			else if (wasOn)
-			{
-				clearTimeout(timeoutId);
-			}
-
-			return {
-				isOn: isOn,
-				time: currentTime,
-				delta: (isOn && !wasOn) ? 0 : currentTime - previousTime
-			};
-		}
-
-		return A2(
-			NS.map,
-			function(state) { return state.delta; },
-			A3(NS.foldp, F2(update), update(input.value,initialState), input)
-		);
-	}
-
-
-	// EVERY
-
-	function every(t)
-	{
-		var ticker = NS.input('every-' + t, null);
-		function tellTime()
-		{
-			localRuntime.notify(ticker.id, null);
-		}
-		var clock = A2( NS.map, fst, NS.timestamp(ticker) );
-		setInterval(tellTime, t);
-		return clock;
-	}
-
-
-	function fst(pair)
-	{
-		return pair._0;
-	}
-
-
-	function read(s)
-	{
-		var t = Date.parse(s);
-		return isNaN(t) ? Maybe.Nothing : Maybe.Just(t);
-	}
-
-	return localRuntime.Native.Time.values = {
-		fpsWhen: F2(fpsWhen),
-		every: every,
-		toDate: function(t) { return new window.Date(t); },
-		read: read
-	};
-
 };
 
 Elm.Native.Transform2D = {};
@@ -16111,654 +11738,6 @@ Elm.Native.VirtualDom.make = function(elm)
 
 },{}]},{},[39]);
 
-Elm.Native.WebSocket = {};
-Elm.Native.WebSocket.make = function(elm) {
-
-  elm.Native = elm.Native || {};
-  elm.Native.WebSocket = elm.Native.WebSocket || {};
-  if (elm.Native.WebSocket.values) return elm.Native.WebSocket.values;
-
-  var Signal = Elm.Signal.make(elm);
-  var List = Elm.Native.List.make(elm);
-
-  function open(url, outgoing) {
-    var incoming = Signal.constant("");
-    var ws = new WebSocket(url);
-
-    var pending = [];
-    var ready = false;
-    
-    ws.onopen = function(e) {
-      var len = pending.length;
-      for (var i = 0; i < len; ++i) { ws.send(pending[i]); }
-      ready = true;
-    };
-    ws.onmessage = function(event) {
-      elm.notify(incoming.id, event.data);
-    };
-    
-    function send(msg) {
-      ready ? ws.send(msg) : pending.push(msg);
-    }
-    
-    function take1(x,y) { return x }
-    return A3(Signal.map2, F2(take1), incoming, A2(Signal.map, send, outgoing));
-  }
-
-  return elm.Native.WebSocket.values = { connect: F2(open) };
-};
-Elm.Native = Elm.Native || {};
-Elm.Native.Window = {};
-Elm.Native.Window.make = function(localRuntime) {
-
-	localRuntime.Native = localRuntime.Native || {};
-	localRuntime.Native.Window = localRuntime.Native.Window || {};
-	if (localRuntime.Native.Window.values)
-	{
-		return localRuntime.Native.Window.values;
-	}
-
-	var NS = Elm.Native.Signal.make(localRuntime);
-	var Tuple2 = Elm.Native.Utils.make(localRuntime).Tuple2;
-
-
-	function getWidth()
-	{
-		return localRuntime.node.clientWidth;
-	}
-
-
-	function getHeight()
-	{
-		if (localRuntime.isFullscreen())
-		{
-			return window.innerHeight;
-		}
-		return localRuntime.node.clientHeight;
-	}
-
-
-	var dimensions = NS.input('Window.dimensions', Tuple2(getWidth(), getHeight()));
-
-
-	function resizeIfNeeded()
-	{
-		// Do not trigger event if the dimensions have not changed.
-		// This should be most of the time.
-		var w = getWidth();
-		var h = getHeight();
-		if (dimensions.value._0 === w && dimensions.value._1 === h)
-		{
-			return;
-		}
-
-		setTimeout(function () {
-			// Check again to see if the dimensions have changed.
-			// It is conceivable that the dimensions have changed
-			// again while some other event was being processed.
-			var w = getWidth();
-			var h = getHeight();
-			if (dimensions.value._0 === w && dimensions.value._1 === h)
-			{
-				return;
-			}
-			localRuntime.notify(dimensions.id, Tuple2(w,h));
-		}, 0);
-	}
-
-
-	localRuntime.addListener([dimensions.id], window, 'resize', resizeIfNeeded);
-
-
-	return localRuntime.Native.Window.values = {
-		dimensions: dimensions,
-		resizeIfNeeded: resizeIfNeeded
-	};
-};
-
-Elm.Piece = Elm.Piece || {};
-Elm.Piece.make = function (_elm) {
-   "use strict";
-   _elm.Piece = _elm.Piece || {};
-   if (_elm.Piece.values)
-   return _elm.Piece.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Piece",
-   $GameTypes = Elm.GameTypes.make(_elm);
-   var rulesText = function (piece) {
-      return function () {
-         switch (piece.ctor)
-         {case "Joukahainen":
-            return "4 - Value is the sum of all Joukahainen tiles in the same row or column.";
-            case "Kaarme":
-            return "5 - May be placed on top of other tiles (except other K&auml;&auml;rmes).";
-            case "Kullervo":
-            return "6 - Only other Kullervos may be placed next to this tile.";
-            case "Lemminkainen":
-            return "1 - All adjacent tiles (except other Lemmink&auml;inens) have value 0.";
-            case "Louhi":
-            return "2 - Automatically scores when there are Louhis on both ends of a line.";
-            case "SeppoIlmarinen":
-            return "3 - You may exchange it with any tile on the table (except other Seppo Ilmarinens).";
-            case "Ukko":
-            return "7 - No special rules.";
-            case "Vainamoinen":
-            return "8 - No special rules.";}
-         _U.badCase($moduleName,
-         "between lines 67 and 75");
-      }();
-   };
-   var flavorText = function (piece) {
-      return function () {
-         switch (piece.ctor)
-         {case "Joukahainen":
-            return "After losing a contest, the arrogant archer Joukahainen pledged his sister Aino to V&auml;in&auml;m&ouml;inen, but she drowned herself rather than marry him.";
-            case "Kaarme":
-            return "Plowing a field of poisonous snakes (k&auml;&auml;rmeit&auml;) was the first task that Seppo Ilmarinen had to perform to marry Louhi\'s daughter.";
-            case "Kullervo":
-            return "Kullervo grew up thinking his family was dead, amongst his people\'s murderers, and killed himself after unknowingly seducing his sister.";
-            case "Lemminkainen":
-            return "After Lemmink&auml;inen drowned in the underworld, his mother sewed his body together and restored him to life with ointment from Ukko\'s halls.";
-            case "Louhi":
-            return "Louhi was a powerful witch with the ability to change shape, and the main opponent of V&auml;in&auml;m&ouml;inen in the battle for the magical artifact Sampo.";
-            case "SeppoIlmarinen":
-            return "Seppo Ilmarinen, the Eternal Hammerer, was an immortal blacksmith who was capable of creating practically anything, but unlucky in love.";
-            case "Ukko":
-            return "Ukko, the god of the sky, created lightning with his hammer Ukonvasara and caused thunderstorms by driving his chariot through the skies.";
-            case "Vainamoinen":
-            return "V&auml;in&auml;m&ouml;inen, the central character of the Kalevala, was a shamanistic hero with a magical power of song and music.";}
-         _U.badCase($moduleName,
-         "between lines 55 and 63");
-      }();
-   };
-   var baseValue = function (piece) {
-      return function () {
-         switch (piece.ctor)
-         {case "Joukahainen": return 4;
-            case "Kaarme": return 5;
-            case "Kullervo": return 6;
-            case "Lemminkainen": return 1;
-            case "Louhi": return 2;
-            case "SeppoIlmarinen": return 3;
-            case "Ukko": return 7;
-            case "Vainamoinen": return 8;}
-         _U.badCase($moduleName,
-         "between lines 43 and 51");
-      }();
-   };
-   var toDisplayString = function (piece) {
-      return function () {
-         switch (piece.ctor)
-         {case "Joukahainen":
-            return "Joukahainen";
-            case "Kaarme":
-            return "K&auml;&auml;rme";
-            case "Kullervo":
-            return "Kullervo";
-            case "Lemminkainen":
-            return "Lemmink&auml;inen";
-            case "Louhi": return "Louhi";
-            case "SeppoIlmarinen":
-            return "Seppo Ilmarinen";
-            case "Ukko": return "Ukko";
-            case "Vainamoinen":
-            return "V&auml;in&auml;m&ouml;inen";}
-         _U.badCase($moduleName,
-         "between lines 31 and 39");
-      }();
-   };
-   var toString = function (piece) {
-      return function () {
-         switch (piece.ctor)
-         {case "Joukahainen":
-            return "Jouk";
-            case "Kaarme": return "Kaarme";
-            case "Kullervo":
-            return "Kullervo";
-            case "Lemminkainen":
-            return "Lemmi";
-            case "Louhi": return "Louhi";
-            case "SeppoIlmarinen":
-            return "Ilmar";
-            case "Ukko": return "Ukko";
-            case "Vainamoinen":
-            return "Vain";}
-         _U.badCase($moduleName,
-         "between lines 19 and 27");
-      }();
-   };
-   var fromString = function (str) {
-      return function () {
-         switch (str)
-         {case "Ilmar":
-            return $GameTypes.SeppoIlmarinen;
-            case "Jouk":
-            return $GameTypes.Joukahainen;
-            case "Kaarme":
-            return $GameTypes.Kaarme;
-            case "Kullervo":
-            return $GameTypes.Kullervo;
-            case "Lemmi":
-            return $GameTypes.Lemminkainen;
-            case "Louhi":
-            return $GameTypes.Louhi;
-            case "Ukko":
-            return $GameTypes.Ukko;
-            case "Vain":
-            return $GameTypes.Vainamoinen;}
-         _U.badCase($moduleName,
-         "between lines 7 and 15");
-      }();
-   };
-   _elm.Piece.values = {_op: _op
-                       ,fromString: fromString
-                       ,toString: toString
-                       ,toDisplayString: toDisplayString
-                       ,baseValue: baseValue
-                       ,flavorText: flavorText
-                       ,rulesText: rulesText};
-   return _elm.Piece.values;
-};
-Elm.Player = Elm.Player || {};
-Elm.Player.make = function (_elm) {
-   "use strict";
-   _elm.Player = _elm.Player || {};
-   if (_elm.Player.values)
-   return _elm.Player.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Player",
-   $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm),
-   $Dict = Elm.Dict.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Random = Elm.Random.make(_elm);
-   var random = function (seed) {
-      return _U.cmp($Basics.fst(A2($Random.generate,
-      A2($Random.$float,0,1),
-      seed)),
-      0.5) > 0 ? $GameTypes.Red : $GameTypes.Blue;
-   };
-   var next = function (player) {
-      return function () {
-         switch (player.ctor)
-         {case "Blue":
-            return $GameTypes.Red;
-            case "Red":
-            return $GameTypes.Blue;
-            case "SwitchingTo":
-            return player._0;}
-         _U.badCase($moduleName,
-         "between lines 36 and 39");
-      }();
-   };
-   var toString = function (player) {
-      return function () {
-         switch (player.ctor)
-         {case "Blue": return "Blue";
-            case "Red": return "Red";
-            case "SwitchingTo":
-            return toString(player._0);}
-         _U.badCase($moduleName,
-         "between lines 29 and 32");
-      }();
-   };
-   var getType = F2(function (player,
-   state) {
-      return A2($Maybe.withDefault,
-      $GameTypes.Human,
-      A2($Dict.get,
-      toString(player),
-      state.players));
-   });
-   var getHand = F2(function (player,
-   state) {
-      return A2($Maybe.withDefault,
-      _L.fromArray([]),
-      A2($Dict.get,
-      toString(player),
-      state.hands));
-   });
-   var noTilesInHand = F2(function (player,
-   state) {
-      return $List.isEmpty(A2(getHand,
-      player,
-      state));
-   });
-   var fromString = function (str) {
-      return function () {
-         switch (str)
-         {case "Blue":
-            return $GameTypes.Blue;
-            case "Red":
-            return $GameTypes.Red;
-            case "blue":
-            return $GameTypes.Blue;
-            case "red":
-            return $GameTypes.Red;}
-         _U.badCase($moduleName,
-         "between lines 21 and 25");
-      }();
-   };
-   var toColor = function (player) {
-      return function () {
-         switch (player.ctor)
-         {case "Blue":
-            return A3($Color.rgb,
-              70,
-              131,
-              193);
-            case "Red":
-            return A3($Color.rgb,217,33,32);
-            case "SwitchingTo":
-            return toColor(player._0);}
-         _U.badCase($moduleName,
-         "between lines 14 and 17");
-      }();
-   };
-   _elm.Player.values = {_op: _op
-                        ,toColor: toColor
-                        ,fromString: fromString
-                        ,toString: toString
-                        ,next: next
-                        ,getType: getType
-                        ,getHand: getHand
-                        ,noTilesInHand: noTilesInHand
-                        ,random: random};
-   return _elm.Player.values;
-};
-Elm.Random = Elm.Random || {};
-Elm.Random.make = function (_elm) {
-   "use strict";
-   _elm.Random = _elm.Random || {};
-   if (_elm.Random.values)
-   return _elm.Random.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Random",
-   $Basics = Elm.Basics.make(_elm),
-   $List = Elm.List.make(_elm);
-   var magicNum8 = 2147483562;
-   var range = function (_v0) {
-      return function () {
-         return {ctor: "_Tuple2"
-                ,_0: 0
-                ,_1: magicNum8};
-      }();
-   };
-   var magicNum7 = 2137383399;
-   var magicNum6 = 2147483563;
-   var magicNum5 = 3791;
-   var magicNum4 = 40692;
-   var magicNum3 = 52774;
-   var magicNum2 = 12211;
-   var magicNum1 = 53668;
-   var magicNum0 = 40014;
-   var generate = F2(function (_v2,
-   seed) {
-      return function () {
-         switch (_v2.ctor)
-         {case "Generator":
-            return _v2._0(seed);}
-         _U.badCase($moduleName,
-         "on line 246, column 5 to 19");
-      }();
-   });
-   var Seed = F4(function (a,
-   b,
-   c,
-   d) {
-      return {_: {}
-             ,next: b
-             ,range: d
-             ,split: c
-             ,state: a};
-   });
-   var State = F2(function (a,b) {
-      return {ctor: "State"
-             ,_0: a
-             ,_1: b};
-   });
-   var initState = function (s$) {
-      return function () {
-         var s = A2($Basics.max,
-         s$,
-         0 - s$);
-         var q = s / (magicNum6 - 1) | 0;
-         var s2 = A2($Basics._op["%"],
-         q,
-         magicNum7 - 1);
-         var s1 = A2($Basics._op["%"],
-         s,
-         magicNum6 - 1);
-         return A2(State,s1 + 1,s2 + 1);
-      }();
-   };
-   var next = function (_v5) {
-      return function () {
-         switch (_v5.ctor)
-         {case "State":
-            return function () {
-                 var k$ = _v5._1 / magicNum3 | 0;
-                 var s2$ = magicNum4 * (_v5._1 - k$ * magicNum3) - k$ * magicNum5;
-                 var s2$$ = _U.cmp(s2$,
-                 0) < 0 ? s2$ + magicNum7 : s2$;
-                 var k = _v5._0 / magicNum1 | 0;
-                 var s1$ = magicNum0 * (_v5._0 - k * magicNum1) - k * magicNum2;
-                 var s1$$ = _U.cmp(s1$,
-                 0) < 0 ? s1$ + magicNum6 : s1$;
-                 var z = s1$$ - s2$$;
-                 var z$ = _U.cmp(z,
-                 1) < 0 ? z + magicNum8 : z;
-                 return {ctor: "_Tuple2"
-                        ,_0: z$
-                        ,_1: A2(State,s1$$,s2$$)};
-              }();}
-         _U.badCase($moduleName,
-         "between lines 290 and 299");
-      }();
-   };
-   var split = function (_v9) {
-      return function () {
-         switch (_v9.ctor)
-         {case "State":
-            return function () {
-                 var _raw = $Basics.snd(next(_v9)),
-                 $ = _raw.ctor === "State" ? _raw : _U.badCase($moduleName,
-                 "on line 306, column 25 to 38"),
-                 t1 = $._0,
-                 t2 = $._1;
-                 var new_s2 = _U.eq(_v9._1,
-                 1) ? magicNum7 - 1 : _v9._1 - 1;
-                 var new_s1 = _U.eq(_v9._0,
-                 magicNum6 - 1) ? 1 : _v9._0 + 1;
-                 return {ctor: "_Tuple2"
-                        ,_0: A2(State,new_s1,t2)
-                        ,_1: A2(State,t1,new_s2)};
-              }();}
-         _U.badCase($moduleName,
-         "between lines 304 and 308");
-      }();
-   };
-   var initialSeed = function (n) {
-      return A4(Seed,
-      initState(n),
-      next,
-      split,
-      range);
-   };
-   var Generator = function (a) {
-      return {ctor: "Generator"
-             ,_0: a};
-   };
-   var customGenerator = function (generate) {
-      return Generator(generate);
-   };
-   var listHelp = F4(function (list,
-   n,
-   generate,
-   seed) {
-      return _U.cmp(n,
-      1) < 0 ? {ctor: "_Tuple2"
-               ,_0: $List.reverse(list)
-               ,_1: seed} : function () {
-         var $ = generate(seed),
-         value = $._0,
-         seed$ = $._1;
-         return A4(listHelp,
-         A2($List._op["::"],value,list),
-         n - 1,
-         generate,
-         seed$);
-      }();
-   });
-   var list = F2(function (n,
-   _v13) {
-      return function () {
-         switch (_v13.ctor)
-         {case "Generator":
-            return Generator(function (seed) {
-                 return A4(listHelp,
-                 _L.fromArray([]),
-                 n,
-                 _v13._0,
-                 seed);
-              });}
-         _U.badCase($moduleName,
-         "between lines 182 and 183");
-      }();
-   });
-   var pair = F2(function (_v16,
-   _v17) {
-      return function () {
-         switch (_v17.ctor)
-         {case "Generator":
-            return function () {
-                 switch (_v16.ctor)
-                 {case "Generator":
-                    return Generator(function (seed) {
-                         return function () {
-                            var $ = _v16._0(seed),
-                            left = $._0,
-                            seed$ = $._1;
-                            var $ = _v17._0(seed$),
-                            right = $._0,
-                            seed$$ = $._1;
-                            return {ctor: "_Tuple2"
-                                   ,_0: {ctor: "_Tuple2"
-                                        ,_0: left
-                                        ,_1: right}
-                                   ,_1: seed$$};
-                         }();
-                      });}
-                 _U.badCase($moduleName,
-                 "between lines 159 and 163");
-              }();}
-         _U.badCase($moduleName,
-         "between lines 159 and 163");
-      }();
-   });
-   var minInt = -2147483648;
-   var maxInt = 2147483647;
-   var iLogBase = F2(function (b,
-   i) {
-      return _U.cmp(i,
-      b) < 0 ? 1 : 1 + A2(iLogBase,
-      b,
-      i / b | 0);
-   });
-   var $int = F2(function (a,b) {
-      return Generator(function (seed) {
-         return function () {
-            var base = 2147483561;
-            var f = F3(function (n,
-            acc,
-            state) {
-               return function () {
-                  switch (n)
-                  {case 0: return {ctor: "_Tuple2"
-                                  ,_0: acc
-                                  ,_1: state};}
-                  return function () {
-                     var $ = seed.next(state),
-                     x = $._0,
-                     state$ = $._1;
-                     return A3(f,
-                     n - 1,
-                     x + acc * base,
-                     state$);
-                  }();
-               }();
-            });
-            var $ = _U.cmp(a,
-            b) < 0 ? {ctor: "_Tuple2"
-                     ,_0: a
-                     ,_1: b} : {ctor: "_Tuple2"
-                               ,_0: b
-                               ,_1: a},
-            lo = $._0,
-            hi = $._1;
-            var k = hi - lo + 1;
-            var n = A2(iLogBase,base,k);
-            var $ = A3(f,n,1,seed.state),
-            v = $._0,
-            state$ = $._1;
-            return {ctor: "_Tuple2"
-                   ,_0: lo + A2($Basics._op["%"],
-                   v,
-                   k)
-                   ,_1: _U.replace([["state"
-                                    ,state$]],
-                   seed)};
-         }();
-      });
-   });
-   var $float = F2(function (a,b) {
-      return Generator(function (seed) {
-         return function () {
-            var $ = A2(generate,
-            A2($int,minInt,maxInt),
-            seed),
-            number = $._0,
-            seed$ = $._1;
-            var negativeOneToOne = $Basics.toFloat(number) / $Basics.toFloat(maxInt - minInt);
-            var $ = _U.cmp(a,
-            b) < 0 ? {ctor: "_Tuple2"
-                     ,_0: a
-                     ,_1: b} : {ctor: "_Tuple2"
-                               ,_0: b
-                               ,_1: a},
-            lo = $._0,
-            hi = $._1;
-            var scaled = (lo + hi) / 2 + (hi - lo) * negativeOneToOne;
-            return {ctor: "_Tuple2"
-                   ,_0: scaled
-                   ,_1: seed$};
-         }();
-      });
-   });
-   _elm.Random.values = {_op: _op
-                        ,$int: $int
-                        ,$float: $float
-                        ,list: list
-                        ,pair: pair
-                        ,minInt: minInt
-                        ,maxInt: maxInt
-                        ,generate: generate
-                        ,initialSeed: initialSeed
-                        ,customGenerator: customGenerator
-                        ,Seed: Seed};
-   return _elm.Random.values;
-};
 Elm.Result = Elm.Result || {};
 Elm.Result.make = function (_elm) {
    "use strict";
@@ -16779,7 +11758,7 @@ Elm.Result.make = function (_elm) {
             case "Ok":
             return $Maybe.Just(result._0);}
          _U.badCase($moduleName,
-         "between lines 164 and 177");
+         "between lines 164 and 166");
       }();
    };
    var Err = function (a) {
@@ -16794,7 +11773,7 @@ Elm.Result.make = function (_elm) {
             case "Ok":
             return callback(result._0);}
          _U.badCase($moduleName,
-         "between lines 126 and 145");
+         "between lines 126 and 128");
       }();
    });
    var Ok = function (a) {
@@ -16808,7 +11787,7 @@ Elm.Result.make = function (_elm) {
             case "Ok":
             return Ok(func(ra._0));}
          _U.badCase($moduleName,
-         "between lines 41 and 52");
+         "between lines 41 and 43");
       }();
    });
    var map2 = F3(function (func,
@@ -16962,7 +11941,7 @@ Elm.Result.make = function (_elm) {
                  return Err(_v39._4._0);}
               break;}
          _U.badCase($moduleName,
-         "between lines 82 and 123");
+         "between lines 82 and 88");
       }();
    });
    var formatError = F2(function (f,
@@ -16974,7 +11953,7 @@ Elm.Result.make = function (_elm) {
             case "Ok":
             return Ok(result._0);}
          _U.badCase($moduleName,
-         "between lines 148 and 161");
+         "between lines 148 and 150");
       }();
    });
    var fromMaybe = F2(function (err,
@@ -17003,95 +11982,29 @@ Elm.Result.make = function (_elm) {
                         ,Err: Err};
    return _elm.Result.values;
 };
-Elm.Serialize = Elm.Serialize || {};
-Elm.Serialize.make = function (_elm) {
+Elm.Rules = Elm.Rules || {};
+Elm.Rules.make = function (_elm) {
    "use strict";
-   _elm.Serialize = _elm.Serialize || {};
-   if (_elm.Serialize.values)
-   return _elm.Serialize.values;
+   _elm.Rules = _elm.Rules || {};
+   if (_elm.Rules.values)
+   return _elm.Rules.values;
    var _op = {},
    _N = Elm.Native,
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
-   $moduleName = "Serialize",
+   $moduleName = "Rules",
    $Basics = Elm.Basics.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $Json$Encode = Elm.Json.Encode.make(_elm),
    $List = Elm.List.make(_elm),
-   $Player = Elm.Player.make(_elm);
-   var intPair = function (_v0) {
-      return function () {
-         switch (_v0.ctor)
-         {case "_Tuple2":
-            return $Json$Encode.list(A2($List.map,
-              $Json$Encode.$int,
-              _L.fromArray([_v0._0
-                           ,_v0._1])));}
-         _U.badCase($moduleName,
-         "on line 34, column 18 to 40");
-      }();
-   };
-   var player = function ($) {
-      return $Json$Encode.string($Player.toString($));
-   };
-   var deck = function ($) {
-      return $Json$Encode.list($List.map($Json$Encode.string)($));
-   };
-   var action = function (a) {
-      return function () {
-         switch (a.ctor)
-         {case "MoveToMainMenu":
-            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
-                                                     ,_0: "action"
-                                                     ,_1: $Json$Encode.string("OpponentDisconnected")}]));
-            case "Pass":
-            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
-                                                     ,_0: "action"
-                                                     ,_1: $Json$Encode.string("Pass")}]));
-            case "PickUpPiece":
-            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
-                                                     ,_0: "action"
-                                                     ,_1: $Json$Encode.string("PickUpPiece")}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "player"
-                                                     ,_1: player(a._0)}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "idx"
-                                                     ,_1: $Json$Encode.$int(a._1)}]));
-            case "PlacePiece":
-            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
-                                                     ,_0: "action"
-                                                     ,_1: $Json$Encode.string("PlacePiece")}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "mousePos"
-                                                     ,_1: intPair(a._0)}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "dims"
-                                                     ,_1: intPair(a._1)}]));
-            case "StartGame":
-            return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
-                                                     ,_0: "action"
-                                                     ,_1: $Json$Encode.string("StartGame")}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "deck"
-                                                     ,_1: deck(a._1)}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "player"
-                                                     ,_1: player(a._2)}
-                                                    ,{ctor: "_Tuple2"
-                                                     ,_0: "playerName"
-                                                     ,_1: $Json$Encode.string(a._3)}]));}
-         return $Json$Encode.object(_L.fromArray([{ctor: "_Tuple2"
-                                                  ,_0: "action"
-                                                  ,_1: $Json$Encode.string("NoAction")}]));
-      }();
-   };
-   _elm.Serialize.values = {_op: _op
-                           ,action: action
-                           ,deck: deck
-                           ,player: player
-                           ,intPair: intPair};
-   return _elm.Serialize.values;
+   $Markdown = Elm.Markdown.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var markdown = "\n- - -\n\n# Kalevala\n\n*Kalevala* is a tile-laying game for two players inspired by the board game [\nV&ouml;lusp&aacute;](http://www.whitegoblingames.com/game/126/Vlusp) by Scott Caputo.\n\n## Placing Tiles\n\nPlayers take turns placing tiles from their hand on the board. A tile must \nbe placed adjacent to an existing tile, and there cannot be more than 7 tiles\nin a horizontal or vertical line. \n\nFor example, this *V&auml;in&auml;m&ouml;inen* tile can be placed anywhere above or below the existing line of tiles, but not to the left or right of them, because there are already 7 tiles in that row:\n\n![Example illustrating length limit](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/Length_Example.gif)\n\nAfter you place a tile, you draw a new tile from the deck (if there are any tiles left in it).\n\nIf you can\'t place any tiles or you have none in your hand, your turn is passed. The game ends when neither player can place any more tiles.\n\n## Scoring\n\nAfter you place a tile, if it\'s the single highest-value tile in its row, you score points equal to the number of tiles in the row, and if it\'s the single highest-value tile in its column, you score points equal to the number of tiles in the column. You can score for a row, a column, both, or neither. Lines must have at least two tiles in them to earn points. Tying the highest value in a row or column doesn\'t earn you points.\n\nFor example, this *Ukko* tile scores 2 points, because it\'s the single highest-value tile in its column of 2 tiles, but there are no other tiles in its row (2 points for column + 0 points for row = 2 points total).\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/7-Ukko_Example.gif)\n\nOn the other hand, this *V&auml;in&auml;m&ouml;inen* tile scores 3 points, because it\'s the single highest-value tile in its row of 3 tiles, but it\'s only tied for highest value in its column due to the other V&auml;in&auml;m&ouml;inen there (0 points for column + 3 points for row = 3 points total).\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/8-Vain_Example.gif)\n\n## Special Tiles\n\nMany of the tiles in *Kalevala* have special rules associated with them.\n\n### V&auml;in&auml;m&ouml;inen (8)\n\nNo special rules.\n\n### Ukko (7)\n\nNo special rules.\n\n### Kullervo (6)\n\nNo other tiles may be placed next to a *Kullervo*, unless it is another *Kullervo*.\n\nIn this example, a *Kullervo* tile is able to be be placed next to another one, but no other tile could go there:\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/6-Kullervo_Example.gif)\n\n### K&auml;&auml;rme (5)\n\n*K&auml;&auml;rme* tiles may be placed on top of other tiles (except other *K&auml;&auml;rme*s). If you place a *K&auml;&auml;rme* on top of another tile, that tile is treated as though it\'s no longer on the board, and its special abilities no longer take effect. You can still place a *K&auml;&auml;rme* tile normally.\n\nIn this example, a *K&auml;&auml;rme* swoops in on top of a stubborn *V&auml;in&auml;m&ouml;inen* to score 4 points (2 for the column + 2 for the row):\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/5-Kaarme_Example.gif)\n\n### Joukahainen (4)\n\nThe value of a *Joukahainen* tile in a row or column is equal to the sum of **all** of the *Joukahainen* tiles in a row or column. This means that a *Joukahainen* tile may have a different value in its row and in its column. *Joukahainen* tiles that have an increased value in their row or column are indicated by a **4+** symbol.\n\n*Joukahainen* tiles adjacent to *Lemminkainen* **(1)** tiles have zero value and don\'t contribute to the values of other *Joukahainen*s in their row and column. (More on *Lemminkainen* later!)\n\nIn this example, the *Joukahainen* tile gains a value of 8 in its row when it\'s placed due to the other *Joukahainen* in its row, thus winning its row for 3 points. But it only has a value of 4 in its column (because the other *Joukahainen* in its column has zero value and doesn\'t contribute to it), so it doesn\'t score any points for its column:\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/4-Jouk_Example.gif)\n\n### Seppo Ilmarinen (3)\n\n*Seppo Ilmarinen* tiles may be exchanged for tiles on the board (except other *Seppo Ilmarinen*s). If you choose to do that, place a *Seppo Ilmarinen* tile where another tile is already placed, and you will receive that other tile in your hand.\n\nYou can still place a *Seppo Ilmarinen* tile normally.\n\nIn this example, a *Seppo Ilmarinen* is exchanged for a *K&auml;&auml;rme* tile on the board to both score 4 points and gain a useful *K&auml;&auml;rme* tile. Way to go, *Seppo Ilmarinen*!\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/3-Ilmar_Example.gif)\n\n### Louhi (2)\n\n*Louhi* tiles can score a row or column automatically if there are *Louhi*s at both ends of it.\n\nIn this example, a *Louhi* scores a row of 4 tiles because there\'s another *Louhi* at the other end of the row (even though they\'re not the highest-value tiles in the row):\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/2-Louhi_Example.gif)\n\n### Lemminkainen (1)\n\nAll other tiles adjacent to *Lemminkainen* tiles have zero value (except other *Lemminkainen*s).\n\nIn this example, a *Lemminkainen* scores 4 points (2 for its row and 2 for its column) by reducing all of its neighbors to zero value:\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/1-Lemmi_Example.gif)\n\n## Credits\n\n*Kalevala* was programmed by [Alex Nisnevich](http://alex.nisnevich.com) and [Greg Shuflin](http://github.everydayimshuflin.com/) with art by [Jordan Arnesen](http://byjor.com/).\n\nIt\'s based on the board game _[\nV&ouml;lusp&aacute;](http://www.whitegoblingames.com/game/126/Vlusp)_, designed by [Scott Caputo](https://boardgamegeek.com/boardgamedesigner/8862/scott-caputo) and published by [White Goblin Games](http://www.whitegoblingames.com). _V&ouml;lusp&aacute;_ supports up to four players and has many expansions that add new tiles - if you like *Kalevala*, you should check it out!\n\n- - -\n";
+   var main = $Markdown.toHtml(markdown);
+   _elm.Rules.values = {_op: _op
+                       ,main: main
+                       ,markdown: markdown};
+   return _elm.Rules.values;
 };
 Elm.Signal = Elm.Signal || {};
 Elm.Signal.make = function (_elm) {
@@ -17195,7 +12108,7 @@ Elm.Signal.make = function (_elm) {
             case "[]":
             return $Debug.crash("mergeMany was given an empty list!");}
          _U.badCase($moduleName,
-         "between lines 177 and 197");
+         "between lines 177 and 182");
       }();
    };
    var foldp = $Native$Signal.foldp;
@@ -17236,157 +12149,6 @@ Elm.Signal.make = function (_elm) {
                         ,forwardTo: forwardTo
                         ,Mailbox: Mailbox};
    return _elm.Signal.values;
-};
-Elm.State = Elm.State || {};
-Elm.State.make = function (_elm) {
-   "use strict";
-   _elm.State = _elm.State || {};
-   if (_elm.State.values)
-   return _elm.State.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "State",
-   $Basics = Elm.Basics.make(_elm),
-   $GameTypes = Elm.GameTypes.make(_elm),
-   $Helpers = Elm.Helpers.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Piece = Elm.Piece.make(_elm),
-   $Player = Elm.Player.make(_elm);
-   var endStateMsg = function (state) {
-      return function () {
-         var blueScore = A2($Helpers.getU,
-         "Blue",
-         state.score);
-         var redScore = A2($Helpers.getU,
-         "Red",
-         state.score);
-         return _U.eq(redScore,
-         blueScore) ? "Tie game!" : _U.cmp(redScore,
-         blueScore) > 0 ? A2($Basics._op["++"],
-         A2($Helpers.getU,
-         "Red",
-         state.playerNames),
-         " wins!") : _U.cmp(redScore,
-         blueScore) < 0 ? A2($Basics._op["++"],
-         A2($Helpers.getU,
-         "Blue",
-         state.playerNames),
-         " wins!") : _U.badIf($moduleName,
-         "between lines 84 and 86");
-      }();
-   };
-   var leadingPlayer = function (state) {
-      return function () {
-         var blueScore = A2($Helpers.getU,
-         "Blue",
-         state.score);
-         var redScore = A2($Helpers.getU,
-         "Red",
-         state.score);
-         return _U.cmp(redScore,
-         blueScore) > 0 ? $Maybe.Just($GameTypes.Red) : _U.cmp(blueScore,
-         redScore) > 0 ? $Maybe.Just($GameTypes.Blue) : $Maybe.Nothing;
-      }();
-   };
-   var nextPlayer = function (state) {
-      return function () {
-         var next = $Player.next(state.turn);
-         return _U.eq(state.gameType,
-         $GameTypes.HumanVsHumanLocal) ? $GameTypes.SwitchingTo(next) : next;
-      }();
-   };
-   var pieceHeld = function (state) {
-      return function () {
-         var _v0 = state.heldPiece;
-         switch (_v0.ctor)
-         {case "Just":
-            return function () {
-                 var hand = A2($Player.getHand,
-                 state.turn,
-                 state);
-                 var pieceStr = A2($Helpers._op["!!"],
-                 hand,
-                 _v0._0);
-                 return $Maybe.Just($Piece.fromString(pieceStr));
-              }();
-            case "Nothing":
-            return $Maybe.Nothing;}
-         _U.badCase($moduleName,
-         "between lines 54 and 60");
-      }();
-   };
-   var isSwitchingPlayers = function (state) {
-      return function () {
-         var _v2 = state.turn;
-         switch (_v2.ctor)
-         {case "SwitchingTo":
-            return true;}
-         return false;
-      }();
-   };
-   var isSettingUpRemoteGame = function (state) {
-      return _U.eq(state.gameState,
-      $GameTypes.NotStarted) && _U.eq(state.gameType,
-      $GameTypes.HumanVsHumanRemote);
-   };
-   var isAtMainMenu = function (state) {
-      return _U.eq(state.gameState,
-      $GameTypes.NotStarted) && !_U.eq(state.gameType,
-      $GameTypes.HumanVsHumanRemote);
-   };
-   var isNotStarted = function (state) {
-      return function () {
-         var _v4 = state.gameState;
-         switch (_v4.ctor)
-         {case "NotStarted": return true;
-            case "WaitingForPlayers":
-            return true;}
-         return false;
-      }();
-   };
-   var isOngoing = function (state) {
-      return function () {
-         var _v5 = state.gameState;
-         switch (_v5.ctor)
-         {case "Connected": return true;
-            case "Ongoing": return true;}
-         return false;
-      }();
-   };
-   var isGameOver = function (state) {
-      return isOngoing(state) && (A2($Player.noTilesInHand,
-      $GameTypes.Red,
-      state) && A2($Player.noTilesInHand,
-      $GameTypes.Blue,
-      state));
-   };
-   var mustPass = function (state) {
-      return isOngoing(state) && ($Basics.not(isSwitchingPlayers(state)) && A2($Player.noTilesInHand,
-      state.turn,
-      state));
-   };
-   var isPlayerTurn = function (state) {
-      return isOngoing(state) && _U.eq(A2($Player.getType,
-      state.turn,
-      state),
-      $GameTypes.Human);
-   };
-   _elm.State.values = {_op: _op
-                       ,isOngoing: isOngoing
-                       ,isNotStarted: isNotStarted
-                       ,isAtMainMenu: isAtMainMenu
-                       ,isSettingUpRemoteGame: isSettingUpRemoteGame
-                       ,isGameOver: isGameOver
-                       ,mustPass: mustPass
-                       ,isPlayerTurn: isPlayerTurn
-                       ,isSwitchingPlayers: isSwitchingPlayers
-                       ,pieceHeld: pieceHeld
-                       ,nextPlayer: nextPlayer
-                       ,leadingPlayer: leadingPlayer
-                       ,endStateMsg: endStateMsg};
-   return _elm.State.values;
 };
 Elm.String = Elm.String || {};
 Elm.String.make = function (_elm) {
@@ -17800,85 +12562,6 @@ Elm.Text.make = function (_elm) {
                       ,Through: Through};
    return _elm.Text.values;
 };
-Elm.Time = Elm.Time || {};
-Elm.Time.make = function (_elm) {
-   "use strict";
-   _elm.Time = _elm.Time || {};
-   if (_elm.Time.values)
-   return _elm.Time.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Time",
-   $Basics = Elm.Basics.make(_elm),
-   $Native$Signal = Elm.Native.Signal.make(_elm),
-   $Native$Time = Elm.Native.Time.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var delay = $Native$Signal.delay;
-   var since = F2(function (time,
-   signal) {
-      return function () {
-         var stop = A2($Signal.map,
-         $Basics.always(-1),
-         A2(delay,time,signal));
-         var start = A2($Signal.map,
-         $Basics.always(1),
-         signal);
-         var delaydiff = A3($Signal.foldp,
-         F2(function (x,y) {
-            return x + y;
-         }),
-         0,
-         A2($Signal.merge,start,stop));
-         return A2($Signal.map,
-         F2(function (x,y) {
-            return !_U.eq(x,y);
-         })(0),
-         delaydiff);
-      }();
-   });
-   var timestamp = $Native$Signal.timestamp;
-   var every = $Native$Time.every;
-   var fpsWhen = $Native$Time.fpsWhen;
-   var fps = function (targetFrames) {
-      return A2(fpsWhen,
-      targetFrames,
-      $Signal.constant(true));
-   };
-   var inMilliseconds = function (t) {
-      return t;
-   };
-   var millisecond = 1;
-   var second = 1000 * millisecond;
-   var minute = 60 * second;
-   var hour = 60 * minute;
-   var inHours = function (t) {
-      return t / hour;
-   };
-   var inMinutes = function (t) {
-      return t / minute;
-   };
-   var inSeconds = function (t) {
-      return t / second;
-   };
-   _elm.Time.values = {_op: _op
-                      ,millisecond: millisecond
-                      ,second: second
-                      ,minute: minute
-                      ,hour: hour
-                      ,inMilliseconds: inMilliseconds
-                      ,inSeconds: inSeconds
-                      ,inMinutes: inMinutes
-                      ,inHours: inHours
-                      ,fps: fps
-                      ,fpsWhen: fpsWhen
-                      ,every: every
-                      ,timestamp: timestamp
-                      ,delay: delay
-                      ,since: since};
-   return _elm.Time.values;
-};
 Elm.Transform2D = Elm.Transform2D || {};
 Elm.Transform2D.make = function (_elm) {
    "use strict";
@@ -17955,9 +12638,13 @@ Elm.VirtualDom.make = function (_elm) {
    _U = _N.Utils.make(_elm),
    _L = _N.List.make(_elm),
    $moduleName = "VirtualDom",
+   $Basics = Elm.Basics.make(_elm),
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Json$Decode = Elm.Json.Decode.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
    $Native$VirtualDom = Elm.Native.VirtualDom.make(_elm),
+   $Result = Elm.Result.make(_elm),
    $Signal = Elm.Signal.make(_elm);
    var lazy3 = $Native$VirtualDom.lazy3;
    var lazy2 = $Native$VirtualDom.lazy2;
@@ -17985,31 +12672,4 @@ Elm.VirtualDom.make = function (_elm) {
                             ,lazy2: lazy2
                             ,lazy3: lazy3};
    return _elm.VirtualDom.values;
-};
-Elm.Window = Elm.Window || {};
-Elm.Window.make = function (_elm) {
-   "use strict";
-   _elm.Window = _elm.Window || {};
-   if (_elm.Window.values)
-   return _elm.Window.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Window",
-   $Basics = Elm.Basics.make(_elm),
-   $Native$Window = Elm.Native.Window.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var dimensions = $Native$Window.dimensions;
-   var width = A2($Signal.map,
-   $Basics.fst,
-   dimensions);
-   var height = A2($Signal.map,
-   $Basics.snd,
-   dimensions);
-   _elm.Window.values = {_op: _op
-                        ,dimensions: dimensions
-                        ,width: width
-                        ,height: height};
-   return _elm.Window.values;
 };

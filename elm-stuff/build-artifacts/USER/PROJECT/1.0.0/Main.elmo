@@ -1,0 +1,24 @@
+Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   "use strict";
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values)
+   return _elm.Main.values;
+   var _op = {},
+   _N = Elm.Native,
+   _U = _N.Utils.make(_elm),
+   _L = _N.List.make(_elm),
+   $moduleName = "Main",
+   $Basics = Elm.Basics.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Markdown = Elm.Markdown.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
+   var markdown = "\n\n# This is Markdown\n\n[Markdown](http://daringfireball.net/projects/markdown/) lets you\nwrite content in a really natural way.\n\n  * You can have lists, like this one\n  * Make things **bold** or *italic*\n  * Embed snippets of `code`\n  * Create [links](/)\n  * ...\n\nThe [elm-markdown][] package parses all this content, allowing you\nto easily generate blocks of `Element` or `Html`.\n\n[elm-markdown]: http://package.elm-lang.org/packages/evancz/elm-markdown/latest\n\n";
+   var main = $Markdown.toHtml(markdown);
+   _elm.Main.values = {_op: _op
+                      ,main: main
+                      ,markdown: markdown};
+   return _elm.Main.values;
+};

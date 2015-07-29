@@ -13,7 +13,10 @@ Elm.Serialize.make = function (_elm) {
    $GameTypes = Elm.GameTypes.make(_elm),
    $Json$Encode = Elm.Json.Encode.make(_elm),
    $List = Elm.List.make(_elm),
-   $Player = Elm.Player.make(_elm);
+   $Maybe = Elm.Maybe.make(_elm),
+   $Player = Elm.Player.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
    var intPair = function (_v0) {
       return function () {
          switch (_v0.ctor)

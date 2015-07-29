@@ -20,7 +20,9 @@ Elm.Display.Board.make = function (_elm) {
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $List = Elm.List.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
-   $Player = Elm.Player.make(_elm);
+   $Player = Elm.Player.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
    var drawLastPlacedOutline = F2(function (state,
    tileSize) {
       return function () {

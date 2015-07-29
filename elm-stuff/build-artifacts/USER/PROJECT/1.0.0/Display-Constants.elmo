@@ -12,7 +12,11 @@ Elm.Display.Constants.make = function (_elm) {
    _L = _N.List.make(_elm),
    $moduleName = "Display.Constants",
    $Basics = Elm.Basics.make(_elm),
-   $Color = Elm.Color.make(_elm);
+   $Color = Elm.Color.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm);
    var transpGreen = A4($Color.rgba,
    0,
    255,
