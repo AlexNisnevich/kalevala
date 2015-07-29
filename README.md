@@ -26,7 +26,7 @@ First [install Elm](http://elm-lang.org/install).
 
 Then:
 ```
-elm compile Kalevala.elm Rules.elm
+elm make Kalevala.elm Rules.elm
 elm reactor   # to serve HTML and allow debugging
 ```
 and go to `localhost:8000`.
