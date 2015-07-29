@@ -20,6 +20,17 @@ Völuspá](http://www.whitegoblingames.com/game/126/Vlusp) by Scott Caputo.
 
 See [the rules page](rules.md).
 
+## Development.
+
+First [install Elm](http://elm-lang.org/install).
+
+Then:
+```
+elm compile Kalevala.elm Rules.elm
+elm reactor   # to serve HTML and allow debugging
+```
+and go to `localhost:8000`.
+
 ## Credits
 
 *Kalevala* was programmed by [Alex Nisnevich](http://alex.nisnevich.com) and [Greg Shuflin](http://github.everydayimshuflin.com/) with art by [Jordan Arnesen](http://byjor.com/).
