@@ -3,6 +3,8 @@
 *Kalevala* is a tile-laying game for two players inspired by the board game [
 Völuspá](http://www.whitegoblingames.com/game/126/Vlusp) by Scott Caputo.
 
+[>>> PLAY ONLINE <<<](http://alexnisnevich.github.io/voluspa)
+
 ## Features
 
 - Fast-paced strategic gameplay for two players
