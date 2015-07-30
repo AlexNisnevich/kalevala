@@ -1,7 +1,7 @@
 # Kalevala
 
-*Kalevala* is a tile-laying game for two players inspired by the board game [
-Völuspá](http://www.whitegoblingames.com/game/126/Vlusp) by Scott Caputo.
+*Kalevala* is a tile-laying game for two players inspired by the board game _[
+Völuspá](http://www.whitegoblingames.com/game/126/Vlusp)_ by Scott Caputo.
 
 **[>>> PLAY ONLINE <<<](http://alexnisnevich.github.io/kalevala)**
 
@@ -19,6 +19,17 @@ Völuspá](http://www.whitegoblingames.com/game/126/Vlusp) by Scott Caputo.
 ## Rules
 
 See [the rules page](rules.md).
+
+## Development.
+
+First [install Elm](http://elm-lang.org/install).
+
+Then:
+```
+elm make Kalevala.elm Rules.elm
+elm reactor   # to serve HTML and allow debugging
+```
+and go to `localhost:8000`.
 
 ## Credits
 
