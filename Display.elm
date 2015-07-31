@@ -151,6 +151,7 @@ playerHandText player state playerName =
                                             else withDefault "?" (Dict.get p state.playerNames)
   in 
     text |> String.toUpper
+         |> (if state.turn == player && State.isOngoing state then (\t -> "*" ++ t) else identity)
          |> fromString
          |> (if state.turn == player && State.isOngoing state then bold else identity)
          |> Text.color (Player.toColor player)

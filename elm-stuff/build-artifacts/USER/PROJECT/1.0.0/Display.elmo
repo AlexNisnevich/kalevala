@@ -137,7 +137,12 @@ Elm.Display.make = function (_elm) {
             "between lines 142 and 152");
          }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
-         player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(text)))));
+         player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString((_U.eq(state.turn,
+         player) && $State.isOngoing(state) ? function (t) {
+            return A2($Basics._op["++"],
+            "*",
+            t);
+         } : $Basics.identity)($String.toUpper(text))))));
       }();
    });
    var renderScoreArea = F2(function (state,
@@ -628,7 +633,7 @@ Elm.Display.make = function (_elm) {
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
-            "between lines 194 and 197");
+            "between lines 195 and 198");
          }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},

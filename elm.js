@@ -2771,7 +2771,12 @@ Elm.Display.make = function (_elm) {
             "between lines 142 and 152");
          }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
-         player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString($String.toUpper(text)))));
+         player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString((_U.eq(state.turn,
+         player) && $State.isOngoing(state) ? function (t) {
+            return A2($Basics._op["++"],
+            "*",
+            t);
+         } : $Basics.identity)($String.toUpper(text))))));
       }();
    });
    var renderScoreArea = F2(function (state,
@@ -3262,7 +3267,7 @@ Elm.Display.make = function (_elm) {
                case "Nothing":
                return renderLog(state);}
             _U.badCase($moduleName,
-            "between lines 194 and 197");
+            "between lines 195 and 198");
          }();
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
@@ -7348,60 +7353,6 @@ Elm.Log.make = function (_elm) {
                      ,display: display};
    return _elm.Log.values;
 };
-Elm.Markdown = Elm.Markdown || {};
-Elm.Markdown.make = function (_elm) {
-   "use strict";
-   _elm.Markdown = _elm.Markdown || {};
-   if (_elm.Markdown.values)
-   return _elm.Markdown.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Markdown",
-   $Basics = Elm.Basics.make(_elm),
-   $Graphics$Element = Elm.Graphics.Element.make(_elm),
-   $Html = Elm.Html.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Native$Markdown = Elm.Native.Markdown.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var toElementWith = $Native$Markdown.toElementWith;
-   var toHtmlWith = $Native$Markdown.toHtmlWith;
-   var defaultOptions = {_: {}
-                        ,githubFlavored: $Maybe.Just({_: {}
-                                                     ,breaks: false
-                                                     ,tables: false})
-                        ,sanitize: false
-                        ,smartypants: false};
-   var Options = F3(function (a,
-   b,
-   c) {
-      return {_: {}
-             ,githubFlavored: a
-             ,sanitize: b
-             ,smartypants: c};
-   });
-   var toElement = function (string) {
-      return A2($Native$Markdown.toElementWith,
-      defaultOptions,
-      string);
-   };
-   var toHtml = function (string) {
-      return A2($Native$Markdown.toHtmlWith,
-      defaultOptions,
-      string);
-   };
-   _elm.Markdown.values = {_op: _op
-                          ,toHtml: toHtml
-                          ,toElement: toElement
-                          ,Options: Options
-                          ,defaultOptions: defaultOptions
-                          ,toHtmlWith: toHtmlWith
-                          ,toElementWith: toElementWith};
-   return _elm.Markdown.values;
-};
 Elm.Maybe = Elm.Maybe || {};
 Elm.Maybe.make = function (_elm) {
    "use strict";
@@ -11318,108 +11269,6 @@ Elm.Native.List.make = function(localRuntime) {
 
 };
 
-
-// setup
-Elm.Native = Elm.Native || {};
-Elm.Native.Markdown = Elm.Native.Markdown || {};
-
-// definition
-Elm.Native.Markdown.make = function(localRuntime) {
-	'use strict';
-
-	// attempt to short-circuit
-	if ('values' in Elm.Native.Markdown)
-	{
-		return Elm.Native.Markdown.values;
-	}
-
-	var Element = Elm.Native.Graphics.Element.make(localRuntime);
-
-	/**
-	 * marked - a markdown parser
-	 * Copyright (c) 2011-2014, Christopher Jeffrey. (MIT Licensed)
-	 * https://github.com/chjj/marked
-	 */
-	(function(){var block={newline:/^\n+/,code:/^( {4}[^\n]+\n*)+/,fences:noop,hr:/^( *[-*_]){3,} *(?:\n+|$)/,heading:/^ *(#{1,6}) *([^\n]+?) *#* *(?:\n+|$)/,nptable:noop,lheading:/^([^\n]+)\n *(=|-){2,} *(?:\n+|$)/,blockquote:/^( *>[^\n]+(\n(?!def)[^\n]+)*\n*)+/,list:/^( *)(bull) [\s\S]+?(?:hr|def|\n{2,}(?! )(?!\1bull )\n*|\s*$)/,html:/^ *(?:comment|closed|closing) *(?:\n{2,}|\s*$)/,def:/^ *\[([^\]]+)\]: *<?([^\s>]+)>?(?: +["(]([^\n]+)[")])? *(?:\n+|$)/,table:noop,paragraph:/^((?:[^\n]+\n?(?!hr|heading|lheading|blockquote|tag|def))+)\n*/,text:/^[^\n]+/};block.bullet=/(?:[*+-]|\d+\.)/;block.item=/^( *)(bull) [^\n]*(?:\n(?!\1bull )[^\n]*)*/;block.item=replace(block.item,"gm")(/bull/g,block.bullet)();block.list=replace(block.list)(/bull/g,block.bullet)("hr","\\n+(?=\\1?(?:[-*_] *){3,}(?:\\n+|$))")("def","\\n+(?="+block.def.source+")")();block.blockquote=replace(block.blockquote)("def",block.def)();block._tag="(?!(?:"+"a|em|strong|small|s|cite|q|dfn|abbr|data|time|code"+"|var|samp|kbd|sub|sup|i|b|u|mark|ruby|rt|rp|bdi|bdo"+"|span|br|wbr|ins|del|img)\\b)\\w+(?!:/|[^\\w\\s@]*@)\\b";block.html=replace(block.html)("comment",/<!--[\s\S]*?-->/)("closed",/<(tag)[\s\S]+?<\/\1>/)("closing",/<tag(?:"[^"]*"|'[^']*'|[^'">])*?>/)(/tag/g,block._tag)();block.paragraph=replace(block.paragraph)("hr",block.hr)("heading",block.heading)("lheading",block.lheading)("blockquote",block.blockquote)("tag","<"+block._tag)("def",block.def)();block.normal=merge({},block);block.gfm=merge({},block.normal,{fences:/^ *(`{3,}|~{3,}) *(\S+)? *\n([\s\S]+?)\s*\1 *(?:\n+|$)/,paragraph:/^/});block.gfm.paragraph=replace(block.paragraph)("(?!","(?!"+block.gfm.fences.source.replace("\\1","\\2")+"|"+block.list.source.replace("\\1","\\3")+"|")();block.tables=merge({},block.gfm,{nptable:/^ *(\S.*\|.*)\n *([-:]+ *\|[-| :]*)\n((?:.*\|.*(?:\n|$))*)\n*/,table:/^ *\|(.+)\n *\|( *[-:]+[-| :]*)\n((?: *\|.*(?:\n|$))*)\n*/});function Lexer(options){this.tokens=[];this.tokens.links={};this.options=options||marked.defaults;this.rules=block.normal;if(this.options.gfm){if(this.options.tables){this.rules=block.tables}else{this.rules=block.gfm}}}Lexer.rules=block;Lexer.lex=function(src,options){var lexer=new Lexer(options);return lexer.lex(src)};Lexer.prototype.lex=function(src){src=src.replace(/\r\n|\r/g,"\n").replace(/\t/g,"    ").replace(/\u00a0/g," ").replace(/\u2424/g,"\n");return this.token(src,true)};Lexer.prototype.token=function(src,top,bq){var src=src.replace(/^ +$/gm,""),next,loose,cap,bull,b,item,space,i,l;while(src){if(cap=this.rules.newline.exec(src)){src=src.substring(cap[0].length);if(cap[0].length>1){this.tokens.push({type:"space"})}}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);cap=cap[0].replace(/^ {4}/gm,"");this.tokens.push({type:"code",text:!this.options.pedantic?cap.replace(/\n+$/,""):cap});continue}if(cap=this.rules.fences.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"code",lang:cap[2],text:cap[3]});continue}if(cap=this.rules.heading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[1].length,text:cap[2]});continue}if(top&&(cap=this.rules.nptable.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].split(/ *\| */)}this.tokens.push(item);continue}if(cap=this.rules.lheading.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"heading",depth:cap[2]==="="?1:2,text:cap[1]});continue}if(cap=this.rules.hr.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"hr"});continue}if(cap=this.rules.blockquote.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"blockquote_start"});cap=cap[0].replace(/^ *> ?/gm,"");this.token(cap,top,true);this.tokens.push({type:"blockquote_end"});continue}if(cap=this.rules.list.exec(src)){src=src.substring(cap[0].length);bull=cap[2];this.tokens.push({type:"list_start",ordered:bull.length>1});cap=cap[0].match(this.rules.item);next=false;l=cap.length;i=0;for(;i<l;i++){item=cap[i];space=item.length;item=item.replace(/^ *([*+-]|\d+\.) +/,"");if(~item.indexOf("\n ")){space-=item.length;item=!this.options.pedantic?item.replace(new RegExp("^ {1,"+space+"}","gm"),""):item.replace(/^ {1,4}/gm,"")}if(this.options.smartLists&&i!==l-1){b=block.bullet.exec(cap[i+1])[0];if(bull!==b&&!(bull.length>1&&b.length>1)){src=cap.slice(i+1).join("\n")+src;i=l-1}}loose=next||/\n\n(?!\s*$)/.test(item);if(i!==l-1){next=item.charAt(item.length-1)==="\n";if(!loose)loose=next}this.tokens.push({type:loose?"loose_item_start":"list_item_start"});this.token(item,false,bq);this.tokens.push({type:"list_item_end"})}this.tokens.push({type:"list_end"});continue}if(cap=this.rules.html.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:this.options.sanitize?"paragraph":"html",pre:cap[1]==="pre"||cap[1]==="script"||cap[1]==="style",text:cap[0]});continue}if(!bq&&top&&(cap=this.rules.def.exec(src))){src=src.substring(cap[0].length);this.tokens.links[cap[1].toLowerCase()]={href:cap[2],title:cap[3]};continue}if(top&&(cap=this.rules.table.exec(src))){src=src.substring(cap[0].length);item={type:"table",header:cap[1].replace(/^ *| *\| *$/g,"").split(/ *\| */),align:cap[2].replace(/^ *|\| *$/g,"").split(/ *\| */),cells:cap[3].replace(/(?: *\| *)?\n$/,"").split("\n")};for(i=0;i<item.align.length;i++){if(/^ *-+: *$/.test(item.align[i])){item.align[i]="right"}else if(/^ *:-+: *$/.test(item.align[i])){item.align[i]="center"}else if(/^ *:-+ *$/.test(item.align[i])){item.align[i]="left"}else{item.align[i]=null}}for(i=0;i<item.cells.length;i++){item.cells[i]=item.cells[i].replace(/^ *\| *| *\| *$/g,"").split(/ *\| */)}this.tokens.push(item);continue}if(top&&(cap=this.rules.paragraph.exec(src))){src=src.substring(cap[0].length);this.tokens.push({type:"paragraph",text:cap[1].charAt(cap[1].length-1)==="\n"?cap[1].slice(0,-1):cap[1]});continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);this.tokens.push({type:"text",text:cap[0]});continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return this.tokens};var inline={escape:/^\\([\\`*{}\[\]()#+\-.!_>])/,autolink:/^<([^ >]+(@|:\/)[^ >]+)>/,url:noop,tag:/^<!--[\s\S]*?-->|^<\/?\w+(?:"[^"]*"|'[^']*'|[^'">])*?>/,link:/^!?\[(inside)\]\(href\)/,reflink:/^!?\[(inside)\]\s*\[([^\]]*)\]/,nolink:/^!?\[((?:\[[^\]]*\]|[^\[\]])*)\]/,strong:/^__([\s\S]+?)__(?!_)|^\*\*([\s\S]+?)\*\*(?!\*)/,em:/^\b_((?:__|[\s\S])+?)_\b|^\*((?:\*\*|[\s\S])+?)\*(?!\*)/,code:/^(`+)\s*([\s\S]*?[^`])\s*\1(?!`)/,br:/^ {2,}\n(?!\s*$)/,del:noop,text:/^[\s\S]+?(?=[\\<!\[_*`]| {2,}\n|$)/};inline._inside=/(?:\[[^\]]*\]|[^\[\]]|\](?=[^\[]*\]))*/;inline._href=/\s*<?([\s\S]*?)>?(?:\s+['"]([\s\S]*?)['"])?\s*/;inline.link=replace(inline.link)("inside",inline._inside)("href",inline._href)();inline.reflink=replace(inline.reflink)("inside",inline._inside)();inline.normal=merge({},inline);inline.pedantic=merge({},inline.normal,{strong:/^__(?=\S)([\s\S]*?\S)__(?!_)|^\*\*(?=\S)([\s\S]*?\S)\*\*(?!\*)/,em:/^_(?=\S)([\s\S]*?\S)_(?!_)|^\*(?=\S)([\s\S]*?\S)\*(?!\*)/});inline.gfm=merge({},inline.normal,{escape:replace(inline.escape)("])","~|])")(),url:/^(https?:\/\/[^\s<]+[^<.,:;"')\]\s])/,del:/^~~(?=\S)([\s\S]*?\S)~~/,text:replace(inline.text)("]|","~]|")("|","|https?://|")()});inline.breaks=merge({},inline.gfm,{br:replace(inline.br)("{2,}","*")(),text:replace(inline.gfm.text)("{2,}","*")()});function InlineLexer(links,options){this.options=options||marked.defaults;this.links=links;this.rules=inline.normal;this.renderer=this.options.renderer||new Renderer;this.renderer.options=this.options;if(!this.links){throw new Error("Tokens array requires a `links` property.")}if(this.options.gfm){if(this.options.breaks){this.rules=inline.breaks}else{this.rules=inline.gfm}}else if(this.options.pedantic){this.rules=inline.pedantic}}InlineLexer.rules=inline;InlineLexer.output=function(src,links,options){var inline=new InlineLexer(links,options);return inline.output(src)};InlineLexer.prototype.output=function(src){var out="",link,text,href,cap;while(src){if(cap=this.rules.escape.exec(src)){src=src.substring(cap[0].length);out+=cap[1];continue}if(cap=this.rules.autolink.exec(src)){src=src.substring(cap[0].length);if(cap[2]==="@"){text=cap[1].charAt(6)===":"?this.mangle(cap[1].substring(7)):this.mangle(cap[1]);href=this.mangle("mailto:")+text}else{text=escape(cap[1]);href=text}out+=this.renderer.link(href,null,text);continue}if(!this.inLink&&(cap=this.rules.url.exec(src))){src=src.substring(cap[0].length);text=escape(cap[1]);href=text;out+=this.renderer.link(href,null,text);continue}if(cap=this.rules.tag.exec(src)){if(!this.inLink&&/^<a /i.test(cap[0])){this.inLink=true}else if(this.inLink&&/^<\/a>/i.test(cap[0])){this.inLink=false}src=src.substring(cap[0].length);out+=this.options.sanitize?escape(cap[0]):cap[0];continue}if(cap=this.rules.link.exec(src)){src=src.substring(cap[0].length);this.inLink=true;out+=this.outputLink(cap,{href:cap[2],title:cap[3]});this.inLink=false;continue}if((cap=this.rules.reflink.exec(src))||(cap=this.rules.nolink.exec(src))){src=src.substring(cap[0].length);link=(cap[2]||cap[1]).replace(/\s+/g," ");link=this.links[link.toLowerCase()];if(!link||!link.href){out+=cap[0].charAt(0);src=cap[0].substring(1)+src;continue}this.inLink=true;out+=this.outputLink(cap,link);this.inLink=false;continue}if(cap=this.rules.strong.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.strong(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.em.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.em(this.output(cap[2]||cap[1]));continue}if(cap=this.rules.code.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.codespan(escape(cap[2],true));continue}if(cap=this.rules.br.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.br();continue}if(cap=this.rules.del.exec(src)){src=src.substring(cap[0].length);out+=this.renderer.del(this.output(cap[1]));continue}if(cap=this.rules.text.exec(src)){src=src.substring(cap[0].length);out+=escape(this.smartypants(cap[0]));continue}if(src){throw new Error("Infinite loop on byte: "+src.charCodeAt(0))}}return out};InlineLexer.prototype.outputLink=function(cap,link){var href=escape(link.href),title=link.title?escape(link.title):null;return cap[0].charAt(0)!=="!"?this.renderer.link(href,title,this.output(cap[1])):this.renderer.image(href,title,escape(cap[1]))};InlineLexer.prototype.smartypants=function(text){if(!this.options.smartypants)return text;return text.replace(/--/g,"—").replace(/(^|[-\u2014/(\[{"\s])'/g,"$1‘").replace(/'/g,"’").replace(/(^|[-\u2014/(\[{\u2018\s])"/g,"$1“").replace(/"/g,"”").replace(/\.{3}/g,"…")};InlineLexer.prototype.mangle=function(text){var out="",l=text.length,i=0,ch;for(;i<l;i++){ch=text.charCodeAt(i);if(Math.random()>.5){ch="x"+ch.toString(16)}out+="&#"+ch+";"}return out};function Renderer(options){this.options=options||{}}Renderer.prototype.code=function(code,lang,escaped){if(this.options.highlight){var out=this.options.highlight(code,lang);if(out!=null&&out!==code){escaped=true;code=out}}if(!lang){return"<pre><code>"+(escaped?code:escape(code,true))+"\n</code></pre>"}return'<pre><code class="'+this.options.langPrefix+escape(lang,true)+'">'+(escaped?code:escape(code,true))+"\n</code></pre>\n"};Renderer.prototype.blockquote=function(quote){return"<blockquote>\n"+quote+"</blockquote>\n"};Renderer.prototype.html=function(html){return html};Renderer.prototype.heading=function(text,level,raw){return"<h"+level+' id="'+this.options.headerPrefix+raw.toLowerCase().replace(/[^\w]+/g,"-")+'">'+text+"</h"+level+">\n"};Renderer.prototype.hr=function(){return this.options.xhtml?"<hr/>\n":"<hr>\n"};Renderer.prototype.list=function(body,ordered){var type=ordered?"ol":"ul";return"<"+type+">\n"+body+"</"+type+">\n"};Renderer.prototype.listitem=function(text){return"<li>"+text+"</li>\n"};Renderer.prototype.paragraph=function(text){return"<p>"+text+"</p>\n"};Renderer.prototype.table=function(header,body){return"<table>\n"+"<thead>\n"+header+"</thead>\n"+"<tbody>\n"+body+"</tbody>\n"+"</table>\n"};Renderer.prototype.tablerow=function(content){return"<tr>\n"+content+"</tr>\n"};Renderer.prototype.tablecell=function(content,flags){var type=flags.header?"th":"td";var tag=flags.align?"<"+type+' style="text-align:'+flags.align+'">':"<"+type+">";return tag+content+"</"+type+">\n"};Renderer.prototype.strong=function(text){return"<strong>"+text+"</strong>"};Renderer.prototype.em=function(text){return"<em>"+text+"</em>"};Renderer.prototype.codespan=function(text){return"<code>"+text+"</code>"};Renderer.prototype.br=function(){return this.options.xhtml?"<br/>":"<br>"};Renderer.prototype.del=function(text){return"<del>"+text+"</del>"};Renderer.prototype.link=function(href,title,text){if(this.options.sanitize){try{var prot=decodeURIComponent(unescape(href)).replace(/[^\w:]/g,"").toLowerCase()}catch(e){return""}if(prot.indexOf("javascript:")===0){return""}}var out='<a href="'+href+'"';if(title){out+=' title="'+title+'"'}out+=">"+text+"</a>";return out};Renderer.prototype.image=function(href,title,text){var out='<img src="'+href+'" alt="'+text+'"';if(title){out+=' title="'+title+'"'}out+=this.options.xhtml?"/>":">";return out};function Parser(options){this.tokens=[];this.token=null;this.options=options||marked.defaults;this.options.renderer=this.options.renderer||new Renderer;this.renderer=this.options.renderer;this.renderer.options=this.options}Parser.parse=function(src,options,renderer){var parser=new Parser(options,renderer);return parser.parse(src)};Parser.prototype.parse=function(src){this.inline=new InlineLexer(src.links,this.options,this.renderer);this.tokens=src.reverse();var out="";while(this.next()){out+=this.tok()}return out};Parser.prototype.next=function(){return this.token=this.tokens.pop()};Parser.prototype.peek=function(){return this.tokens[this.tokens.length-1]||0};Parser.prototype.parseText=function(){var body=this.token.text;while(this.peek().type==="text"){body+="\n"+this.next().text}return this.inline.output(body)};Parser.prototype.tok=function(){switch(this.token.type){case"space":{return""}case"hr":{return this.renderer.hr()}case"heading":{return this.renderer.heading(this.inline.output(this.token.text),this.token.depth,this.token.text)}case"code":{return this.renderer.code(this.token.text,this.token.lang,this.token.escaped)}case"table":{var header="",body="",i,row,cell,flags,j;cell="";for(i=0;i<this.token.header.length;i++){flags={header:true,align:this.token.align[i]};cell+=this.renderer.tablecell(this.inline.output(this.token.header[i]),{header:true,align:this.token.align[i]})}header+=this.renderer.tablerow(cell);for(i=0;i<this.token.cells.length;i++){row=this.token.cells[i];cell="";for(j=0;j<row.length;j++){cell+=this.renderer.tablecell(this.inline.output(row[j]),{header:false,align:this.token.align[j]})}body+=this.renderer.tablerow(cell)}return this.renderer.table(header,body)}case"blockquote_start":{var body="";while(this.next().type!=="blockquote_end"){body+=this.tok()}return this.renderer.blockquote(body)}case"list_start":{var body="",ordered=this.token.ordered;while(this.next().type!=="list_end"){body+=this.tok()}return this.renderer.list(body,ordered)}case"list_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.token.type==="text"?this.parseText():this.tok()}return this.renderer.listitem(body)}case"loose_item_start":{var body="";while(this.next().type!=="list_item_end"){body+=this.tok()}return this.renderer.listitem(body)}case"html":{var html=!this.token.pre&&!this.options.pedantic?this.inline.output(this.token.text):this.token.text;return this.renderer.html(html)}case"paragraph":{return this.renderer.paragraph(this.inline.output(this.token.text))}case"text":{return this.renderer.paragraph(this.parseText())}}};function escape(html,encode){return html.replace(!encode?/&(?!#?\w+;)/g:/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;")}function unescape(html){return html.replace(/&([#\w]+);/g,function(_,n){n=n.toLowerCase();if(n==="colon")return":";if(n.charAt(0)==="#"){return n.charAt(1)==="x"?String.fromCharCode(parseInt(n.substring(2),16)):String.fromCharCode(+n.substring(1))}return""})}function replace(regex,opt){regex=regex.source;opt=opt||"";return function self(name,val){if(!name)return new RegExp(regex,opt);val=val.source||val;val=val.replace(/(^|[^\[])\^/g,"$1");regex=regex.replace(name,val);return self}}function noop(){}noop.exec=noop;function merge(obj){var i=1,target,key;for(;i<arguments.length;i++){target=arguments[i];for(key in target){if(Object.prototype.hasOwnProperty.call(target,key)){obj[key]=target[key]}}}return obj}function marked(src,opt,callback){if(callback||typeof opt==="function"){if(!callback){callback=opt;opt=null}opt=merge({},marked.defaults,opt||{});var highlight=opt.highlight,tokens,pending,i=0;try{tokens=Lexer.lex(src,opt)}catch(e){return callback(e)}pending=tokens.length;var done=function(err){if(err){opt.highlight=highlight;return callback(err)}var out;try{out=Parser.parse(tokens,opt)}catch(e){err=e}opt.highlight=highlight;return err?callback(err):callback(null,out)};if(!highlight||highlight.length<3){return done()}delete opt.highlight;if(!pending)return done();for(;i<tokens.length;i++){(function(token){if(token.type!=="code"){return--pending||done()}return highlight(token.text,token.lang,function(err,code){if(err)return done(err);if(code==null||code===token.text){return--pending||done()}token.text=code;token.escaped=true;--pending||done()})})(tokens[i])}return}try{if(opt)opt=merge({},marked.defaults,opt);return Parser.parse(Lexer.lex(src,opt),opt)}catch(e){e.message+="\nPlease report this to https://github.com/chjj/marked.";if((opt||marked.defaults).silent){return"<p>An error occured:</p><pre>"+escape(e.message+"",true)+"</pre>"}throw e}}marked.options=marked.setOptions=function(opt){merge(marked.defaults,opt);return marked};marked.defaults={gfm:true,tables:true,breaks:false,pedantic:false,sanitize:false,smartLists:false,silent:false,highlight:null,langPrefix:"lang-",smartypants:false,headerPrefix:"",renderer:new Renderer,xhtml:false};marked.Parser=Parser;marked.parser=Parser.parse;marked.Renderer=Renderer;marked.Lexer=Lexer;marked.lexer=Lexer.lex;marked.InlineLexer=InlineLexer;marked.inlineLexer=InlineLexer.output;marked.parse=marked;if(typeof module!=="undefined"&&typeof exports==="object"){module.exports=marked}else if(typeof define==="function"&&define.amd){define(function(){return marked})}else{this.marked=marked}}).call(function(){return this||(typeof window!=="undefined"?window:global)}());
-
-	marked.setOptions({
-		highlight: function (code, lang) {
-			if (typeof hljs !== 'undefined'
-				&& lang
-				&& hljs.listLanguages().indexOf(lang) >= 0)
-			{
-				return hljs.highlight(lang, code, true).value;
-			}
-			return code;
-		}
-	});
-
-	function formatOptions(options) {
-		var gfm = options.githubFlavored;
-		if (gfm.ctor === 'Just')
-		{
-			return {
-				gfm: true,
-				tables: gfm.tables,
-				breaks: gfm.breaks,
-				sanitize: options.sanitize,
-				smartypants: options.smartypants
-			};
-		}
-		else
-		{
-			return {
-				gfm: false,
-				tables: false,
-				breaks: false,
-				sanitize: options.sanitize,
-				smartypants: options.smartypants
-			};
-		}
-	}
-
-	function toHtmlWith(options, rawMarkdown)
-	{
-		return new MarkdownWidget(options, rawMarkdown);
-	}
-
-	function MarkdownWidget(options, rawMarkdown)
-	{
-		this.options = options;
-		this.markdown = rawMarkdown;
-	}
-
-	MarkdownWidget.prototype.type = "Widget";
-
-	MarkdownWidget.prototype.init = function init()
-	{
-		var html = marked(this.markdown, formatOptions(this.options));
-		var div = document.createElement('div');
-		div.innerHTML = html;
-		return div;
-	};
-
-	MarkdownWidget.prototype.update = function update(previous, node)
-	{
-		if (this.markdown !== previous.markdown || this.options != previous.options)
-		{
-			var html = marked(this.markdown, formatOptions(this.options));
-			node.innerHTML = html;
-		}
-		return node;
-	};
-
-
-	function toElementWith(options, rawMarkdown)
-	{
-		return Element.markdown(marked(rawMarkdown, formatOptions(options)));
-	}
-
-	return Elm.Native.Markdown.values = {
-		toHtmlWith: F2(toHtmlWith),
-		toElementWith: F2(toElementWith)
-	};
-};
 Elm.Native = Elm.Native || {};
 Elm.Native.Mouse = {};
 Elm.Native.Mouse.make = function(localRuntime) {
@@ -17225,30 +17074,6 @@ Elm.Result.make = function (_elm) {
                         ,Ok: Ok
                         ,Err: Err};
    return _elm.Result.values;
-};
-Elm.Rules = Elm.Rules || {};
-Elm.Rules.make = function (_elm) {
-   "use strict";
-   _elm.Rules = _elm.Rules || {};
-   if (_elm.Rules.values)
-   return _elm.Rules.values;
-   var _op = {},
-   _N = Elm.Native,
-   _U = _N.Utils.make(_elm),
-   _L = _N.List.make(_elm),
-   $moduleName = "Rules",
-   $Basics = Elm.Basics.make(_elm),
-   $List = Elm.List.make(_elm),
-   $Markdown = Elm.Markdown.make(_elm),
-   $Maybe = Elm.Maybe.make(_elm),
-   $Result = Elm.Result.make(_elm),
-   $Signal = Elm.Signal.make(_elm);
-   var markdown = "\n- - -\n\n# Kalevala\n\n*Kalevala* is a tile-laying game for two players inspired by the board game [\nV&ouml;lusp&aacute;](http://www.whitegoblingames.com/game/126/Vlusp) by Scott Caputo.\n\n## Placing Tiles\n\nPlayers take turns placing tiles from their hand on the board. A tile must \nbe placed adjacent to an existing tile, and there cannot be more than 7 tiles\nin a horizontal or vertical line. \n\nFor example, this *V&auml;in&auml;m&ouml;inen* tile can be placed anywhere above or below the existing line of tiles, but not to the left or right of them, because there are already 7 tiles in that row:\n\n![Example illustrating length limit](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/Length_Example.gif)\n\nAfter you place a tile, you draw a new tile from the deck (if there are any tiles left in it).\n\nIf you can\'t place any tiles or you have none in your hand, your turn is passed. The game ends when neither player can place any more tiles.\n\n## Scoring\n\nAfter you place a tile, if it\'s the single highest-value tile in its row, you score points equal to the number of tiles in the row, and if it\'s the single highest-value tile in its column, you score points equal to the number of tiles in the column. You can score for a row, a column, both, or neither. Lines must have at least two tiles in them to earn points. Tying the highest value in a row or column doesn\'t earn you points.\n\nFor example, this *Ukko* tile scores 2 points, because it\'s the single highest-value tile in its column of 2 tiles, but there are no other tiles in its row (2 points for column + 0 points for row = 2 points total).\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/7-Ukko_Example.gif)\n\nOn the other hand, this *V&auml;in&auml;m&ouml;inen* tile scores 3 points, because it\'s the single highest-value tile in its row of 3 tiles, but it\'s only tied for highest value in its column due to the other V&auml;in&auml;m&ouml;inen there (0 points for column + 3 points for row = 3 points total).\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/8-Vain_Example.gif)\n\n## Special Tiles\n\nMany of the tiles in *Kalevala* have special rules associated with them.\n\n### V&auml;in&auml;m&ouml;inen (8)\n\nNo special rules.\n\n### Ukko (7)\n\nNo special rules.\n\n### Kullervo (6)\n\nNo other tiles may be placed next to a *Kullervo*, unless it is another *Kullervo*.\n\nIn this example, a *Kullervo* tile is able to be be placed next to another one, but no other tile could go there:\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/6-Kullervo_Example.gif)\n\n### K&auml;&auml;rme (5)\n\n*K&auml;&auml;rme* tiles may be placed on top of other tiles (except other *K&auml;&auml;rme*s). If you place a *K&auml;&auml;rme* on top of another tile, that tile is treated as though it\'s no longer on the board, and its special abilities no longer take effect. You can still place a *K&auml;&auml;rme* tile normally.\n\nIn this example, a *K&auml;&auml;rme* swoops in on top of a stubborn *V&auml;in&auml;m&ouml;inen* to score 4 points (2 for the column + 2 for the row):\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/5-Kaarme_Example.gif)\n\n### Joukahainen (4)\n\nThe value of a *Joukahainen* tile in a row or column is equal to the sum of **all** of the *Joukahainen* tiles in a row or column. This means that a *Joukahainen* tile may have a different value in its row and in its column. *Joukahainen* tiles that have an increased value in their row or column are indicated by a **4+** symbol.\n\n*Joukahainen* tiles adjacent to *Lemminkainen* **(1)** tiles have zero value and don\'t contribute to the values of other *Joukahainen*s in their row and column. (More on *Lemminkainen* later!)\n\nIn this example, the *Joukahainen* tile gains a value of 8 in its row when it\'s placed due to the other *Joukahainen* in its row, thus winning its row for 3 points. But it only has a value of 4 in its column (because the other *Joukahainen* in its column has zero value and doesn\'t contribute to it), so it doesn\'t score any points for its column:\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/4-Jouk_Example.gif)\n\n### Seppo Ilmarinen (3)\n\n*Seppo Ilmarinen* tiles may be exchanged for tiles on the board (except other *Seppo Ilmarinen*s). If you choose to do that, place a *Seppo Ilmarinen* tile where another tile is already placed, and you will receive that other tile in your hand.\n\nYou can still place a *Seppo Ilmarinen* tile normally.\n\nIn this example, a *Seppo Ilmarinen* is exchanged for a *K&auml;&auml;rme* tile on the board to both score 4 points and gain a useful *K&auml;&auml;rme* tile. Way to go, *Seppo Ilmarinen*!\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/3-Ilmar_Example.gif)\n\n### Louhi (2)\n\n*Louhi* tiles can score a row or column automatically if there are *Louhi*s at both ends of it.\n\nIn this example, a *Louhi* scores a row of 4 tiles because there\'s another *Louhi* at the other end of the row (even though they\'re not the highest-value tiles in the row):\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/2-Louhi_Example.gif)\n\n### Lemminkainen (1)\n\nAll other tiles adjacent to *Lemminkainen* tiles have zero value (except other *Lemminkainen*s).\n\nIn this example, a *Lemminkainen* scores 4 points (2 for its row and 2 for its column) by reducing all of its neighbors to zero value:\n\n![](https://raw.githubusercontent.com/AlexNisnevich/voluspa/master/images/Gifs/1-Lemmi_Example.gif)\n\n## Credits\n\n*Kalevala* was programmed by [Alex Nisnevich](http://alex.nisnevich.com) and [Greg Shuflin](http://github.everydayimshuflin.com/) with art by [Jordan Arnesen](http://byjor.com/).\n\nIt\'s based on the board game _[\nV&ouml;lusp&aacute;](http://www.whitegoblingames.com/game/126/Vlusp)_, designed by [Scott Caputo](https://boardgamegeek.com/boardgamedesigner/8862/scott-caputo) and published by [White Goblin Games](http://www.whitegoblingames.com). _V&ouml;lusp&aacute;_ supports up to four players and has many expansions that add new tiles - if you like *Kalevala*, you should check it out!\n\n- - -\n";
-   var main = $Markdown.toHtml(markdown);
-   _elm.Rules.values = {_op: _op
-                       ,main: main
-                       ,markdown: markdown};
-   return _elm.Rules.values;
 };
 Elm.Serialize = Elm.Serialize || {};
 Elm.Serialize.make = function (_elm) {
