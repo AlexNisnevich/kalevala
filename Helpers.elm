@@ -6,6 +6,12 @@ import Random exposing (..)
 import Signal
 import Graphics.Element exposing (..)
 
+isJust : Maybe a -> Bool
+isJust maybe =
+  case maybe of
+    Just something -> True
+    Nothing -> False
+
 getOrFail : Maybe a -> a
 getOrFail maybe =
   case maybe of

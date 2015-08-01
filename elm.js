@@ -2655,6 +2655,7 @@ Elm.Display.make = function (_elm) {
    $Graphics$Element = Elm.Graphics.Element.make(_elm),
    $Graphics$Input = Elm.Graphics.Input.make(_elm),
    $Graphics$Input$Field = Elm.Graphics.Input.Field.make(_elm),
+   $Helpers = Elm.Helpers.make(_elm),
    $List = Elm.List.make(_elm),
    $Log = Elm.Log.make(_elm),
    $Maybe = Elm.Maybe.make(_elm),
@@ -2752,7 +2753,7 @@ Elm.Display.make = function (_elm) {
                     {case "Cpu": return "CPU";
                        case "Human": return "Player";}
                     _U.badCase($moduleName,
-                    "between lines 143 and 146");
+                    "between lines 144 and 147");
                  }();
                case "HumanVsHumanLocal":
                return $Basics.toString(player);
@@ -2768,7 +2769,7 @@ Elm.Display.make = function (_elm) {
                     state.playerNames));
                  }();}
             _U.badCase($moduleName,
-            "between lines 142 and 152");
+            "between lines 143 and 153");
          }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
          player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString((_U.eq(state.turn,
@@ -2958,7 +2959,7 @@ Elm.Display.make = function (_elm) {
                return _U.eq(playerType,
                  $GameTypes.Human);}
             _U.badCase($moduleName,
-            "between lines 116 and 121");
+            "between lines 117 and 122");
          }();
          var handContents = $State.isNotStarted(state) ? dummyHand : isHandShown ? playerHand : cpuHand;
          return A3($Graphics$Element.container,
@@ -3259,16 +3260,10 @@ Elm.Display.make = function (_elm) {
    var renderRightArea = F2(function (state,
    playerName) {
       return function () {
-         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : function () {
-            var _v5 = $State.pieceHeld(state);
-            switch (_v5.ctor)
-            {case "Just":
-               return renderPieceDescription(_v5._0);
-               case "Nothing":
-               return renderLog(state);}
-            _U.badCase($moduleName,
-            "between lines 195 and 198");
-         }();
+         var content = $State.isAtMainMenu(state) ? renderMenu : $State.isSettingUpRemoteGame(state) ? renderRemoteSetupMenu(playerName) : $Helpers.isJust($State.pieceHeld(state)) && _U.eq(A2($Player.getType,
+         state.turn,
+         state),
+         $GameTypes.Human) ? renderPieceDescription($Helpers.getOrFail($State.pieceHeld(state))) : renderLog(state);
          return A2($Display$Helpers.withBorder,
          {ctor: "_Tuple2",_0: 2,_1: 2},
          $Color.darkGrey)(A3($Graphics$Element.container,
@@ -3278,15 +3273,15 @@ Elm.Display.make = function (_elm) {
       }();
    });
    var renderSidebar = F3(function (state,
-   _v7,
+   _v5,
    playerName) {
       return function () {
-         switch (_v7.ctor)
+         switch (_v5.ctor)
          {case "_Tuple2":
             return function () {
                  var sidebarPaddingHeight = ($Display$Board.getTotalBoardSize({ctor: "_Tuple2"
-                                                                              ,_0: _v7._0
-                                                                              ,_1: _v7._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
+                                                                              ,_0: _v5._0
+                                                                              ,_1: _v5._1}) - $Display$Constants.minSidebarHeight) / 2 | 0;
                  var sidebarInnerPaddingHeight = A2($Basics.min,
                  30,
                  sidebarPaddingHeight * 2 / 3 | 0);
@@ -3333,7 +3328,7 @@ Elm.Display.make = function (_elm) {
                                            sidebarOuterPaddingHeight)])))]));
               }();}
          _U.badCase($moduleName,
-         "between lines 74 and 89");
+         "between lines 75 and 90");
       }();
    });
    var renderGameArea = F3(function (state,
@@ -5537,7 +5532,7 @@ Elm.Helpers.make = function (_elm) {
          switch (maybe.ctor)
          {case "Just": return maybe._0;}
          _U.badCase($moduleName,
-         "between lines 11 and 14");
+         "between lines 17 and 20");
       }();
    };
    var headU = function (l) {
@@ -5584,7 +5579,17 @@ Elm.Helpers.make = function (_elm) {
       key,
       dict));
    });
+   var isJust = function (maybe) {
+      return function () {
+         switch (maybe.ctor)
+         {case "Just": return true;
+            case "Nothing": return false;}
+         _U.badCase($moduleName,
+         "between lines 11 and 13");
+      }();
+   };
    _elm.Helpers.values = {_op: _op
+                         ,isJust: isJust
                          ,getOrFail: getOrFail
                          ,headU: headU
                          ,tailU: tailU

@@ -76,7 +76,7 @@ Elm.Helpers.make = function (_elm) {
          switch (maybe.ctor)
          {case "Just": return maybe._0;}
          _U.badCase($moduleName,
-         "between lines 11 and 14");
+         "between lines 17 and 20");
       }();
    };
    var headU = function (l) {
@@ -123,7 +123,17 @@ Elm.Helpers.make = function (_elm) {
       key,
       dict));
    });
+   var isJust = function (maybe) {
+      return function () {
+         switch (maybe.ctor)
+         {case "Just": return true;
+            case "Nothing": return false;}
+         _U.badCase($moduleName,
+         "between lines 11 and 13");
+      }();
+   };
    _elm.Helpers.values = {_op: _op
+                         ,isJust: isJust
                          ,getOrFail: getOrFail
                          ,headU: headU
                          ,tailU: tailU

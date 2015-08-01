@@ -12,6 +12,7 @@ import Signal exposing (Mailbox, mailbox, message)
 import String
 import Text exposing (..)
 
+import Helpers exposing (..)
 import GameTypes exposing (..)
 import Log
 import State
@@ -190,11 +191,14 @@ renderDeck state =
 
 renderRightArea : State -> Content -> Element
 renderRightArea state playerName = 
-  let content = if | State.isAtMainMenu state -> renderMenu
-                   | State.isSettingUpRemoteGame state -> renderRemoteSetupMenu playerName
-                   | otherwise -> case State.pieceHeld state of
-                                    Just piece -> renderPieceDescription piece
-                                    Nothing -> renderLog state
+  let content = if | State.isAtMainMenu state -> 
+                        renderMenu
+                   | State.isSettingUpRemoteGame state -> 
+                        renderRemoteSetupMenu playerName
+                   | isJust (State.pieceHeld state) && Player.getType state.turn state == Human ->
+                        renderPieceDescription (getOrFail <| State.pieceHeld state)
+                   | otherwise ->
+                        renderLog state
   in 
     content |> container 410 sidebarRightAreaHeight middle |> withBorder (2, 2) darkGrey
 
