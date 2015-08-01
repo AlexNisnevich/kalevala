@@ -3164,22 +3164,10 @@ Elm.Display.make = function (_elm) {
                       196,
                       46,
                       "images/Buttons/Back-H.png"))
-                      ,$Graphics$Element.link("rules.html")(A4($Graphics$Input.customButton,
-                      A2($Signal.message,
-                      clickMailbox.address,
-                      $GameTypes.None),
-                      A3($Graphics$Element.image,
+                      ,$Graphics$Element.link("rules.html")(A3($Graphics$Element.image,
                       196,
                       46,
-                      "images/Buttons/View_Rules.png"),
-                      A3($Graphics$Element.image,
-                      196,
-                      46,
-                      "images/Buttons/View_Rules-H.png"),
-                      A3($Graphics$Element.image,
-                      196,
-                      46,
-                      "images/Buttons/View_Rules-H.png")))]));
+                      "images/Buttons/View_Rules.png"))]));
          var buttons = function () {
             var _v4 = state.gameState;
             switch (_v4.ctor)

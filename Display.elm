@@ -228,10 +228,7 @@ renderLog state =
                                            (image 196 46 "images/Buttons/Back.png")
                                            (image 196 46 "images/Buttons/Back-H.png")
                                            (image 196 46 "images/Buttons/Back-H.png")
-                                       , customButton (message clickMailbox.address None) 
-                                           (image 196 46 "images/Buttons/View_Rules.png")
-                                           (image 196 46 "images/Buttons/View_Rules-H.png")
-                                           (image 196 46 "images/Buttons/View_Rules-H.png") |> Element.link "rules.html"
+                                       , (image 196 46 "images/Buttons/View_Rules.png") |> Element.link "rules.html"
                                        ]
       mainMenuAndNewGameButtons = flow right [ customButton (message clickMailbox.address MainMenuButton) 
                                                  (image 196 46 "images/Buttons/Main_Menu.png")
