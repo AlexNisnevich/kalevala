@@ -19,6 +19,7 @@ import State
 import Piece
 import Player
 import Game
+import Decorate exposing (decorate)
 
 import Display.Board as Board
 import Display.Constants exposing (..)
@@ -224,16 +225,19 @@ renderMenu =
 
 renderLog : State -> Element
 renderLog state =
-  let backAndRulesButtons = flow right [ customButton (message clickMailbox.address MainMenuButton) 
+  let backAndRulesButtons = flow right [ customButton (message clickMailbox.address None) 
                                            (image 196 46 "images/Buttons/Back.png")
                                            (image 196 46 "images/Buttons/Back-H.png")
-                                           (image 196 46 "images/Buttons/Back-H.png")
-                                       , (image 196 46 "images/Buttons/View_Rules.png") |> Element.link "rules.html"
+                                           (image 196 46 "images/Buttons/Back-H.png") |> decorate ("onClick", "location.reload();")
+                                       , customButton (message clickMailbox.address None) 
+                                           (image 196 46 "images/Buttons/View_Rules.png")
+                                           (image 196 46 "images/Buttons/View_Rules-H.png")
+                                           (image 196 46 "images/Buttons/View_Rules-H.png") |> decorate ("onClick", "window.open('rules.html');")
                                        ]
-      mainMenuAndNewGameButtons = flow right [ customButton (message clickMailbox.address MainMenuButton) 
+      mainMenuAndNewGameButtons = flow right [ customButton (message clickMailbox.address None) 
                                                  (image 196 46 "images/Buttons/Main_Menu.png")
                                                  (image 196 46 "images/Buttons/Main_Menu-H.png")
-                                                 (image 196 46 "images/Buttons/Main_Menu-H.png")
+                                                 (image 196 46 "images/Buttons/Main_Menu-H.png") |> decorate ("onClick", "location.reload();")
                                              , customButton (message clickMailbox.address StartNewGameButton) 
                                                  (image 196 46 "images/Buttons/New_Game.png")
                                                  (image 196 46 "images/Buttons/New_Game-H.png")
@@ -245,10 +249,10 @@ renderLog state =
                                                 (image 196 46 "images/Buttons/Pass_Turn-H.png")
                                                 (image 196 46 "images/Buttons/Pass_Turn-H.png")
                                         else (image 196 46 "images/Buttons/Pass_Turn-H.png")
-                                      , customButton (message clickMailbox.address MainMenuButton) 
+                                      , customButton (message clickMailbox.address None) 
                                           (image 196 46 "images/Buttons/Quit_Game.png")
                                           (image 196 46 "images/Buttons/Quit_Game-H.png")
-                                          (image 196 46 "images/Buttons/Quit_Game-H.png")
+                                          (image 196 46 "images/Buttons/Quit_Game-H.png") |> decorate ("onClick", "location.reload();")
                                       ]
       currentTurnAndSwitchButton = flow right [ Player.toString state.turn ++ "'s Turn" |> fromString
                                                                                         |> Text.color (Player.toColor state.turn)

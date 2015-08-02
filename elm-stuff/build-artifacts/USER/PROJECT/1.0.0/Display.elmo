@@ -11,6 +11,7 @@ Elm.Display.make = function (_elm) {
    $moduleName = "Display",
    $Basics = Elm.Basics.make(_elm),
    $Color = Elm.Color.make(_elm),
+   $Decorate = Elm.Decorate.make(_elm),
    $Dict = Elm.Dict.make(_elm),
    $Display$Board = Elm.Display.Board.make(_elm),
    $Display$Constants = Elm.Display.Constants.make(_elm),
@@ -119,7 +120,7 @@ Elm.Display.make = function (_elm) {
                     {case "Cpu": return "CPU";
                        case "Human": return "Player";}
                     _U.badCase($moduleName,
-                    "between lines 144 and 147");
+                    "between lines 145 and 148");
                  }();
                case "HumanVsHumanLocal":
                return $Basics.toString(player);
@@ -135,7 +136,7 @@ Elm.Display.make = function (_elm) {
                     state.playerNames));
                  }();}
             _U.badCase($moduleName,
-            "between lines 143 and 153");
+            "between lines 144 and 154");
          }();
          return $Text.height(20)($Text.color($Player.toColor(player))((_U.eq(state.turn,
          player) && $State.isOngoing(state) ? $Text.bold : $Basics.identity)($Text.fromString((_U.eq(state.turn,
@@ -325,7 +326,7 @@ Elm.Display.make = function (_elm) {
                return _U.eq(playerType,
                  $GameTypes.Human);}
             _U.badCase($moduleName,
-            "between lines 117 and 122");
+            "between lines 118 and 123");
          }();
          var handContents = $State.isNotStarted(state) ? dummyHand : isHandShown ? playerHand : cpuHand;
          return A3($Graphics$Element.container,
@@ -462,10 +463,12 @@ Elm.Display.make = function (_elm) {
                       196,
                       46,
                       "images/Buttons/Pass_Turn-H.png")
-                      ,A4($Graphics$Input.customButton,
+                      ,$Decorate.decorate({ctor: "_Tuple2"
+                                          ,_0: "onClick"
+                                          ,_1: "location.reload();"})(A4($Graphics$Input.customButton,
                       A2($Signal.message,
                       clickMailbox.address,
-                      $GameTypes.MainMenuButton),
+                      $GameTypes.None),
                       A3($Graphics$Element.image,
                       196,
                       46,
@@ -477,13 +480,15 @@ Elm.Display.make = function (_elm) {
                       A3($Graphics$Element.image,
                       196,
                       46,
-                      "images/Buttons/Quit_Game-H.png"))]));
+                      "images/Buttons/Quit_Game-H.png")))]));
          var mainMenuAndNewGameButtons = A2($Graphics$Element.flow,
          $Graphics$Element.right,
-         _L.fromArray([A4($Graphics$Input.customButton,
+         _L.fromArray([$Decorate.decorate({ctor: "_Tuple2"
+                                          ,_0: "onClick"
+                                          ,_1: "location.reload();"})(A4($Graphics$Input.customButton,
                       A2($Signal.message,
                       clickMailbox.address,
-                      $GameTypes.MainMenuButton),
+                      $GameTypes.None),
                       A3($Graphics$Element.image,
                       196,
                       46,
@@ -495,7 +500,7 @@ Elm.Display.make = function (_elm) {
                       A3($Graphics$Element.image,
                       196,
                       46,
-                      "images/Buttons/Main_Menu-H.png"))
+                      "images/Buttons/Main_Menu-H.png")))
                       ,A4($Graphics$Input.customButton,
                       A2($Signal.message,
                       clickMailbox.address,
@@ -514,10 +519,12 @@ Elm.Display.make = function (_elm) {
                       "images/Buttons/New_Game-H.png"))]));
          var backAndRulesButtons = A2($Graphics$Element.flow,
          $Graphics$Element.right,
-         _L.fromArray([A4($Graphics$Input.customButton,
+         _L.fromArray([$Decorate.decorate({ctor: "_Tuple2"
+                                          ,_0: "onClick"
+                                          ,_1: "location.reload();"})(A4($Graphics$Input.customButton,
                       A2($Signal.message,
                       clickMailbox.address,
-                      $GameTypes.MainMenuButton),
+                      $GameTypes.None),
                       A3($Graphics$Element.image,
                       196,
                       46,
@@ -529,11 +536,25 @@ Elm.Display.make = function (_elm) {
                       A3($Graphics$Element.image,
                       196,
                       46,
-                      "images/Buttons/Back-H.png"))
-                      ,$Graphics$Element.link("rules.html")(A3($Graphics$Element.image,
+                      "images/Buttons/Back-H.png")))
+                      ,$Decorate.decorate({ctor: "_Tuple2"
+                                          ,_0: "onClick"
+                                          ,_1: "window.open(\'rules.html\');"})(A4($Graphics$Input.customButton,
+                      A2($Signal.message,
+                      clickMailbox.address,
+                      $GameTypes.None),
+                      A3($Graphics$Element.image,
                       196,
                       46,
-                      "images/Buttons/View_Rules.png"))]));
+                      "images/Buttons/View_Rules.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/View_Rules-H.png"),
+                      A3($Graphics$Element.image,
+                      196,
+                      46,
+                      "images/Buttons/View_Rules-H.png")))]));
          var buttons = function () {
             var _v4 = state.gameState;
             switch (_v4.ctor)
@@ -682,7 +703,7 @@ Elm.Display.make = function (_elm) {
                                            sidebarOuterPaddingHeight)])))]));
               }();}
          _U.badCase($moduleName,
-         "between lines 75 and 90");
+         "between lines 76 and 91");
       }();
    });
    var renderGameArea = F3(function (state,
