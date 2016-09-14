@@ -1,1 +1,4 @@
+build/* linguist-vendored
 elm-stuff/* linguist-vendored
+elm.js linguist-vendored
+`
